@@ -52,7 +52,7 @@ public class MultimediaStreamingSessionEventBroadcaster implements
         mMultimediaStreamingListeners.unregister(listener);
     }
 
-    public void broadcastPayloadReceived(ContactId contact, String sessionId, byte[] content) {
+    public void broadcastPayloadReceived(ContactId contact, String sessionId, byte[] content, String contentType) {
         final int N = mMultimediaStreamingListeners.beginBroadcast();
         for (int i = 0; i < N; i++) {
             try {
@@ -63,13 +63,6 @@ public class MultimediaStreamingSessionEventBroadcaster implements
                     logger.error("Can't notify listener", e);
                 }
             }
-        }
-        mMultimediaStreamingListeners.finishBroadcast();
-    }
-
-    public void broadcastPayloadReceived(ContactId contact, String sessionId, byte[] content, String contentType) {
-        final int N = mMultimediaStreamingListeners.beginBroadcast();
-        for (int i = 0; i < N; i++) {
             try {
                 mMultimediaStreamingListeners.getBroadcastItem(i).onPayloadReceived2(contact,
                         sessionId, content, contentType);

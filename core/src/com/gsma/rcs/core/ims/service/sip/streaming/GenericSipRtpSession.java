@@ -198,7 +198,7 @@ public abstract class GenericSipRtpSession extends GenericSipSession implements 
         if (!mMediaSessionStarted) {
             throw new SessionNotEstablishedException("Unable to send payload!");
         }
-        // TODO 1.6: use content type in the payload
+        // TODO 1.6: use content type
         mDataSender.addFrame(content, System.currentTimeMillis());
     }
 
@@ -241,13 +241,14 @@ public abstract class GenericSipRtpSession extends GenericSipSession implements 
 
     /**
      * Receive media data
-     * 
+     *
      * @param data Data
+     * @param mimeType MIME-type
      */
-    public void receiveData(byte[] data) {
+    public void receiveData(byte[] data, String mimeType) {
         ContactId contact = getRemoteContact();
         for (ImsSessionListener listener : getListeners()) {
-            ((SipSessionListener) listener).onDataReceived(contact, data);
+            ((SipSessionListener) listener).onDataReceived(contact, data, mimeType);
         }
     }
 

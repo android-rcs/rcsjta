@@ -361,7 +361,7 @@ public class StreamingSessionView extends RcsActivity {
                 mCounter++;
                 final String data = "data".concat(mCounter.toString());
                 try {
-                    mSession.sendPayload(data.getBytes());
+                    mSession.sendPayload(data.getBytes(), StreamingSessionUtils.SERVICE_CONTENT_TYPE);
                     handler.post(new Runnable() {
                         public void run() {
                             /* Display Transmitted data */
@@ -455,8 +455,8 @@ public class StreamingSessionView extends RcsActivity {
                                     Log.d(LOGTAG,
                                             "onMultimediaStreamingStateChanged "
                                                     + getString(R.string.label_mms_state_changed,
-                                                            RiApplication.sMultimediaStates[state
-                                                                    .toInt()], _reasonCode));
+                                                    RiApplication.sMultimediaStates[state
+                                                            .toInt()], _reasonCode));
                                 }
                         }
                     }
@@ -465,18 +465,7 @@ public class StreamingSessionView extends RcsActivity {
 
             @Override
             public void onPayloadReceived(ContactId contact, String sessionId, final byte[] content) {
-                if (LogUtils.isActive) {
-                    Log.d(LOGTAG, "onNewMessage contact=" + contact + " sessionId=" + sessionId);
-                }
-                if (mSessionId == null || !mSessionId.equals(sessionId)) {
-                    return;
-                }
-                handler.post(new Runnable() {
-                    public void run() {
-                        /* Display received data */
-                        mRxDataView.setText(new String(content));
-                    }
-                });
+                // Deprecated since TAPI 1.6
             }
 
             @Override

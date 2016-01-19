@@ -541,10 +541,9 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
     }
 
     @Override
-    public void onDataReceived(ContactId contact, byte[] data) {
-        // TODO 1.6: add a content type
+    public void onDataReceived(ContactId contact, byte[] data, String contentType) {
         synchronized (mLock) {
-            mBroadcaster.broadcastMessageReceived(contact, mSessionId, data);
+            mBroadcaster.broadcastMessageReceived(contact, mSessionId, data, contentType);
         }
     }
 

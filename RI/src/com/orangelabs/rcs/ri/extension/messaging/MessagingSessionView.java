@@ -340,7 +340,7 @@ public class MessagingSessionView extends RcsActivity {
             public void onClick(View v) {
                 try {
                     String data = "data".concat(String.valueOf(i++));
-                    mSession.sendMessage(data.getBytes());
+                    mSession.sendMessage(data.getBytes(), MessagingSessionUtils.SERVICE_CONTENT_TYPE);
 
                 } catch (RcsServiceException e) {
                     showExceptionThenExit(e);
@@ -403,24 +403,7 @@ public class MessagingSessionView extends RcsActivity {
 
             @Override
             public void onMessageReceived(ContactId contact, String sessionId, byte[] content) {
-                if (LogUtils.isActive) {
-                    Log.d(LOGTAG, "onMessageReceived contact=" + contact + " sessionId="
-                            + sessionId);
-                }
-                /* Discard event if not for current sessionId */
-                if (mSessionId == null || !mSessionId.equals(sessionId)) {
-                    return;
-                }
-                final String data = new String(content);
-
-                mHandler.post(new Runnable() {
-                    public void run() {
-                        /* Display received data */
-                        TextView txt = (TextView) MessagingSessionView.this
-                                .findViewById(R.id.recv_data);
-                        txt.setText(data);
-                    }
-                });
+                // Deprecated since TAPI 1.6
             }
 
             @Override

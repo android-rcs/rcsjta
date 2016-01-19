@@ -519,10 +519,9 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
     }
 
     @Override
-    public void onDataReceived(ContactId contact, byte[] data) {
-        // TODO 1.6: use content type
+    public void onDataReceived(ContactId contact, byte[] data, String contentType) {
         synchronized (mLock) {
-            mBroadcaster.broadcastPayloadReceived(contact, mSessionId, data);
+            mBroadcaster.broadcastPayloadReceived(contact, mSessionId, data, contentType);
         }
     }
 

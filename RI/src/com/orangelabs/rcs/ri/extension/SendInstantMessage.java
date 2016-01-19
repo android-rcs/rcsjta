@@ -84,7 +84,7 @@ public class SendInstantMessage extends RcsActivity {
     public void sendMessage(ContactId contact) {
         try {
             String content = "Hello world";
-            String contentType = "plain/text";
+            String contentType = MessagingSessionUtils.SERVICE_CONTENT_TYPE;
             getMultimediaSessionApi().sendInstantMultimediaMessage(mServiceId, contact, content.getBytes(), contentType);
             Utils.displayToast(this, getString(R.string.label_instant_message_sent));
         } catch (RcsServiceException e) {

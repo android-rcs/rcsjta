@@ -42,8 +42,9 @@ public interface SipSessionListener extends ImsSessionListener {
      * 
      * @param contact Remote contact
      * @param data Received data
+     * @param contentType Data content type
      */
-    public void onDataReceived(ContactId contact, byte[] data);
+    public void onDataReceived(ContactId contact, byte[] data, String contentType);
 
     /**
      * Destination user agent received INVITE, and is alerting user of call

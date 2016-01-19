@@ -62,6 +62,6 @@ public class DataReceiver implements MediaOutput {
      */
     public void writeSample(MediaSample sample) {
         // Notify API
-        mParent.receiveData(sample.getData());
+        mParent.receiveData(sample.getData(), "application/*"); // TODO 1.6: add mime-type
     }
 }
