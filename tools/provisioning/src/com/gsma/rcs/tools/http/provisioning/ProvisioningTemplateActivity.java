@@ -25,6 +25,7 @@ import android.app.Activity;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.View;
@@ -54,7 +55,7 @@ import java.net.URL;
  * @author yplo6403
  */
 public class ProvisioningTemplateActivity extends Activity {
-
+    private static final String PARAM_TERMINAL_MODEL = "terminal_model";
     private static final String TOKEN_MSISDN = "__s__MSISDN__e__";
     private static final String PROVISIONING_FILENAME = "provisioning_template.xml";
 
@@ -77,8 +78,7 @@ public class ProvisioningTemplateActivity extends Activity {
             TextView textView = (TextView) findViewById(R.id.result);
             ProgressBar progressBar = (ProgressBar) findViewById(R.id.pBAsync);
             try {
-                URL url = new URL(new StringBuilder("http").append("://")
-                        .append(buildProvisioningAddress()).toString());
+                URL url = new URL("http" + "://" + buildProvisioningAddress());
                 HttpProvisioningClient client = new HttpProvisioningClient(url, progressBar,
                         textView, mButton);
                 client.execute();
@@ -91,7 +91,6 @@ public class ProvisioningTemplateActivity extends Activity {
     private class HttpProvisioningClient extends AsyncTask<Object, Integer, String> {
 
         private static final String PARAM_RCS_VERSION = "rcs_version";
-        private static final String PARAM_VERS = "vers";
         private static final String PARAM_RCS_PROFILE = "rcs_profile";
         private static final String PARAM_MSISDN = "msisdn";
 
@@ -196,7 +195,7 @@ public class ProvisioningTemplateActivity extends Activity {
             } finally {
                 try {
                     in.close();
-                } catch (IOException e) {
+                } catch (IOException ignore) {
 
                 }
             }
@@ -208,9 +207,9 @@ public class ProvisioningTemplateActivity extends Activity {
             uriBuilder.authority(buildProvisioningAddress());
             uriBuilder.appendQueryParameter(PARAM_RCS_VERSION, "5.1B");
             uriBuilder.appendQueryParameter(PARAM_RCS_PROFILE, "joyn_blackbird");
-            uriBuilder.appendQueryParameter(PARAM_VERS, "0");
+            uriBuilder.appendQueryParameter(PARAM_TERMINAL_MODEL, Build.DEVICE );
             if (msisdn != null) {
-                uriBuilder.appendQueryParameter(PARAM_MSISDN, msisdn.toString());
+                uriBuilder.appendQueryParameter(PARAM_MSISDN, msisdn);
             }
             return new URL(uriBuilder.build().toString());
         }
@@ -234,8 +233,7 @@ public class ProvisioningTemplateActivity extends Activity {
     private String buildProvisioningAddress() {
         String mnc = String.format("%03d", getMobileNetworkCode());
         String mcc = String.format("%03d", getMobileCountryCode());
-        return new StringBuilder("config.rcs.mnc").append(mnc).append(".mcc").append(mcc)
-                .append(".pub.3gppnetwork.org").toString();
+        return "config.rcs.mnc" + mnc + ".mcc" + mcc + ".pub.3gppnetwork.org";
     }
 
     private int getMobileCountryCode() {
