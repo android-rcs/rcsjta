@@ -289,8 +289,11 @@ public final class CapabilityService extends RcsService {
     @Deprecated
     public void requestAllContactsCapabilities() throws RcsServiceNotRegisteredException,
             RcsServiceNotAvailableException, RcsGenericException {
+        if (mApi == null) {
+            throw new RcsServiceNotAvailableException();
+        }
         try {
-            mApi.requestContactCapabilities2(null);
+            mApi.requestContactCapabilities2(new ArrayList<ContactId>());
 
         } catch (Exception e) {
             RcsServiceNotRegisteredException.assertException(e);
