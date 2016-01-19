@@ -46,7 +46,6 @@ public class SendInstantMessage extends RcsActivity {
         // Set buttons callback
         Button sendBtn = (Button) findViewById(R.id.send_btn);
         sendBtn.setOnClickListener(btnSendListener);
-        sendBtn.setEnabled(false);
 
         /* Register to API connection manager */
         if (!isServiceConnected(ConnectionManager.RcsServiceName.MULTIMEDIA, ConnectionManager.RcsServiceName.CONTACT)) {

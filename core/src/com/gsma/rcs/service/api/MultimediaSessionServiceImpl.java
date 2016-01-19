@@ -46,10 +46,12 @@ import com.gsma.services.rcs.extension.IMultimediaSessionService;
 import com.gsma.services.rcs.extension.IMultimediaSessionServiceConfiguration;
 import com.gsma.services.rcs.extension.IMultimediaStreamingSession;
 import com.gsma.services.rcs.extension.IMultimediaStreamingSessionListener;
+import com.gsma.services.rcs.extension.InstantMultimediaMessageIntent;
 import com.gsma.services.rcs.extension.MultimediaSession.State;
 
 import android.content.Intent;
 import android.os.IBinder;
+import android.os.Parcelable;
 import android.os.RemoteException;
 import android.text.TextUtils;
 
@@ -744,6 +746,9 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
     public void receiveSipInstantMessage(Intent intent, ContactId contact, byte[] content, String contentType) {
         intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
         IntentUtils.tryToSetReceiverForegroundFlag(intent);
+        intent.putExtra(InstantMultimediaMessageIntent.EXTRA_CONTACT, (Parcelable) contact);
+        intent.putExtra(InstantMultimediaMessageIntent.EXTRA_CONTENT, content);
+        intent.putExtra(InstantMultimediaMessageIntent.EXTRA_CONTENT_TYPE, contentType);
         AndroidFactory.getApplicationContext().sendBroadcast(intent);
     }
 }

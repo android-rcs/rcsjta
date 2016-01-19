@@ -5,9 +5,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
+import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.extension.InstantMultimediaMessageIntent;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.LogUtils;
+import com.orangelabs.rcs.ri.utils.RcsContactUtil;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
@@ -31,6 +33,8 @@ public class InstantMessageReceiver extends BroadcastReceiver {
 
         /* Display instant message content */
         String content = new String(intent.getByteArrayExtra(InstantMultimediaMessageIntent.EXTRA_CONTENT));
-        Utils.displayLongToast(context, context.getString(R.string.label_recv_instant_messsage) + "\n" + content);
+        ContactId contact = intent.getParcelableExtra(InstantMultimediaMessageIntent.EXTRA_CONTACT);
+        String displayName = RcsContactUtil.getInstance(context).getDisplayName(contact);
+        Utils.displayLongToast(context, context.getString(R.string.label_recv_instant_messsage, displayName) + "\n" + content);
     }
 }

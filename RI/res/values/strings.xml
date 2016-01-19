@@ -290,7 +290,7 @@
     <string name="label_rx_count">RX :</string>
     <string name="label_tx_count">TX :</string>
     <string name="label_send_message">Send message</string>
-    <string name="label_recv_instant_messsage">Instant multimedia message:</string>
+    <string name="label_recv_instant_messsage">Instant multimedia message from %s:</string>
     <string name="label_instant_message_sent">Message has been sent!</string>
 
     <!-- Geolocation push -->

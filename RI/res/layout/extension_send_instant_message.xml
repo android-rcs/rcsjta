@@ -17,19 +17,6 @@
             android:layout_marginLeft="5dip"
             android:layout_marginRight="5dip" />
 
-        <TableRow android:paddingTop="5dip" >
-            <TextView
-                android:layout_marginLeft="5dip"
-                android:gravity="right"
-                android:text="@string/label_service_id" />
-
-            <TextView
-                android:id="@+id/feature_tag"
-                android:layout_marginLeft="5dip"
-                android:layout_marginRight="5dip"
-                android:textStyle="bold" />
-        </TableRow>
-
         <Button
             android:id="@+id/send_btn"
             android:layout_marginLeft="5dip"
