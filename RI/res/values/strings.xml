@@ -84,6 +84,9 @@
     <string name="label_unblock">Unblock</string>
     <string name="label_contact_blocked">%s has been blocked</string>
     <string name="label_contact_unblocked">%s has been unblocked</string>
+    <string name="label_is_blocked">Is blocked:</string>
+    <string name="label_is_online">On line:</string>
+    <string name="label_block_timestamp">Blocking time:</string>
 
     <!-- Capabilities menu -->
     <string name="menu_capabilities">Capabilities</string>

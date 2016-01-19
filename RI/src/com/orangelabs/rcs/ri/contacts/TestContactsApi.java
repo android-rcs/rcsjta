@@ -52,8 +52,6 @@ public class TestContactsApi extends RcsListActivity {
         // Set items
         String[] items = {
                 getString(R.string.menu_address_book), getString(R.string.menu_list_rcs_contacts),
-                getString(R.string.menu_list_online_contacts),
-                getString(R.string.menu_list_supported_contacts),
                 getString(R.string.menu_contact_vcard), getString(R.string.menu_blocking_contact)
         };
         setListAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, items));
@@ -83,18 +81,10 @@ public class TestContactsApi extends RcsListActivity {
                 break;
 
             case 2:
-                startActivity(new Intent(this, OnlineContactsList.class));
-                break;
-
-            case 3:
-                startActivity(new Intent(this, SupportedContactsList.class));
-                break;
-
-            case 4:
                 startActivity(new Intent(this, ContactVCard.class));
                 break;
 
-            case 5:
+            case 3:
                 startActivity(new Intent(this, BlockingContact.class));
                 break;
         }

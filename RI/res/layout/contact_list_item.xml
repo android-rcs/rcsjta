@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content">
+
+    <include
+        android:id="@+id/capabilities"
+        layout="@layout/capabilities_list_item"/>
+
+    <TableLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/capabilities"
+        android:paddingTop="5dip"
+        android:stretchColumns="1">
+
+        <TableRow>
+
+            <TextView
+                android:gravity="end"
+                android:text="@string/label_is_online"/>
+
+            <CheckBox
+                android:id="@+id/is_online"
+                android:clickable="false"
+                android:textAppearance="?android:attr/textAppearanceSmall"/>
+        </TableRow>
+
+        <TableRow>
+
+            <TextView
+                android:gravity="end"
+                android:text="@string/label_is_blocked"/>
+
+            <CheckBox
+                android:id="@+id/is_blocked"
+                android:clickable="false"
+                android:textAppearance="?android:attr/textAppearanceSmall"/>
+        </TableRow>
+
+        <TableRow>
+
+            <TextView
+                android:gravity="end"
+                android:text="@string/label_block_timestamp"/>
+
+            <TextView
+                android:id="@+id/block_timestamp"
+                android:layout_marginLeft="5dip"
+                android:layout_marginStart="5dip"
+                android:textAppearance="?android:attr/textAppearanceSmall"/>
+        </TableRow>
+
+    </TableLayout>
+
+</RelativeLayout>
