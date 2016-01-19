@@ -47,6 +47,9 @@ import java.net.CookieManager;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.NoSuchElementException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * This activity creates a provisioning template by querying the DM server. The current MSISDN is
@@ -60,6 +63,26 @@ public class ProvisioningTemplateActivity extends Activity {
     private static final String PROVISIONING_FILENAME = "provisioning_template.xml";
 
     private Button mButton;
+
+    private static String REGEXP_EXTRACT_URI = "<parm name=\"Public_user_Identity\" value=\"sip:(.*)@(.*)\"/>";
+    /**
+     * Pattern to extract Uri from SIP header
+     */
+    private final static Pattern PATTERN_EXTRACT_URI = Pattern.compile(REGEXP_EXTRACT_URI);
+
+    /**
+     * get URI from SIP identity header
+     *
+     * @param header the SIP header
+     * @return the Uri
+     */
+    public static String extractMsisdnFromProvisioningResponse(String header) {
+        Matcher matcher = PATTERN_EXTRACT_URI.matcher(header);
+        if (matcher.find()) {
+            return matcher.group(1);
+        }
+        throw new NoSuchElementException("Cannot found MSISDN!");
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,13 +115,11 @@ public class ProvisioningTemplateActivity extends Activity {
 
         private static final String PARAM_RCS_VERSION = "rcs_version";
         private static final String PARAM_RCS_PROFILE = "rcs_profile";
-        private static final String PARAM_MSISDN = "msisdn";
 
         private URL mUrl;
         private final TextView mTextView;
         private final ProgressBar mProgress;
         private final Button mGenerateButton;
-        private String mMsisdn;
 
         public HttpProvisioningClient(URL url, final ProgressBar progress, final TextView textview,
                 final Button generateButton) {
@@ -142,10 +163,7 @@ public class ProvisioningTemplateActivity extends Activity {
                 int respCode = urlConnection.getResponseCode();
                 String message = urlConnection.getResponseMessage();
                 if (HttpURLConnection.HTTP_OK == respCode) {
-                    InputStream in = new BufferedInputStream(urlConnection.getInputStream());
-                    mMsisdn = readStream(in).replace("MSISDN:", "");
-                    mMsisdn = mMsisdn.replace("\n", "");
-                    mUrl = getHttpsRequestArguments(mMsisdn);
+                    mUrl = getHttpsRequestArguments();
                     urlConnection.disconnect();
                     urlConnection = null;
                     publishProgress(50);
@@ -157,8 +175,16 @@ public class ProvisioningTemplateActivity extends Activity {
                     message = urlConnection.getResponseMessage();
                     if (HttpURLConnection.HTTP_OK == respCode) {
                         publishProgress(100);
-                        in = new BufferedInputStream(urlConnection.getInputStream());
-                        saveProvisioningTemplate(readStream(in));
+                        InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+                        String content = readStream(in);
+                        try {
+                            String msisdn = extractMsisdnFromProvisioningResponse(content);
+                            saveProvisioningTemplate(content, msisdn);
+                        } catch (NoSuchElementException e) {
+                            return "Second request failed: code=" + respCode + " message='" + e.getMessage()
+                                    + "'!";
+                        }
+
                         return "Success! /sdcard/provisioning_template.xml is available";
                     } else {
                         return "Second request failed: code=" + respCode + " message='" + message
@@ -201,26 +227,26 @@ public class ProvisioningTemplateActivity extends Activity {
             }
         }
 
-        private URL getHttpsRequestArguments(String msisdn) throws MalformedURLException {
+        private URL getHttpsRequestArguments() throws MalformedURLException {
             Uri.Builder uriBuilder = new Uri.Builder();
             uriBuilder.scheme("https");
             uriBuilder.authority(buildProvisioningAddress());
             uriBuilder.appendQueryParameter(PARAM_RCS_VERSION, "5.1B");
             uriBuilder.appendQueryParameter(PARAM_RCS_PROFILE, "joyn_blackbird");
             uriBuilder.appendQueryParameter(PARAM_TERMINAL_MODEL, Build.DEVICE );
-            if (msisdn != null) {
-                uriBuilder.appendQueryParameter(PARAM_MSISDN, msisdn);
-            }
             return new URL(uriBuilder.build().toString());
         }
 
-        private void saveProvisioningTemplate(String provisioning) throws FileNotFoundException {
+        private void saveProvisioningTemplate(String provisioning, String msisdn) throws FileNotFoundException {
             File dirProvTemplate = Environment.getExternalStorageDirectory();
             PrintWriter out = null;
             try {
                 File file = new File(dirProvTemplate, PROVISIONING_FILENAME);
                 out = new PrintWriter(file);
-                String template = provisioning.replaceAll(mMsisdn, TOKEN_MSISDN);
+                if (msisdn.startsWith("+")) {
+                    msisdn = "\\" + msisdn;
+                }
+                String template = provisioning.replaceAll(msisdn, TOKEN_MSISDN);
                 out.println(template);
             } finally {
                 if (out != null) {
