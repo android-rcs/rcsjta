@@ -34,11 +34,11 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * List of RCS contacts
+ * List of RCS contacts who are online (i.e. registered)
  * 
  * @author Jean-Marc AUFFRET
  */
-public class RcsContactsList extends RcsListActivity {
+public class OnlineContactsList extends RcsListActivity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -67,9 +67,9 @@ public class RcsContactsList extends RcsListActivity {
 
     private void updateList() {
         try {
-            // Get list of RCS contacts
-            Set<RcsContact> allContacts = getContactApi().getRcsContacts();
-            List<RcsContact> contacts = new ArrayList<>(allContacts);
+            // Get list of RCS contacts who are online
+            Set<RcsContact> onlineContacts = getContactApi().getRcsContactsOnline();
+            List<RcsContact> contacts = new ArrayList<>(onlineContacts);
             if (contacts.size() > 0) {
                 String[] items = new String[contacts.size()];
                 for (int i = 0; i < contacts.size(); i++) {
@@ -82,7 +82,8 @@ public class RcsContactsList extends RcsListActivity {
                     }
                     items[i] = contact.getContactId() + " (" + status + ")";
                 }
-                setListAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, items));
+                setListAdapter(new ArrayAdapter<>(OnlineContactsList.this,
+                        android.R.layout.simple_list_item_1, items));
             } else {
                 setListAdapter(null);
             }

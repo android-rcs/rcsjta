@@ -22,31 +22,47 @@ import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.contact.RcsContact;
 
 import com.orangelabs.rcs.api.connection.ConnectionManager.RcsServiceName;
-import com.orangelabs.rcs.api.connection.utils.RcsListActivity;
+import com.orangelabs.rcs.api.connection.utils.RcsActivity;
 import com.orangelabs.rcs.ri.R;
 
+import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
+import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ListView;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
 /**
- * List of RCS contacts
+ * List of RCS contacts supporting a given feature tag or extension
  * 
  * @author Jean-Marc AUFFRET
  */
-public class RcsContactsList extends RcsListActivity {
+public class SupportedContactsList extends RcsActivity {
+
+    private OnClickListener mBtnRefreshListener;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        initialize();
         // Set layout
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        setContentView(R.layout.contacts_rcs_list);
+        setContentView(R.layout.contacts_supported_list);
+
+        // Set a default tag
+        EditText tagEdit = (EditText) findViewById(R.id.tag);
+        tagEdit.setText("game");
+
+        // Set button callback
+        Button refreshBtn = (Button) findViewById(R.id.refresh_btn);
+        refreshBtn.setOnClickListener(mBtnRefreshListener);
 
         // Register to API connection manager
         if (!isServiceConnected(RcsServiceName.CONTACT)) {
@@ -67,11 +83,16 @@ public class RcsContactsList extends RcsListActivity {
 
     private void updateList() {
         try {
-            // Get list of RCS contacts
-            Set<RcsContact> allContacts = getContactApi().getRcsContacts();
-            List<RcsContact> contacts = new ArrayList<>(allContacts);
+            // Get tag to check
+            EditText tagEdit = (EditText) findViewById(R.id.tag);
+            String tag = tagEdit.getText().toString();
+
+            // Get list of RCS contacts supporting a given tag
+            Set<RcsContact> supportedContacts = getContactApi().getRcsContactsSupporting(tag);
+            List<RcsContact> contacts = new ArrayList<>(supportedContacts);
+            ListView listView = (ListView) findViewById(R.id.contacts);
             if (contacts.size() > 0) {
-                String[] items = new String[contacts.size()];
+                ArrayList<String> items = new ArrayList<>();
                 for (int i = 0; i < contacts.size(); i++) {
                     RcsContact contact = contacts.get(i);
                     String status;
@@ -80,14 +101,48 @@ public class RcsContactsList extends RcsListActivity {
                     } else {
                         status = "offline";
                     }
-                    items[i] = contact.getContactId() + " (" + status + ")";
+                    items.add(contact.getContactId() + " (" + status + ")");
                 }
-                setListAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, items));
+                ContactListAdapter adapter = new ContactListAdapter(this,
+                        android.R.layout.simple_list_item_1, items);
+                listView.setAdapter(adapter);
             } else {
-                setListAdapter(null);
+                listView.setAdapter(null);
             }
         } catch (RcsServiceException e) {
             showExceptionThenExit(e);
+        }
+    }
+
+    private void initialize() {
+        mBtnRefreshListener = new OnClickListener() {
+            public void onClick(View v) {
+                // Update list
+                updateList();
+            }
+        };
+    }
+
+    /**
+     * Contact list adapter
+     */
+    private class ContactListAdapter extends ArrayAdapter<String> {
+        private List<String> list;
+
+        public ContactListAdapter(Context context, int textViewResourceId, List<String> list) {
+            super(context, textViewResourceId, list);
+
+            this.list = list;
+        }
+
+        @Override
+        public String getItem(int position) {
+            return list.get(position);
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
         }
     }
 }

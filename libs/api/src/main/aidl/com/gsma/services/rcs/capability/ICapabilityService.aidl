@@ -26,9 +26,7 @@ interface ICapabilityService {
 
 	void requestContactCapabilities(in ContactId contact);
 
-    void requestAllContactsCapabilities();
-
-	void requestContactCapabilities2(in List<ContactId> contacts);
+	void requestAllContactsCapabilities();
 
 	void addCapabilitiesListener(in ICapabilitiesListener listener);
 

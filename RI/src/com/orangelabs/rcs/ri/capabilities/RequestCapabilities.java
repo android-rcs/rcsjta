@@ -47,9 +47,6 @@ import android.widget.CheckBox;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import java.util.HashSet;
-import java.util.Set;
-
 /**
  * Refresh capabilities of a given contact
  * 
@@ -175,9 +172,7 @@ public class RequestCapabilities extends RcsActivity {
         Utils.displayLongToast(RequestCapabilities.this,
                 getString(R.string.label_request_in_background, contact));
         try {
-            Set<ContactId> contactSet = new HashSet<>();
-            contactSet.add(contact);
-            getCapabilityApi().requestContactCapabilities(contactSet);
+            getCapabilityApi().requestContactCapabilities(contact);
 
         } catch (RcsServiceException e) {
             showExceptionThenExit(e);
@@ -193,19 +188,13 @@ public class RequestCapabilities extends RcsActivity {
         TextView extensions = (TextView) findViewById(R.id.extensions);
         TextView timestamp = (TextView) findViewById(R.id.last_refresh);
         CheckBox automata = (CheckBox) findViewById(R.id.automata);
+        // Set capabilities
+        imageCSh.setChecked((capabilities != null) && capabilities.isImageSharingSupported());
+        videoCSh.setChecked((capabilities != null) && capabilities.isVideoSharingSupported());
+        ft.setChecked((capabilities != null) && capabilities.isFileTransferSupported());
+        im.setChecked((capabilities != null) && capabilities.isImSessionSupported());
+        geoloc.setChecked((capabilities != null) && capabilities.isGeolocPushSupported());
 
-        if (capabilities != null) {
-            // Set capabilities
-            imageCSh.setChecked(capabilities
-                    .hasCapabilities(Capabilities.CAPABILITY_IMAGE_SHARING_SUPPORT));
-            videoCSh.setChecked(capabilities
-                    .hasCapabilities(Capabilities.CAPABILITY_VIDEO_SHARING_SUPPORT));
-            ft.setChecked(capabilities
-                    .hasCapabilities(Capabilities.CAPABILITY_FILE_TRANSFER_SUPPORT));
-            im.setChecked(capabilities.hasCapabilities(Capabilities.CAPABILITY_IM_SUPPORT));
-            geoloc.setChecked(capabilities
-                    .hasCapabilities(Capabilities.CAPABILITY_GEOLOC_PUSH_SUPPORT));
-        }
         // Set extensions
         extensions.setVisibility(View.VISIBLE);
         extensions.setText(getExtensions(capabilities));

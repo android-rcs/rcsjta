@@ -181,7 +181,7 @@ public final class ContactService extends RcsService {
             throw new RcsServiceNotAvailableException();
         }
         try {
-            return new HashSet<>(mApi.getRcsContacts());
+            return new HashSet<RcsContact>(mApi.getRcsContacts());
 
         } catch (Exception e) {
             RcsPersistentStorageException.assertException(e);
@@ -198,14 +198,13 @@ public final class ContactService extends RcsService {
      * @throws RcsGenericException
      * @see RcsContact
      */
-    @Deprecated
     public Set<RcsContact> getRcsContactsOnline() throws RcsPersistentStorageException,
             RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
         try {
-            return new HashSet<>(mApi.getRcsContactsOnline());
+            return new HashSet<RcsContact>(mApi.getRcsContactsOnline());
 
         } catch (Exception e) {
             RcsPersistentStorageException.assertException(e);
@@ -223,7 +222,6 @@ public final class ContactService extends RcsService {
      * @throws RcsGenericException
      * @see RcsContact
      */
-    @Deprecated
     public Set<RcsContact> getRcsContactsSupporting(String serviceId)
             throws RcsPersistentStorageException, RcsServiceNotAvailableException,
             RcsGenericException {
@@ -231,7 +229,7 @@ public final class ContactService extends RcsService {
             throw new RcsServiceNotAvailableException();
         }
         try {
-            return new HashSet<>(mApi.getRcsContactsSupporting(serviceId));
+            return new HashSet<RcsContact>(mApi.getRcsContactsSupporting(serviceId));
 
         } catch (Exception e) {
             RcsIllegalArgumentException.assertException(e);

@@ -136,6 +136,10 @@ public class CapabilitiesList extends RcsActivity {
                     .setChecked(cursor.getInt(holder.columnCapabilityVideoSharing) == CapabilitiesLog.SUPPORTED);
             holder.geolocBox
                     .setChecked(cursor.getInt(holder.columnCapabilityGeolocPush) == CapabilitiesLog.SUPPORTED);
+            holder.ipVoiceCallBox
+                    .setChecked(cursor.getInt(holder.columnCapabilityIpVoiceCall) == CapabilitiesLog.SUPPORTED);
+            holder.ipVideoCallBox
+                    .setChecked(cursor.getInt(holder.columnCapabilityIpVideoCall) == CapabilitiesLog.SUPPORTED);
             String exts = cursor.getString(holder.columnCapabilityExtensions);
             if (exts != null) {
                 exts = exts.replace(';', '\n');
@@ -162,39 +166,47 @@ public class CapabilitiesList extends RcsActivity {
     private class CapabilitiesItemViewHolder {
         public TextView numberText;
 
-        public final CheckBox imBox;
+        public CheckBox imBox;
 
-        public final CheckBox ftBox;
+        public CheckBox ftBox;
 
-        public final CheckBox ishBox;
+        public CheckBox ishBox;
 
-        public final CheckBox vshBox;
+        public CheckBox vshBox;
 
-        public final CheckBox geolocBox;
+        public CheckBox geolocBox;
 
-        public final TextView extsText;
+        public CheckBox ipVoiceCallBox;
 
-        public final CheckBox automataBox;
+        public CheckBox ipVideoCallBox;
 
-        public final TextView lastRefreshText;
+        public TextView extsText;
 
-        public final int columnContact;
+        public CheckBox automataBox;
 
-        public final int columnCapabilityIm;
+        public TextView lastRefreshText;
 
-        public final int columnCapabilityImageSharing;
+        public int columnContact;
 
-        public final int columnCapabilityFileTransfer;
+        public int columnCapabilityIm;
 
-        public final int columnCapabilityVideoSharing;
+        public int columnCapabilityImageSharing;
 
-        public final int columnCapabilityGeolocPush;
+        public int columnCapabilityFileTransfer;
 
-        public final int columnCapabilityExtensions;
+        public int columnCapabilityVideoSharing;
 
-        public final int columnAutomata;
+        public int columnCapabilityIpVoiceCall;
 
-        public final int columnTimestamp;
+        public int columnCapabilityIpVideoCall;
+
+        public int columnCapabilityGeolocPush;
+
+        public int columnCapabilityExtensions;
+
+        public int columnAutomata;
+
+        public int columnTimestamp;
 
         CapabilitiesItemViewHolder(View base, Cursor cursor) {
             columnContact = cursor.getColumnIndexOrThrow(CapabilitiesLog.CONTACT);
@@ -219,6 +231,8 @@ public class CapabilitiesList extends RcsActivity {
             ishBox = (CheckBox) base.findViewById(R.id.image_sharing);
             vshBox = (CheckBox) base.findViewById(R.id.video_sharing);
             geolocBox = (CheckBox) base.findViewById(R.id.geoloc_push);
+            ipVoiceCallBox = (CheckBox) base.findViewById(R.id.ip_voice_call);
+            ipVideoCallBox = (CheckBox) base.findViewById(R.id.ip_video_call);
             extsText = (TextView) base.findViewById(R.id.extensions);
             automataBox = (CheckBox) base.findViewById(R.id.automata);
             lastRefreshText = (TextView) base.findViewById(R.id.last_refresh);

@@ -42,8 +42,7 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.os.IInterface;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Iterator;
 import java.util.Set;
 
 /**
@@ -214,13 +213,12 @@ public final class CapabilityService extends RcsService {
      * format, SIP address, SIP-URI or Tel-URI. If the format of the contact is not supported an
      * exception is thrown. The result of the capability refresh request is provided to all the
      * clients that have registered the listener for this event.
-     *
+     * 
      * @param contact Contact Identifier
      * @throws RcsServiceNotRegisteredException
      * @throws RcsServiceNotAvailableException
      * @throws RcsGenericException
      */
-    @Deprecated
     public void requestContactCapabilities(ContactId contact)
             throws RcsServiceNotRegisteredException, RcsServiceNotAvailableException,
             RcsGenericException {
@@ -228,10 +226,7 @@ public final class CapabilityService extends RcsService {
             throw new RcsServiceNotAvailableException();
         }
         try {
-            List<ContactId> listOfContacts = new ArrayList<>();
-            listOfContacts.add(contact);
-            mApi.requestContactCapabilities2(listOfContacts);
-
+            mApi.requestContactCapabilities(contact);
         } catch (Exception e) {
             RcsIllegalArgumentException.assertException(e);
             RcsServiceNotRegisteredException.assertException(e);
@@ -248,7 +243,7 @@ public final class CapabilityService extends RcsService {
      * exception is thrown. The result of the capability refresh request is provided to all the
      * clients that have registered the listener for this event.
      * 
-     * @param contacts Set of contact identifiers or null to request for all contacts
+     * @param contacts Set of contact identifiers
      * @throws RcsServiceNotRegisteredException
      * @throws RcsServiceNotAvailableException
      * @throws RcsGenericException
@@ -256,22 +251,9 @@ public final class CapabilityService extends RcsService {
     public void requestContactCapabilities(Set<ContactId> contacts)
             throws RcsServiceNotRegisteredException, RcsServiceNotAvailableException,
             RcsGenericException {
-        if (mApi == null) {
-            throw new RcsServiceNotAvailableException();
-        }
-        try {
-            List<ContactId> listOfContacts;
-            if (contacts == null) {
-                listOfContacts = new ArrayList<>();
-            } else {
-                listOfContacts = new ArrayList<>(contacts);
-            }
-            mApi.requestContactCapabilities2(listOfContacts);
-
-        } catch (Exception e) {
-            RcsIllegalArgumentException.assertException(e);
-            RcsServiceNotRegisteredException.assertException(e);
-            throw new RcsGenericException(e);
+        Iterator<ContactId> values = contacts.iterator();
+        while (values.hasNext()) {
+            requestContactCapabilities(values.next());
         }
     }
 
@@ -286,15 +268,13 @@ public final class CapabilityService extends RcsService {
      * @throws RcsServiceNotAvailableException
      * @throws RcsGenericException
      */
-    @Deprecated
     public void requestAllContactsCapabilities() throws RcsServiceNotRegisteredException,
             RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
         try {
-            mApi.requestContactCapabilities2(new ArrayList<ContactId>());
-
+            mApi.requestAllContactsCapabilities();
         } catch (Exception e) {
             RcsServiceNotRegisteredException.assertException(e);
             throw new RcsGenericException(e);
