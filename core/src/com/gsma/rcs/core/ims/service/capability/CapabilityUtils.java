@@ -238,8 +238,11 @@ public class CapabilityUtils {
                     tag.contains(FeatureTags.FEATURE_RCSE_IARI_EXTENSION + ".mnc") ||
                         tag.contains(FeatureTags.FEATURE_RCSE_ICSI_EXTENSION + ".gsma")) {
                 // Support an RCS extension
-                capaBuilder.addExtension(extractServiceId(tag));
-
+                String serviceId = extractServiceId(tag);
+                if ((serviceId != null) &&
+                        !serviceId.equals("gsma.rcs.extension")) {
+                    capaBuilder.addExtension(serviceId);
+                }
             } else if (tag.contains(FeatureTags.FEATURE_SIP_AUTOMATA)) {
                 capaBuilder.setSipAutomata(true);
             }
