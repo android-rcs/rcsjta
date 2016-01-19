@@ -244,7 +244,7 @@ public class ProvisioningTemplateActivity extends Activity {
                 File file = new File(dirProvTemplate, PROVISIONING_FILENAME);
                 out = new PrintWriter(file);
                 if (msisdn.startsWith("+")) {
-                    msisdn = "\\" + msisdn;
+                    msisdn = msisdn.substring(1);
                 }
                 String template = provisioning.replaceAll(msisdn, TOKEN_MSISDN);
                 out.println(template);
