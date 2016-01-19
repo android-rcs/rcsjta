@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -260,7 +260,7 @@ public class HttpsProvisioningManager {
     private HttpURLConnection executeHttpRequest(boolean secured, String request)
             throws IOException {
         String protocol = (secured) ? "https" : "http";
-        URL url = new URL(new StringBuilder(protocol).append("://").append(request).toString());
+        URL url = new URL(protocol + "://" + request);
         HttpURLConnection cnx = (HttpURLConnection) url.openConnection();
         cnx.setRequestProperty("Accept-Language", HttpsProvisioningUtils.getUserLanguage());
         return cnx;
@@ -313,18 +313,28 @@ public class HttpsProvisioningManager {
         }
 
         /*
-         * According to the standard the token-parameter name should be part of the Uri even if the
-         * token is null here.
+         * RCS standard:
+         * "The token shall be stored on the device so it can be used in subsequent configuration requests over non-3GPP access."
+         * <br> In 3GPP access, the token is only compulsory for non 3GPP access and is not used for
+         * 3GPP access. It shall then not be inserted as a URI parameter for 3GPP access.
          */
-        uriBuilder.appendQueryParameter(PARAM_TOKEN, token == null ? "" : token);
+        if (NetworkUtils.getNetworkAccessType() == NetworkUtils.NETWORK_ACCESS_WIFI) {
+            /*
+             * According to the standard the token-parameter name should be part of the Uri even if
+             * the token is null here but only for non 3gpp access.
+             */
+            uriBuilder.appendQueryParameter(PARAM_TOKEN, token == null ? "" : token);
+        }
 
         return uriBuilder.toString();
     }
 
     /**
      * Send the first HTTPS request to require the one time password (OTP)
-     * 
-     * @param requestUri Request URI
+     *
+     * @param msisdn the phone number
+     * @param primaryUri the primary URI
+     * @param secondaryUri the secondary URI
      * @return Instance of {@link HttpsProvisioningResult} or null in case of internal exception
      * @throws IOException
      */
@@ -362,12 +372,12 @@ public class HttpsProvisioningManager {
             String args = getHttpsRequestArguments(smsPortForOTP, token, msisdn);
 
             /* Execute first HTTPS request with extra parameters */
-            String request = new StringBuilder(primaryUri).append(args).toString();
+            String request = primaryUri + args;
             urlConnection = executeHttpRequest(true, request);
             result.code = urlConnection.getResponseCode();
             if (HttpURLConnection.HTTP_OK != result.code && !StringUtils.isEmpty(secondaryUri)) {
                 /* First server not available, try the secondaryUri */
-                request = new StringBuilder(secondaryUri).append(args).toString();
+                request = secondaryUri + args;
                 urlConnection.disconnect();
                 urlConnection = null;
                 urlConnection = executeHttpRequest(true, request);
@@ -446,8 +456,7 @@ public class HttpsProvisioningManager {
     private String buildProvisioningAddress() {
         String mnc = String.format("%03d", mRcsSettings.getMobileNetworkCode());
         String mcc = String.format("%03d", mRcsSettings.getMobileCountryCode());
-        return new StringBuilder("config.rcs.mnc").append(mnc).append(".mcc").append(mcc)
-                .append(".pub.3gppnetwork.org").toString();
+        return "config.rcs.mnc" + mnc + ".mcc" + mcc + ".pub.3gppnetwork.org";
     }
 
     private static String readStream(InputStream in) throws IOException {
@@ -477,7 +486,7 @@ public class HttpsProvisioningManager {
             sLogger.debug("Request config via HTTPS");
         }
         HttpURLConnection urlConnection = null;
-        String primaryUri = null;
+        String primaryUri;
         String secondaryUri = null;
         try {
             /* Get provisioning address */
@@ -497,8 +506,7 @@ public class HttpsProvisioningManager {
                 secondaryUri = null;
             }
             if (logActivated) {
-                sLogger.debug(new StringBuilder("HCS/RCS Uri to connect: ").append(primaryUri)
-                        .append(" or ").append(secondaryUri).toString());
+                sLogger.debug("HCS/RCS Uri to connect: " + primaryUri + " or " + secondaryUri);
             }
             CookieManager cookieManager = new CookieManager();
             CookieHandler.setDefault(cookieManager);
@@ -551,8 +559,7 @@ public class HttpsProvisioningManager {
             urlConnection = null;
 
             /* Format second HTTPS request */
-            String request = new StringBuilder(requestUri).append(
-                    getHttpsRequestArguments(null, null, null)).toString();
+            String request = requestUri + getHttpsRequestArguments(null, null, null);
             if (logActivated) {
                 sLogger.info("Request provisioning: ".concat(request));
             }
@@ -631,12 +638,12 @@ public class HttpsProvisioningManager {
         }
         HttpURLConnection urlConnection = null;
         try {
-            // Format second HTTPS request
-            String request = new StringBuilder(requestUri).append("?OTP=").append(otp).toString();
+            /* Format second HTTPS request */
+            String request = requestUri + "?OTP=" + otp;
             if (logActivated) {
                 sLogger.info("Request provisioning with OTP: ".concat(request));
             }
-            // Execute second HTTPS request
+            /* Execute second HTTPS request */
             urlConnection = executeHttpRequest(true, request);
             result.code = urlConnection.getResponseCode();
             switch (result.code) {
@@ -730,8 +737,7 @@ public class HttpsProvisioningManager {
                 int version = info.getVersion();
                 long validity = info.getValidity();
                 if (logActivated) {
-                    sLogger.debug(new StringBuilder("Provisioning version=").append(version)
-                            .append(", validity=").append(validity).toString());
+                    sLogger.debug("Provisioning version=" + version + ", validity=" + validity);
                 }
 
                 // Save the latest positive version of the configuration
@@ -854,8 +860,7 @@ public class HttpsProvisioningManager {
         } else if (HttpURLConnection.HTTP_UNAVAILABLE == result.code) {
             // Server Unavailable
             if (logActivated) {
-                sLogger.debug(new StringBuilder("Server Unavailable. Retry after: ")
-                        .append(result.retryAfter).append("ms").toString());
+                sLogger.debug("Server Unavailable. Retry after: " + result.retryAfter + "ms");
             }
             if (mFirstProvAfterBoot) {
                 // Reason: Unable to get configuration
@@ -909,7 +914,7 @@ public class HttpsProvisioningManager {
     /**
      * Try to launch RCS Core Service. RCS Service is only launched if version is positive.
      * 
-     * @param context
+     * @param context the context
      * @param timerRetry timer in milliseconds to trigger next provisioning request. Only applicable
      *            if greater than 0.
      */
