@@ -665,8 +665,6 @@ public class ProvisioningParser {
                 // Not used: "geolocPullAuth"
 
             } while ((childnode = childnode.getNextSibling()) != null);
-
-// TODO 1.6            mRcsSettings.writeString(RcsSettingsData.AUTH_EXTENSIONS, extsAuth.toString());
         }
     }
 

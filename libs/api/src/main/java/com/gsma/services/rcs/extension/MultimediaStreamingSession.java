@@ -191,7 +191,8 @@ public class MultimediaStreamingSession extends MultimediaSession {
 
     /**
      * Sends a payload in real time
-     * 
+     * @deprecated Use {@link #sendPayload(byte[] content, String contentType)} instead.
+     *
      * @param content Payload content
      * @throws RcsPermissionDeniedException
      * @throws RcsGenericException

@@ -191,6 +191,7 @@ public class MultimediaMessagingSession extends MultimediaSession {
 
     /**
      * Sends a message in real time
+     * @deprecated Use {@link #sendMessage(byte[] content, String contentType)} instead.
      * 
      * @param content Message content
      * @throws RcsPermissionDeniedException

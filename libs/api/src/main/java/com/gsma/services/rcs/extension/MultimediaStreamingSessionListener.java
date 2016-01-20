@@ -45,7 +45,8 @@ public abstract class MultimediaStreamingSessionListener {
 
     /**
      * Callback called when a multimedia message or data is received.
-     * 
+     * @deprecated Use {@link #onPayloadReceived(ContactId contact, String sessionId, byte[] content, String contentType)} instead.
+
      * @param contact Contact ID
      * @param sessionId Session ID
      * @param content Payload content

@@ -45,6 +45,7 @@ public abstract class MultimediaMessagingSessionListener {
 
     /**
      * Callback called when a multimedia message or data is received.
+     * @deprecated Use {@link #onMessageReceived(ContactId contact, String sessionId, byte[] content, String contentType)} instead.
      * 
      * @param contact Contact ID
      * @param sessionId Session ID
