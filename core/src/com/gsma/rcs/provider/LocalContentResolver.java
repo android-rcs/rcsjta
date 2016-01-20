@@ -17,9 +17,12 @@
 package com.gsma.rcs.provider;
 
 import android.content.ContentProviderClient;
+import android.content.ContentProviderOperation;
+import android.content.ContentProviderResult;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.OperationApplicationException;
 import android.database.Cursor;
 import android.net.Uri;
 
@@ -27,6 +30,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 
 /**
  * The purpose of this class is to allow query-/insert-/update-/delete- and stream operations
@@ -186,6 +190,27 @@ public class LocalContentResolver {
 
         } catch (IOException e) {
             throw new FileNotFoundException("Unable to create stream");
+        } finally {
+            if (contentProviderClient != null) {
+                contentProviderClient.release();
+            }
+        }
+    }
+
+    /**
+     * Handles request to update multiple rows
+     * 
+     * @param uri
+     * @param operations
+     * @return
+     * @throws OperationApplicationException
+     */
+    public final ContentProviderResult[] applyBatch(Uri uri,
+            ArrayList<ContentProviderOperation> operations) throws OperationApplicationException {
+        ContentProviderClient contentProviderClient = null;
+        try {
+            contentProviderClient = mContentResolver.acquireContentProviderClient(uri);
+            return contentProviderClient.getLocalContentProvider().applyBatch(operations);
         } finally {
             if (contentProviderClient != null) {
                 contentProviderClient.release();

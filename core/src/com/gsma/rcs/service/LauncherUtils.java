@@ -168,8 +168,8 @@ public class LauncherUtils {
         /* Stop the Core service */
         ctx.stopService(new Intent(ctx, RcsCoreService.class));
 
-        /* Reset user profile */
-        rcsSettings.resetUserProfile();
+        /* Reset existing configuration parameters */
+        rcsSettings.resetConfigParameters();
 
         /* Clear all entries in chat, message and file transfer tables */
         mMessagingLog.deleteAllEntries();

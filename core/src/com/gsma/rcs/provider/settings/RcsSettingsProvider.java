@@ -27,8 +27,11 @@ import com.gsma.rcs.utils.DatabaseUtils;
 import com.gsma.services.rcs.contact.ContactId;
 
 import android.content.ContentProvider;
+import android.content.ContentProviderOperation;
+import android.content.ContentProviderResult;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.OperationApplicationException;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -566,5 +569,24 @@ public class RcsSettingsProvider extends ContentProvider {
     public int delete(Uri uri, String where, String[] whereArgs) {
         throw new UnsupportedOperationException(new StringBuilder("Cannot delete URI ").append(uri)
                 .append("!").toString());
+    }
+
+    @Override
+    public ContentProviderResult[] applyBatch(ArrayList<ContentProviderOperation> operations)
+            throws OperationApplicationException {
+        SQLiteDatabase database = mOpenHelper.getWritableDatabase();
+        database.beginTransaction();
+        try {
+            ContentProviderResult[] results = new ContentProviderResult[operations.size()];
+            int index = 0;
+            for (ContentProviderOperation operation : operations) {
+                results[index] = operation.apply(this, results, index);
+                index++;
+            }
+            database.setTransactionSuccessful();
+            return results;
+        } finally {
+            database.endTransaction();
+        }
     }
 }

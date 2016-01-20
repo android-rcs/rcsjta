@@ -36,19 +36,22 @@ import com.gsma.rcs.provider.settings.RcsSettingsData.ImMsgTech;
 import com.gsma.rcs.provider.settings.RcsSettingsData.ImSessionStartMode;
 import com.gsma.rcs.provider.settings.RcsSettingsData.NetworkAccessType;
 import com.gsma.rcs.provider.settings.RcsSettingsData.TermsAndConditionsResponse;
-import com.gsma.rcs.provisioning.ProvisioningInfo;
 import com.gsma.rcs.utils.ContactUtil;
+import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.CommonServiceConfiguration.MessagingMethod;
 import com.gsma.services.rcs.CommonServiceConfiguration.MessagingMode;
 import com.gsma.services.rcs.CommonServiceConfiguration.MinimumBatteryLevel;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransferServiceConfiguration.ImageResizeOption;
 
+import android.content.ContentProviderOperation;
 import android.content.ContentValues;
+import android.content.OperationApplicationException;
 import android.database.Cursor;
 import android.net.Uri;
 import android.text.TextUtils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -116,6 +119,32 @@ public class RcsSettings {
         super();
         mLocalContentResolver = localContentResolver;
         mCache = new HashMap<String, Object>();
+    }
+
+    private ContentProviderOperation buildContentProviderOp(String key, String value) {
+        return ContentProviderOperation.newUpdate(RcsSettingsData.CONTENT_URI)
+                .withValue(RcsSettingsData.KEY_VALUE, value)
+                .withSelection(WHERE_CLAUSE, new String[] { key }).build();
+    }
+
+    private ContentProviderOperation buildContentProviderOp(String key, int value) {
+        return buildContentProviderOp(key, Integer.toString(value));
+    }
+
+    private ContentProviderOperation buildContentProviderOp(String key, boolean value) {
+        return buildContentProviderOp(key, Boolean.toString(value));
+    }
+
+    private ContentProviderOperation buildContentProviderOp(String key, long value) {
+        return buildContentProviderOp(key, Long.toString(value));
+    }
+
+    private ContentProviderOperation buildContentProviderOp(String key, Uri value) {
+        return buildContentProviderOp(key, value == null ? null : value.toString());
+    }
+
+    private ContentProviderOperation buildContentProviderOp(String key, ContactId value) {
+        return buildContentProviderOp(key, value == null ? null : value.toString());
     }
 
     /**
@@ -1770,21 +1799,329 @@ public class RcsSettings {
     }
 
     /**
-     * Reset user profile settings
+     * Reset configuration parameters to default values
      */
-    public void resetUserProfile() {
-        setUserProfileImsUserName(RcsSettingsData.DEFAULT_USERPROFILE_IMS_USERNAME);
-        setUserProfileImsDomain(RcsSettingsData.DEFAULT_USERPROFILE_IMS_HOME_DOMAIN);
-        setUserProfileImsPassword(RcsSettingsData.DEFAULT_USERPROFILE_IMS_PASSWORD);
-        setImsProxyAddrForMobile(RcsSettingsData.DEFAULT_IMS_PROXY_ADDR_MOBILE);
-        setImsProxyAddrForWifi(RcsSettingsData.DEFAULT_IMS_PROXY_ADDR_WIFI);
-        setUserProfileImsDisplayName(RcsSettingsData.DEFAULT_USERPROFILE_IMS_DISPLAY_NAME);
-        setUserProfileImsPrivateId(RcsSettingsData.DEFAULT_USERPROFILE_IMS_PRIVATE_ID);
-        setXdmLogin(RcsSettingsData.DEFAULT_XDM_LOGIN);
-        setXdmPassword(RcsSettingsData.DEFAULT_XDM_PASSWORD);
-        setXdmServer(RcsSettingsData.DEFAULT_XDM_SERVER);
-        setProvisioningVersion(ProvisioningInfo.Version.RESETED.toInt());
-        setProvisioningToken(RcsSettingsData.DEFAULT_PROVISIONING_TOKEN);
+    public void resetConfigParameters() {
+        final Logger logger = Logger.getLogger(RcsSettings.class.getName());
+
+        ArrayList<ContentProviderOperation> operations = new ArrayList<ContentProviderOperation>();
+
+        operations.add(buildContentProviderOp(RcsSettingsData.SERVICE_ACTIVATED,
+                RcsSettingsData.DEFAULT_SERVICE_ACTIVATED));
+        operations.add(buildContentProviderOp(RcsSettingsData.CHAT_RESPOND_TO_DISPLAY_REPORTS,
+                RcsSettingsData.DEFAULT_CHAT_RESPOND_TO_DISPLAY_REPORTS));
+        operations.add(buildContentProviderOp(RcsSettingsData.MIN_BATTERY_LEVEL,
+                RcsSettingsData.DEFAULT_MIN_BATTERY_LEVEL));
+        operations.add(buildContentProviderOp(RcsSettingsData.MAX_FILE_ICON_SIZE,
+                RcsSettingsData.DEFAULT_MAX_FILE_ICON_SIZE));
+        operations.add(buildContentProviderOp(RcsSettingsData.MAX_PHOTO_ICON_SIZE,
+                RcsSettingsData.DEFAULT_MAX_PHOTO_ICON_SIZE));
+        operations.add(buildContentProviderOp(RcsSettingsData.MAX_FREETXT_LENGTH,
+                RcsSettingsData.DEFAULT_MAX_FREETXT_LENGTH));
+        operations.add(buildContentProviderOp(RcsSettingsData.MAX_GEOLOC_LABEL_LENGTH,
+                RcsSettingsData.DEFAULT_MAX_GEOLOC_LABEL_LENGTH));
+        operations.add(buildContentProviderOp(RcsSettingsData.GEOLOC_EXPIRATION_TIME,
+                RcsSettingsData.DEFAULT_GEOLOC_EXPIRATION_TIME));
+        operations.add(buildContentProviderOp(RcsSettingsData.MAX_CHAT_PARTICIPANTS,
+                RcsSettingsData.DEFAULT_MAX_CHAT_PARTICIPANTS));
+        operations.add(buildContentProviderOp(RcsSettingsData.MAX_CHAT_MSG_LENGTH,
+                RcsSettingsData.DEFAULT_MAX_CHAT_MSG_LENGTH));
+        operations.add(buildContentProviderOp(RcsSettingsData.MAX_GROUPCHAT_MSG_LENGTH,
+                RcsSettingsData.DEFAULT_MAX_GC_MSG_LENGTH));
+        operations.add(buildContentProviderOp(RcsSettingsData.CHAT_IDLE_DURATION,
+                RcsSettingsData.DEFAULT_CHAT_IDLE_DURATION));
+        operations.add(buildContentProviderOp(RcsSettingsData.MAX_FILE_TRANSFER_SIZE,
+                RcsSettingsData.DEFAULT_MAX_FT_SIZE));
+        operations.add(buildContentProviderOp(RcsSettingsData.WARN_FILE_TRANSFER_SIZE,
+                RcsSettingsData.DEFAULT_WARN_FT_SIZE));
+        operations.add(buildContentProviderOp(RcsSettingsData.MAX_IMAGE_SHARE_SIZE,
+                RcsSettingsData.DEFAULT_MAX_ISH_SIZE));
+        operations.add(buildContentProviderOp(RcsSettingsData.MAX_VIDEO_SHARE_DURATION,
+                RcsSettingsData.DEFAULT_MAX_VSH_DURATION));
+        operations.add(buildContentProviderOp(RcsSettingsData.MAX_CHAT_SESSIONS,
+                RcsSettingsData.DEFAULT_MAX_CHAT_SESSIONS));
+        operations.add(buildContentProviderOp(RcsSettingsData.MAX_FILE_TRANSFER_SESSIONS,
+                RcsSettingsData.DEFAULT_MAX_FT_SESSIONS));
+        operations.add(buildContentProviderOp(
+                RcsSettingsData.MAX_CONCURRENT_OUTGOING_FILE_TRANSFERS,
+                RcsSettingsData.DEFAULT_MAX_CONCURRENT_OUTGOING_FT_SESSIONS));
+        operations.add(buildContentProviderOp(RcsSettingsData.MAX_IP_CALL_SESSIONS,
+                RcsSettingsData.DEFAULT_MAX_IP_CALL_SESSIONS));
+        operations.add(buildContentProviderOp(RcsSettingsData.SMS_FALLBACK_SERVICE,
+                RcsSettingsData.DEFAULT_SMS_FALLBACK_SERVICE));
+        operations.add(buildContentProviderOp(RcsSettingsData.WARN_SF_SERVICE,
+                RcsSettingsData.DEFAULT_WARN_SF_SERVICE));
+        operations.add(buildContentProviderOp(RcsSettingsData.AUTO_ACCEPT_CHAT,
+                RcsSettingsData.DEFAULT_AUTO_ACCEPT_CHAT));
+        operations.add(buildContentProviderOp(RcsSettingsData.AUTO_ACCEPT_GROUP_CHAT,
+                RcsSettingsData.DEFAULT_AUTO_ACCEPT_GC));
+        operations.add(buildContentProviderOp(RcsSettingsData.AUTO_ACCEPT_FILE_TRANSFER,
+                RcsSettingsData.DEFAULT_AUTO_ACCEPT_FT));
+        operations.add(buildContentProviderOp(RcsSettingsData.IM_SESSION_START,
+                RcsSettingsData.DEFAULT_IM_SESSION_START));
+        operations.add(buildContentProviderOp(RcsSettingsData.USERPROFILE_IMS_USERNAME,
+                RcsSettingsData.DEFAULT_USERPROFILE_IMS_USERNAME));
+        operations.add(buildContentProviderOp(RcsSettingsData.USERPROFILE_IMS_DISPLAY_NAME,
+                RcsSettingsData.DEFAULT_USERPROFILE_IMS_DISPLAY_NAME));
+        operations.add(buildContentProviderOp(RcsSettingsData.USERPROFILE_IMS_HOME_DOMAIN,
+                RcsSettingsData.DEFAULT_USERPROFILE_IMS_HOME_DOMAIN));
+        operations.add(buildContentProviderOp(RcsSettingsData.USERPROFILE_IMS_PRIVATE_ID,
+                RcsSettingsData.DEFAULT_USERPROFILE_IMS_PRIVATE_ID));
+        operations.add(buildContentProviderOp(RcsSettingsData.USERPROFILE_IMS_PASSWORD,
+                RcsSettingsData.DEFAULT_USERPROFILE_IMS_PASSWORD));
+        operations.add(buildContentProviderOp(RcsSettingsData.USERPROFILE_IMS_REALM,
+                RcsSettingsData.DEFAULT_USERPROFILE_IMS_REALM));
+        operations.add(buildContentProviderOp(RcsSettingsData.IMS_PROXY_ADDR_MOBILE,
+                RcsSettingsData.DEFAULT_IMS_PROXY_ADDR_MOBILE));
+        operations.add(buildContentProviderOp(RcsSettingsData.IMS_PROXY_PORT_MOBILE,
+                RcsSettingsData.DEFAULT_IMS_PROXY_PORT_MOBILE));
+        operations.add(buildContentProviderOp(RcsSettingsData.IMS_PROXY_ADDR_WIFI,
+                RcsSettingsData.DEFAULT_IMS_PROXY_ADDR_WIFI));
+        operations.add(buildContentProviderOp(RcsSettingsData.IMS_PROXY_PORT_WIFI,
+                RcsSettingsData.DEFAULT_IMS_PROXY_PORT_WIFI));
+        operations.add(buildContentProviderOp(RcsSettingsData.XDM_SERVER,
+                RcsSettingsData.DEFAULT_XDM_SERVER));
+        operations.add(buildContentProviderOp(RcsSettingsData.XDM_LOGIN,
+                RcsSettingsData.DEFAULT_XDM_LOGIN));
+        operations.add(buildContentProviderOp(RcsSettingsData.XDM_PASSWORD,
+                RcsSettingsData.DEFAULT_XDM_PASSWORD));
+        operations.add(buildContentProviderOp(RcsSettingsData.FT_HTTP_SERVER,
+                RcsSettingsData.DEFAULT_FT_HTTP_SERVER));
+        operations.add(buildContentProviderOp(RcsSettingsData.FT_HTTP_LOGIN,
+                RcsSettingsData.DEFAULT_FT_HTTP_LOGIN));
+        operations.add(buildContentProviderOp(RcsSettingsData.FT_HTTP_PASSWORD,
+                RcsSettingsData.DEFAULT_FT_HTTP_PASSWORD));
+        operations.add(buildContentProviderOp(RcsSettingsData.FT_PROTOCOL,
+                RcsSettingsData.DEFAULT_FT_PROTOCOL));
+        operations.add(buildContentProviderOp(RcsSettingsData.IM_CONF_URI,
+                RcsSettingsData.DEFAULT_IM_CONF_URI));
+        operations.add(buildContentProviderOp(RcsSettingsData.ENDUSER_CONFIRMATION_URI,
+                RcsSettingsData.DEFAULT_ENDUSER_CONFIRMATION_URI));
+        operations.add(buildContentProviderOp(RcsSettingsData.UUID, RcsSettingsData.DEFAULT_UUID));
+        operations.add(buildContentProviderOp(RcsSettingsData.CAPABILITY_CS_VIDEO,
+                RcsSettingsData.DEFAULT_CAPABILITY_CS_VIDEO));
+        operations.add(buildContentProviderOp(RcsSettingsData.CAPABILITY_IMAGE_SHARING,
+                RcsSettingsData.DEFAULT_CAPABILITY_ISH));
+        operations.add(buildContentProviderOp(RcsSettingsData.CAPABILITY_VIDEO_SHARING,
+                RcsSettingsData.DEFAULT_CAPABILITY_VSH));
+        operations.add(buildContentProviderOp(RcsSettingsData.CAPABILITY_IP_VOICE_CALL,
+                RcsSettingsData.DEFAULT_CAPABILITY_IP_VOICE_CALL));
+        operations.add(buildContentProviderOp(RcsSettingsData.CAPABILITY_IP_VIDEO_CALL,
+                RcsSettingsData.DEFAULT_CAPABILITY_IP_VIDEO_CALL));
+        operations.add(buildContentProviderOp(RcsSettingsData.CAPABILITY_IM_SESSION,
+                RcsSettingsData.DEFAULT_CAPABILITY_IM_SESSION));
+        operations.add(buildContentProviderOp(RcsSettingsData.CAPABILITY_IM_GROUP_SESSION,
+                RcsSettingsData.DEFAULT_CAPABILITY_IM_GROUP_SESSION));
+        operations.add(buildContentProviderOp(RcsSettingsData.CAPABILITY_FILE_TRANSFER,
+                RcsSettingsData.DEFAULT_CAPABILITY_FT));
+        operations.add(buildContentProviderOp(RcsSettingsData.CAPABILITY_FILE_TRANSFER_HTTP,
+                RcsSettingsData.DEFAULT_CAPABILITY_FT_HTTP));
+        operations.add(buildContentProviderOp(RcsSettingsData.CAPABILITY_PRESENCE_DISCOVERY,
+                RcsSettingsData.DEFAULT_CAPABILITY_PRESENCE_DISCOVERY));
+        operations.add(buildContentProviderOp(RcsSettingsData.CAPABILITY_SOCIAL_PRESENCE,
+                RcsSettingsData.DEFAULT_CAPABILITY_SOCIAL_PRESENCE));
+        operations.add(buildContentProviderOp(RcsSettingsData.CAPABILITY_GEOLOCATION_PUSH,
+                RcsSettingsData.DEFAULT_CAPABILITY_GEOLOCATION_PUSH));
+        operations.add(buildContentProviderOp(RcsSettingsData.CAPABILITY_FILE_TRANSFER_THUMBNAIL,
+                RcsSettingsData.DEFAULT_CAPABILITY_FT_THUMBNAIL));
+        operations.add(buildContentProviderOp(RcsSettingsData.CAPABILITY_GROUP_CHAT_SF,
+                RcsSettingsData.DEFAULT_CAPABILITY_GC_SF));
+        operations.add(buildContentProviderOp(RcsSettingsData.CAPABILITY_FILE_TRANSFER_SF,
+                RcsSettingsData.DEFAULT_CAPABILITY_FT_SF));
+        operations.add(buildContentProviderOp(RcsSettingsData.CAPABILITY_RCS_EXTENSIONS,
+                RcsSettingsData.DEFAULT_CAPABILITY_RCS_EXTENSIONS));
+        operations.add(buildContentProviderOp(RcsSettingsData.IMS_SERVICE_POLLING_PERIOD,
+                RcsSettingsData.DEFAULT_IMS_SERVICE_POLLING_PERIOD));
+        operations.add(buildContentProviderOp(RcsSettingsData.SIP_DEFAULT_PORT,
+                RcsSettingsData.DEFAULT_SIP_DEFAULT_PORT));
+        operations.add(buildContentProviderOp(RcsSettingsData.SIP_DEFAULT_PROTOCOL_FOR_MOBILE,
+                RcsSettingsData.DEFAULT_SIP_DEFAULT_PROTOCOL_FOR_MOBILE));
+        operations.add(buildContentProviderOp(RcsSettingsData.SIP_DEFAULT_PROTOCOL_FOR_WIFI,
+                RcsSettingsData.DEFAULT_SIP_DEFAULT_PROTOCOL_FOR_WIFI));
+        operations.add(buildContentProviderOp(RcsSettingsData.TLS_CERTIFICATE_ROOT,
+                RcsSettingsData.DEFAULT_TLS_CERTIFICATE_ROOT));
+        operations.add(buildContentProviderOp(RcsSettingsData.TLS_CERTIFICATE_INTERMEDIATE,
+                RcsSettingsData.DEFAULT_TLS_CERTIFICATE_INTERMEDIATE));
+        operations.add(buildContentProviderOp(RcsSettingsData.SIP_TRANSACTION_TIMEOUT,
+                RcsSettingsData.DEFAULT_SIP_TRANSACTION_TIMEOUT));
+        operations.add(buildContentProviderOp(RcsSettingsData.MSRP_DEFAULT_PORT,
+                RcsSettingsData.DEFAULT_MSRP_DEFAULT_PORT));
+        operations.add(buildContentProviderOp(RcsSettingsData.RTP_DEFAULT_PORT,
+                RcsSettingsData.DEFAULT_RTP_DEFAULT_PORT));
+        operations.add(buildContentProviderOp(RcsSettingsData.MSRP_TRANSACTION_TIMEOUT,
+                RcsSettingsData.DEFAULT_MSRP_TRANSACTION_TIMEOUT));
+        operations.add(buildContentProviderOp(RcsSettingsData.REGISTER_EXPIRE_PERIOD,
+                RcsSettingsData.DEFAULT_REGISTER_EXPIRE_PERIOD));
+        operations.add(buildContentProviderOp(RcsSettingsData.REGISTER_RETRY_BASE_TIME,
+                RcsSettingsData.DEFAULT_REGISTER_RETRY_BASE_TIME));
+        operations.add(buildContentProviderOp(RcsSettingsData.REGISTER_RETRY_MAX_TIME,
+                RcsSettingsData.DEFAULT_REGISTER_RETRY_MAX_TIME));
+        operations.add(buildContentProviderOp(RcsSettingsData.PUBLISH_EXPIRE_PERIOD,
+                RcsSettingsData.DEFAULT_PUBLISH_EXPIRE_PERIOD));
+        operations.add(buildContentProviderOp(RcsSettingsData.REVOKE_TIMEOUT,
+                RcsSettingsData.DEFAULT_REVOKE_TIMEOUT));
+        operations.add(buildContentProviderOp(RcsSettingsData.IMS_AUTHENT_PROCEDURE_MOBILE,
+                RcsSettingsData.DEFAULT_IMS_AUTHENT_PROCEDURE_MOBILE));
+        operations.add(buildContentProviderOp(RcsSettingsData.IMS_AUTHENT_PROCEDURE_WIFI,
+                RcsSettingsData.DEFAULT_IMS_AUTHENT_PROCEDURE_WIFI));
+        operations.add(buildContentProviderOp(RcsSettingsData.TEL_URI_FORMAT,
+                RcsSettingsData.DEFAULT_TEL_URI_FORMAT));
+        operations.add(buildContentProviderOp(RcsSettingsData.RINGING_SESSION_PERIOD,
+                RcsSettingsData.DEFAULT_RINGING_SESSION_PERIOD));
+        operations.add(buildContentProviderOp(RcsSettingsData.SUBSCRIBE_EXPIRE_PERIOD,
+                RcsSettingsData.DEFAULT_SUBSCRIBE_EXPIRE_PERIOD));
+        operations.add(buildContentProviderOp(RcsSettingsData.IS_COMPOSING_TIMEOUT,
+                RcsSettingsData.DEFAULT_IS_COMPOSING_TIMEOUT));
+        operations.add(buildContentProviderOp(RcsSettingsData.SESSION_REFRESH_EXPIRE_PERIOD,
+                RcsSettingsData.DEFAULT_SESSION_REFRESH_EXPIRE_PERIOD));
+        operations.add(buildContentProviderOp(RcsSettingsData.PERMANENT_STATE_MODE,
+                RcsSettingsData.DEFAULT_PERMANENT_STATE_MODE));
+        operations.add(buildContentProviderOp(RcsSettingsData.TRACE_ACTIVATED,
+                RcsSettingsData.DEFAULT_TRACE_ACTIVATED));
+        operations.add(buildContentProviderOp(RcsSettingsData.TRACE_LEVEL,
+                RcsSettingsData.DEFAULT_TRACE_LEVEL));
+        operations.add(buildContentProviderOp(RcsSettingsData.SIP_TRACE_ACTIVATED,
+                RcsSettingsData.DEFAULT_SIP_TRACE_ACTIVATED));
+        operations.add(buildContentProviderOp(RcsSettingsData.SIP_TRACE_FILE,
+                RcsSettingsData.DEFAULT_SIP_TRACE_FILE));
+        operations.add(buildContentProviderOp(RcsSettingsData.MEDIA_TRACE_ACTIVATED,
+                RcsSettingsData.DEFAULT_MEDIA_TRACE_ACTIVATED));
+        operations.add(buildContentProviderOp(RcsSettingsData.CAPABILITY_REFRESH_TIMEOUT,
+                RcsSettingsData.DEFAULT_CAPABILITY_REFRESH_TIMEOUT));
+        operations.add(buildContentProviderOp(RcsSettingsData.CAPABILITY_EXPIRY_TIMEOUT,
+                RcsSettingsData.DEFAULT_CAPABILITY_EXPIRY_TIMEOUT));
+        operations.add(buildContentProviderOp(RcsSettingsData.CAPABILITY_POLLING_PERIOD,
+                RcsSettingsData.DEFAULT_CAPABILITY_POLLING_PERIOD));
+        operations.add(buildContentProviderOp(RcsSettingsData.IM_CAPABILITY_ALWAYS_ON,
+                RcsSettingsData.DEFAULT_IM_CAPABILITY_ALWAYS_ON));
+        operations.add(buildContentProviderOp(RcsSettingsData.GROUP_CHAT_INVITE_ONLY_FULL_SF,
+                RcsSettingsData.DEFAULT_GC_INVITE_ONLY_FULL_SF));
+        operations.add(buildContentProviderOp(RcsSettingsData.FT_CAPABILITY_ALWAYS_ON,
+                RcsSettingsData.DEFAULT_FT_CAPABILITY_ALWAYS_ON));
+        operations.add(buildContentProviderOp(RcsSettingsData.FT_HTTP_CAP_ALWAYS_ON,
+                RcsSettingsData.DEFAULT_FT_HTTP_CAP_ALWAYS_ON));
+        operations.add(buildContentProviderOp(RcsSettingsData.MSG_DELIVERY_TIMEOUT,
+                RcsSettingsData.DEFAULT_MSG_DELIVERY_TIMEOUT));
+        operations.add(buildContentProviderOp(RcsSettingsData.MSG_CAP_VALIDITY_PERIOD,
+                RcsSettingsData.DEFAULT_MSG_CAP_VALIDITY_PERIOD));
+        operations.add(buildContentProviderOp(RcsSettingsData.IM_USE_REPORTS,
+                RcsSettingsData.DEFAULT_IM_USE_REPORTS));
+        operations.add(buildContentProviderOp(RcsSettingsData.NETWORK_ACCESS,
+                RcsSettingsData.DEFAULT_NETWORK_ACCESS));
+        operations.add(buildContentProviderOp(RcsSettingsData.SIP_TIMER_T1,
+                RcsSettingsData.DEFAULT_SIP_TIMER_T1));
+        operations.add(buildContentProviderOp(RcsSettingsData.SIP_TIMER_T2,
+                RcsSettingsData.DEFAULT_SIP_TIMER_T2));
+        operations.add(buildContentProviderOp(RcsSettingsData.SIP_TIMER_T4,
+                RcsSettingsData.DEFAULT_SIP_TIMER_T4));
+        operations.add(buildContentProviderOp(RcsSettingsData.SIP_KEEP_ALIVE,
+                RcsSettingsData.DEFAULT_SIP_KEEP_ALIVE));
+        operations.add(buildContentProviderOp(RcsSettingsData.SIP_KEEP_ALIVE_PERIOD,
+                RcsSettingsData.DEFAULT_SIP_KEEP_ALIVE_PERIOD));
+        operations.add(buildContentProviderOp(RcsSettingsData.RCS_APN,
+                RcsSettingsData.DEFAULT_RCS_APN));
+        operations.add(buildContentProviderOp(RcsSettingsData.RCS_OPERATOR,
+                RcsSettingsData.DEFAULT_RCS_OPERATOR));
+        operations.add(buildContentProviderOp(RcsSettingsData.MAX_CHAT_LOG_ENTRIES,
+                RcsSettingsData.DEFAULT_MAX_CHAT_LOG_ENTRIES));
+        operations.add(buildContentProviderOp(RcsSettingsData.MAX_RICHCALL_LOG_ENTRIES,
+                RcsSettingsData.DEFAULT_MAX_RICHCALL_LOG_ENTRIES));
+        operations.add(buildContentProviderOp(RcsSettingsData.MAX_IPCALL_LOG_ENTRIES,
+                RcsSettingsData.DEFAULT_MAX_IPCALL_LOG_ENTRIES));
+        operations.add(buildContentProviderOp(RcsSettingsData.GRUU, RcsSettingsData.DEFAULT_GRUU));
+        operations.add(buildContentProviderOp(RcsSettingsData.USE_IMEI_AS_DEVICE_ID,
+                RcsSettingsData.DEFAULT_USE_IMEI_AS_DEVICE_ID));
+        operations.add(buildContentProviderOp(RcsSettingsData.CPU_ALWAYS_ON,
+                RcsSettingsData.DEFAULT_CPU_ALWAYS_ON));
+        operations.add(buildContentProviderOp(RcsSettingsData.CONFIG_MODE,
+                RcsSettingsData.DEFAULT_CONFIG_MODE));
+        operations.add(buildContentProviderOp(RcsSettingsData.TC_RESPONSE,
+                RcsSettingsData.DEFAULT_TC_RESPONSE));
+        operations.add(buildContentProviderOp(RcsSettingsData.PROVISIONING_VERSION,
+                RcsSettingsData.DEFAULT_PROVISIONING_VERSION));
+        operations.add(buildContentProviderOp(RcsSettingsData.PROVISIONING_TOKEN,
+                RcsSettingsData.DEFAULT_PROVISIONING_TOKEN));
+        operations.add(buildContentProviderOp(RcsSettingsData.SECONDARY_PROVISIONING_ADDRESS,
+                RcsSettingsData.DEFAULT_SECONDARY_PROV_ADDR));
+        operations.add(buildContentProviderOp(RcsSettingsData.SECONDARY_PROVISIONING_ADDRESS_ONLY,
+                RcsSettingsData.DEFAULT_SECONDARY_PROV_ADDR_ONLY));
+        operations.add(buildContentProviderOp(RcsSettingsData.DIRECTORY_PATH_PHOTOS,
+                RcsSettingsData.DEFAULT_DIRECTORY_PATH_PHOTOS));
+        operations.add(buildContentProviderOp(RcsSettingsData.DIRECTORY_PATH_VIDEOS,
+                RcsSettingsData.DEFAULT_DIRECTORY_PATH_VIDEOS));
+        operations.add(buildContentProviderOp(RcsSettingsData.DIRECTORY_PATH_FILES,
+                RcsSettingsData.DEFAULT_DIRECTORY_PATH_FILES));
+        operations.add(buildContentProviderOp(RcsSettingsData.DIRECTORY_PATH_FILEICONS,
+                RcsSettingsData.DEFAULT_DIRECTORY_PATH_FILEICONS));
+        operations.add(buildContentProviderOp(RcsSettingsData.SECURE_MSRP_OVER_WIFI,
+                RcsSettingsData.DEFAULT_SECURE_MSRP_OVER_WIFI));
+        operations.add(buildContentProviderOp(RcsSettingsData.SECURE_RTP_OVER_WIFI,
+                RcsSettingsData.DEFAULT_SECURE_RTP_OVER_WIFI));
+        operations.add(buildContentProviderOp(RcsSettingsData.KEY_MESSAGING_MODE,
+                RcsSettingsData.DEFAULT_KEY_MESSAGING_MODE));
+        operations.add(buildContentProviderOp(RcsSettingsData.CAPABILITY_SIP_AUTOMATA,
+                RcsSettingsData.DEFAULT_CAPABILITY_SIP_AUTOMATA));
+        operations.add(buildContentProviderOp(RcsSettingsData.KEY_GSMA_RELEASE,
+                RcsSettingsData.DEFAULT_KEY_GSMA_RELEASE));
+        operations.add(buildContentProviderOp(RcsSettingsData.IPVOICECALL_BREAKOUT_AA,
+                RcsSettingsData.DEFAULT_IPVOICECALL_BREAKOUT_AA));
+        operations.add(buildContentProviderOp(RcsSettingsData.IPVOICECALL_BREAKOUT_CS,
+                RcsSettingsData.DEFAULT_IPVOICECALL_BREAKOUT_CS));
+        operations.add(buildContentProviderOp(RcsSettingsData.IPVIDEOCALL_UPGRADE_FROM_CS,
+                RcsSettingsData.DEFAULT_IPVIDEOCALL_UPGRADE_FROM_CS));
+        operations.add(buildContentProviderOp(RcsSettingsData.IPVIDEOCALL_UPGRADE_ON_CAPERROR,
+                RcsSettingsData.DEFAULT_IPVIDEOCALL_UPGRADE_ON_CAPERROR));
+        operations.add(buildContentProviderOp(RcsSettingsData.IPVIDEOCALL_UPGRADE_ATTEMPT_EARLY,
+                RcsSettingsData.DEFAULT_IPVIDEOCALL_UPGRADE_ATTEMPT_EARLY));
+        operations.add(buildContentProviderOp(RcsSettingsData.TCP_FALLBACK,
+                RcsSettingsData.DEFAULT_TCP_FALLBACK));
+        operations.add(buildContentProviderOp(RcsSettingsData.CONTROL_EXTENSIONS,
+                RcsSettingsData.DEFAULT_CONTROL_EXTENSIONS));
+        operations.add(buildContentProviderOp(RcsSettingsData.ALLOW_EXTENSIONS,
+                RcsSettingsData.DEFAULT_ALLOW_EXTENSIONS));
+        operations.add(buildContentProviderOp(RcsSettingsData.MAX_MSRP_SIZE_EXTENSIONS,
+                RcsSettingsData.DEFAULT_MAX_MSRP_SIZE_EXTENSIONS));
+        operations.add(buildContentProviderOp(RcsSettingsData.CONFIGURATION_VALID,
+                RcsSettingsData.DEFAULT_CONFIGURATION_VALID));
+        operations.add(buildContentProviderOp(RcsSettingsData.AUTO_ACCEPT_FT_IN_ROAMING,
+                RcsSettingsData.DEFAULT_AUTO_ACCEPT_FT_IN_ROAMING));
+        operations.add(buildContentProviderOp(RcsSettingsData.AUTO_ACCEPT_FT_CHANGEABLE,
+                RcsSettingsData.DEFAULT_AUTO_ACCEPT_FT_CHANGEABLE));
+        operations.add(buildContentProviderOp(RcsSettingsData.KEY_DEFAULT_MESSAGING_METHOD,
+                RcsSettingsData.DEFAULT_KEY_DEFAULT_MESSAGING_METHOD));
+        operations.add(buildContentProviderOp(RcsSettingsData.KEY_IMAGE_RESIZE_OPTION,
+                RcsSettingsData.DEFAULT_KEY_IMAGE_RESIZE_OPTION));
+        operations.add(buildContentProviderOp(RcsSettingsData.ENABLE_RCS_SWITCH,
+                RcsSettingsData.DEFAULT_ENABLE_RCS_SWITCH));
+        operations.add(buildContentProviderOp(RcsSettingsData.IM_MSG_TECH,
+                RcsSettingsData.DEFAULT_IM_MSG_TECH));
+        operations.add(buildContentProviderOp(RcsSettingsData.FIRST_MESSAGE_INVITE,
+                RcsSettingsData.DEFAULT_FIRST_MESSAGE_INVITE));
+        operations.add(buildContentProviderOp(
+                RcsSettingsData.REQUEST_AND_RESPOND_TO_GROUP_DISPLAY_REPORTS,
+                RcsSettingsData.DEFAULT_REQUEST_AND_RESPOND_TO_GROUP_DISPLAY_REPORTS));
+        operations.add(buildContentProviderOp(RcsSettingsData.MAX_ALLOWED_DISPLAY_NAME_CHARS,
+                RcsSettingsData.DEFAULT_MAX_ALLOWED_DISPLAY_NAME_CHARS));
+        operations.add(buildContentProviderOp(RcsSettingsData.PROV_USER_MSG_CONTENT,
+                RcsSettingsData.DEFAULT_PROV_USER_MSG_CONTENT));
+        operations.add(buildContentProviderOp(RcsSettingsData.PROV_USER_MSG_TITLE,
+                RcsSettingsData.DEFAULT_PROV_USER_MSG_TITLE));
+        operations.add(buildContentProviderOp(RcsSettingsData.MOBILE_COUNTRY_CODE,
+                RcsSettingsData.DEFAULT_MOBILE_COUNTRY_CODE));
+        operations.add(buildContentProviderOp(RcsSettingsData.MOBILE_NETWORK_CODE,
+                RcsSettingsData.DEFAULT_MOBILE_NETWORK_CODE));
+        operations.add(buildContentProviderOp(RcsSettingsData.PROV_ACCEPT_BUTTON,
+                RcsSettingsData.DEFAULT_PROV_ACCEPT_BUTTON));
+        operations.add(buildContentProviderOp(RcsSettingsData.PROV_REJECT_BUTTON,
+                RcsSettingsData.DEFAULT_PROV_REJECT_BUTTON));
+        operations.add(buildContentProviderOp(RcsSettingsData.LOCAL_DISPLAY_LANGUAGE,
+                RcsSettingsData.DEFAULT_LOCAL_DISPLAY_LANGUAGE));
+        try {
+            mCache.clear();
+            mLocalContentResolver.applyBatch(RcsSettingsData.CONTENT_URI, operations);
+        } catch (OperationApplicationException e) {
+            logger.error("Reset existing configuration failed", e);
+        }
     }
 
     /**
