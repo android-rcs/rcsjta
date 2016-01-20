@@ -37,19 +37,22 @@ import com.gsma.rcs.provider.settings.RcsSettingsData.ImMsgTech;
 import com.gsma.rcs.provider.settings.RcsSettingsData.ImSessionStartMode;
 import com.gsma.rcs.provider.settings.RcsSettingsData.NetworkAccessType;
 import com.gsma.rcs.provider.settings.RcsSettingsData.TermsAndConditionsResponse;
-import com.gsma.rcs.provisioning.ProvisioningInfo;
 import com.gsma.rcs.utils.ContactUtil;
+import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.CommonServiceConfiguration.MessagingMethod;
 import com.gsma.services.rcs.CommonServiceConfiguration.MessagingMode;
 import com.gsma.services.rcs.CommonServiceConfiguration.MinimumBatteryLevel;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransferServiceConfiguration.ImageResizeOption;
 
+import android.content.ContentProviderOperation;
 import android.content.ContentValues;
+import android.content.OperationApplicationException;
 import android.database.Cursor;
 import android.net.Uri;
 import android.text.TextUtils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -61,6 +64,8 @@ import java.util.Set;
  * @author yplo6403
  */
 public class RcsSettings {
+
+    private final static Logger sLogger = Logger.getLogger(RcsSettings.class.getName());
 
     /**
      * Minimum number of participants in a group chat
@@ -118,6 +123,18 @@ public class RcsSettings {
         mCache = new HashMap<>();
     }
 
+    private ContentProviderOperation buildContentProviderOp(String key, String value) {
+        return ContentProviderOperation.newUpdate(RcsSettingsData.CONTENT_URI)
+                .withValue(RcsSettingsData.KEY_VALUE, value)
+                .withSelection(WHERE_CLAUSE, new String[] {
+                    key
+                }).build();
+    }
+
+    private ContentProviderOperation buildContentProviderOp(String key, Object value) {
+        return buildContentProviderOp(key, value == null ? null : value.toString());
+    }
+
     /**
      * Read boolean parameter
      * <p/>
@@ -138,7 +155,7 @@ public class RcsSettings {
     /**
      * Write boolean parameter
      *
-     * @param key   the key field
+     * @param key the key field
      * @param value the boolean value
      */
     public void writeBoolean(String key, Boolean value) {
@@ -199,7 +216,7 @@ public class RcsSettings {
     /**
      * Write integer parameter
      *
-     * @param key   the key field
+     * @param key the key field
      * @param value the integer value
      */
     public void writeInteger(String key, Integer value) {
@@ -211,7 +228,7 @@ public class RcsSettings {
     /**
      * Write long parameter
      *
-     * @param key   the key field
+     * @param key the key field
      * @param value the long value
      */
     public void writeLong(String key, Long value) {
@@ -223,7 +240,7 @@ public class RcsSettings {
     /**
      * Write String parameter
      *
-     * @param key   the key field
+     * @param key the key field
      * @param value the long value
      */
     public void writeString(String key, String value) {
@@ -253,7 +270,7 @@ public class RcsSettings {
     /**
      * Write uri parameter
      *
-     * @param key   the key field
+     * @param key the key field
      * @param value the long value
      */
     public void writeUri(String key, Uri value) {
@@ -283,7 +300,7 @@ public class RcsSettings {
     /**
      * Write ContactId parameter
      *
-     * @param key   the key field
+     * @param key the key field
      * @param value the long value
      */
     public void writeContactId(String key, ContactId value) {
@@ -301,8 +318,8 @@ public class RcsSettings {
     private String readParameter(String key) {
         Cursor c = null;
         try {
-            String[] whereArg = new String[]{
-                    key
+            String[] whereArg = new String[] {
+                key
             };
             c = mLocalContentResolver.query(RcsSettingsData.CONTENT_URI, null, WHERE_CLAUSE,
                     whereArg, null);
@@ -322,7 +339,7 @@ public class RcsSettings {
     /**
      * Write a string setting parameter to Database
      *
-     * @param key   the key setting
+     * @param key the key setting
      * @param value the value setting
      * @return the number of rows updated
      */
@@ -332,8 +349,8 @@ public class RcsSettings {
         }
         ContentValues values = new ContentValues();
         values.put(RcsSettingsData.KEY_VALUE, value);
-        String[] whereArgs = new String[]{
-                key
+        String[] whereArgs = new String[] {
+            key
         };
         return mLocalContentResolver.update(RcsSettingsData.CONTENT_URI, values, WHERE_CLAUSE,
                 whereArgs);
@@ -795,15 +812,6 @@ public class RcsSettings {
     }
 
     /**
-     * Get max freetext length
-     *
-     * @return Number of char
-     */
-    public int getMaxFreetextLength() {
-        return readInteger(RcsSettingsData.MAX_FREETXT_LENGTH);
-    }
-
-    /**
      * Get max number of participants in a group chat
      *
      * @return Number of participants
@@ -946,15 +954,6 @@ public class RcsSettings {
     }
 
     /**
-     * Get max number of simultaneous IP call sessions
-     *
-     * @return Number of sessions
-     */
-    public int getMaxIPCallSessions() {
-        return readInteger(RcsSettingsData.MAX_IP_CALL_SESSIONS);
-    }
-
-    /**
      * Is SMS fallback service activated
      *
      * @return Boolean
@@ -1003,18 +1002,18 @@ public class RcsSettings {
      * Get IM session start mode
      *
      * @return the IM session start mode
-     * <p/>
-     * <ul>
-     * <li>0 (RCS-e default): The 200 OK is sent when the receiver consumes the notification
-     * opening the chat window.
-     * <li>1 (RCS default): The 200 OK is sent when the receiver starts to type a message
-     * back in the chat window.
-     * <li>2: The 200 OK is sent when the receiver presses the button to send a message
-     * (that is the message will be buffered in the client until the MSRP session is
-     * established). Note: as described in section 3.2, the parameter only affects the
-     * behavior for 1-to-1 sessions in case no session between the parties has been
-     * established yet.
-     * </ul>
+     *         <p/>
+     *         <ul>
+     *         <li>0 (RCS-e default): The 200 OK is sent when the receiver consumes the notification
+     *         opening the chat window.
+     *         <li>1 (RCS default): The 200 OK is sent when the receiver starts to type a message
+     *         back in the chat window.
+     *         <li>2: The 200 OK is sent when the receiver presses the button to send a message
+     *         (that is the message will be buffered in the client until the MSRP session is
+     *         established). Note: as described in section 3.2, the parameter only affects the
+     *         behavior for 1-to-1 sessions in case no session between the parties has been
+     *         established yet.
+     *         </ul>
      */
     public ImSessionStartMode getImSessionStartMode() {
         return ImSessionStartMode.valueOf(readInteger(RcsSettingsData.IM_SESSION_START));
@@ -1027,33 +1026,6 @@ public class RcsSettings {
      */
     public void setImSessionStartMode(ImSessionStartMode mode) {
         writeInteger(RcsSettingsData.IM_SESSION_START, mode.toInt());
-    }
-
-    /**
-     * Get max number of entries per contact in the chat log
-     *
-     * @return Number
-     */
-    public int getMaxChatLogEntriesPerContact() {
-        return readInteger(RcsSettingsData.MAX_CHAT_LOG_ENTRIES);
-    }
-
-    /**
-     * Get max number of entries per contact in the richcall log
-     *
-     * @return Number
-     */
-    public int getMaxRichcallLogEntriesPerContact() {
-        return readInteger(RcsSettingsData.MAX_RICHCALL_LOG_ENTRIES);
-    }
-
-    /**
-     * Get max number of entries per contact in the IP call log
-     *
-     * @return Number
-     */
-    public int getMaxIPCallLogEntriesPerContact() {
-        return readInteger(RcsSettingsData.MAX_IPCALL_LOG_ENTRIES);
     }
 
     /**
@@ -1181,16 +1153,6 @@ public class RcsSettings {
      */
     public long getPublishExpirePeriod() {
         return readLong(RcsSettingsData.PUBLISH_EXPIRE_PERIOD);
-    }
-
-    /**
-     * Get revoke timeout before to unrevoke a revoked contact
-     *
-     * @return Timeout in milliseconds
-     */
-    /* TODO: Check if really dead code or somebody missing calling this. */
-    public long getRevokeTimeout() {
-        return readLong(RcsSettingsData.REVOKE_TIMEOUT);
     }
 
     /**
@@ -1378,7 +1340,7 @@ public class RcsSettings {
     /**
      * Set HTTP file transfer support
      *
-     * @param supported
+     * @param supported true if HTTP file transfer is supported
      */
     public void setFileTransferHttpSupported(boolean supported) {
         writeBoolean(RcsSettingsData.CAPABILITY_FILE_TRANSFER_HTTP, supported);
@@ -1400,15 +1362,6 @@ public class RcsSettings {
      */
     public boolean isImSessionSupported() {
         return readBoolean(RcsSettingsData.CAPABILITY_IM_SESSION);
-    }
-
-    /**
-     * Is IM group session supported
-     *
-     * @return Boolean
-     */
-    public boolean isImGroupSessionSupported() {
-        return readBoolean(RcsSettingsData.CAPABILITY_IM_GROUP_SESSION);
     }
 
     /**
@@ -1673,15 +1626,6 @@ public class RcsSettings {
     }
 
     /**
-     * Get APN used to connect to RCS platform
-     *
-     * @return APN (null means any APN may be used to connect to RCS)
-     */
-    public String getNetworkApn() {
-        return readString(RcsSettingsData.RCS_APN);
-    }
-
-    /**
      * Get operator authorized to connect to RCS platform
      *
      * @return SIM operator name (null means any SIM operator is authorized to connect to RCS)
@@ -1697,15 +1641,6 @@ public class RcsSettings {
      */
     public boolean isGruuSupported() {
         return readBoolean(RcsSettingsData.GRUU);
-    }
-
-    /**
-     * Is IMEI used as device ID
-     *
-     * @return Boolean
-     */
-    public boolean isImeiUsedAsDeviceId() {
-        return readBoolean(RcsSettingsData.USE_IMEI_AS_DEVICE_ID);
     }
 
     /**
@@ -1799,30 +1734,20 @@ public class RcsSettings {
     }
 
     /**
-     * Set secondary provisioning address only used
-     *
-     * @param value True if secondary provisioning address only used.
+     * Reset configuration parameters to default values
      */
-    public void setSecondaryProvisioningAddressOnly(boolean value) {
-        writeBoolean(RcsSettingsData.SECONDARY_PROVISIONING_ADDRESS_ONLY, value);
-    }
+    public void resetConfigParameters() {
+        ArrayList<ContentProviderOperation> operations = new ArrayList<>();
+        for (Map.Entry<String, Object> entry : RcsSettingsData.sSettingsKeyDefaultValue.entrySet()) {
+            operations.add(buildContentProviderOp(entry.getKey(), entry.getValue()));
+        }
+        try {
+            mCache.clear();
+            mLocalContentResolver.applyBatch(RcsSettingsData.CONTENT_URI, operations);
 
-    /**
-     * Reset user profile settings
-     */
-    public void resetUserProfile() {
-        setUserProfileImsUserName(RcsSettingsData.DEFAULT_USERPROFILE_IMS_USERNAME);
-        setUserProfileImsDomain(RcsSettingsData.DEFAULT_USERPROFILE_IMS_HOME_DOMAIN);
-        setUserProfileImsPassword(RcsSettingsData.DEFAULT_USERPROFILE_IMS_PASSWORD);
-        setImsProxyAddrForMobile(RcsSettingsData.DEFAULT_IMS_PROXY_ADDR_MOBILE);
-        setImsProxyAddrForWifi(RcsSettingsData.DEFAULT_IMS_PROXY_ADDR_WIFI);
-        setUserProfileImsDisplayName(RcsSettingsData.DEFAULT_USERPROFILE_IMS_DISPLAY_NAME);
-        setUserProfileImsPrivateId(RcsSettingsData.DEFAULT_USERPROFILE_IMS_PRIVATE_ID);
-        setXdmLogin(RcsSettingsData.DEFAULT_XDM_LOGIN);
-        setXdmPassword(RcsSettingsData.DEFAULT_XDM_PASSWORD);
-        setXdmServer(RcsSettingsData.DEFAULT_XDM_SERVER);
-        setProvisioningVersion(ProvisioningInfo.Version.RESETED.toInt());
-        setProvisioningToken(RcsSettingsData.DEFAULT_PROVISIONING_TOKEN);
+        } catch (OperationApplicationException e) {
+            sLogger.error("Reset existing configuration failed", e);
+        }
     }
 
     /**
@@ -1900,30 +1825,12 @@ public class RcsSettings {
     }
 
     /**
-     * Set the root directory for files
-     *
-     * @param path Directory path
-     */
-    public void setFileRootDirectory(String path) {
-        writeString(RcsSettingsData.DIRECTORY_PATH_FILES, path);
-    }
-
-    /**
      * Is secure MSRP media over Wi-Fi
      *
      * @return Boolean
      */
     public boolean isSecureMsrpOverWifi() {
         return readBoolean(RcsSettingsData.SECURE_MSRP_OVER_WIFI);
-    }
-
-    /**
-     * Set the root directory for file icons
-     *
-     * @param path Directory path
-     */
-    public void setFileIconRootDirectory(String path) {
-        writeString(RcsSettingsData.DIRECTORY_PATH_FILEICONS, path);
     }
 
     /**
@@ -1949,15 +1856,6 @@ public class RcsSettings {
 
     public void setFirstMessageInInvite(boolean inInvite) {
         writeBoolean(RcsSettingsData.FIRST_MESSAGE_INVITE, inInvite);
-    }
-
-    /**
-     * Is secure RTP media over Wi-Fi
-     *
-     * @return Boolean
-     */
-    public boolean isSecureRtpOverWifi() {
-        return readBoolean(RcsSettingsData.SECURE_RTP_OVER_WIFI);
     }
 
     /**
@@ -2040,75 +1938,12 @@ public class RcsSettings {
     }
 
     /**
-     * Is Blackbird GSMA release
-     *
-     * @return Boolean True if Blackbird GSMA release
-     */
-    public boolean isBlackbirdRelease() {
-        return (GsmaRelease.BLACKBIRD.equals(getGsmaRelease()));
-    }
-
-    /**
-     * Is IP voice call breakout supported in RCS-AA mode
-     *
-     * @return Boolean
-     */
-    public boolean isIPVoiceCallBreakoutAA() {
-        return readBoolean(RcsSettingsData.IPVOICECALL_BREAKOUT_AA);
-    }
-
-    /**
-     * Is IP voice call breakout supported in RCS-CS mode
-     *
-     * @return Boolean
-     */
-    public boolean isIPVoiceCallBreakoutCS() {
-        return readBoolean(RcsSettingsData.IPVOICECALL_BREAKOUT_CS);
-    }
-
-    /**
-     * Is IP Video Call upgrade without first tearing down the CS voice call authorized
-     *
-     * @return Boolean
-     */
-    public boolean isIPVideoCallUpgradeFromCS() {
-        return readBoolean(RcsSettingsData.IPVIDEOCALL_UPGRADE_FROM_CS);
-    }
-
-    /**
-     * Is IP Video Call upgrade on capability error
-     *
-     * @return Boolean
-     */
-    public boolean isIPVideoCallUpgradeOnCapError() {
-        return readBoolean(RcsSettingsData.IPVIDEOCALL_UPGRADE_ON_CAPERROR);
-    }
-
-    /**
-     * Is device in RCS-CS mode authorized to upgrade to video without first tearing down CS call?
-     *
-     * @return Boolean
-     */
-    public boolean isIPVideoCallAttemptEarly() {
-        return readBoolean(RcsSettingsData.IPVIDEOCALL_UPGRADE_ATTEMPT_EARLY);
-    }
-
-    /**
      * Is TCP fallback enabled according to RFC3261 chapter 18.1.1
      *
      * @return Boolean
      */
     public boolean isTcpFallback() {
         return readBoolean(RcsSettingsData.TCP_FALLBACK);
-    }
-
-    /**
-     * Is RCS extensions controlled
-     *
-     * @return Boolean
-     */
-    public boolean isExtensionsControlled() {
-        return readBoolean(RcsSettingsData.CONTROL_EXTENSIONS);
     }
 
     /**
@@ -2126,11 +1961,11 @@ public class RcsSettings {
      * @return Boolean
      */
     public boolean isExtensionAuthorized(String ext) {
-        return ext != null && !(EnrichCallingService.CALL_COMPOSER_FEATURE_TAG.equals(ext) &&
-                !isCallComposerSupported()) && !(EnrichCallingService.SHARED_MAP_SERVICE_ID.equals(ext) &&
-                !isSharedMapSupported()) && !(EnrichCallingService.SHARED_SKETCH_SERVICE_ID.equals(ext) &&
-                !isSharedSketchSupported()) && !(EnrichCallingService.POST_CALL_SERVICE_ID.equals(ext) &&
-                !isPostCallSupported());
+        return ext != null
+                && !(EnrichCallingService.CALL_COMPOSER_FEATURE_TAG.equals(ext) && !isCallComposerSupported())
+                && !(EnrichCallingService.SHARED_MAP_SERVICE_ID.equals(ext) && !isSharedMapSupported())
+                && !(EnrichCallingService.SHARED_SKETCH_SERVICE_ID.equals(ext) && !isSharedSketchSupported())
+                && !(EnrichCallingService.POST_CALL_SERVICE_ID.equals(ext) && !isPostCallSupported());
     }
 
     /**
@@ -2263,7 +2098,7 @@ public class RcsSettings {
     /**
      * Set configuration valid
      *
-     * @param valid
+     * @param valid true if configuration is valid
      */
     public void setConfigurationValid(boolean valid) {
         writeBoolean(RcsSettingsData.CONFIGURATION_VALID, valid);
@@ -2407,7 +2242,7 @@ public class RcsSettings {
      * Sets whether an Accept button is shown with the message in the terms and conditions pop-up
      *
      * @param accept True if an Accept button is shown with the message in the terms and conditions
-     *               pop-up
+     *            pop-up
      */
     public void setProvisioningAcceptButton(boolean accept) {
         writeBoolean(RcsSettingsData.PROV_ACCEPT_BUTTON, accept);
@@ -2417,7 +2252,7 @@ public class RcsSettings {
      * Is Accept button shown with the message in the terms and conditions pop-up
      *
      * @return Boolean True if Accept button shown with the message in the terms and conditions
-     * pop-up
+     *         pop-up
      */
     public boolean isProvisioningAcceptButton() {
         return readBoolean(RcsSettingsData.PROV_ACCEPT_BUTTON);
@@ -2427,7 +2262,7 @@ public class RcsSettings {
      * Sets whether a Decline button is shown with the message in the terms and conditions pop-up
      *
      * @param reject True if a Decline button is shown with the message in the terms and conditions
-     *               pop-up
+     *            pop-up
      */
     public void setProvisioningRejectButton(boolean reject) {
         writeBoolean(RcsSettingsData.PROV_REJECT_BUTTON, reject);
@@ -2437,7 +2272,7 @@ public class RcsSettings {
      * Is Decline button shown with the message in the terms and conditions pop-up
      *
      * @return Boolean True if a Decline button is shown with the message in the terms and
-     * conditions pop-up
+     *         conditions pop-up
      */
     public boolean isProvisioningRejectButton() {
         return readBoolean(RcsSettingsData.PROV_REJECT_BUTTON);
@@ -2459,15 +2294,6 @@ public class RcsSettings {
      */
     public String getDisplayLanguage() {
         return readString(RcsSettingsData.LOCAL_DISPLAY_LANGUAGE);
-    }
-
-    /**
-     * Sets whether enrich calling service is supported or not
-     *
-     * @param support True if service supported
-     */
-    public void setEnrichCallingServiceSupport(boolean support) {
-        writeBoolean(RcsSettingsData.ENRICH_CALLING_SERVICE, support);
     }
 
     /**

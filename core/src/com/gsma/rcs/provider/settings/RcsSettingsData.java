@@ -33,6 +33,9 @@ import android.net.Uri;
 import android.os.Environment;
 import android.util.SparseArray;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax2.sip.ListeningPoint;
 
 /**
@@ -135,7 +138,8 @@ public class RcsSettingsData {
             if (entry != null) {
                 return entry;
             }
-            throw new IllegalArgumentException("No enum const class " + ImSessionStartMode.class.getName() + "." + value);
+            throw new IllegalArgumentException("No enum const class "
+                    + ImSessionStartMode.class.getName() + "." + value);
         }
 
     }
@@ -174,8 +178,8 @@ public class RcsSettingsData {
             if (entry != null) {
                 return entry;
             }
-            throw new IllegalArgumentException("No enum const class " +
-                    TermsAndConditionsResponse.class.getName() + "." + value);
+            throw new IllegalArgumentException("No enum const class "
+                    + TermsAndConditionsResponse.class.getName() + "." + value);
         }
 
     }
@@ -216,7 +220,8 @@ public class RcsSettingsData {
             if (entry != null) {
                 return entry;
             }
-            throw new IllegalArgumentException("No enum const class " + ImMsgTech.class.getName() + "." + value);
+            throw new IllegalArgumentException("No enum const class " + ImMsgTech.class.getName()
+                    + "." + value);
         }
 
     }
@@ -268,7 +273,8 @@ public class RcsSettingsData {
             if (entry != null) {
                 return entry;
             }
-            throw new IllegalArgumentException("No enum const class " + NetworkAccessType.class.getName() + "." + value);
+            throw new IllegalArgumentException("No enum const class "
+                    + NetworkAccessType.class.getName() + "." + value);
         }
 
     }
@@ -320,7 +326,8 @@ public class RcsSettingsData {
             if (entry != null) {
                 return entry;
             }
-            throw new IllegalArgumentException("No enum const class " + EnableRcseSwitch.class.getName() + "." + value);
+            throw new IllegalArgumentException("No enum const class "
+                    + EnableRcseSwitch.class.getName() + "." + value);
         }
 
     }
@@ -368,7 +375,8 @@ public class RcsSettingsData {
             if (entry != null) {
                 return entry;
             }
-            throw new IllegalArgumentException("No enum const class " + ConfigurationMode.class.getName() + "." + value);
+            throw new IllegalArgumentException("No enum const class "
+                    + ConfigurationMode.class.getName() + "." + value);
         }
     }
 
@@ -433,7 +441,8 @@ public class RcsSettingsData {
             if (entry != null) {
                 return entry;
             }
-            throw new IllegalArgumentException("No enum const class " + GsmaRelease.class.getName() + "." + value);
+            throw new IllegalArgumentException("No enum const class " + GsmaRelease.class.getName()
+                    + "." + value);
         }
 
     }
@@ -1387,7 +1396,7 @@ public class RcsSettingsData {
      * RCS stack can be activated/deactivated by client applications
      */
     public static final String ENABLE_RCS_SWITCH = "enableRcseSwitch";
-    /* package private */static final int DEFAULT_ENABLE_RCS_SWITCH = EnableRcseSwitch.ALWAYS_SHOW
+    /* package private */static final Integer DEFAULT_ENABLE_RCS_SWITCH = EnableRcseSwitch.ALWAYS_SHOW
             .toInt();
 
     public static final String IM_MSG_TECH = "ImMsgTech";
@@ -1400,7 +1409,7 @@ public class RcsSettingsData {
     /* package private */static final Boolean DEFAULT_REQUEST_AND_RESPOND_TO_GROUP_DISPLAY_REPORTS = false;
 
     public static final String MAX_ALLOWED_DISPLAY_NAME_CHARS = "MaxAllowedDisplayNameChars";
-    /* package private */static final int DEFAULT_MAX_ALLOWED_DISPLAY_NAME_CHARS = 256;
+    /* package private */static final Integer DEFAULT_MAX_ALLOWED_DISPLAY_NAME_CHARS = 256;
 
     /**
      * Provisioning optional user message content associated with the result of the configuration
@@ -1436,4 +1445,331 @@ public class RcsSettingsData {
 
     /* package private */static final String LOCAL_DISPLAY_LANGUAGE = "language";
     /* package private */static final String DEFAULT_LOCAL_DISPLAY_LANGUAGE = null;
+
+    /* package private */final static Map<String, Object> sSettingsKeyDefaultValue;
+    static {
+        sSettingsKeyDefaultValue = new HashMap<>();
+        sSettingsKeyDefaultValue.put(RcsSettingsData.SERVICE_ACTIVATED,
+                RcsSettingsData.DEFAULT_SERVICE_ACTIVATED);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.CHAT_RESPOND_TO_DISPLAY_REPORTS,
+                RcsSettingsData.DEFAULT_CHAT_RESPOND_TO_DISPLAY_REPORTS);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.MIN_BATTERY_LEVEL,
+                RcsSettingsData.DEFAULT_MIN_BATTERY_LEVEL);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.MAX_FILE_ICON_SIZE,
+                RcsSettingsData.DEFAULT_MAX_FILE_ICON_SIZE);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.MAX_PHOTO_ICON_SIZE,
+                RcsSettingsData.DEFAULT_MAX_PHOTO_ICON_SIZE);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.MAX_FREETXT_LENGTH,
+                RcsSettingsData.DEFAULT_MAX_FREETXT_LENGTH);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.MAX_GEOLOC_LABEL_LENGTH,
+                RcsSettingsData.DEFAULT_MAX_GEOLOC_LABEL_LENGTH);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.GEOLOC_EXPIRATION_TIME,
+                RcsSettingsData.DEFAULT_GEOLOC_EXPIRATION_TIME);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.MAX_CHAT_PARTICIPANTS,
+                RcsSettingsData.DEFAULT_MAX_CHAT_PARTICIPANTS);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.MAX_CHAT_MSG_LENGTH,
+                RcsSettingsData.DEFAULT_MAX_CHAT_MSG_LENGTH);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.MAX_GROUPCHAT_MSG_LENGTH,
+                RcsSettingsData.DEFAULT_MAX_GC_MSG_LENGTH);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.CHAT_IDLE_DURATION,
+                RcsSettingsData.DEFAULT_CHAT_IDLE_DURATION);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.MAX_FILE_TRANSFER_SIZE,
+                RcsSettingsData.DEFAULT_MAX_FT_SIZE);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.WARN_FILE_TRANSFER_SIZE,
+                RcsSettingsData.DEFAULT_WARN_FT_SIZE);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.MAX_IMAGE_SHARE_SIZE,
+                RcsSettingsData.DEFAULT_MAX_ISH_SIZE);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.MAX_VIDEO_SHARE_DURATION,
+                RcsSettingsData.DEFAULT_MAX_VSH_DURATION);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.MAX_AUDIO_MESSAGE_DURATION,
+                RcsSettingsData.DEFAULT_MAX_AUDIO_DURATION);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.MAX_CHAT_SESSIONS,
+                RcsSettingsData.DEFAULT_MAX_CHAT_SESSIONS);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.MAX_FILE_TRANSFER_SESSIONS,
+                RcsSettingsData.DEFAULT_MAX_FT_SESSIONS);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.MAX_CONCURRENT_OUTGOING_FILE_TRANSFERS,
+                RcsSettingsData.DEFAULT_MAX_CONCURRENT_OUTGOING_FT_SESSIONS);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.MAX_IP_CALL_SESSIONS,
+                RcsSettingsData.DEFAULT_MAX_IP_CALL_SESSIONS);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.SMS_FALLBACK_SERVICE,
+                RcsSettingsData.DEFAULT_SMS_FALLBACK_SERVICE);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.WARN_SF_SERVICE,
+                RcsSettingsData.DEFAULT_WARN_SF_SERVICE);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.AUTO_ACCEPT_CHAT,
+                RcsSettingsData.DEFAULT_AUTO_ACCEPT_CHAT);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.AUTO_ACCEPT_GROUP_CHAT,
+                RcsSettingsData.DEFAULT_AUTO_ACCEPT_GC);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.AUTO_ACCEPT_FILE_TRANSFER,
+                RcsSettingsData.DEFAULT_AUTO_ACCEPT_FT);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.IM_SESSION_START,
+                RcsSettingsData.DEFAULT_IM_SESSION_START);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.USERPROFILE_IMS_USERNAME,
+                RcsSettingsData.DEFAULT_USERPROFILE_IMS_USERNAME);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.USERPROFILE_IMS_DISPLAY_NAME,
+                RcsSettingsData.DEFAULT_USERPROFILE_IMS_DISPLAY_NAME);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.USERPROFILE_IMS_HOME_DOMAIN,
+                RcsSettingsData.DEFAULT_USERPROFILE_IMS_HOME_DOMAIN);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.USERPROFILE_IMS_PRIVATE_ID,
+                RcsSettingsData.DEFAULT_USERPROFILE_IMS_PRIVATE_ID);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.USERPROFILE_IMS_PASSWORD,
+                RcsSettingsData.DEFAULT_USERPROFILE_IMS_PASSWORD);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.USERPROFILE_IMS_REALM,
+                RcsSettingsData.DEFAULT_USERPROFILE_IMS_REALM);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.IMS_PROXY_ADDR_MOBILE,
+                RcsSettingsData.DEFAULT_IMS_PROXY_ADDR_MOBILE);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.IMS_PROXY_PORT_MOBILE,
+                RcsSettingsData.DEFAULT_IMS_PROXY_PORT_MOBILE);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.IMS_PROXY_ADDR_WIFI,
+                RcsSettingsData.DEFAULT_IMS_PROXY_ADDR_WIFI);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.IMS_PROXY_PORT_WIFI,
+                RcsSettingsData.DEFAULT_IMS_PROXY_PORT_WIFI);
+        sSettingsKeyDefaultValue
+                .put(RcsSettingsData.XDM_SERVER, RcsSettingsData.DEFAULT_XDM_SERVER);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.XDM_LOGIN, RcsSettingsData.DEFAULT_XDM_LOGIN);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.XDM_PASSWORD,
+                RcsSettingsData.DEFAULT_XDM_PASSWORD);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.FT_HTTP_SERVER,
+                RcsSettingsData.DEFAULT_FT_HTTP_SERVER);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.FT_HTTP_LOGIN,
+                RcsSettingsData.DEFAULT_FT_HTTP_LOGIN);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.FT_HTTP_PASSWORD,
+                RcsSettingsData.DEFAULT_FT_HTTP_PASSWORD);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.FT_PROTOCOL,
+                RcsSettingsData.DEFAULT_FT_PROTOCOL);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.IM_CONF_URI,
+                RcsSettingsData.DEFAULT_IM_CONF_URI);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.ENDUSER_CONFIRMATION_URI,
+                RcsSettingsData.DEFAULT_ENDUSER_CONFIRMATION_URI);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.UUID, RcsSettingsData.DEFAULT_UUID);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.CAPABILITY_CS_VIDEO,
+                RcsSettingsData.DEFAULT_CAPABILITY_CS_VIDEO);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.CAPABILITY_IMAGE_SHARING,
+                RcsSettingsData.DEFAULT_CAPABILITY_ISH);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.CAPABILITY_VIDEO_SHARING,
+                RcsSettingsData.DEFAULT_CAPABILITY_VSH);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.CAPABILITY_IP_VOICE_CALL,
+                RcsSettingsData.DEFAULT_CAPABILITY_IP_VOICE_CALL);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.CAPABILITY_IP_VIDEO_CALL,
+                RcsSettingsData.DEFAULT_CAPABILITY_IP_VIDEO_CALL);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.CAPABILITY_IM_SESSION,
+                RcsSettingsData.DEFAULT_CAPABILITY_IM_SESSION);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.CAPABILITY_IM_GROUP_SESSION,
+                RcsSettingsData.DEFAULT_CAPABILITY_IM_GROUP_SESSION);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.CAPABILITY_FILE_TRANSFER,
+                RcsSettingsData.DEFAULT_CAPABILITY_FT);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.CAPABILITY_FILE_TRANSFER_HTTP,
+                RcsSettingsData.DEFAULT_CAPABILITY_FT_HTTP);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.CAPABILITY_PRESENCE_DISCOVERY,
+                RcsSettingsData.DEFAULT_CAPABILITY_PRESENCE_DISCOVERY);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.CAPABILITY_SOCIAL_PRESENCE,
+                RcsSettingsData.DEFAULT_CAPABILITY_SOCIAL_PRESENCE);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.CAPABILITY_GEOLOCATION_PUSH,
+                RcsSettingsData.DEFAULT_CAPABILITY_GEOLOCATION_PUSH);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.CAPABILITY_FILE_TRANSFER_THUMBNAIL,
+                RcsSettingsData.DEFAULT_CAPABILITY_FT_THUMBNAIL);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.CAPABILITY_GROUP_CHAT_SF,
+                RcsSettingsData.DEFAULT_CAPABILITY_GC_SF);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.CAPABILITY_FILE_TRANSFER_SF,
+                RcsSettingsData.DEFAULT_CAPABILITY_FT_SF);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.CAPABILITY_RCS_EXTENSIONS,
+                RcsSettingsData.DEFAULT_CAPABILITY_RCS_EXTENSIONS);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.CAPABILITY_CALL_COMPOSER,
+                RcsSettingsData.DEFAULT_CAPABILITY_CALL_COMPOSER);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.CAPABILITY_SHARED_MAP,
+                RcsSettingsData.DEFAULT_CAPABILITY_SHARED_MAP);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.CAPABILITY_SHARED_SKETCH,
+                RcsSettingsData.DEFAULT_CAPABILITY_SHARED_SKETCH);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.CAPABILITY_POST_CALL,
+                RcsSettingsData.DEFAULT_CAPABILITY_POST_CALL);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.IMS_SERVICE_POLLING_PERIOD,
+                RcsSettingsData.DEFAULT_IMS_SERVICE_POLLING_PERIOD);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.SIP_DEFAULT_PORT,
+                RcsSettingsData.DEFAULT_SIP_DEFAULT_PORT);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.SIP_DEFAULT_PROTOCOL_FOR_MOBILE,
+                RcsSettingsData.DEFAULT_SIP_DEFAULT_PROTOCOL_FOR_MOBILE);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.SIP_DEFAULT_PROTOCOL_FOR_WIFI,
+                RcsSettingsData.DEFAULT_SIP_DEFAULT_PROTOCOL_FOR_WIFI);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.TLS_CERTIFICATE_ROOT,
+                RcsSettingsData.DEFAULT_TLS_CERTIFICATE_ROOT);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.TLS_CERTIFICATE_INTERMEDIATE,
+                RcsSettingsData.DEFAULT_TLS_CERTIFICATE_INTERMEDIATE);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.SIP_TRANSACTION_TIMEOUT,
+                RcsSettingsData.DEFAULT_SIP_TRANSACTION_TIMEOUT);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.MSRP_DEFAULT_PORT,
+                RcsSettingsData.DEFAULT_MSRP_DEFAULT_PORT);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.RTP_DEFAULT_PORT,
+                RcsSettingsData.DEFAULT_RTP_DEFAULT_PORT);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.MSRP_TRANSACTION_TIMEOUT,
+                RcsSettingsData.DEFAULT_MSRP_TRANSACTION_TIMEOUT);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.REGISTER_EXPIRE_PERIOD,
+                RcsSettingsData.DEFAULT_REGISTER_EXPIRE_PERIOD);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.REGISTER_RETRY_BASE_TIME,
+                RcsSettingsData.DEFAULT_REGISTER_RETRY_BASE_TIME);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.REGISTER_RETRY_MAX_TIME,
+                RcsSettingsData.DEFAULT_REGISTER_RETRY_MAX_TIME);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.PUBLISH_EXPIRE_PERIOD,
+                RcsSettingsData.DEFAULT_PUBLISH_EXPIRE_PERIOD);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.REVOKE_TIMEOUT,
+                RcsSettingsData.DEFAULT_REVOKE_TIMEOUT);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.IMS_AUTHENT_PROCEDURE_MOBILE,
+                RcsSettingsData.DEFAULT_IMS_AUTHENT_PROCEDURE_MOBILE);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.IMS_AUTHENT_PROCEDURE_WIFI,
+                RcsSettingsData.DEFAULT_IMS_AUTHENT_PROCEDURE_WIFI);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.TEL_URI_FORMAT,
+                RcsSettingsData.DEFAULT_TEL_URI_FORMAT);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.RINGING_SESSION_PERIOD,
+                RcsSettingsData.DEFAULT_RINGING_SESSION_PERIOD);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.SUBSCRIBE_EXPIRE_PERIOD,
+                RcsSettingsData.DEFAULT_SUBSCRIBE_EXPIRE_PERIOD);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.IS_COMPOSING_TIMEOUT,
+                RcsSettingsData.DEFAULT_IS_COMPOSING_TIMEOUT);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.SESSION_REFRESH_EXPIRE_PERIOD,
+                RcsSettingsData.DEFAULT_SESSION_REFRESH_EXPIRE_PERIOD);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.PERMANENT_STATE_MODE,
+                RcsSettingsData.DEFAULT_PERMANENT_STATE_MODE);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.TRACE_ACTIVATED,
+                RcsSettingsData.DEFAULT_TRACE_ACTIVATED);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.TRACE_LEVEL,
+                RcsSettingsData.DEFAULT_TRACE_LEVEL);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.SIP_TRACE_ACTIVATED,
+                RcsSettingsData.DEFAULT_SIP_TRACE_ACTIVATED);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.SIP_TRACE_FILE,
+                RcsSettingsData.DEFAULT_SIP_TRACE_FILE);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.MEDIA_TRACE_ACTIVATED,
+                RcsSettingsData.DEFAULT_MEDIA_TRACE_ACTIVATED);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.CAPABILITY_REFRESH_TIMEOUT,
+                RcsSettingsData.DEFAULT_CAPABILITY_REFRESH_TIMEOUT);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.CAPABILITY_EXPIRY_TIMEOUT,
+                RcsSettingsData.DEFAULT_CAPABILITY_EXPIRY_TIMEOUT);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.CAPABILITY_POLLING_PERIOD,
+                RcsSettingsData.DEFAULT_CAPABILITY_POLLING_PERIOD);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.IM_CAPABILITY_ALWAYS_ON,
+                RcsSettingsData.DEFAULT_IM_CAPABILITY_ALWAYS_ON);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.GROUP_CHAT_INVITE_ONLY_FULL_SF,
+                RcsSettingsData.DEFAULT_GC_INVITE_ONLY_FULL_SF);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.FT_CAPABILITY_ALWAYS_ON,
+                RcsSettingsData.DEFAULT_FT_CAPABILITY_ALWAYS_ON);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.FT_HTTP_CAP_ALWAYS_ON,
+                RcsSettingsData.DEFAULT_FT_HTTP_CAP_ALWAYS_ON);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.MSG_DELIVERY_TIMEOUT,
+                RcsSettingsData.DEFAULT_MSG_DELIVERY_TIMEOUT);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.MSG_CAP_VALIDITY_PERIOD,
+                RcsSettingsData.DEFAULT_MSG_CAP_VALIDITY_PERIOD);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.IM_USE_REPORTS,
+                RcsSettingsData.DEFAULT_IM_USE_REPORTS);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.NETWORK_ACCESS,
+                RcsSettingsData.DEFAULT_NETWORK_ACCESS);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.SIP_TIMER_T1,
+                RcsSettingsData.DEFAULT_SIP_TIMER_T1);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.SIP_TIMER_T2,
+                RcsSettingsData.DEFAULT_SIP_TIMER_T2);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.SIP_TIMER_T4,
+                RcsSettingsData.DEFAULT_SIP_TIMER_T4);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.SIP_KEEP_ALIVE,
+                RcsSettingsData.DEFAULT_SIP_KEEP_ALIVE);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.SIP_KEEP_ALIVE_PERIOD,
+                RcsSettingsData.DEFAULT_SIP_KEEP_ALIVE_PERIOD);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.RCS_APN, RcsSettingsData.DEFAULT_RCS_APN);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.RCS_OPERATOR,
+                RcsSettingsData.DEFAULT_RCS_OPERATOR);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.MAX_CHAT_LOG_ENTRIES,
+                RcsSettingsData.DEFAULT_MAX_CHAT_LOG_ENTRIES);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.MAX_RICHCALL_LOG_ENTRIES,
+                RcsSettingsData.DEFAULT_MAX_RICHCALL_LOG_ENTRIES);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.MAX_IPCALL_LOG_ENTRIES,
+                RcsSettingsData.DEFAULT_MAX_IPCALL_LOG_ENTRIES);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.GRUU, RcsSettingsData.DEFAULT_GRUU);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.USE_IMEI_AS_DEVICE_ID,
+                RcsSettingsData.DEFAULT_USE_IMEI_AS_DEVICE_ID);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.CPU_ALWAYS_ON,
+                RcsSettingsData.DEFAULT_CPU_ALWAYS_ON);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.CONFIG_MODE,
+                RcsSettingsData.DEFAULT_CONFIG_MODE);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.TC_RESPONSE,
+                RcsSettingsData.DEFAULT_TC_RESPONSE);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.PROVISIONING_VERSION,
+                RcsSettingsData.DEFAULT_PROVISIONING_VERSION);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.PROVISIONING_TOKEN,
+                RcsSettingsData.DEFAULT_PROVISIONING_TOKEN);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.SECONDARY_PROVISIONING_ADDRESS,
+                RcsSettingsData.DEFAULT_SECONDARY_PROV_ADDR);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.SECONDARY_PROVISIONING_ADDRESS_ONLY,
+                RcsSettingsData.DEFAULT_SECONDARY_PROV_ADDR_ONLY);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.DIRECTORY_PATH_PHOTOS,
+                RcsSettingsData.DEFAULT_DIRECTORY_PATH_PHOTOS);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.DIRECTORY_PATH_VIDEOS,
+                RcsSettingsData.DEFAULT_DIRECTORY_PATH_VIDEOS);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.DIRECTORY_PATH_AUDIOS,
+                RcsSettingsData.DEFAULT_DIRECTORY_PATH_AUDIOS);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.DIRECTORY_PATH_FILES,
+                RcsSettingsData.DEFAULT_DIRECTORY_PATH_FILES);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.DIRECTORY_PATH_FILEICONS,
+                RcsSettingsData.DEFAULT_DIRECTORY_PATH_FILEICONS);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.SECURE_MSRP_OVER_WIFI,
+                RcsSettingsData.DEFAULT_SECURE_MSRP_OVER_WIFI);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.SECURE_RTP_OVER_WIFI,
+                RcsSettingsData.DEFAULT_SECURE_RTP_OVER_WIFI);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.MESSAGING_MODE,
+                RcsSettingsData.DEFAULT_KEY_MESSAGING_MODE);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.CAPABILITY_SIP_AUTOMATA,
+                RcsSettingsData.DEFAULT_CAPABILITY_SIP_AUTOMATA);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.KEY_GSMA_RELEASE,
+                RcsSettingsData.DEFAULT_KEY_GSMA_RELEASE);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.IPVOICECALL_BREAKOUT_AA,
+                RcsSettingsData.DEFAULT_IPVOICECALL_BREAKOUT_AA);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.IPVOICECALL_BREAKOUT_CS,
+                RcsSettingsData.DEFAULT_IPVOICECALL_BREAKOUT_CS);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.IPVIDEOCALL_UPGRADE_FROM_CS,
+                RcsSettingsData.DEFAULT_IPVIDEOCALL_UPGRADE_FROM_CS);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.IPVIDEOCALL_UPGRADE_ON_CAPERROR,
+                RcsSettingsData.DEFAULT_IPVIDEOCALL_UPGRADE_ON_CAPERROR);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.IPVIDEOCALL_UPGRADE_ATTEMPT_EARLY,
+                RcsSettingsData.DEFAULT_IPVIDEOCALL_UPGRADE_ATTEMPT_EARLY);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.TCP_FALLBACK,
+                RcsSettingsData.DEFAULT_TCP_FALLBACK);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.CONTROL_EXTENSIONS,
+                RcsSettingsData.DEFAULT_CONTROL_EXTENSIONS);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.ALLOW_EXTENSIONS,
+                RcsSettingsData.DEFAULT_ALLOW_EXTENSIONS);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.MAX_MSRP_SIZE_EXTENSIONS,
+                RcsSettingsData.DEFAULT_MAX_MSRP_SIZE_EXTENSIONS);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.CALL_COMPOSER_INACTIVITY_TIMEOUT,
+                RcsSettingsData.DEFAULT_CALL_COMPOSER_INACTIVITY_TIMEOUT);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.CONFIGURATION_VALID,
+                RcsSettingsData.DEFAULT_CONFIGURATION_VALID);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.AUTO_ACCEPT_FT_IN_ROAMING,
+                RcsSettingsData.DEFAULT_AUTO_ACCEPT_FT_IN_ROAMING);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.AUTO_ACCEPT_FT_CHANGEABLE,
+                RcsSettingsData.DEFAULT_AUTO_ACCEPT_FT_CHANGEABLE);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.DEFAULT_MESSAGING_METHOD,
+                RcsSettingsData.DEFAULT_KEY_DEFAULT_MESSAGING_METHOD);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.KEY_IMAGE_RESIZE_OPTION,
+                RcsSettingsData.DEFAULT_KEY_IMAGE_RESIZE_OPTION);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.ENABLE_RCS_SWITCH,
+                RcsSettingsData.DEFAULT_ENABLE_RCS_SWITCH);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.IM_MSG_TECH,
+                RcsSettingsData.DEFAULT_IM_MSG_TECH);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.FIRST_MESSAGE_INVITE,
+                RcsSettingsData.DEFAULT_FIRST_MESSAGE_INVITE);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.REQUEST_AND_RESPOND_TO_GROUP_DISPLAY_REPORTS,
+                RcsSettingsData.DEFAULT_REQUEST_AND_RESPOND_TO_GROUP_DISPLAY_REPORTS);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.MAX_ALLOWED_DISPLAY_NAME_CHARS,
+                RcsSettingsData.DEFAULT_MAX_ALLOWED_DISPLAY_NAME_CHARS);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.PROV_USER_MSG_CONTENT,
+                RcsSettingsData.DEFAULT_PROV_USER_MSG_CONTENT);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.PROV_USER_MSG_TITLE,
+                RcsSettingsData.DEFAULT_PROV_USER_MSG_TITLE);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.MOBILE_COUNTRY_CODE,
+                RcsSettingsData.DEFAULT_MOBILE_COUNTRY_CODE);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.MOBILE_NETWORK_CODE,
+                RcsSettingsData.DEFAULT_MOBILE_NETWORK_CODE);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.PROV_ACCEPT_BUTTON,
+                RcsSettingsData.DEFAULT_PROV_ACCEPT_BUTTON);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.PROV_REJECT_BUTTON,
+                RcsSettingsData.DEFAULT_PROV_REJECT_BUTTON);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.LOCAL_DISPLAY_LANGUAGE,
+                RcsSettingsData.DEFAULT_LOCAL_DISPLAY_LANGUAGE);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.ENRICH_CALLING_SERVICE,
+                RcsSettingsData.DEFAULT_ENRICH_CALLING_SERVICE);
+    }
 }

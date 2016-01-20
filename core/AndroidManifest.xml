@@ -1,12 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.gsma.rcs"
-    android:versionCode="1"
-    android:versionName="2.0" >
-
-    <uses-sdk
-        android:minSdkVersion="12"
-        android:targetSdkVersion="23" />
+    package="com.gsma.rcs">
 
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
@@ -231,7 +225,7 @@
         <activity android:name=".provisioning.local.StackProvisioning" />
         <activity android:name=".provisioning.local.ServiceProvisioning" />
         <activity android:name=".provisioning.local.LoggerProvisioning" />
-        <activity android:name=".service.Permissions.PermissionsAlertDialog" android:theme="@style/Theme.Transparent"/>
+        <activity android:name=".service.permissions.PermissionsAlertDialog" android:theme="@style/Theme.Transparent"/>
 
         <service
             android:name="com.gsma.rcs.service.api.OneToOneDeliveryExpirationService"

@@ -17,9 +17,12 @@
 package com.gsma.rcs.provider;
 
 import android.content.ContentProviderClient;
+import android.content.ContentProviderOperation;
+import android.content.ContentProviderResult;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.OperationApplicationException;
 import android.database.Cursor;
 import android.net.Uri;
 
@@ -27,6 +30,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 
 /**
  * The purpose of this class is to allow query-/insert-/update-/delete- and stream operations
@@ -42,7 +46,7 @@ public class LocalContentResolver {
     /**
      * Constructor
      * 
-     * @param contentResolver
+     * @param contentResolver the content resolver
      */
     public LocalContentResolver(ContentResolver contentResolver) {
         mContentResolver = contentResolver;
@@ -51,7 +55,7 @@ public class LocalContentResolver {
     /**
      * Constructor
      * 
-     * @param context
+     * @param context the context
      */
     public LocalContentResolver(Context context) {
         this(context.getContentResolver());
@@ -60,11 +64,11 @@ public class LocalContentResolver {
     /**
      * Handles query requests from clients
      * 
-     * @param uri
-     * @param projection
-     * @param selection
-     * @param selectionArgs
-     * @param sortOrder
+     * @param uri the URI to query
+     * @param projection The list of columns to put into the cursor of null if all
+     * @param selection A selection criteria to apply when filtering rows
+     * @param selectionArgs The array of arguments for the selection or null if no argument.
+     * @param sortOrder the sording order
      * @return a Cursor or null.
      */
     public final Cursor query(Uri uri, String[] projection, String selection,
@@ -85,8 +89,8 @@ public class LocalContentResolver {
     /**
      * Handles requests to insert a new row.
      * 
-     * @param uri
-     * @param values
+     * @param uri the URI
+     * @param values A set of column_name/value pairs to add to the database.
      * @return The URI for the newly inserted item
      */
     public final Uri insert(Uri uri, ContentValues values) {
@@ -105,10 +109,10 @@ public class LocalContentResolver {
     /**
      * Handle requests to update one or more rows.
      * 
-     * @param uri
-     * @param values
-     * @param selection
-     * @param selectionArgs
+     * @param uri the URI
+     * @param values A set of column_name/value pairs to update
+     * @param selection A selection criteria to apply when filtering rows
+     * @param selectionArgs The array of arguments for the selection or null if no argument.
      * @return the number of rows affected.
      */
     public final int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
@@ -128,9 +132,9 @@ public class LocalContentResolver {
     /**
      * Handles requests to delete one or more rows.
      * 
-     * @param uri
-     * @param selection
-     * @param selectionArgs
+     * @param uri the URI
+     * @param selection A selection criteria to apply when filtering rows
+     * @param selectionArgs The array of arguments for the selection or null if no argument.
      * @return The number of rows affected.
      */
     public final int delete(Uri uri, String selection, String[] selectionArgs) {
@@ -150,7 +154,7 @@ public class LocalContentResolver {
     /**
      * Create and return a new auto-close input stream for this URI
      * 
-     * @param uri
+     * @param uri the URI
      * @return the InputStream
      * @throws FileNotFoundException
      */
@@ -173,7 +177,7 @@ public class LocalContentResolver {
     /**
      * Create and return a new auto-close output stream for this URI
      * 
-     * @param uri
+     * @param uri the URI
      * @return the InputStream
      * @throws FileNotFoundException
      */
@@ -186,6 +190,27 @@ public class LocalContentResolver {
 
         } catch (IOException e) {
             throw new FileNotFoundException("Unable to create stream");
+        } finally {
+            if (contentProviderClient != null) {
+                contentProviderClient.release();
+            }
+        }
+    }
+
+    /**
+     * Handles request to update multiple rows
+     *
+     * @param uri the URI
+     * @param operations the list of the operations to apply
+     * @return the results of the applications
+     * @throws OperationApplicationException
+     */
+    public final ContentProviderResult[] applyBatch(Uri uri,
+            ArrayList<ContentProviderOperation> operations) throws OperationApplicationException {
+        ContentProviderClient contentProviderClient = null;
+        try {
+            contentProviderClient = mContentResolver.acquireContentProviderClient(uri);
+            return contentProviderClient.getLocalContentProvider().applyBatch(operations);
         } finally {
             if (contentProviderClient != null) {
                 contentProviderClient.release();
