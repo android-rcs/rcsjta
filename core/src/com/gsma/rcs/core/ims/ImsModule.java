@@ -456,4 +456,13 @@ public class ImsModule implements SipEventListener {
     public static void setImsUserProfile(UserProfile profile) {
         sImsUserProfile = profile;
     }
+
+    /**
+     * Return the extension manager
+     *
+     * @return Extension manager
+     */
+    public ServiceExtensionManager getExtensionManager() {
+        return mExtensionManager;
+    }
 }

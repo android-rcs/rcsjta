@@ -283,7 +283,7 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
                         }
                         return;
                     }
-                    ServerApiUtils.testApiExtensionPermission(session.getServiceId());
+                    ServerApiUtils.testImsExtension(session.getServiceId());
                     session.acceptSession();
 
                 } catch (RuntimeException e) {
@@ -322,7 +322,7 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
                         }
                         return;
                     }
-                    ServerApiUtils.testApiExtensionPermission(session.getServiceId());
+                    ServerApiUtils.testImsExtension(session.getServiceId());
                     session.rejectSession(InvitationStatus.INVITATION_REJECTED_DECLINE);
 
                 } catch (RuntimeException e) {
@@ -367,7 +367,7 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
                                 + " is already aborted!");
                         return;
                     }
-                    ServerApiUtils.testApiExtensionPermission(session.getServiceId());
+                    ServerApiUtils.testImsExtension(session.getServiceId());
                     session.terminateSession(TerminationReason.TERMINATION_BY_USER);
 
                 } catch (PayloadException e) {
@@ -432,7 +432,6 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
                         }
                         return;
                     }
-                    ServerApiUtils.testApiExtensionPermission(session.getServiceId());
 
                     /* Do not consider max message size if null */
                     if (session.getMaxMessageSize() != 0

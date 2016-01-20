@@ -333,8 +333,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
         if (sLogger.isActivated()) {
             sLogger.info("Initiate a multimedia messaging session with " + contact);
         }
-        ServerApiUtils.testIms();
-        ServerApiUtils.testApiExtensionPermission(serviceId);
+        ServerApiUtils.testImsExtension(serviceId);
         try {
             String featureTag = FeatureTags.FEATURE_RCSE + "=\""
                     + FeatureTags.FEATURE_RCSE_IARI_EXTENSION + "." + serviceId + "\"";
@@ -449,8 +448,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
         if (sLogger.isActivated()) {
             sLogger.info("Initiate a multimedia streaming session with " + contact);
         }
-        ServerApiUtils.testIms();
-        ServerApiUtils.testApiExtensionPermission(serviceId);
+        ServerApiUtils.testImsExtension(serviceId);
         try {
             String featureTag = FeatureTags.FEATURE_RCSE + "=\""
                     + FeatureTags.FEATURE_RCSE_IARI_EXTENSION + "." + serviceId + "\"";
@@ -717,8 +715,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
         if (sLogger.isActivated()) {
             sLogger.info("Send an instant multimedia message to " + contact);
         }
-        ServerApiUtils.testIms();
-        ServerApiUtils.testApiExtensionPermission(serviceId);
+        ServerApiUtils.testImsExtension(serviceId);
         try {
             String featureTag = FeatureTags.FEATURE_RCSE + "=\""
                     + FeatureTags.FEATURE_RCSE_IARI_EXTENSION + "." + serviceId + "\"";

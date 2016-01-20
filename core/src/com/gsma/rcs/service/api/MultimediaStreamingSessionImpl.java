@@ -284,7 +284,7 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
                         sLogger.debug("Cannot accept: no session ID=".concat(mSessionId));
                         return;
                     }
-                    ServerApiUtils.testApiExtensionPermission(session.getServiceId());
+                    ServerApiUtils.testImsExtension(session.getServiceId());
                     session.acceptSession();
 
                 } catch (RuntimeException e) {
@@ -321,7 +321,7 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
                         sLogger.debug("Cannot reject: no session ID=".concat(mSessionId));
                         return;
                     }
-                    ServerApiUtils.testApiExtensionPermission(session.getServiceId());
+                    ServerApiUtils.testImsExtension(session.getServiceId());
                     session.rejectSession(InvitationStatus.INVITATION_REJECTED_DECLINE);
 
                 } catch (RuntimeException e) {
@@ -364,7 +364,7 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
                                 + " is already aborted!");
                         return;
                     }
-                    ServerApiUtils.testApiExtensionPermission(session.getServiceId());
+                    ServerApiUtils.testImsExtension(session.getServiceId());
                     session.terminateSession(TerminationReason.TERMINATION_BY_USER);
 
                 } catch (PayloadException e) {
@@ -426,7 +426,6 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
                         }
                         return;
                     }
-                    ServerApiUtils.testApiExtensionPermission(session.getServiceId());
 
                     session.sendPlayload(content, contentType);
 
