@@ -1055,6 +1055,30 @@ public class RcsSettingsData {
     /* package private */static final String DEFAULT_CAPABILITY_RCS_EXTENSIONS = null;
 
     /**
+     * Call composer
+     */
+    public static final String CAPABILITY_CALL_COMPOSER = "CapabilityCallComposer";
+    /* package private */static final Boolean DEFAULT_CAPABILITY_CALL_COMPOSER = true;
+
+    /**
+     * Shared map
+     */
+    public static final String CAPABILITY_SHARED_MAP = "CapabilitySharedMap";
+    /* package private */static final Boolean DEFAULT_CAPABILITY_SHARED_MAP = true;
+
+    /**
+     * Shared sketch
+     */
+    public static final String CAPABILITY_SHARED_SKETCH = "CapabilitySharedSketch";
+    /* package private */static final Boolean DEFAULT_CAPABILITY_SHARED_SKETCH = true;
+
+    /**
+     * Post call
+     */
+    public static final String CAPABILITY_POST_CALL = "CapabilityPostCall";
+    /* package private */static final Boolean DEFAULT_CAPABILITY_POST_CALL = true;
+
+    /**
      * Instant messaging is always on (Store & Forward server)
      */
     public static final String IM_CAPABILITY_ALWAYS_ON = "ImAlwaysOn";

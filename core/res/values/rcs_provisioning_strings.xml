@@ -58,6 +58,10 @@
     <string name="File_transfer_Store_Forward">File transfer Store &amp; Forward</string>
     <string name="Group_chat_Store_Forward">Group chat Store &amp; Forward</string>
     <string name="SIP_automata">SIP automata</string>
+    <string name="call_composer">Call composer</string>
+    <string name="shared_map">Shared map</string>
+    <string name="shared_sketch">Shared sketch</string>
+    <string name="post_call">Post call</string>
     <!-- rcs_provisioning_service.xml -->
     <string name="Max_photo_icon_size">Max photo-icon size:</string>
     <string name="Max_length_of_the_freetext">Max length of the freetext:</string>

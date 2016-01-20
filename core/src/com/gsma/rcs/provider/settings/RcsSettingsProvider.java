@@ -78,7 +78,7 @@ public class RcsSettingsProvider extends ContentProvider {
     }
 
     private static class DatabaseHelper extends SQLiteOpenHelper {
-        private static final int DATABASE_VERSION = 116;
+        private static final int DATABASE_VERSION = 117;
 
         /**
          * Add a parameter in the db
@@ -241,6 +241,14 @@ public class RcsSettingsProvider extends ContentProvider {
                     RcsSettingsData.DEFAULT_CAPABILITY_FT_SF);
             addParameter(db, RcsSettingsData.CAPABILITY_RCS_EXTENSIONS,
                     RcsSettingsData.DEFAULT_CAPABILITY_RCS_EXTENSIONS);
+            addParameter(db, RcsSettingsData.CAPABILITY_CALL_COMPOSER,
+                    RcsSettingsData.DEFAULT_CAPABILITY_CALL_COMPOSER);
+            addParameter(db, RcsSettingsData.CAPABILITY_SHARED_MAP,
+                    RcsSettingsData.DEFAULT_CAPABILITY_SHARED_MAP);
+            addParameter(db, RcsSettingsData.CAPABILITY_SHARED_SKETCH,
+                    RcsSettingsData.DEFAULT_CAPABILITY_SHARED_SKETCH);
+            addParameter(db, RcsSettingsData.CAPABILITY_POST_CALL,
+                    RcsSettingsData.DEFAULT_CAPABILITY_POST_CALL);
             addParameter(db, RcsSettingsData.IMS_SERVICE_POLLING_PERIOD,
                     RcsSettingsData.DEFAULT_IMS_SERVICE_POLLING_PERIOD);
             addParameter(db, RcsSettingsData.SIP_DEFAULT_PORT,

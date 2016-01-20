@@ -526,6 +526,10 @@ public class ProvisioningParser {
         String rcsIPVoiceCallAuth = null;
         String rcsIPVideoCallAuth = null;
         String allowExtensions = null;
+        String composerAuth = null;
+        String sharedMapAuth = null;
+        String sharedSketchAuth = null;
+        String postCallAuth = null;
         Node childnode = node.getFirstChild();
 
         if (childnode != null) {
@@ -625,10 +629,44 @@ public class ProvisioningParser {
                     }
                 }
 
+                if ((composerAuth = getValueByParamName("composerAuth", childnode,
+                        TYPE_INT)) != null) {
+                    int value = Integer.decode(composerAuth);
+                    mRcsSettings.writeBoolean(RcsSettingsData.CAPABILITY_CALL_COMPOSER,
+                            (value % 16) != 0);
+                    continue;
+                }
+
+                if ((sharedMapAuth = getValueByParamName("sharedMapAuth", childnode,
+                        TYPE_INT)) != null) {
+                    int value = Integer.decode(sharedMapAuth);
+                    mRcsSettings.writeBoolean(RcsSettingsData.CAPABILITY_SHARED_MAP,
+                            (value % 16) != 0);
+                    continue;
+                }
+
+                if ((sharedSketchAuth = getValueByParamName("sharedSketchAuth", childnode,
+                        TYPE_INT)) != null) {
+                    int value = Integer.decode(sharedSketchAuth);
+                    mRcsSettings.writeBoolean(RcsSettingsData.CAPABILITY_SHARED_SKETCH,
+                            (value % 16) != 0);
+                    continue;
+                }
+
+                if ((postCallAuth = getValueByParamName("postCallAuth", childnode,
+                        TYPE_INT)) != null) {
+                    int value = Integer.decode(postCallAuth);
+                    mRcsSettings.writeBoolean(RcsSettingsData.CAPABILITY_POST_CALL,
+                            (value % 16) != 0);
+                    continue;
+                }
+
                 // Not used: "standaloneMsgAuth"
                 // Not used: "geolocPullAuth"
 
             } while ((childnode = childnode.getNextSibling()) != null);
+
+// TODO 1.6            mRcsSettings.writeString(RcsSettingsData.AUTH_EXTENSIONS, extsAuth.toString());
         }
     }
 

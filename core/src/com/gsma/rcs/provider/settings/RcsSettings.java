@@ -110,7 +110,7 @@ public class RcsSettings {
     /**
      * Constructor
      * 
-     * @param ctx Application context
+     * @param localContentResolver Content resolver
      */
     private RcsSettings(LocalContentResolver localContentResolver) {
         super();
@@ -1536,6 +1536,42 @@ public class RcsSettings {
     }
 
     /**
+     * Is call composer supported
+     *
+     * @return Boolean
+     */
+    public boolean isCallComposerSupported() {
+        return readBoolean(RcsSettingsData.CAPABILITY_CALL_COMPOSER);
+    }
+
+    /**
+     * Is shared map supported
+     *
+     * @return Boolean
+     */
+    public boolean isSharedMapSupported() {
+        return readBoolean(RcsSettingsData.CAPABILITY_SHARED_MAP);
+    }
+
+    /**
+     * Is shared sketch supported
+     *
+     * @return Boolean
+     */
+    public boolean isSharedSketchSupported() {
+        return readBoolean(RcsSettingsData.CAPABILITY_SHARED_SKETCH);
+    }
+
+    /**
+     * Is post call supported
+     *
+     * @return Boolean
+     */
+    public boolean isPostCallSupported() {
+        return readBoolean(RcsSettingsData.CAPABILITY_POST_CALL);
+    }
+
+    /**
      * Is IM always-on thanks to the Store & Forward functionality
      * 
      * @return Boolean
@@ -2076,6 +2112,35 @@ public class RcsSettings {
      */
     public boolean isExtensionsAllowed() {
         return readBoolean(RcsSettingsData.ALLOW_EXTENSIONS);
+    }
+
+    /**
+     * Is RCS extension authorized
+     *
+     * @return Boolean
+     */
+    public boolean isExtensionAuthorized(String ext) {
+        if (ext == null) {
+            return false;
+        }
+
+        if (ext.equals("gsma.callcomposer") && !isCallComposerSupported()) {
+            return false;
+        }
+
+        if (ext.equals("gsma.sharedmap") && !isSharedMapSupported()) {
+            return false;
+        }
+
+        if (ext.equals("gsma.sharedsketch") && !isSharedSketchSupported()) {
+            return false;
+        }
+
+        if (ext.equals("gsma.callunanswered") && !isPostCallSupported()) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
