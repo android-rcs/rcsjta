@@ -608,7 +608,7 @@ public class ProvisioningParser {
                 if (rcsIPVideoCallAuth == null) {
                     if ((rcsIPVideoCallAuth = getValueByParamName("rcsIPVideoCallAuth", childnode,
                             TYPE_INT)) != null) {
-                        int value = Integer.decode(rcsIPVoiceCallAuth);
+                        int value = Integer.decode(rcsIPVideoCallAuth);
                         mRcsSettings.writeBoolean(RcsSettingsData.CAPABILITY_IP_VIDEO_CALL,
                                 (value % 16) != 0);
                         continue;
