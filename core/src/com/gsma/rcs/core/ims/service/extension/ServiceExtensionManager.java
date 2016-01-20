@@ -135,10 +135,17 @@ public class ServiceExtensionManager {
             }
             return false;
         }
-        if (sLogger.isActivated()) {
-            sLogger.debug("No control on extension: ".concat(ext));
+        if (mRcsSettings.isExtensionAuthorized(ext)) {
+            if (sLogger.isActivated()) {
+                sLogger.debug("No control on extension: ".concat(ext));
+            }
+            return true;
+        } else {
+            if (sLogger.isActivated()) {
+                sLogger.debug("Extension ".concat(ext).concat(" is not allowed"));
+            }
+            return false;
         }
-        return true;
     }
 
     /**

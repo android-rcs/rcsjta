@@ -74,7 +74,17 @@ public class MultimediaSessionServiceConfigurationImpl extends
 
     @Override
     public boolean isServiceActivated(String serviceId) throws RemoteException {
-        // TODO 1.6: implement the feature
-        return true;
+        try {
+            return mRcsSettings.isExtensionAuthorized(serviceId);
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
     }
 }

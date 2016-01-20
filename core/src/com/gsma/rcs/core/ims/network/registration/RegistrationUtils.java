@@ -87,14 +87,16 @@ public class RegistrationUtils {
         // Extensions
         if (rcsSettings.isExtensionsAllowed()) {
             for (String extension : rcsSettings.getSupportedRcsExtensions()) {
-                if (extension.startsWith("gsma.")) {
-                    StringBuilder sb = new StringBuilder(FeatureTags.FEATURE_RCSE_ICSI_EXTENSION)
-                            .append(".").append(extension);
-                    icsiTags.add(sb.toString());
-                } else {
-                    StringBuilder sb = new StringBuilder(FeatureTags.FEATURE_RCSE_IARI_EXTENSION)
-                            .append(".").append(extension);
-                    iariTags.add(sb.toString());
+                if (rcsSettings.isExtensionAuthorized(extension)) {
+                    if (extension.startsWith("gsma.")) {
+                        StringBuilder sb = new StringBuilder(FeatureTags.FEATURE_RCSE_ICSI_EXTENSION)
+                                .append(".").append(extension);
+                        icsiTags.add(sb.toString());
+                    } else {
+                        StringBuilder sb = new StringBuilder(FeatureTags.FEATURE_RCSE_IARI_EXTENSION)
+                                .append(".").append(extension);
+                        iariTags.add(sb.toString());
+                    }
                 }
             }
             icsiTags.add(FeatureTags.FEATURE_3GPP_EXTENSION);
