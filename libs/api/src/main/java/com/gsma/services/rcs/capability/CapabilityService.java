@@ -215,6 +215,8 @@ public final class CapabilityService extends RcsService {
      * exception is thrown. The result of the capability refresh request is provided to all the
      * clients that have registered the listener for this event.
      *
+     * @deprecated Use {@link #requestContactCapabilities(Set<ContactId> )} instead.
+     *
      * @param contact Contact Identifier
      * @throws RcsServiceNotRegisteredException
      * @throws RcsServiceNotAvailableException

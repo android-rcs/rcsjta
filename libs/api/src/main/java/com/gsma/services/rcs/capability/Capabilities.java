@@ -26,6 +26,8 @@ import java.util.Set;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.gsma.services.rcs.contact.ContactId;
+
 /**
  * Capabilities of a contact. This class encapsulates the different capabilities which may be
  * supported by the local user or a remote contact.
@@ -203,8 +205,9 @@ public class Capabilities implements Parcelable {
     /**
      * Is image sharing supported
      *
+     * @deprecated Use {@link #hasCapabilities(int  capabilities)} instead.
+     *
      * @return true if supported else returns false
-     * @hide
      */
     @Deprecated
     public boolean isImageSharingSupported() {
@@ -214,8 +217,9 @@ public class Capabilities implements Parcelable {
     /**
      * Is video sharing supported
      *
+     * @deprecated Use {@link #hasCapabilities(int  capabilities)} instead.
+     *
      * @return true if supported else returns false
-     * @hide
      */
     @Deprecated
     public boolean isVideoSharingSupported() {
@@ -225,8 +229,9 @@ public class Capabilities implements Parcelable {
     /**
      * Is IM session supported
      *
+     * @deprecated Use {@link #hasCapabilities(int  capabilities)} instead.
+     *
      * @return true if supported else returns false
-     * @hide
      */
     @Deprecated
     public boolean isImSessionSupported() {
@@ -236,8 +241,9 @@ public class Capabilities implements Parcelable {
     /**
      * Is file transfer supported
      *
+     * @deprecated Use {@link #hasCapabilities(int  capabilities)} instead.
+     *
      * @return true if supported else returns false
-     * @hide
      */
     @Deprecated
     public boolean isFileTransferSupported() {
@@ -247,8 +253,9 @@ public class Capabilities implements Parcelable {
     /**
      * Is geolocation push supported
      *
+     * @deprecated Use {@link #hasCapabilities(int  capabilities)} instead.
+     *
      * @return true if supported else returns false
-     * @hide
      */
     @Deprecated
     public boolean isGeolocPushSupported() {
