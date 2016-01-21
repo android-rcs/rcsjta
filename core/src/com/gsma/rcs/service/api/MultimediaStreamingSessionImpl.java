@@ -524,6 +524,15 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
         }
     }
 
+    /**
+     * Data has been flushed
+     *
+     * @param contact Remote contact
+     */
+    public void onDataFlushed(ContactId contact) {
+        // Not applicable for RTP streaming session
+    }
+
     @Override
     public void onSessionAccepting(ContactId contact) {
         if (sLogger.isActivated()) {
@@ -571,5 +580,4 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
             setStateAndReason(contact, State.RINGING, ReasonCode.UNSPECIFIED);
         }
     }
-
 }

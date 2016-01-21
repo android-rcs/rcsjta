@@ -1149,5 +1149,4 @@ public class MsrpSession {
     public boolean isEstablished() {
         return mIsEstablished && !mCancelTransfer;
     }
-
 }

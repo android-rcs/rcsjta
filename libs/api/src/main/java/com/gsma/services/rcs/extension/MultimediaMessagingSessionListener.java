@@ -62,4 +62,12 @@ public abstract class MultimediaMessagingSessionListener {
      * @param contentType Message content type
      */
     public abstract void onMessageReceived(ContactId contact, String sessionId, byte[] content, String contentType);
+
+    /**
+     * Callback called when multimedia messages have been flushed.
+     *
+     * @param contact Contact ID
+     * @param sessionId Session ID
+     */
+    public abstract void onMessagesFlushed(ContactId contact, String sessionId);
 }

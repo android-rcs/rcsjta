@@ -33,4 +33,6 @@ public interface IMultimediaMessagingSessionEventBroadcaster {
             ReasonCode reasonCode);
 
     public void broadcastInvitation(String sessionId, Intent msrpSessionInvite);
+
+    public void broadcastMessagesFlushed(ContactId contact, String sessionId);
 }

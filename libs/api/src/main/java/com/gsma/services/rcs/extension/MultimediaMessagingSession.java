@@ -237,7 +237,6 @@ public class MultimediaMessagingSession extends MultimediaSession {
         try {
             sessionIntf.flushMessages();
         } catch (Exception e) {
-            RcsIllegalArgumentException.assertException(e);
             RcsPermissionDeniedException.assertException(e);
             throw new RcsGenericException(e);
         }

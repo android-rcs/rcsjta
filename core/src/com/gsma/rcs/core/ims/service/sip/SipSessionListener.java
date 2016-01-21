@@ -60,4 +60,11 @@ public interface SipSessionListener extends ImsSessionListener {
      * @param sessionInvite
      */
     public void onInvitationReceived(ContactId contact, Intent sessionInvite);
+
+    /**
+     * Data has been flushed
+     *
+     * @param contact Remote contact
+     */
+    public void onDataFlushed(ContactId contact);
 }

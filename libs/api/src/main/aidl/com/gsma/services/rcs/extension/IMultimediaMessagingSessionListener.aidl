@@ -12,4 +12,6 @@ interface IMultimediaMessagingSessionListener {
 	void onMessageReceived(in ContactId contact, in String sessionId, in byte[] content);
 
 	void onMessageReceived2(in ContactId contact, in String sessionId, in byte[] content, in String contentType);
+
+	void onMessagesFlushed(in ContactId contact, in String sessionId);
 }

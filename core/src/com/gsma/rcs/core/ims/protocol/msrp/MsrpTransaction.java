@@ -41,9 +41,8 @@ public class MsrpTransaction extends Object {
      */
     private int waitingCount = 0;
 
-    // Changed by Deutsche Telekom
     /**
-     * Count the total number of request received 200OK
+     * Count the total number of received 200OK
      */
     private int totalReceivedResponses = 0;
 
@@ -53,7 +52,7 @@ public class MsrpTransaction extends Object {
     private boolean isWaiting = false;
 
     /**
-     * is MSRP session terminated ?
+     * Is MSRP session terminated
      */
     private boolean isTerminated = false;
 

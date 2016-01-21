@@ -468,7 +468,36 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
      * @throws RemoteException
      */
     public void flushMessages() throws RemoteException {
-        // TODO 1.6: implement the feature
+        mSipService.scheduleMultimediaMessagingOperation(new Runnable() {
+            public void run() {
+                try {
+                    if (sLogger.isActivated()) {
+                        sLogger.debug("Flush messages");
+                    }
+                    final GenericSipMsrpSession session = mSipService
+                            .getGenericSipMsrpSession(mSessionId);
+                    if (session == null) {
+                        if (sLogger.isActivated()) {
+                            sLogger.debug("Cannot accept: no session ID=".concat(mSessionId));
+                        }
+                        return;
+                    }
+                    session.flushMessages();
+
+                } catch (RuntimeException e) {
+                    /*
+                     * Normally we are not allowed to catch runtime exceptions as these are genuine
+                     * bugs which should be handled/fixed within the code. However the cases when we
+                     * are executing operations on a thread unhandling such exceptions will
+                     * eventually lead to exit the system and thus can bring the whole system down,
+                     * which is not intended.
+                     */
+                    sLogger.error(
+                            new StringBuilder("Failed to flush messages for session with ID: ").append(
+                                    mSessionId).toString(), e);
+                }
+            }
+        });
     }
 
     /*------------------------------- SESSION EVENTS ----------------------------------*/
@@ -594,4 +623,13 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
         }
     }
 
+    @Override
+    public void onDataFlushed(ContactId contact) {
+        if (sLogger.isActivated()) {
+            sLogger.debug("Messages have been flushed");
+        }
+        synchronized (mLock) {
+            mBroadcaster.broadcastMessagesFlushed(contact, mSessionId);
+        }
+    }
 }

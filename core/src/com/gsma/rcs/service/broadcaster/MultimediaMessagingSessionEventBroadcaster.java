@@ -100,4 +100,18 @@ public class MultimediaMessagingSessionEventBroadcaster implements
 
         AndroidFactory.getApplicationContext().sendBroadcast(msrpSessionInvite);
     }
+
+    public void broadcastMessagesFlushed(ContactId contact, String sessionId) {
+        final int N = mMultimediaMessagingListeners.beginBroadcast();
+        for (int i = 0; i < N; i++) {
+            try {
+                mMultimediaMessagingListeners.getBroadcastItem(i).onMessagesFlushed(contact, sessionId);
+            } catch (RemoteException e) {
+                if (logger.isActivated()) {
+                    logger.error("Can't notify listener", e);
+                }
+            }
+        }
+        mMultimediaMessagingListeners.finishBroadcast();
+    }
 }

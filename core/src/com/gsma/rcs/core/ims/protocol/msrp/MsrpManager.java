@@ -292,7 +292,6 @@ public class MsrpManager {
         return mMsrpSession;
     }
 
-    // Changed by Deutsche Telekom
     /**
      * Send data chunks
      * 
@@ -341,5 +340,4 @@ public class MsrpManager {
         }
         return mMsrpSession.isEstablished();
     }
-
 }

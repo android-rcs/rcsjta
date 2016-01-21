@@ -66,10 +66,12 @@ public abstract class GenericSipMsrpSession extends GenericSipSession implements
 
     private int mMaxMsgSize;
 
-    private final static Logger sLogger = Logger.getLogger(GenericSipMsrpSession.class
-            .getSimpleName());
+    private boolean mFlushRequested = false;
 
     private final SessionActivityManager mActivityMgr;
+
+    private final static Logger sLogger = Logger.getLogger(GenericSipMsrpSession.class
+            .getSimpleName());
 
     /**
      * Constructor
@@ -245,12 +247,35 @@ public abstract class GenericSipMsrpSession extends GenericSipSession implements
                 TypeMsrpChunk.Unknown);
     }
 
+    private synchronized void setFlushRequest(boolean value) {
+        mFlushRequested = value;
+    }
+
+    /**
+     * Flush messages
+     */
+    public void flushMessages() {
+        if (sLogger.isActivated()) {
+            sLogger.info("Request messages flush");
+        }
+        setFlushRequest(true);
+    }
+
     @Override
     public void msrpDataTransferred(String msgId) {
         if (sLogger.isActivated()) {
             sLogger.info("Data transferred");
         }
         mActivityMgr.updateActivity();
+
+        if (mFlushRequested) {
+            // Notify if flush procedure requested
+            ContactId contact = getRemoteContact();
+            for (ImsSessionListener listener : getListeners()) {
+                ((SipSessionListener) listener).onDataFlushed(contact);
+            }
+            setFlushRequest(false);
+        }
     }
 
     @Override

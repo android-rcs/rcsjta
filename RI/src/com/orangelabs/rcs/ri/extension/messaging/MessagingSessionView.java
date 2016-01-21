@@ -343,7 +343,6 @@ public class MessagingSessionView extends RcsActivity {
                 try {
                     String data = "data".concat(String.valueOf(i++));
                     mSession.sendMessage(data.getBytes(), MessagingSessionUtils.SERVICE_CONTENT_TYPE);
-
                 } catch (RcsServiceException e) {
                     showExceptionThenExit(e);
                 }
@@ -428,6 +427,14 @@ public class MessagingSessionView extends RcsActivity {
                         txt.setText(data);
                     }
                 });
+            }
+
+            @Override
+            public void onMessagesFlushed(ContactId contact, String sessionId) {
+                if (LogUtils.isActive) {
+                    Log.d(LOGTAG, "onMessagesFlushed contact=" + contact +
+                                    " sessionId=" + sessionId);
+                }
             }
         };
 
