@@ -2153,6 +2153,15 @@ public class RcsSettings {
     }
 
     /**
+     * Get call composer inactivity timeout
+     *
+     * @return Timeout in milliseconds
+     */
+    public long getCallComposerInactivityTimeout() {
+        return readLong(RcsSettingsData.CALL_COMPOSER_INACTIVITY_TIMEOUT);
+    }
+
+    /**
      * Set the client messaging mode
      * 
      * @param mode the client messaging mode (0: CONVERGED, 1: INTEGRATED, 2: SEAMLESS, 3: NONE)

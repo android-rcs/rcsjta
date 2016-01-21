@@ -1417,6 +1417,7 @@ public class ProvisioningParser {
         String rcsIPVideoCallUpgradeOnCapError = null;
         String beIPVideoCallUpgradeAttemptEarly = null;
         String maxMsrpLengthExtensions = null;
+        String callComposerTimerIdle = null;
 
         Node typenode = null;
         Node childnode = node.getFirstChild();
@@ -1510,6 +1511,15 @@ public class ProvisioningParser {
                     if ((maxMsrpLengthExtensions = getValueByParamName("extensionsMaxMSRPSize",
                             childnode, TYPE_INT)) != null) {
                         mRcsSettings.writeInteger(RcsSettingsData.MAX_MSRP_SIZE_EXTENSIONS,
+                                Integer.parseInt(maxMsrpLengthExtensions));
+                        continue;
+                    }
+                }
+
+                if (callComposerTimerIdle == null) {
+                    if ((callComposerTimerIdle = getValueByParamName("callComposerTimerIdle",
+                            childnode, TYPE_INT)) != null) {
+                        mRcsSettings.writeInteger(RcsSettingsData.CALL_COMPOSER_INACTIVITY_TIMEOUT,
                                 Integer.parseInt(maxMsrpLengthExtensions));
                         continue;
                     }

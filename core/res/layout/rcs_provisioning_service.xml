@@ -337,6 +337,22 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:paddingTop="5dip"
+                android:text="@string/Idle_duration_of_a_callcomposer_session_milliseconds" />
+
+            <EditText
+                android:id="@+id/CallComposerIdleDuration"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:inputType="number"
+                android:lines="1"
+                android:maxLength="13" />
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="5dip"
                 android:text="@string/Directory_path_to_store_photos" />
 
             <EditText

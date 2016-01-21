@@ -140,7 +140,8 @@ public class ServiceProvisioning extends Activity {
                 helper);
         setLongEditTextParam(R.id.GeolocExpirationTime, RcsSettingsData.GEOLOC_EXPIRATION_TIME,
                 helper);
-
+        setLongEditTextParam(R.id.CallComposerIdleDuration,
+                RcsSettingsData.CALL_COMPOSER_INACTIVITY_TIMEOUT, helper);
         Spinner spinner = (Spinner) findViewById(R.id.ImSessionStart);
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_item, IM_SESSION_START_MODES);
@@ -213,6 +214,8 @@ public class ServiceProvisioning extends Activity {
                 helper);
         saveStringEditTextParam(R.id.DirectoryPathFiles, RcsSettingsData.DIRECTORY_PATH_FILES,
                 helper);
+        saveLongEditTextParam(R.id.CallComposerIdleDuration,
+                RcsSettingsData.CALL_COMPOSER_INACTIVITY_TIMEOUT, helper);
 
         Spinner spinner = (Spinner) findViewById(R.id.ImSessionStart);
         if (bundle != null) {

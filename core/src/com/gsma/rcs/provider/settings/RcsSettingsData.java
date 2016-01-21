@@ -1334,6 +1334,12 @@ public class RcsSettingsData {
     /* package private */static final Integer DEFAULT_MAX_MSRP_SIZE_EXTENSIONS = 0;
 
     /**
+     * Call composer inactivity timeout before session is closed
+     */
+    public static final String CALL_COMPOSER_INACTIVITY_TIMEOUT = "CallComposerInactivityTimeout";
+    /* package private */static final Long DEFAULT_CALL_COMPOSER_INACTIVITY_TIMEOUT = 180000L;
+
+    /**
      * Validity of the RCS configuration.
      */
     public static final String CONFIGURATION_VALID = "ConfigurationValidity";
