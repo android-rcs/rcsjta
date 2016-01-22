@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -71,6 +71,7 @@ import com.gsma.services.rcs.sharing.image.ImageSharing;
 import com.gsma.services.rcs.sharing.video.IVideoPlayer;
 import com.gsma.services.rcs.sharing.video.VideoSharing;
 
+import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 
@@ -126,17 +127,17 @@ public class RichcallService extends ImsService {
     /**
      * ImageTransferSessionCache with Session ID as key
      */
-    private Map<String, ImageTransferSession> mImageTransferSessionCache = new HashMap<String, ImageTransferSession>();
+    private Map<String, ImageTransferSession> mImageTransferSessionCache = new HashMap<>();
 
     /**
      * VideoStreamingSessionCache with Session ID as key
      */
-    private Map<String, VideoStreamingSession> mVideoStremaingSessionCache = new HashMap<String, VideoStreamingSession>();
+    private Map<String, VideoStreamingSession> mVideoStremaingSessionCache = new HashMap<>();
 
     /**
      * GeolocTransferSessionCache with Session ID as key
      */
-    private Map<String, GeolocTransferSession> mGeolocTransferSessionCache = new HashMap<String, GeolocTransferSession>();
+    private Map<String, GeolocTransferSession> mGeolocTransferSessionCache = new HashMap<>();
 
     private final ContactManager mContactManager;
 
@@ -148,17 +149,17 @@ public class RichcallService extends ImsService {
 
     private final LocalContentResolver mLocalContentResolver;
 
-    private Handler mImageSharingOperationHandler;
+    private final Handler mImageSharingOperationHandler;
 
-    private Handler mImageSharingDeleteOperationHandler;
+    private final Handler mImageSharingDeleteOperationHandler;
 
-    private Handler mVideoSharingOperationHandler;
+    private final Handler mVideoSharingOperationHandler;
 
-    private Handler mVideoSharingDeleteOperationHandler;
+    private final Handler mVideoSharingDeleteOperationHandler;
 
-    private Handler mGeolocSharingOperationHandler;
+    private final Handler mGeolocSharingOperationHandler;
 
-    private Handler mGeolocSharingDeleteOperationHandler;
+    private final Handler mGeolocSharingDeleteOperationHandler;
 
     private ImageSharingServiceImpl mImageSharingService;
 
@@ -174,10 +175,10 @@ public class RichcallService extends ImsService {
      * @param parent IMS module
      * @param richCallHistory RichCallHistory
      * @param contactsManager ContactManager
-     * @param rcsSettings
-     * @param callManager
-     * @param localContentResolver
-     * @param capabilityService
+     * @param rcsSettings the RCS settings accessor
+     * @param callManager the call manager
+     * @param localContentResolver the local content resolver
+     * @param capabilityService the capability service
      */
     public RichcallService(ImsModule parent, RichCallHistory richCallHistory,
             ContactManager contactsManager, RcsSettings rcsSettings, CallManager callManager,
@@ -189,6 +190,12 @@ public class RichcallService extends ImsService {
         mRichCallHistory = richCallHistory;
         mLocalContentResolver = localContentResolver;
         mCapabilityService = capabilityService;
+        mImageSharingOperationHandler = allocateBgHandler(ISH_OPERATION_THREAD_NAME);
+        mImageSharingDeleteOperationHandler = allocateBgHandler(ISH_DELETE_OPERATION_THREAD_NAME);
+        mVideoSharingOperationHandler = allocateBgHandler(VSH_OPERATION_THREAD_NAME);
+        mVideoSharingDeleteOperationHandler = allocateBgHandler(VSH_DELETE_OPERATION_THREAD_NAME);
+        mGeolocSharingOperationHandler = allocateBgHandler(GSH_OPERATION_THREAD_NAME);
+        mGeolocSharingDeleteOperationHandler = allocateBgHandler(GSH_DELETE_OPERATION_THREAD_NAME);
     }
 
     private Handler allocateBgHandler(String threadName) {
@@ -222,12 +229,6 @@ public class RichcallService extends ImsService {
      * Initializes richcall service
      */
     public void initialize() {
-        mImageSharingOperationHandler = allocateBgHandler(ISH_OPERATION_THREAD_NAME);
-        mImageSharingDeleteOperationHandler = allocateBgHandler(ISH_DELETE_OPERATION_THREAD_NAME);
-        mVideoSharingOperationHandler = allocateBgHandler(VSH_OPERATION_THREAD_NAME);
-        mVideoSharingDeleteOperationHandler = allocateBgHandler(VSH_DELETE_OPERATION_THREAD_NAME);
-        mGeolocSharingOperationHandler = allocateBgHandler(GSH_OPERATION_THREAD_NAME);
-        mGeolocSharingDeleteOperationHandler = allocateBgHandler(GSH_DELETE_OPERATION_THREAD_NAME);
     }
 
     public void scheduleImageShareOperation(Runnable runnable) {
@@ -258,51 +259,30 @@ public class RichcallService extends ImsService {
             return;
         }
         setServiceStarted(true);
-        if (mImageSharingOperationHandler == null) {
-            mImageSharingOperationHandler = allocateBgHandler(ISH_OPERATION_THREAD_NAME);
-        }
-        if (mImageSharingDeleteOperationHandler == null) {
-            mImageSharingDeleteOperationHandler = allocateBgHandler(ISH_DELETE_OPERATION_THREAD_NAME);
-        }
-        if (mVideoSharingOperationHandler == null) {
-            mVideoSharingOperationHandler = allocateBgHandler(VSH_OPERATION_THREAD_NAME);
-        }
-        if (mVideoSharingDeleteOperationHandler == null) {
-            mVideoSharingDeleteOperationHandler = allocateBgHandler(VSH_DELETE_OPERATION_THREAD_NAME);
-        }
-        if (mGeolocSharingOperationHandler == null) {
-            mGeolocSharingOperationHandler = allocateBgHandler(GSH_OPERATION_THREAD_NAME);
-        }
-        if (mGeolocSharingDeleteOperationHandler == null) {
-            mGeolocSharingDeleteOperationHandler = allocateBgHandler(GSH_DELETE_OPERATION_THREAD_NAME);
-        }
     }
 
     @Override
-    public synchronized void stop() {
+    public synchronized void stop(TerminationReason reasonCode) {
         if (!isServiceStarted()) {
             /* Already stopped */
             return;
         }
         setServiceStarted(false);
+        if (TerminationReason.TERMINATION_BY_SYSTEM == reasonCode) {
+            mImageSharingOperationHandler.getLooper().quit();
+            mVideoSharingOperationHandler.getLooper().quit();
+            mGeolocSharingOperationHandler.getLooper().quit();
 
-        mImageSharingOperationHandler.getLooper().quit();
-        mImageSharingOperationHandler = null;
-
-        mImageSharingDeleteOperationHandler.getLooper().quitSafely();
-        mImageSharingDeleteOperationHandler = null;
-
-        mVideoSharingOperationHandler.getLooper().quit();
-        mVideoSharingOperationHandler = null;
-
-        mVideoSharingDeleteOperationHandler.getLooper().quitSafely();
-        mVideoSharingDeleteOperationHandler = null;
-
-        mGeolocSharingOperationHandler.getLooper().quit();
-        mGeolocSharingOperationHandler = null;
-
-        mGeolocSharingDeleteOperationHandler.getLooper().quitSafely();
-        mGeolocSharingDeleteOperationHandler = null;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+                mImageSharingDeleteOperationHandler.getLooper().quitSafely();
+                mVideoSharingDeleteOperationHandler.getLooper().quitSafely();
+                mGeolocSharingDeleteOperationHandler.getLooper().quitSafely();
+            } else {
+                mImageSharingDeleteOperationHandler.getLooper().quit();
+                mVideoSharingDeleteOperationHandler.getLooper().quit();
+                mGeolocSharingDeleteOperationHandler.getLooper().quit();
+            }
+        }
     }
 
     @Override
@@ -386,8 +366,7 @@ public class RichcallService extends ImsService {
     public void addSession(ImageTransferSession session) {
         String sessionId = session.getSessionID();
         if (sLogger.isActivated()) {
-            sLogger.debug(new StringBuilder("Add ImageTransferSession with sessionId '")
-                    .append(sessionId).append("'").toString());
+            sLogger.debug("Add ImageTransferSession with sessionId '" + sessionId + "'");
         }
         synchronized (getImsServiceSessionOperationLock()) {
             mImageTransferSessionCache.put(sessionId, session);
@@ -398,8 +377,7 @@ public class RichcallService extends ImsService {
     public void removeSession(final ImageTransferSession session) {
         final String sessionId = session.getSessionID();
         if (sLogger.isActivated()) {
-            sLogger.debug(new StringBuilder("Remove ImageTransferSession with sessionId '")
-                    .append(sessionId).append("'").toString());
+            sLogger.debug("Remove ImageTransferSession with sessionId '" + sessionId + "'");
         }
         synchronized (getImsServiceSessionOperationLock()) {
             mImageTransferSessionCache.remove(sessionId);
@@ -409,8 +387,7 @@ public class RichcallService extends ImsService {
 
     public ImageTransferSession getImageTransferSession(String sessionId) {
         if (sLogger.isActivated()) {
-            sLogger.debug(new StringBuilder("Get ImageTransferSession with sessionId '")
-                    .append(sessionId).append("'").toString());
+            sLogger.debug("Get ImageTransferSession with sessionId '" + sessionId + "'");
         }
         synchronized (getImsServiceSessionOperationLock()) {
             return mImageTransferSessionCache.get(sessionId);
@@ -420,8 +397,7 @@ public class RichcallService extends ImsService {
     public void addSession(VideoStreamingSession session) {
         String sessionId = session.getSessionID();
         if (sLogger.isActivated()) {
-            sLogger.debug(new StringBuilder("Add VideoStreamingSession with sessionId '")
-                    .append(sessionId).append("'").toString());
+            sLogger.debug("Add VideoStreamingSession with sessionId '" + sessionId + "'");
         }
         synchronized (getImsServiceSessionOperationLock()) {
             mVideoStremaingSessionCache.put(sessionId, session);
@@ -432,8 +408,7 @@ public class RichcallService extends ImsService {
     public void removeSession(final VideoStreamingSession session) {
         final String sessionId = session.getSessionID();
         if (sLogger.isActivated()) {
-            sLogger.debug(new StringBuilder("Remove VideoStreamingSession with sessionId '")
-                    .append(sessionId).append("'").toString());
+            sLogger.debug("Remove VideoStreamingSession with sessionId '" + sessionId + "'");
         }
         synchronized (getImsServiceSessionOperationLock()) {
             mVideoStremaingSessionCache.remove(sessionId);
@@ -443,8 +418,7 @@ public class RichcallService extends ImsService {
 
     public VideoStreamingSession getVideoSharingSession(String sessionId) {
         if (sLogger.isActivated()) {
-            sLogger.debug(new StringBuilder("Get VideoStreamingSession with sessionId '")
-                    .append(sessionId).append("'").toString());
+            sLogger.debug("Get VideoStreamingSession with sessionId '" + sessionId + "'");
         }
         synchronized (getImsServiceSessionOperationLock()) {
             return mVideoStremaingSessionCache.get(sessionId);
@@ -454,8 +428,7 @@ public class RichcallService extends ImsService {
     public void addSession(GeolocTransferSession session) {
         String sessionId = session.getSessionID();
         if (sLogger.isActivated()) {
-            sLogger.debug(new StringBuilder("Add GeolocTransferSession with sessionId '")
-                    .append(sessionId).append("'").toString());
+            sLogger.debug("Add GeolocTransferSession with sessionId '" + sessionId + "'");
         }
         synchronized (getImsServiceSessionOperationLock()) {
             mGeolocTransferSessionCache.put(sessionId, session);
@@ -466,8 +439,7 @@ public class RichcallService extends ImsService {
     public void removeSession(final GeolocTransferSession session) {
         final String sessionId = session.getSessionID();
         if (sLogger.isActivated()) {
-            sLogger.debug(new StringBuilder("Remove GeolocTransferSession with sessionId '")
-                    .append(sessionId).append("'").toString());
+            sLogger.debug("Remove GeolocTransferSession with sessionId '" + sessionId + "'");
         }
         synchronized (getImsServiceSessionOperationLock()) {
             mGeolocTransferSessionCache.remove(sessionId);
@@ -477,8 +449,7 @@ public class RichcallService extends ImsService {
 
     public GeolocTransferSession getGeolocTransferSession(String sessionId) {
         if (sLogger.isActivated()) {
-            sLogger.debug(new StringBuilder("Get GeolocTransferSession with sessionId '")
-                    .append(sessionId).append("'").toString());
+            sLogger.debug("Get GeolocTransferSession with sessionId '" + sessionId + "'");
         }
         synchronized (getImsServiceSessionOperationLock()) {
             return mGeolocTransferSessionCache.get(sessionId);
@@ -492,8 +463,7 @@ public class RichcallService extends ImsService {
      * @return Boolean
      */
     public boolean isCallConnectedWith(ContactId contact) {
-        boolean csCall = mCallManager.isCallConnectedWith(contact);
-        return (csCall);
+        return (mCallManager.isCallConnectedWith(contact));
     }
 
     /**
@@ -920,8 +890,7 @@ public class RichcallService extends ImsService {
     public GeolocTransferSession createGeolocSharingSession(ContactId contact, MmContent content,
             Geoloc geoloc, long timestamp) throws CoreException {
         if (sLogger.isActivated()) {
-            sLogger.info(new StringBuilder("Initiate geoloc sharing session with contact ")
-                    .append(contact).append(".").toString());
+            sLogger.info("Initiate geoloc sharing session with contact " + contact + ".");
         }
         if (!isCallConnectedWith(contact)) {
             if (sLogger.isActivated()) {
@@ -1081,7 +1050,7 @@ public class RichcallService extends ImsService {
     /**
      * Is the current session an originating one
      * 
-     * @param session
+     * @param session the session instance
      * @return true if session is an originating content sharing session (image or video)
      */
     private boolean isSessionOriginating(ContentSharingSession session) {
@@ -1091,7 +1060,7 @@ public class RichcallService extends ImsService {
     /**
      * Is the current session a terminating one
      * 
-     * @param session
+     * @param session the session instance
      * @return true if session is an terminating content sharing session (image or video)
      */
     private boolean isSessionTerminating(ContentSharingSession session) {
@@ -1152,7 +1121,7 @@ public class RichcallService extends ImsService {
      * Try to delete image sharing with a given contact from history and abort/reject any associated
      * ongoing session if such exists.
      * 
-     * @param contact
+     * @param contact the remote contact
      */
     public void tryToDeleteImageSharings(ContactId contact) {
         mImageSharingDeleteOperationHandler.post(new ImageSharingDeleteTask(mImageSharingService,
@@ -1163,7 +1132,7 @@ public class RichcallService extends ImsService {
      * Try to delete a image sharing by its sharing id from history and abort/reject any associated
      * ongoing session if such exists.
      * 
-     * @param sharingId
+     * @param sharingId the sharing ID
      */
     public void tryToDeleteImageSharing(String sharingId) {
         mImageSharingDeleteOperationHandler.post(new ImageSharingDeleteTask(mImageSharingService,
@@ -1183,7 +1152,7 @@ public class RichcallService extends ImsService {
      * Try to delete video sharing with a given contact from history and abort/reject any associated
      * ongoing session if such exists.
      * 
-     * @param contact
+     * @param contact the remote contact
      */
     public void tryToDeleteVideoSharings(ContactId contact) {
         mVideoSharingDeleteOperationHandler.post(new VideoSharingDeleteTask(mVideoSharingService,
@@ -1194,7 +1163,7 @@ public class RichcallService extends ImsService {
      * Try to delete a video sharing by its sharing id from history and abort/reject any associated
      * ongoing session if such exists.
      * 
-     * @param sharingId
+     * @param sharingId the sharing ID
      */
     public void tryToDeleteVideoSharing(String sharingId) {
         mVideoSharingDeleteOperationHandler.post(new VideoSharingDeleteTask(mVideoSharingService,
@@ -1214,7 +1183,7 @@ public class RichcallService extends ImsService {
      * Try to delete geoloc sharing with a given contact from history and abort/reject any
      * associated ongoing session if such exists.
      * 
-     * @param contact
+     * @param contact the remote contact
      */
     public void tryToDeleteGeolocSharings(ContactId contact) {
         mGeolocSharingDeleteOperationHandler.post(new GeolocSharingDeleteTask(
@@ -1225,7 +1194,7 @@ public class RichcallService extends ImsService {
      * Try to delete a geoloc sharing by its sharing id from history and abort/reject any associated
      * ongoing session if such exists.
      * 
-     * @param sharingId
+     * @param sharingId the sharing ID
      */
     public void tryToDeleteGeolocSharing(String sharingId) {
         mGeolocSharingDeleteOperationHandler.post(new GeolocSharingDeleteTask(
