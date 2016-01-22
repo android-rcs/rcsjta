@@ -68,8 +68,21 @@ public class MultimediaSessionServiceConfigurationImpl extends
 
     @Override
     public long getInactivityTimeout() throws RemoteException {
-        // TODO 1.6: implement the feature
-        return 0L;
+        try {
+            // Note: We use the value of the call composer for a MM session
+            // even if it's not very good. Then it's up to the application to
+            // use it or not finally in its side
+            return mRcsSettings.getCallComposerInactivityTimeout();
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
     }
 
     @Override

@@ -64,7 +64,7 @@ public class SipService extends ImsService {
 
     private static final String MM_STREAMING_OPERATION_THREAD_NAME = "MmsOperations";
 
-    private static final String MM_MESSAGE_OPERATION_THREAD_NAME = "MmmOperations";
+    private static final String MM_INSTANT_MESSAGE_OPERATION_THREAD_NAME = "ImmOperations";
 
     private final static Logger sLogger = Logger.getLogger(SipService.class.getSimpleName());
 
@@ -147,7 +147,7 @@ public class SipService extends ImsService {
 
         mMultimediaMessagingOperationHandler = allocateBgHandler(MM_MESSAGING_OPERATION_THREAD_NAME);
         mMultimediaStreamingOperationHandler = allocateBgHandler(MM_STREAMING_OPERATION_THREAD_NAME);
-        mMultimediaMessageOperationHandler = allocateBgHandler(MM_MESSAGE_OPERATION_THREAD_NAME);
+        mMultimediaMessageOperationHandler = allocateBgHandler(MM_INSTANT_MESSAGE_OPERATION_THREAD_NAME);
     }
 
     /**

@@ -53,7 +53,6 @@ public class MultimediaSessionServiceConfiguration {
     public int getMessageMaxLength() throws RcsGenericException {
         try {
             return mIConfig.getMessageMaxLength();
-
         } catch (Exception e) {
             throw new RcsGenericException(e);
         }

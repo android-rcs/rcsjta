@@ -25,6 +25,7 @@ package com.gsma.rcs.provider.settings;
 import com.gsma.rcs.core.ims.service.capability.Capabilities;
 import com.gsma.rcs.core.ims.service.capability.Capabilities.CapabilitiesBuilder;
 import com.gsma.rcs.core.ims.service.extension.ServiceExtensionManager;
+import com.gsma.rcs.core.ims.service.sip.EnrichCallingService;
 import com.gsma.rcs.provider.CursorUtil;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.settings.RcsSettingsData.AuthenticationProcedure;
@@ -2123,23 +2124,22 @@ public class RcsSettings {
         if (ext == null) {
             return false;
         }
-
-        if (ext.equals("gsma.callcomposer") && !isCallComposerSupported()) {
+        if (ext.equals(EnrichCallingService.CALL_COMPOSER_FEATURE_TAG) &&
+                !isCallComposerSupported()) {
             return false;
         }
-
-        if (ext.equals("gsma.sharedmap") && !isSharedMapSupported()) {
+        if (ext.equals(EnrichCallingService.SHARED_MAP_SERVICE_ID) &&
+                !isSharedMapSupported()) {
             return false;
         }
-
-        if (ext.equals("gsma.sharedsketch") && !isSharedSketchSupported()) {
+        if (ext.equals(EnrichCallingService.SHARED_SKETCH_SERVICE_ID) &&
+                !isSharedSketchSupported()) {
             return false;
         }
-
-        if (ext.equals("gsma.callunanswered") && !isPostCallSupported()) {
+        if (ext.equals(EnrichCallingService.POST_CALL_SERVICE_ID) &&
+                !isPostCallSupported()) {
             return false;
         }
-
         return true;
     }
 

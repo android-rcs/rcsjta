@@ -202,7 +202,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
         mImService = imService;
         mImdnManager = imService.getImdnManager();
         mMessagingLog = messagingLog;
-        mActivityMgr = new SessionActivityManager(this, rcsSettings);
+        mActivityMgr = new SessionActivityManager(this, mRcsSettings.getChatIdleDuration());
 
         // Create the MSRP manager
         int localMsrpPort = NetworkRessourceManager.generateLocalMsrpPort(rcsSettings);

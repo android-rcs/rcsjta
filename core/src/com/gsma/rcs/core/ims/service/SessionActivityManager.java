@@ -24,7 +24,6 @@ package com.gsma.rcs.core.ims.service;
 
 import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
-import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.PeriodicRefresher;
 import com.gsma.rcs.utils.logger.Logger;
 
@@ -45,24 +44,24 @@ public class SessionActivityManager extends PeriodicRefresher {
     private ImsServiceSession mSession;
 
     /**
+     * Timeout
+     */
+    private long mTimeout;
+
+    /**
      * The logger
      */
     private Logger logger = Logger.getLogger(this.getClass().getName());
 
     /**
-     * RcsSettings
-     */
-    private RcsSettings mRcsSettings;
-
-    /**
      * Constructor
      * 
      * @param session IM session
-     * @param rcsSettings
+     * @param timeout Idle timeout
      */
-    public SessionActivityManager(ImsServiceSession session, RcsSettings rcsSettings) {
+    public SessionActivityManager(ImsServiceSession session, long timeout) {
         mSession = session;
-        mRcsSettings = rcsSettings;
+        mTimeout = timeout;
     }
 
     /**
@@ -76,9 +75,14 @@ public class SessionActivityManager extends PeriodicRefresher {
      * Start manager
      */
     public void start() {
-        long timeout = mRcsSettings.getChatIdleDuration();
+        if (mTimeout == 0) {
+            logger.info(new StringBuilder(
+                    "Activity manager is disabled (no idle timeout)").toString());
+            return;
+        }
+
         if (logger.isActivated()) {
-            logger.info(new StringBuilder("Start the activity manager for ").append(timeout)
+            logger.info(new StringBuilder("Start the activity manager for ").append(mTimeout)
                     .append("ms").toString());
         }
 
@@ -86,7 +90,7 @@ public class SessionActivityManager extends PeriodicRefresher {
         updateActivity();
 
         // Start a timer to check if the inactivity period has been reach or not each 10seconds
-        startTimer(System.currentTimeMillis(), timeout);
+        startTimer(System.currentTimeMillis(), mTimeout);
     }
 
     /**
@@ -108,7 +112,7 @@ public class SessionActivityManager extends PeriodicRefresher {
      * @throws PayloadException
      */
     public void periodicProcessing() throws PayloadException, NetworkException {
-        long timeout = mRcsSettings.getChatIdleDuration();
+        long timeout = mTimeout;
         long inactivityPeriod = System.currentTimeMillis() - mActivityTimestamp;
         long remainingPeriod = timeout - inactivityPeriod;
         if (logger.isActivated()) {

@@ -26,6 +26,7 @@ import static com.gsma.rcs.utils.StringUtils.UTF8;
 
 import com.gsma.rcs.core.FileAccessException;
 import com.gsma.rcs.core.ims.network.NetworkException;
+import com.gsma.rcs.core.ims.network.sip.FeatureTags;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpEventListener;
@@ -39,6 +40,7 @@ import com.gsma.rcs.core.ims.protocol.sdp.SdpUtils;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.SessionActivityManager;
+import com.gsma.rcs.core.ims.service.sip.EnrichCallingService;
 import com.gsma.rcs.core.ims.service.sip.GenericSipSession;
 import com.gsma.rcs.core.ims.service.sip.SipService;
 import com.gsma.rcs.core.ims.service.sip.SipSessionError;
@@ -88,7 +90,15 @@ public abstract class GenericSipMsrpSession extends GenericSipSession implements
         super(parent, contact, featureTag, rcsSettings, timestamp, contactManager);
 
         mMaxMsgSize = rcsSettings.getMaxMsrpLengthForExtensions();
-        mActivityMgr = new SessionActivityManager(this, rcsSettings);
+
+        /* Define the idle timeout depending of the type of service */
+        long timeout;
+        if (featureTag.equals(EnrichCallingService.CALL_COMPOSER_FEATURE_TAG)) {
+            timeout = mRcsSettings.getCallComposerInactivityTimeout();
+        } else {
+            timeout = mRcsSettings.getChatIdleDuration();
+        }
+        mActivityMgr = new SessionActivityManager(this, timeout);
 
         /* Create the MSRP manager */
         int localMsrpPort = NetworkRessourceManager.generateLocalMsrpPort(rcsSettings);
