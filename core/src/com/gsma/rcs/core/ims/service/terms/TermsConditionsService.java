@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -34,6 +34,7 @@ import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
 import com.gsma.rcs.core.ims.service.ImsService;
+import com.gsma.rcs.core.ims.service.ImsServiceSession;
 import com.gsma.rcs.core.ims.service.SessionAuthenticationAgent;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.ContactUtil;
@@ -105,9 +106,7 @@ public class TermsConditionsService extends ImsService {
         mRcsSettings = rcsSettings;
     }
 
-    /**
-     * Start the IMS service
-     */
+    @Override
     public synchronized void start() {
         if (isServiceStarted()) {
             return;
@@ -115,10 +114,8 @@ public class TermsConditionsService extends ImsService {
         setServiceStarted(true);
     }
 
-    /**
-     * Stop the IMS service
-     */
-    public synchronized void stop() {
+    @Override
+    public synchronized void stop(ImsServiceSession.TerminationReason reasonCode) {
         if (!isServiceStarted()) {
             return;
         }
@@ -135,8 +132,6 @@ public class TermsConditionsService extends ImsService {
      * Receive a SIP message
      * 
      * @param message Received message
-     * @throws PayloadException
-     * @throws NetworkException
      */
     public void onMessageReceived(SipRequest message) {
         try {
@@ -256,16 +251,6 @@ public class TermsConditionsService extends ImsService {
                 DECLINE_RESPONSE, pin);
     }
 
-    /**
-     * Send SIP MESSAGE
-     * 
-     * @param eucr
-     * @param requestId
-     * @param responseValue
-     * @param pin
-     * @throws PayloadException
-     * @throws NetworkException
-     */
     private void sendSipMessage(Uri eucr, String requestId, String responseValue, String pin)
             throws PayloadException, NetworkException {
         if (sLogger.isActivated()) {
@@ -306,8 +291,7 @@ public class TermsConditionsService extends ImsService {
                 }
                 break;
             default:
-                throw new IllegalArgumentException(new StringBuilder("Invalid response :  ")
-                        .append(statusCode).append(" received!").toString());
+                throw new IllegalArgumentException("Invalid response :  " + statusCode + " received!");
         }
     }
 
@@ -332,15 +316,6 @@ public class TermsConditionsService extends ImsService {
         return (contentType != null && contentType.startsWith("application/end-user"));
     }
 
-    /**
-     * Handle proxy authentication response
-     * 
-     * @param dialogPath
-     * @param sipResponse
-     * @param response
-     * @throws PayloadException
-     * @throws NetworkException
-     */
     private void handle407Authentication(SipDialogPath dialogPath, SipResponse sipResponse,
             String response) throws PayloadException, NetworkException {
         try {
@@ -369,14 +344,11 @@ public class TermsConditionsService extends ImsService {
                     }
                     break;
                 default:
-                    throw new IllegalArgumentException(new StringBuilder("Invalid response :  ")
-                            .append(statusCode).append(" received!").toString());
+                    throw new IllegalArgumentException("Invalid response :  " + statusCode + " received!");
             }
-        } catch (InvalidArgumentException e) {
+        } catch (InvalidArgumentException | ParseException e) {
             throw new PayloadException("Failed to handle 407 authentication response!", e);
 
-        } catch (ParseException e) {
-            throw new PayloadException("Failed to handle 407 authentication response!", e);
         }
     }
 }

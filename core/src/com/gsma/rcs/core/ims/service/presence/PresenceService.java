@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -34,6 +34,7 @@ import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.http.HttpResponse;
 import com.gsma.rcs.core.ims.service.ContactInfo.RcsStatus;
 import com.gsma.rcs.core.ims.service.ImsService;
+import com.gsma.rcs.core.ims.service.ImsServiceSession;
 import com.gsma.rcs.core.ims.service.capability.Capabilities;
 import com.gsma.rcs.core.ims.service.presence.pidf.PidfDocument;
 import com.gsma.rcs.core.ims.service.presence.xdm.XdmManager;
@@ -123,12 +124,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
         mPresenceSubscriber.initialize();
     }
 
-    /**
-     * Start the IMS service
-     * 
-     * @throws NetworkException
-     * @throws PayloadException
-     */
+    @Override
     public synchronized void start() throws PayloadException, NetworkException {
         if (isServiceStarted()) {
             // Already started
@@ -215,8 +211,8 @@ public class PresenceService extends ImsService implements AddressBookEventListe
      * We create a new contact with the adequate state for each RCS number in the XDM lists that is
      * not already existing on the phone
      * 
-     * @param list of granted contacts
-     * @param list of blocked contacts
+     * @param grantedContacts of granted contacts
+     * @param blockedContacts of blocked contacts
      * @throws PayloadException
      */
     private void firstLaunchOrAccountChangedCheck(Set<ContactId> grantedContacts,
@@ -282,13 +278,9 @@ public class PresenceService extends ImsService implements AddressBookEventListe
         }
     }
 
-    /**
-     * Stop the IMS service
-     * 
-     * @throws NetworkException
-     * @throws PayloadException
-     */
-    public synchronized void stop() throws PayloadException, NetworkException {
+    @Override
+    public synchronized void stop(ImsServiceSession.TerminationReason reasonCode)
+            throws PayloadException, NetworkException {
         if (!isServiceStarted()) {
             // Already stopped
             return;
