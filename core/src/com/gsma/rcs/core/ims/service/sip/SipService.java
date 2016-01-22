@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,6 +28,7 @@ import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.ImsService;
+import com.gsma.rcs.core.ims.service.ImsServiceSession;
 import com.gsma.rcs.core.ims.service.sip.messaging.GenericSipMsrpSession;
 import com.gsma.rcs.core.ims.service.sip.messaging.OriginatingSipMsrpSession;
 import com.gsma.rcs.core.ims.service.sip.messaging.TerminatingSipMsrpSession;
@@ -72,12 +73,12 @@ public class SipService extends ImsService {
     /**
      * GenericSipMsrpSessionCache with SessionId as key
      */
-    private Map<String, GenericSipMsrpSession> mGenericSipMsrpSessionCache = new HashMap<String, GenericSipMsrpSession>();
+    private Map<String, GenericSipMsrpSession> mGenericSipMsrpSessionCache = new HashMap<>();
 
     /**
      * GenericSipRtpSessionCache with SessionId as key
      */
-    private Map<String, GenericSipRtpSession> mGenericSipRtpSessionCache = new HashMap<String, GenericSipRtpSession>();
+    private Map<String, GenericSipRtpSession> mGenericSipRtpSessionCache = new HashMap<>();
 
     private final ContactManager mContactManager;
 
@@ -85,20 +86,22 @@ public class SipService extends ImsService {
 
     private MultimediaSessionServiceImpl mMmSessionService;
 
-    private Handler mMultimediaMessagingOperationHandler;
-    private Handler mMultimediaStreamingOperationHandler;
+    private final Handler mMultimediaMessagingOperationHandler;
+    private final Handler mMultimediaStreamingOperationHandler;
 
     /**
      * Constructor
      * 
      * @param parent IMS module
      * @param contactManager ContactManager
-     * @param rcsSettings
+     * @param rcsSettings the RCS settings accessor
      */
     public SipService(ImsModule parent, ContactManager contactManager, RcsSettings rcsSettings) {
         super(parent, true);
         mContactManager = contactManager;
         mRcsSettings = rcsSettings;
+        mMultimediaMessagingOperationHandler = allocateBgHandler(MM_MESSAGING_OPERATION_THREAD_NAME);
+        mMultimediaStreamingOperationHandler = allocateBgHandler(MM_STREAMING_OPERATION_THREAD_NAME);
     }
 
     private Handler allocateBgHandler(String threadName) {
@@ -122,35 +125,26 @@ public class SipService extends ImsService {
         mMultimediaStreamingOperationHandler.post(runnable);
     }
 
-    /**
-     * /** Start the IMS service
-     */
+    @Override
     public synchronized void start() {
         if (isServiceStarted()) {
             // Already started
             return;
         }
         setServiceStarted(true);
-
-        mMultimediaMessagingOperationHandler = allocateBgHandler(MM_MESSAGING_OPERATION_THREAD_NAME);
-        mMultimediaStreamingOperationHandler = allocateBgHandler(MM_STREAMING_OPERATION_THREAD_NAME);
     }
 
-    /**
-     * Stop the IMS service
-     */
-    public synchronized void stop() {
+    @Override
+    public synchronized void stop(ImsServiceSession.TerminationReason reasonCode) {
         if (!isServiceStarted()) {
             // Already stopped
             return;
         }
         setServiceStarted(false);
-
-        mMultimediaMessagingOperationHandler.getLooper().quit();
-        mMultimediaMessagingOperationHandler = null;
-
-        mMultimediaStreamingOperationHandler.getLooper().quit();
-        mMultimediaStreamingOperationHandler = null;
+        if (ImsServiceSession.TerminationReason.TERMINATION_BY_SYSTEM == reasonCode) {
+            mMultimediaMessagingOperationHandler.getLooper().quit();
+            mMultimediaStreamingOperationHandler.getLooper().quit();
+        }
     }
 
     /**
@@ -346,8 +340,7 @@ public class SipService extends ImsService {
     public void addSession(GenericSipMsrpSession session) {
         final String sessionId = session.getSessionID();
         if (sLogger.isActivated()) {
-            sLogger.debug(new StringBuilder("Add GenericSipMsrpSession with sessionId '")
-                    .append(sessionId).append("'").toString());
+            sLogger.debug("Add GenericSipMsrpSession with sessionId '" + sessionId + "'");
         }
         synchronized (getImsServiceSessionOperationLock()) {
             mGenericSipMsrpSessionCache.put(sessionId, session);
@@ -358,8 +351,7 @@ public class SipService extends ImsService {
     public void removeSession(final GenericSipMsrpSession session) {
         final String sessionId = session.getSessionID();
         if (sLogger.isActivated()) {
-            sLogger.debug(new StringBuilder("Remove GenericSipMsrpSession with sessionId '")
-                    .append(sessionId).append("'").toString());
+            sLogger.debug("Remove GenericSipMsrpSession with sessionId '" + sessionId + "'");
         }
         synchronized (getImsServiceSessionOperationLock()) {
             mGenericSipMsrpSessionCache.remove(sessionId);
@@ -369,8 +361,7 @@ public class SipService extends ImsService {
 
     public GenericSipMsrpSession getGenericSipMsrpSession(String sessionId) {
         if (sLogger.isActivated()) {
-            sLogger.debug(new StringBuilder("Get GenericSipMsrpSession with sessionId '")
-                    .append(sessionId).append("'").toString());
+            sLogger.debug("Get GenericSipMsrpSession with sessionId '" + sessionId + "'");
         }
         synchronized (getImsServiceSessionOperationLock()) {
             return mGenericSipMsrpSessionCache.get(sessionId);
@@ -380,8 +371,7 @@ public class SipService extends ImsService {
     public void addSession(GenericSipRtpSession session) {
         final String sessionId = session.getSessionID();
         if (sLogger.isActivated()) {
-            sLogger.debug(new StringBuilder("Add GenericSipRtpSession with sessionId '")
-                    .append(sessionId).append("'").toString());
+            sLogger.debug("Add GenericSipRtpSession with sessionId '" + sessionId + "'");
         }
         synchronized (getImsServiceSessionOperationLock()) {
             mGenericSipRtpSessionCache.put(sessionId, session);
@@ -392,8 +382,7 @@ public class SipService extends ImsService {
     public void removeSession(final GenericSipRtpSession session) {
         final String sessionId = session.getSessionID();
         if (sLogger.isActivated()) {
-            sLogger.debug(new StringBuilder("Remove GenericSipRtpSession with sessionId '")
-                    .append(sessionId).append("'").toString());
+            sLogger.debug("Remove GenericSipRtpSession with sessionId '" + sessionId + "'");
         }
         synchronized (getImsServiceSessionOperationLock()) {
             mGenericSipRtpSessionCache.remove(sessionId);
@@ -403,8 +392,7 @@ public class SipService extends ImsService {
 
     public GenericSipRtpSession getGenericSipRtpSession(String sessionId) {
         if (sLogger.isActivated()) {
-            sLogger.debug(new StringBuilder("Get GenericSipRtpSession with sessionId '")
-                    .append(sessionId).append("'").toString());
+            sLogger.debug("Get GenericSipRtpSession with sessionId '" + sessionId + "'");
         }
         synchronized (getImsServiceSessionOperationLock()) {
             return mGenericSipRtpSessionCache.get(sessionId);
