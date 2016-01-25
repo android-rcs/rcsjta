@@ -82,9 +82,9 @@ public abstract class GenericSipRtpSession extends GenericSipSession implements 
      * @param parent IMS service
      * @param contact Remote contact Id
      * @param featureTag Feature tag
-     * @param rcsSettings
+     * @param rcsSettings RCS settings
      * @param timestamp Local timestamp for the session
-     * @param contactManager
+     * @param contactManager Contact manager
      */
     public GenericSipRtpSession(SipService parent, ContactId contact, String featureTag,
             RcsSettings rcsSettings, long timestamp, ContactManager contactManager) {
@@ -198,7 +198,6 @@ public abstract class GenericSipRtpSession extends GenericSipSession implements 
         if (!mMediaSessionStarted) {
             throw new SessionNotEstablishedException("Unable to send payload!");
         }
-        // TODO 1.6: use content type
         mDataSender.addFrame(content, System.currentTimeMillis());
     }
 
