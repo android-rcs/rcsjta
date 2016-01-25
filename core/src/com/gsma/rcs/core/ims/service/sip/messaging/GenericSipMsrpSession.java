@@ -81,9 +81,9 @@ public abstract class GenericSipMsrpSession extends GenericSipSession implements
      * @param parent SIP service
      * @param contact Remote contact Id
      * @param featureTag Feature tag
-     * @param rcsSettings
+     * @param rcsSettings RCS settings
      * @param timestamp Local timestamp for the session
-     * @param contactManager
+     * @param contactManager Contact manager
      */
     public GenericSipMsrpSession(SipService parent, ContactId contact, String featureTag,
             RcsSettings rcsSettings, long timestamp, ContactManager contactManager) {

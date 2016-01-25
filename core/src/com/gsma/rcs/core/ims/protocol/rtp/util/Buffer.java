@@ -349,7 +349,7 @@ public class Buffer {
     /**
      * Set the buffer fragments size
      * 
-     * @param fragments the fragments size to set
+     * @param fragmentsSize the fragments size to set
      */
     public void setFragmentsSize(int fragmentsSize) {
         this.fragmentsSize = fragmentsSize;
