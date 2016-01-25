@@ -151,15 +151,14 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
             return ReasonCode.FAILED_DISPLAY;
         }
 
-        throw new IllegalArgumentException(new StringBuilder(
-                "Received invalid imdn notification type:'").append(notificationType).append("'")
-                .toString());
+        throw new IllegalArgumentException("Received invalid IMDN notification type:'"
+                + notificationType + "'");
     }
 
     public void ensureThumbnailIsDeleted(String transferId) {
-        String icon = mMessagingLog.getFileTransferIcon(transferId);
+        Uri icon = mMessagingLog.getFileTransferIcon(transferId);
         if (icon != null) {
-            new File(icon).delete();
+            new File(icon.getPath()).delete();
         }
     }
 
@@ -420,12 +419,10 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
             return FileTransferProtocol.HTTP;
         } else {
             if (sLogger.isActivated()) {
-                sLogger.debug(new StringBuilder(
-                        "There are are no available capabilities : FTMsrp(Self)")
-                        .append(ftMsrpSupportedforSelf).append(" FTHttp(Self)")
-                        .append(ftHttpSupportedforSelf).append(" FTMsrp(Remote)")
-                        .append(ftMsrpSupportedforRemote).append(" FTHttp(Remote)")
-                        .append(ftHttpSupportedforRemote).toString());
+                sLogger.debug("There are are no available capabilities : FTMsrp(Self)"
+                        + ftMsrpSupportedforSelf + " FTHttp(Self)" + ftHttpSupportedforSelf
+                        + " FTMsrp(Remote)" + ftMsrpSupportedforRemote + " FTHttp(Remote)"
+                        + ftHttpSupportedforRemote);
             }
             return null;
         }
@@ -481,9 +478,8 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         FileTransferProtocol ftProtocol = getFileTransferProtocolForOneToOneFileTransfer(contact);
         if (ftProtocol == null) {
             throw new ServerApiGenericException(
-                    new StringBuilder(
-                            "No valid file transfer protocol could be determined for dequeueing file with fileTransferId '")
-                            .append(fileTransferId).append("'!").toString());
+                    "No valid file transfer protocol could be determined for dequeueing file with fileTransferId '"
+                            + fileTransferId + "'!");
         }
         FileSharingSession session = mImService.createFileTransferSession(fileTransferId, contact,
                 file, fileIcon, timestamp, ftProtocol);
@@ -532,9 +528,8 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         FileTransferProtocol ftProtocol = getFileTransferProtocolForOneToOneFileTransfer(contact);
         if (ftProtocol == null) {
             throw new ServerApiGenericException(
-                    new StringBuilder(
-                            "No valid file transfer protocol could be determined for resending file with fileTransferId '")
-                            .append(fileTransferId).append("'!").toString());
+                    "No valid file transfer protocol could be determined for resending file with fileTransferId '"
+                            + fileTransferId + "'!");
         }
 
         final FileSharingSession session = mImService.createFileTransferSession(fileTransferId,
@@ -561,9 +556,8 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
             Capabilities remoteCapabilities = mContactManager.getContactCapabilities(contact);
             if (remoteCapabilities == null) {
                 if (sLogger.isActivated()) {
-                    sLogger.debug(new StringBuilder(
-                            "Cannot transfer file as the capabilities of contact ").append(contact)
-                            .append(" are not known.").toString());
+                    sLogger.debug("Cannot transfer file as the capabilities of contact " + contact
+                            + " are not known.");
                 }
                 return false;
             }
@@ -585,11 +579,9 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
                     }
                     if (!mImService.isCapabilitiesValid(remoteCapabilities)) {
                         if (sLogger.isActivated()) {
-                            sLogger.debug(new StringBuilder(
-                                    "Cannot transfer file as the cached capabilities of contact ")
-                                    .append(contact)
-                                    .append(" are not valid anymore for one-to-one communication.")
-                                    .toString());
+                            sLogger.debug("Cannot transfer file as the cached capabilities of contact "
+                                    + contact
+                                    + " are not valid anymore for one-to-one communication.");
                         }
                         return false;
                     }
@@ -688,30 +680,23 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         try {
             if (!mRcsSettings.isGroupChatActivated()) {
                 if (sLogger.isActivated()) {
-                    sLogger.debug(new StringBuilder(
-                            "Cannot transfer file to group chat with group chat Id '")
-                            .append(chatId).append("' as group chat feature is not supported.")
-                            .toString());
+                    sLogger.debug("Cannot transfer file to group chat with group chat Id '"
+                            + chatId + "' as group chat feature is not supported.");
                 }
                 return false;
             }
             if (!mRcsSettings.getMyCapabilities().isFileTransferHttpSupported()) {
                 if (sLogger.isActivated()) {
-                    sLogger.debug(new StringBuilder(
-                            "Cannot transfer file to group chat with group chat Id '")
-                            .append(chatId)
-                            .append("' as FT over HTTP capabilities are not supported for self.")
-                            .toString());
+                    sLogger.debug("Cannot transfer file to group chat with group chat Id '"
+                            + chatId + "' as FT over HTTP capabilities are not supported for self.");
                 }
                 return false;
             }
             if (mChatService.isGroupChatAbandoned(chatId)) {
                 if (sLogger.isActivated()) {
-                    sLogger.debug(new StringBuilder(
-                            "Cannot transfer file to group chat with group chat Id '")
-                            .append(chatId)
-                            .append("' as the group chat is abandoned and can no more be used to send or receive messages.")
-                            .toString());
+                    sLogger.debug("Cannot transfer file to group chat with group chat Id '"
+                            + chatId
+                            + "' as the group chat is abandoned and can no more be used to send or receive messages.");
                 }
                 return false;
             }
@@ -720,20 +705,16 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
                 GroupChatInfo groupChat = mMessagingLog.getGroupChatInfo(chatId);
                 if (groupChat == null) {
                     if (sLogger.isActivated()) {
-                        sLogger.debug(new StringBuilder(
-                                "Cannot transfer file to group chat with group chat Id '")
-                                .append(chatId).append("' as the group chat does not exist in DB.")
-                                .toString());
+                        sLogger.debug("Cannot transfer file to group chat with group chat Id '"
+                                + chatId + "' as the group chat does not exist in DB.");
                     }
                     return false;
                 }
                 if (groupChat.getRejoinId() == null) {
                     if (sLogger.isActivated()) {
-                        sLogger.debug(new StringBuilder(
-                                "Cannot transfer file to group chat with group chat Id '")
-                                .append(chatId)
-                                .append("' as there is no ongoing session with corresponding chatId and there exists no rejoinId to rejoin the group chat.")
-                                .toString());
+                        sLogger.debug("Cannot transfer file to group chat with group chat Id '"
+                                + chatId
+                                + "' as there is no ongoing session with corresponding chatId and there exists no rejoinId to rejoin the group chat.");
                     }
                     return false;
                 }
@@ -783,14 +764,14 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
             session.startSession();
         } else if (groupChatSession.isInitiatedByRemote()) {
             if (sLogger.isActivated()) {
-                sLogger.debug(new StringBuilder("Group chat session with chatId '").append(chatId)
-                        .append("' is pending for acceptance, accept it.").toString());
+                sLogger.debug("Group chat session with chatId '" + chatId
+                        + "' is pending for acceptance, accept it.");
             }
             groupChatSession.acceptSession();
         } else {
-            throw new SessionNotEstablishedException(new StringBuilder(
-                    "The existing group chat session with chatId '").append(chatId)
-                    .append("' is not established right now!").toString());
+            throw new SessionNotEstablishedException(
+                    "The existing group chat session with chatId '" + chatId
+                            + "' is not established right now!");
         }
     }
 
@@ -1151,10 +1132,9 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         String msgId = imdn.getMsgId();
         long timestamp = imdn.getDateTime();
         if (sLogger.isActivated()) {
-            sLogger.info(new StringBuilder("Handling group file delivery status; contact=")
-                    .append(contact).append(", msgId=").append(msgId).append(", status=")
-                    .append(status).append(", notificationType=")
-                    .append(imdn.getNotificationType()).toString());
+            sLogger.info("Handling group file delivery status; contact=" + contact + ", msgId="
+                    + msgId + ", status=" + status + ", notificationType="
+                    + imdn.getNotificationType());
         }
         switch (status) {
             case ImdnDocument.DELIVERY_STATUS_DELIVERED:
