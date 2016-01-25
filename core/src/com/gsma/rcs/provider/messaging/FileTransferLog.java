@@ -618,12 +618,12 @@ public class FileTransferLog implements IFileTransferLog {
     }
 
     @Override
-    public String getFileTransferIcon(String fileTransferId) {
+    public Uri getFileTransferIcon(String fileTransferId) {
         Cursor cursor = getFileTransferData(FileTransferData.KEY_FILEICON, fileTransferId);
         if (cursor == null) {
             return null;
         }
-        return getDataAsString(cursor);
+        return Uri.parse(getDataAsString(cursor));
     }
 
     @Override

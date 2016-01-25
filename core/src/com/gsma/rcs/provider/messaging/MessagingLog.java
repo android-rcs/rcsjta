@@ -262,7 +262,7 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
     }
 
     @Override
-    public String getFileTransferIcon(String fileTransferId) {
+    public Uri getFileTransferIcon(String fileTransferId) {
         return mFileTransferLog.getFileTransferIcon(fileTransferId);
     }
 
