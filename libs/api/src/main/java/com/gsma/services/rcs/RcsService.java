@@ -68,6 +68,11 @@ public abstract class RcsService {
              * Blackbird version of RCS API
              */
             public final static int BLACKBIRD = 1;
+
+            /**
+             * Crane Priority Release version of RCS API
+             */
+            public final static int CPR = 2;
         }
 
         /**
@@ -80,12 +85,12 @@ public abstract class RcsService {
          * 
          * @see VERSION_CODES
          */
-        public static final int API_VERSION = VERSION_CODES.BLACKBIRD;
+        public static final int API_VERSION = VERSION_CODES.CPR;
 
         /**
          * Internal number used by the underlying source control to represent this build
          */
-        public static final int API_INCREMENTAL = 1;
+        public static final int API_INCREMENTAL = 0;
 
         private Build() {
         }

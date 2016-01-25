@@ -23,7 +23,10 @@ import com.gsma.services.rcs.RcsService.Build;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.widget.TextView;
 
@@ -42,37 +45,52 @@ public class AboutRI extends Activity {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.app_about);
 
-        // Display release number
-        String appRelease = Utils.getApplicationVersion(this);
-        TextView releaseView = (TextView) findViewById(R.id.release);
-        releaseView.setText(getString(R.string.label_about_release, appRelease));
+        // Display application release
+        TextView releaseView = (TextView) findViewById(R.id.app_version);
+        releaseView.setText(getString(R.string.label_about_app_version, getAppVersion()));
 
-        TextView apiView = (TextView) findViewById(R.id.api);
-        apiView.setText(getString(R.string.label_about_api, getBuildNumber()));
+        // Display GSMA version
+        TextView gsmaView = (TextView) findViewById(R.id.gsma_version);
+        gsmaView.setText(getGsmaVersion());
     }
 
     /**
-     * Returns the string representation of the current build
-     * 
-     * @return String
+     * Returns the application version from manifest file
+     *
+     * @return Application version or null if not found
      */
-    private static String getBuildNumber() {
-        return Build.API_CODENAME + " " + getGsmaVersion() + "." + Build.API_INCREMENTAL;
+    private String getAppVersion() {
+        String version = null;
+        try {
+            PackageInfo info = getPackageManager().getPackageInfo(getPackageName(), 0);
+            version = info.versionName + "." + info.versionCode;
+        } catch (PackageManager.NameNotFoundException ignored) {
+        }
+        return version;
     }
 
     /**
-     * Returns the string representation of the supported GSMA version
+     * Returns the GSMA version
      * 
      * @return String
      */
-    private static String getGsmaVersion() {
+    private String getGsmaVersion() {
+        StringBuilder version = new StringBuilder(Build.API_CODENAME);
+        version.append(" ");
         switch (Build.API_VERSION) {
             case Build.VERSION_CODES.BASE:
-                return "Albatros 2.0";
+                version.append("Albatros 2.0.");
+                break;
             case Build.VERSION_CODES.BLACKBIRD:
-                return "Blackbird 1.5";
+                version.append("Blackbird 1.5.");
+                break;
+            case Build.VERSION_CODES.CPR:
+                version.append("Crane Priority Release 1.6.");
+                break;
             default:
-                return "Unknown";
+                version.append("Unknown 0.0");
         }
+        version.append(Build.API_INCREMENTAL);
+        return version.toString();
     }
 }

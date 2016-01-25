@@ -37,8 +37,7 @@
 	
     <!-- About menu -->
     <string name="label_about_title">RCS service</string>
-    <string name="label_about_release">Release: %s</string>
-    <string name="label_about_api">API release: %s</string>
+    <string name="label_about_app_version">App release %s</string>
     <string name="label_api_unavailable">RCS service not available</string>
     <string name="label_api_failed">Call API method has failed</string>
     <string name="label_service_not_available">The service is not available. Please retry later.</string>

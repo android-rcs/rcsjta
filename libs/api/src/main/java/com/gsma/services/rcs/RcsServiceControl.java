@@ -152,7 +152,7 @@ public class RcsServiceControl {
     /**
      * Query RCS stack by sending broadcast intent.
      *
-     * @param action of the intent
+     * @param intent Intent
      * @return the result extra data bundle or null if no response is received due to timeout
      * @throws RcsGenericException raised if timeout
      */

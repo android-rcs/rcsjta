@@ -26,7 +26,7 @@ import com.orangelabs.rcs.core.control.R;
 import android.app.Activity;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.widget.TextView;
 
@@ -45,45 +45,52 @@ public class AboutSettings extends Activity {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.app_about);
 
-        String versionName, versionCode;
+        // Display application release
+        TextView releaseView = (TextView) findViewById(R.id.app_version);
+        releaseView.setText(getString(R.string.label_about_app_version, getAppVersion()));
+
+        // Display GSMA version
+        TextView gsmaView = (TextView) findViewById(R.id.gsma_version);
+        gsmaView.setText(getGsmaVersion());
+    }
+
+    /**
+     * Returns the application version from manifest file
+     *
+     * @return Application version or null if not found
+     */
+    private String getAppVersion() {
+        String version = null;
         try {
-            PackageInfo infos = getPackageManager().getPackageInfo(
-                    RcsServiceControl.RCS_STACK_PACKAGENAME, 0);
-            versionName = infos.versionName;
-            versionCode = getBuildNumber();
-        } catch (NameNotFoundException e) {
-            versionName = getString(R.string.label_api_unavailable);
-            versionCode = getString(R.string.label_api_unavailable);
+            PackageInfo info = getPackageManager().getPackageInfo(getPackageName(), 0);
+            version = info.versionName + "." + info.versionCode;
+        } catch (PackageManager.NameNotFoundException ignored) {
         }
-        TextView releaseView = (TextView) findViewById(R.id.release);
-        releaseView.setText(getString(R.string.label_about_release, versionName));
-        TextView apiView = (TextView) findViewById(R.id.api);
-        apiView.setText(getString(R.string.label_about_api, versionCode));
+        return version;
     }
 
     /**
-     * Returns the string representation of the current build
-     * 
+     * Returns the GSMA version
+     *
      * @return String
      */
-    private String getBuildNumber() {
-        return Build.API_CODENAME + " " + getGsmaVersion(Build.API_VERSION) + '.'
-                + Build.API_INCREMENTAL;
-    }
-
-    /**
-     * Returns the string representation of the supported GSMA version
-     * 
-     * @return String
-     */
-    private String getGsmaVersion(int versionCode) {
-        switch (versionCode) {
+    private String getGsmaVersion() {
+        StringBuilder version = new StringBuilder(Build.API_CODENAME);
+        version.append(" ");
+        switch (Build.API_VERSION) {
             case Build.VERSION_CODES.BASE:
-                return getString(R.string.rcs_settings_label_albatros_20);
+                version.append("Albatros 2.0.");
+                break;
             case Build.VERSION_CODES.BLACKBIRD:
-                return getString(R.string.rcs_settings_label_blackbird_15);
+                version.append("Blackbird 1.5.");
+                break;
+            case Build.VERSION_CODES.CPR:
+                version.append("Crane Priority Release 1.6.");
+                break;
             default:
-                return getString(R.string.rcs_settings_label_unknown);
+                version.append("Unknown 0.0");
         }
+        version.append(Build.API_INCREMENTAL);
+        return version.toString();
     }
 }
