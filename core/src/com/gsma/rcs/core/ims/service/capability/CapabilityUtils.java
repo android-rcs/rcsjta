@@ -141,13 +141,9 @@ public class CapabilityUtils {
         if (rcsSettings.isExtensionsAllowed()) {
             for (String extension : rcsSettings.getSupportedRcsExtensions()) {
                 if (extension.startsWith("gsma.")) {
-                    StringBuilder sb = new StringBuilder(FeatureTags.FEATURE_RCSE_ICSI_EXTENSION)
-                            .append(".").append(extension);
-                    icsiTags.add(sb.toString());
+                    icsiTags.add(FeatureTags.FEATURE_RCSE_ICSI_EXTENSION + "." + extension);
                 } else {
-                    StringBuilder sb = new StringBuilder(FeatureTags.FEATURE_RCSE_IARI_EXTENSION)
-                            .append(".").append(extension);
-                    iariTags.add(sb.toString());
+                    iariTags.add(FeatureTags.FEATURE_RCSE_IARI_EXTENSION + "." + extension);
                 }
             }
             icsiTags.add(FeatureTags.FEATURE_3GPP_EXTENSION);

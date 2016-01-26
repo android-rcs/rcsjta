@@ -471,14 +471,11 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
         mSipService.scheduleMultimediaMessagingOperation(new Runnable() {
             public void run() {
                 try {
-                    if (sLogger.isActivated()) {
-                        sLogger.debug("Flush messages");
-                    }
                     final GenericSipMsrpSession session = mSipService
                             .getGenericSipMsrpSession(mSessionId);
                     if (session == null) {
                         if (sLogger.isActivated()) {
-                            sLogger.debug("Cannot accept: no session ID=".concat(mSessionId));
+                            sLogger.debug("Cannot flush: no session ID=".concat(mSessionId));
                         }
                         return;
                     }
@@ -492,9 +489,8 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
                      * eventually lead to exit the system and thus can bring the whole system down,
                      * which is not intended.
                      */
-                    sLogger.error(
-                            new StringBuilder("Failed to flush messages for session with ID: ").append(
-                                    mSessionId).toString(), e);
+                    sLogger.error("Failed to flush messages for session with ID: ".
+                            concat(mSessionId), e);
                 }
             }
         });

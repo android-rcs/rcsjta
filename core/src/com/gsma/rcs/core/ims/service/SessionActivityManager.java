@@ -41,17 +41,14 @@ public class SessionActivityManager extends PeriodicRefresher {
     /**
      * ImsServiceSession
      */
-    private ImsServiceSession mSession;
+    private final ImsServiceSession mSession;
 
     /**
      * Timeout
      */
-    private long mTimeout;
+    private final long mTimeout;
 
-    /**
-     * The logger
-     */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private static final Logger sLogger = Logger.getLogger(SessionActivityManager.class.getSimpleName());
 
     /**
      * Constructor
@@ -76,14 +73,14 @@ public class SessionActivityManager extends PeriodicRefresher {
      */
     public void start() {
         if (mTimeout == 0) {
-            logger.info(new StringBuilder(
-                    "Activity manager is disabled (no idle timeout)").toString());
+            if (sLogger.isActivated()) {
+                sLogger.info("Activity manager is disabled (no idle timeout)");
+            }
             return;
         }
 
-        if (logger.isActivated()) {
-            logger.info(new StringBuilder("Start the activity manager for ").append(mTimeout)
-                    .append("ms").toString());
+        if (sLogger.isActivated()) {
+            sLogger.info("Start the activity manager for " + mTimeout + "ms");
         }
 
         // Reset the inactivity timestamp
@@ -97,8 +94,8 @@ public class SessionActivityManager extends PeriodicRefresher {
      * Stop manager
      */
     public void stop() {
-        if (logger.isActivated()) {
-            logger.info("Stop the activity manager");
+        if (sLogger.isActivated()) {
+            sLogger.info("Stop the activity manager");
         }
 
         // Stop timer
@@ -115,15 +112,15 @@ public class SessionActivityManager extends PeriodicRefresher {
         long timeout = mTimeout;
         long inactivityPeriod = System.currentTimeMillis() - mActivityTimestamp;
         long remainingPeriod = timeout - inactivityPeriod;
-        if (logger.isActivated()) {
-            logger.debug(new StringBuilder("Check inactivity period: inactivity=")
+        if (sLogger.isActivated()) {
+            sLogger.debug(new StringBuilder("Check inactivity period: inactivity=")
                     .append(inactivityPeriod).append(", remaining=").append(remainingPeriod)
                     .toString());
         }
 
         if (inactivityPeriod >= timeout) {
-            if (logger.isActivated()) {
-                logger.debug(new StringBuilder("No activity on the session during ")
+            if (sLogger.isActivated()) {
+                sLogger.debug(new StringBuilder("No activity on the session during ")
                         .append(timeout).append("ms: abort the session").toString());
             }
             mSession.handleInactivityEvent();

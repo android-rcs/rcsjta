@@ -164,7 +164,7 @@ public abstract class GenericSipMsrpSession extends GenericSipSession implements
             .append("a=path:").append(getMsrpMgr().getLocalMsrpPath()).append(SipUtils.CRLF)
             .append("a=max-size:").append(getMaxMessageSize()).append(SipUtils.CRLF);
 
-        if ((acceptType != null) && (acceptType.length > 0)) {
+        if (acceptType != null && acceptType.length > 0) {
             StringBuffer types = new StringBuffer();
             types.append(acceptType[0]);
             for(int i=1; i < acceptType.length; i++) {
@@ -175,7 +175,7 @@ public abstract class GenericSipMsrpSession extends GenericSipSession implements
             sdp.append("a=accept-types:").append(GenericSipMsrpSession.MIME_TYPE).append(SipUtils.CRLF);
         }
 
-        if ((acceptWrappedType != null) && (acceptWrappedType.length > 0)) {
+        if (acceptWrappedType != null && acceptWrappedType.length > 0) {
             StringBuffer types = new StringBuffer();
             types.append(acceptWrappedType[0]);
             for(int i=1; i < acceptWrappedType.length; i++) {

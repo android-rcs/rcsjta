@@ -2142,19 +2142,19 @@ public class RcsSettings {
         if (ext == null) {
             return false;
         }
-        if (ext.equals(EnrichCallingService.CALL_COMPOSER_FEATURE_TAG) &&
+        if (EnrichCallingService.CALL_COMPOSER_FEATURE_TAG.equals(ext) &&
                 !isCallComposerSupported()) {
             return false;
         }
-        if (ext.equals(EnrichCallingService.SHARED_MAP_SERVICE_ID) &&
+        if (EnrichCallingService.SHARED_MAP_SERVICE_ID.equals(ext) &&
                 !isSharedMapSupported()) {
             return false;
         }
-        if (ext.equals(EnrichCallingService.SHARED_SKETCH_SERVICE_ID) &&
+        if (EnrichCallingService.SHARED_SKETCH_SERVICE_ID.equals(ext) &&
                 !isSharedSketchSupported()) {
             return false;
         }
-        if (ext.equals(EnrichCallingService.POST_CALL_SERVICE_ID) &&
+        if (EnrichCallingService.POST_CALL_SERVICE_ID.equals(ext) &&
                 !isPostCallSupported()) {
             return false;
         }

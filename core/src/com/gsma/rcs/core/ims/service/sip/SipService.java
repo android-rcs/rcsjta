@@ -101,11 +101,7 @@ public class SipService extends ImsService {
      *
      * @param parent IMS module
      * @param contactManager ContactManager
-<<<<<<< HEAD
-     * @param rcsSettings RCS settings
-=======
      * @param rcsSettings the RCS settings accessor
->>>>>>> 02fe761cd293df32ecaac58b2455ac946131c6f4
      */
     public SipService(ImsModule parent, ContactManager contactManager, RcsSettings rcsSettings) {
         super(parent, true);
@@ -127,7 +123,7 @@ public class SipService extends ImsService {
 
     public void register(MultimediaSessionServiceImpl service) {
         if (sLogger.isActivated()) {
-            sLogger.debug(service.getClass().getName() + " registered ok.");
+            sLogger.debug(service.getClass().getName()  + " registered ok.");
         }
         mMmSessionService = service;
     }
