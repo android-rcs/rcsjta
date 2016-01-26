@@ -235,8 +235,7 @@ public class CapabilityUtils {
                         tag.contains(FeatureTags.FEATURE_RCSE_ICSI_EXTENSION + ".gsma")) {
                 // Support an RCS extension
                 String serviceId = extractServiceId(tag);
-                if ((serviceId != null) &&
-                        !serviceId.equals("gsma.rcs.extension")) {
+                if (!"gsma.rcs.extension".equals(serviceId)) {
                     capaBuilder.addExtension(serviceId);
                 }
             } else if (tag.contains(FeatureTags.FEATURE_SIP_AUTOMATA)) {

@@ -337,15 +337,9 @@ public class HttpsProvisioningManager {
     /**
      * Send the first HTTPS request to require the one time password (OTP)
      *
-<<<<<<< HEAD
-     * @param msisdn MSISDN
-     * @param primaryUri Primary choice request URI
-     * @param secondaryUri Secondary choice request URI
-=======
      * @param msisdn the phone number
      * @param primaryUri the primary URI
      * @param secondaryUri the secondary URI
->>>>>>> 02fe761cd293df32ecaac58b2455ac946131c6f4
      * @return Instance of {@link HttpsProvisioningResult} or null in case of internal exception
      * @throws IOException
      */

@@ -26,7 +26,7 @@ public class InstantMessageReceiver extends BroadcastReceiver {
         String action = intent.getAction();
         if (!InstantMultimediaMessageIntent.ACTION_NEW_INSTANT_MESSAGE.equals(action)) {
             if (LogUtils.isActive) {
-                Log.d(LOGTAG, "Unknown action=".concat(action));
+                Log.d(LOGTAG, "Unknown action=" + action);
             }
             return;
         }
