@@ -623,7 +623,11 @@ public class FileTransferLog implements IFileTransferLog {
         if (cursor == null) {
             return null;
         }
-        return Uri.parse(getDataAsString(cursor));
+        String uriString = getDataAsString(cursor);
+        if (uriString == null) {
+            return null;
+        }
+        return Uri.parse(uriString);
     }
 
     @Override
