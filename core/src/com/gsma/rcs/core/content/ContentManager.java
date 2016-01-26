@@ -31,6 +31,7 @@ import com.gsma.rcs.core.ims.protocol.sdp.MediaAttribute;
 import com.gsma.rcs.core.ims.protocol.sdp.MediaDescription;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpParser;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
+import com.gsma.rcs.platform.file.FileFactory;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.MimeManager;
 
@@ -327,5 +328,76 @@ public class ContentManager {
         String filename = SipUtils.extractParameter(fileSelectorValue, "name:", "");
         Uri file = ContentManager.generateUriForReceivedContent(filename, mime, rcsSettings);
         return ContentManager.createMmContent(file, size, filename);
+    }
+
+    /**
+     * Get sent photo root directory
+     * 
+     * @param rcsSettings
+     * @return Path of sent photo root directory
+     */
+    public static String getSentPhotoRootDirectory(RcsSettings rcsSettings) {
+        return rcsSettings.getPhotoRootDirectory().concat(FileFactory.SENT_DIRECTORY);
+    }
+
+    /**
+     * Get sent video root directory
+     * 
+     * @param rcsSettings
+     * @return Path of sent video root directory
+     */
+    public static String getSentVideoRootDirectory(RcsSettings rcsSettings) {
+        return rcsSettings.getVideoRootDirectory().concat(FileFactory.SENT_DIRECTORY);
+    }
+
+    /**
+     * Get sent file root directory
+     * 
+     * @param rcsSettings
+     * @return Path of sent file root directory
+     */
+    public static String getSentFileRootDirectory(RcsSettings rcsSettings) {
+        return rcsSettings.getFileRootDirectory().concat(FileFactory.SENT_DIRECTORY);
+    }
+
+    /**
+     * Generate Uri for saving the content that has to be transferred
+     * 
+     * @param fileName
+     * @param mime
+     * @param rcsSettings
+     * @return Uri
+     */
+    public static Uri generateUriForSentContent(String fileName, String mime,
+            RcsSettings rcsSettings) {
+        String path;
+        if (MimeManager.isImageType(mime)) {
+            path = getSentPhotoRootDirectory(rcsSettings);
+        } else if (MimeManager.isVideoType(mime)) {
+            path = getSentVideoRootDirectory(rcsSettings);
+        } else {
+            path = getSentFileRootDirectory(rcsSettings);
+        }
+        /*
+         * Check that the fileName will not overwrite existing file We modify it if a file of the
+         * same name exists, by appending _1 before the extension For example if image.jpeg exists,
+         * next file will be image_1.jpeg, then image_2.jpeg etc.
+         */
+        StringBuilder extension = new StringBuilder("");
+        if ((fileName != null) && (fileName.indexOf('.') != -1)) {
+            /* if extension is present, split it */
+            extension = new StringBuilder(".")
+                    .append(fileName.substring(fileName.lastIndexOf('.') + 1));
+            fileName = fileName.substring(0, fileName.lastIndexOf('.'));
+        }
+        String destination = fileName;
+        int incrementIndex = 1;
+        while (new File(new StringBuilder(path).append(destination).append(extension).toString())
+                .exists()) {
+            destination = new StringBuilder(fileName).append('_').append(incrementIndex).toString();
+            incrementIndex++;
+        }
+        return Uri.fromFile(new File(new StringBuilder(path).append(destination).append(extension)
+                .toString()));
     }
 }
