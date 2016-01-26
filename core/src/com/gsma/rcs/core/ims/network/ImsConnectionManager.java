@@ -505,6 +505,23 @@ public class ImsConnectionManager implements Runnable {
     }
 
     /**
+     * Disconnect from IMS network interface and de-register due to battery low
+     * 
+     * @throws PayloadException
+     * @throws NetworkException
+     * @throws ContactManagerException
+     */
+    private void disconnectFromImsByBatteryLow() throws PayloadException, NetworkException,
+            ContactManagerException {
+        if (sLogger.isActivated()) {
+            sLogger.debug("Disconnect from IMS network interface and de-register due to battery low");
+        }
+        stopImsConnection(TerminationReason.TERMINATION_BY_LOW_BATTERY);
+        mCurrentNetworkInterface.unregister();
+        mCurrentNetworkInterface.getNetworkAccess().disconnect();
+    }
+
+    /**
      * Start the IMS connection
      */
     private synchronized void startImsConnection() {
@@ -726,8 +743,7 @@ public class ImsConnectionManager implements Runnable {
                             if (!mDisconnectedByBattery) {
                                 mDisconnectedByBattery = true;
 
-                                // Disconnect
-                                disconnectFromIms();
+                                disconnectFromImsByBatteryLow();
                             }
                         } else {
                             if (mDisconnectedByBattery) {

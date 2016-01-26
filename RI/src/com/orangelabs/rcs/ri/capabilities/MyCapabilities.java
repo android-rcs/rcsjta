@@ -61,18 +61,18 @@ public class MyCapabilities extends RcsActivity {
             // Set capabilities
             CheckBox imageCSh = (CheckBox) findViewById(R.id.image_sharing);
             imageCSh.setChecked(capabilities
-                    .hasCapabilities(Capabilities.CAPABILITY_IMAGE_SHARING_SUPPORT));
+                    .hasCapabilities(Capabilities.CAPABILITY_IMAGE_SHARING));
             CheckBox videoCSh = (CheckBox) findViewById(R.id.video_sharing);
             videoCSh.setChecked(capabilities
-                    .hasCapabilities(Capabilities.CAPABILITY_VIDEO_SHARING_SUPPORT));
+                    .hasCapabilities(Capabilities.CAPABILITY_VIDEO_SHARING));
             CheckBox ft = (CheckBox) findViewById(R.id.file_transfer);
             ft.setChecked(capabilities
-                    .hasCapabilities(Capabilities.CAPABILITY_FILE_TRANSFER_SUPPORT));
+                    .hasCapabilities(Capabilities.CAPABILITY_FILE_TRANSFER));
             CheckBox im = (CheckBox) findViewById(R.id.im);
-            im.setChecked(capabilities.hasCapabilities(Capabilities.CAPABILITY_IM_SUPPORT));
+            im.setChecked(capabilities.hasCapabilities(Capabilities.CAPABILITY_IM));
             CheckBox geolocationPush = (CheckBox) findViewById(R.id.geoloc_push);
             geolocationPush.setChecked(capabilities
-                    .hasCapabilities(Capabilities.CAPABILITY_GEOLOC_PUSH_SUPPORT));
+                    .hasCapabilities(Capabilities.CAPABILITY_GEOLOC_PUSH));
             TextView extensions = (TextView) findViewById(R.id.extensions);
             extensions.setText(RequestCapabilities.getExtensions(capabilities));
             CheckBox automata = (CheckBox) findViewById(R.id.automata);

@@ -27,6 +27,7 @@ import com.gsma.rcs.platform.FactoryException;
 import android.net.Uri;
 
 import java.io.File;
+import java.io.IOException;
 
 /**
  * File factory
@@ -34,6 +35,8 @@ import java.io.File;
  * @author jexa7410
  */
 public abstract class FileFactory {
+
+    private static final String NO_MEDIA = ".nomedia";
     /**
      * Current platform factory
      */
@@ -111,5 +114,16 @@ public abstract class FileFactory {
             }
         }
         return true;
+    }
+
+    /**
+     * Creates a .nomedia file if not already exist
+     * 
+     * @param path Directory path
+     * @throws IOException
+     */
+    public static void setNoMedia(String path) throws IOException {
+        File file = new File(path.concat(NO_MEDIA));
+        file.createNewFile();
     }
 }

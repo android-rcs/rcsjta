@@ -175,7 +175,7 @@ public interface IFileTransferLog {
      * @param fileTransferId the file transfer ID
      * @return the icon or null if there s none
      */
-    String getFileTransferIcon(String fileTransferId);
+    Uri getFileTransferIcon(String fileTransferId);
 
     /**
      * Set file upload TID
@@ -285,7 +285,7 @@ public interface IFileTransferLog {
     /**
      * Get interrupted file transfers
      * 
-     * @return
+     * @return Cursor
      */
     Cursor getInterruptedFileTransfers();
 

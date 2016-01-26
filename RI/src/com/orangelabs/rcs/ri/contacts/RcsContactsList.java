@@ -118,15 +118,15 @@ public class RcsContactsList extends RcsListActivity {
                 String displayName = mRcsContactUtil.getDisplayName(item.getContactId());
                 holder.numberText.setText(getString(R.string.label_contact, displayName));
                 Capabilities capa = item.getCapabilities();
-                holder.imBox.setChecked(capa.hasCapabilities(Capabilities.CAPABILITY_IM_SUPPORT));
+                holder.imBox.setChecked(capa.hasCapabilities(Capabilities.CAPABILITY_IM));
                 holder.ftBox.setChecked(capa
-                        .hasCapabilities(Capabilities.CAPABILITY_FILE_TRANSFER_SUPPORT));
+                        .hasCapabilities(Capabilities.CAPABILITY_FILE_TRANSFER));
                 holder.ishBox.setChecked(capa
-                        .hasCapabilities(Capabilities.CAPABILITY_IMAGE_SHARING_SUPPORT));
+                        .hasCapabilities(Capabilities.CAPABILITY_IMAGE_SHARING));
                 holder.vshBox.setChecked(capa
-                        .hasCapabilities(Capabilities.CAPABILITY_VIDEO_SHARING_SUPPORT));
+                        .hasCapabilities(Capabilities.CAPABILITY_VIDEO_SHARING));
                 holder.geolocBox.setChecked(capa
-                        .hasCapabilities(Capabilities.CAPABILITY_GEOLOC_PUSH_SUPPORT));
+                        .hasCapabilities(Capabilities.CAPABILITY_GEOLOC_PUSH));
                 holder.extsText.setText(capa.getSupportedExtensions().toString());
                 holder.automataBox.setChecked(capa.isAutomata());
                 long lastRefresh = capa.getTimestamp();

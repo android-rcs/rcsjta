@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,6 +30,7 @@ import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.ImsService;
+import com.gsma.rcs.core.ims.service.ImsServiceSession;
 import com.gsma.rcs.core.ims.service.capability.Capabilities.CapabilitiesBuilder;
 import com.gsma.rcs.core.ims.service.capability.SyncContactTask.ISyncContactTaskListener;
 import com.gsma.rcs.provider.contact.ContactManager;
@@ -80,7 +81,7 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
      * This purpose of this handler is to make the request asynchronous with the mechanisms provider
      * by android by placing the request in the main thread message queue.
      */
-    private Handler mCapabilityOperationsHandler;
+    private final Handler mCapabilityOperationsHandler;
 
     private CapabilityServiceImpl mCapabilityService;
 
@@ -88,7 +89,6 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
      * Constructor
      * 
      * @param parent IMS module
-     * @param core The core instance
      * @param rcsSettings RCS settings accessor
      * @param contactsManager Contact manager accessor
      * @param addressBookManager The address book manager instance
@@ -100,6 +100,7 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
         mContactManager = contactsManager;
         mAddressBookManager = addressBookManager;
 
+        mCapabilityOperationsHandler = allocateBgHandler(CAPABILITIES_OPERATION_THREAD_NAME);
         mISyncContactTaskListener = new ISyncContactTaskListener() {
             @Override
             public void endOfSyncContactTask() {
@@ -137,16 +138,13 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
         mCapabilityOperationsHandler.post(runnable);
     }
 
-    /**
-     * Start the IMS service
-     */
+    @Override
     public synchronized void start() {
         if (isServiceStarted()) {
             /* Already started */
             return;
         }
         setServiceStarted(true);
-        mCapabilityOperationsHandler = allocateBgHandler(CAPABILITIES_OPERATION_THREAD_NAME);
         mOptionsManager.start();
 
         /* Force a first capability check */
@@ -158,10 +156,8 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
         }
     }
 
-    /**
-     * Stop the IMS service
-     */
-    public synchronized void stop() {
+    @Override
+    public synchronized void stop(ImsServiceSession.TerminationReason reasonCode) {
         if (!isServiceStarted()) {
             /* Already stopped */
             return;
@@ -175,8 +171,9 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
         mAddressBookManager.removeAddressBookListener(this);
         mOptionsManager.stop();
 
-        mCapabilityOperationsHandler.getLooper().quit();
-        mCapabilityOperationsHandler = null;
+        if (ImsServiceSession.TerminationReason.TERMINATION_BY_SYSTEM == reasonCode) {
+            mCapabilityOperationsHandler.getLooper().quit();
+        }
 
         if (sLogger.isActivated()) {
             sLogger.debug("Capability service stop");
@@ -240,8 +237,6 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
      * Receive a capability request (options procedure)
      * 
      * @param options Received options message
-     * @throws NetworkException
-     * @throws PayloadException
      */
     public void onCapabilityRequestReceived(final SipRequest options) {
         scheduleCapabilityOperation(new Runnable() {
@@ -349,9 +344,8 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
             onReceivedCapabilities(contact, capabilities);
 
         } catch (FileAccessException e) {
-            throw new PayloadException(new StringBuilder(
-                    "Failed to reset content share capabilities for contact : ").append(contact)
-                    .toString(), e);
+            throw new PayloadException("Failed to reset content share capabilities for contact : "
+                    + contact, e);
         }
     }
 

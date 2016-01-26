@@ -26,6 +26,8 @@ import java.util.Set;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.gsma.services.rcs.contact.ContactId;
+
 /**
  * Capabilities of a contact. This class encapsulates the different capabilities which may be
  * supported by the local user or a remote contact.
@@ -77,27 +79,27 @@ public class Capabilities implements Parcelable {
     /**
      * Indicates the file transfer capability is supported.
      */
-    public static final int CAPABILITY_FILE_TRANSFER_SUPPORT = 0x00000001;
+    public static final int CAPABILITY_FILE_TRANSFER = 0x00000001;
 
     /**
      * Indicates the IM capability is supported.
      */
-    public static final int CAPABILITY_IM_SUPPORT = 0x00000002;
+    public static final int CAPABILITY_IM = 0x00000002;
 
     /**
      * Indicates the geoloc push capability is supported.
      */
-    public static final int CAPABILITY_GEOLOC_PUSH_SUPPORT = 0x00000004;
+    public static final int CAPABILITY_GEOLOC_PUSH = 0x00000004;
 
     /**
      * Indicates the image sharing capability is supported.
      */
-    public static final int CAPABILITY_IMAGE_SHARING_SUPPORT = 0x00000008;
+    public static final int CAPABILITY_IMAGE_SHARING = 0x00000008;
 
     /**
      * Indicates the video sharing capability is supported.
      */
-    public static final int CAPABILITY_VIDEO_SHARING_SUPPORT = 0x00000010;
+    public static final int CAPABILITY_VIDEO_SHARING = 0x00000010;
 
     /**
      * Constructor
@@ -203,8 +205,9 @@ public class Capabilities implements Parcelable {
     /**
      * Is image sharing supported
      *
+     * @deprecated Use {@link #hasCapabilities(int  capabilities)} instead.
+     *
      * @return true if supported else returns false
-     * @hide
      */
     @Deprecated
     public boolean isImageSharingSupported() {
@@ -214,8 +217,9 @@ public class Capabilities implements Parcelable {
     /**
      * Is video sharing supported
      *
+     * @deprecated Use {@link #hasCapabilities(int  capabilities)} instead.
+     *
      * @return true if supported else returns false
-     * @hide
      */
     @Deprecated
     public boolean isVideoSharingSupported() {
@@ -225,8 +229,9 @@ public class Capabilities implements Parcelable {
     /**
      * Is IM session supported
      *
+     * @deprecated Use {@link #hasCapabilities(int  capabilities)} instead.
+     *
      * @return true if supported else returns false
-     * @hide
      */
     @Deprecated
     public boolean isImSessionSupported() {
@@ -236,8 +241,9 @@ public class Capabilities implements Parcelable {
     /**
      * Is file transfer supported
      *
+     * @deprecated Use {@link #hasCapabilities(int  capabilities)} instead.
+     *
      * @return true if supported else returns false
-     * @hide
      */
     @Deprecated
     public boolean isFileTransferSupported() {
@@ -247,8 +253,9 @@ public class Capabilities implements Parcelable {
     /**
      * Is geolocation push supported
      *
+     * @deprecated Use {@link #hasCapabilities(int  capabilities)} instead.
+     *
      * @return true if supported else returns false
-     * @hide
      */
     @Deprecated
     public boolean isGeolocPushSupported() {
@@ -301,11 +308,11 @@ public class Capabilities implements Parcelable {
      * @return the combination of supported capabilities
      */
     private int getSupportedCapabilities() {
-        int result = isCapabilitySupported(mFileTransfer,CAPABILITY_FILE_TRANSFER_SUPPORT);
-        result |= isCapabilitySupported(mImSession, CAPABILITY_IM_SUPPORT);
-        result |= isCapabilitySupported(mGeolocPush, CAPABILITY_GEOLOC_PUSH_SUPPORT);
-        result |= isCapabilitySupported(mImageSharing, CAPABILITY_IMAGE_SHARING_SUPPORT);
-        result |= isCapabilitySupported(mVideoSharing, CAPABILITY_VIDEO_SHARING_SUPPORT);
+        int result = isCapabilitySupported(mFileTransfer, CAPABILITY_FILE_TRANSFER);
+        result |= isCapabilitySupported(mImSession, CAPABILITY_IM);
+        result |= isCapabilitySupported(mGeolocPush, CAPABILITY_GEOLOC_PUSH);
+        result |= isCapabilitySupported(mImageSharing, CAPABILITY_IMAGE_SHARING);
+        result |= isCapabilitySupported(mVideoSharing, CAPABILITY_VIDEO_SHARING);
         return result;
     }
 

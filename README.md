@@ -15,11 +15,14 @@ The RCS specifications (product, technical, API, Guidelines) are available at [h
 
 Note: the [supported standards](https://rawgit.com/android-rcs/rcsjta/master/docs/SUPPORTED-STANDARDS.txt).
 
-Note: the SIP stack comes from [NIST-SIP project] (http://jsip.java.net/'>http://jsip.java.net/), see [License](https://rawgit.com/android-rcs/rcsjta/master/core/LICENSE-NIST.txt).
+##Licensing:
+The RCS core stack is under [Apache 2 license](https://rawgit.com/android-rcs/rcsjta/master/core/LICENSE-2.0.txt) and uses the following open source libraries:
 
-Note: the DNS stack comes from [DNSJava project](http://www.dnsjava.org/), see [License](https://rawgit.com/android-rcs/rcsjta/master/core/LICENSE-DNS.txt).
+- the SIP stack comes from [NIST-SIP project] (http://jsip.java.net/'>http://jsip.java.net/), see [License](https://rawgit.com/android-rcs/rcsjta/master/core/LICENSE-NIST.txt).
 
-Note: the cryptography API comes from Legion of the [Bouncy Castle Inc] (https://www.bouncycastle.org/), see [License](https://rawgit.com/android-rcs/rcsjta/master/core/LICENSE-BOUNCYCASTLE.txt).
+- the DNS stack comes from [DNSJava project](http://www.dnsjava.org/), see [License](https://rawgit.com/android-rcs/rcsjta/master/core/LICENSE-DNS.txt).
+
+- the cryptography API comes from Legion of the [Bouncy Castle Inc] (https://www.bouncycastle.org/), see [License](https://rawgit.com/android-rcs/rcsjta/master/core/LICENSE-BOUNCYCASTLE.txt).
 
 ##Project:
 
@@ -52,3 +55,6 @@ TAPI 1.6
 - to review [CR Enrich Calling](https://github.com/android-rcs/rcsjta/raw/master/docs/tapi/CR_1.6/RCSJTA_TT_BB_CR001_EnrichCalling_R6.doc).
 - to review [CR Capability](https://github.com/android-rcs/rcsjta/raw/master/docs/tapi/CR_1.6/RCSJTA_T-API1.6_CR003_Capability_Discovery-R1.doc).
 - to review [CR Crane priority release](https://github.com/android-rcs/rcsjta/raw/master/docs/tapi/CR_1.6/RCSJTA_T-API1.6_CR002_ReferenceToCranePriorityRelease-R2.doc).
+
+
+

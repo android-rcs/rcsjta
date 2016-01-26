@@ -136,6 +136,8 @@ public class ServiceProvisioning extends Activity {
                 helper);
         setStringEditTextParam(R.id.DirectoryPathFiles, RcsSettingsData.DIRECTORY_PATH_FILES,
                 helper);
+        setStringEditTextParam(R.id.DirectoryPathFileIcons, RcsSettingsData.DIRECTORY_PATH_FILEICONS,
+                helper);
         setIntegerEditTextParam(R.id.MaxGeolocLabelLength, RcsSettingsData.MAX_GEOLOC_LABEL_LENGTH,
                 helper);
         setLongEditTextParam(R.id.GeolocExpirationTime, RcsSettingsData.GEOLOC_EXPIRATION_TIME,
@@ -216,6 +218,8 @@ public class ServiceProvisioning extends Activity {
                 helper);
         saveLongEditTextParam(R.id.CallComposerIdleDuration,
                 RcsSettingsData.CALL_COMPOSER_INACTIVITY_TIMEOUT, helper);
+        saveStringEditTextParam(R.id.DirectoryPathFileIcons, RcsSettingsData.DIRECTORY_PATH_FILEICONS,
+                helper);
 
         Spinner spinner = (Spinner) findViewById(R.id.ImSessionStart);
         if (bundle != null) {

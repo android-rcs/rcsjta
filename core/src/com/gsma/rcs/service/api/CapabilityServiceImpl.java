@@ -22,6 +22,8 @@
 
 package com.gsma.rcs.service.api;
 
+import android.os.RemoteException;
+
 import com.gsma.rcs.core.ims.service.capability.CapabilityService;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
@@ -37,8 +39,6 @@ import com.gsma.services.rcs.capability.Capabilities;
 import com.gsma.services.rcs.capability.ICapabilitiesListener;
 import com.gsma.services.rcs.capability.ICapabilityService;
 import com.gsma.services.rcs.contact.ContactId;
-
-import android.os.RemoteException;
 
 import java.util.HashSet;
 import java.util.List;
@@ -89,9 +89,7 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
                  * to exit the system and thus can bring the whole system down, which is not
                  * intended.
                  */
-                sLogger.error(new StringBuilder(
-                        "Failed to handle capabilities request for contact: ").append(mContact)
-                        .toString(), e);
+                sLogger.error("Failed to handle capabilities request for contact: " + mContact, e);
             }
         }
     }
@@ -354,24 +352,20 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
     public void requestContactCapabilities2(List<ContactId> contacts) throws RemoteException {
         ServerApiUtils.testIms();
         if (contacts == null) {
-            if (sLogger.isActivated()) {
-                sLogger.info("Request capabilities for all contacts");
-            }
-            mCapabilityService.scheduleCapabilityOperation(new AllCapabilitiesRequester());
+            throw new ServerApiIllegalArgumentException("contacts must not be null!");
 
-        } else {
-            if (sLogger.isActivated()) {
-                sLogger.info("Request capabilities for contacts: " + contacts);
-            }
-            final Set<ContactId> setOfContacts = new HashSet<ContactId>(contacts);
-            mCapabilityService.scheduleCapabilityOperation(new Runnable() {
-
-                @Override
-                public void run() {
-                    mCapabilityService.requestContactCapabilities(setOfContacts);
-                }
-            });
         }
+        if (sLogger.isActivated()) {
+            sLogger.info("Request capabilities for contacts: " + contacts);
+        }
+        final Set<ContactId> setOfContacts = new HashSet<>(contacts);
+        mCapabilityService.scheduleCapabilityOperation(new Runnable() {
+
+            @Override
+            public void run() {
+                mCapabilityService.requestContactCapabilities(setOfContacts);
+            }
+        });
     }
 
     /**

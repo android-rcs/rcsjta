@@ -1930,6 +1930,24 @@ public class RcsSettings {
         return readBoolean(RcsSettingsData.SECURE_MSRP_OVER_WIFI);
     }
 
+    /**
+     * Set the root directory for file icons
+     * 
+     * @param path Directory path
+     */
+    public void setFileIconRootDirectory(String path) {
+        writeString(RcsSettingsData.DIRECTORY_PATH_FILEICONS, path);
+    }
+
+    /**
+     * Get the root directory for file icons
+     * 
+     * @return Directory path
+     */
+    public String getFileIconRootDirectory() {
+        return readString(RcsSettingsData.DIRECTORY_PATH_FILEICONS);
+    }
+
     public ImMsgTech getImMsgTech() {
         return ImMsgTech.valueOf(readInteger(RcsSettingsData.IM_MSG_TECH));
     }

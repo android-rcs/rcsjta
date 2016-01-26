@@ -215,6 +215,8 @@ public final class CapabilityService extends RcsService {
      * exception is thrown. The result of the capability refresh request is provided to all the
      * clients that have registered the listener for this event.
      *
+     * @deprecated Use {@link #requestContactCapabilities(Set<ContactId> )} instead.
+     *
      * @param contact Contact Identifier
      * @throws RcsServiceNotRegisteredException
      * @throws RcsServiceNotAvailableException
@@ -248,7 +250,7 @@ public final class CapabilityService extends RcsService {
      * exception is thrown. The result of the capability refresh request is provided to all the
      * clients that have registered the listener for this event.
      * 
-     * @param contacts Set of contact identifiers or null to request for all contacts
+     * @param contacts Set of contact identifiers
      * @throws RcsServiceNotRegisteredException
      * @throws RcsServiceNotAvailableException
      * @throws RcsGenericException
@@ -259,14 +261,11 @@ public final class CapabilityService extends RcsService {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
+        if (contacts == null || contacts.isEmpty()) {
+            throw new RcsIllegalArgumentException("contacts must not be null or empty!");
+        }
         try {
-            List<ContactId> listOfContacts;
-            if (contacts == null) {
-                listOfContacts = new ArrayList<>();
-            } else {
-                listOfContacts = new ArrayList<>(contacts);
-            }
-            mApi.requestContactCapabilities2(listOfContacts);
+            mApi.requestContactCapabilities2(new ArrayList<>(contacts));
 
         } catch (Exception e) {
             RcsIllegalArgumentException.assertException(e);
@@ -286,12 +285,10 @@ public final class CapabilityService extends RcsService {
      * @throws RcsServiceNotAvailableException
      * @throws RcsGenericException
      */
-    @Deprecated
     public void requestAllContactsCapabilities() throws RcsServiceNotRegisteredException,
             RcsServiceNotAvailableException, RcsGenericException {
         try {
-            mApi.requestContactCapabilities2(null);
-
+            mApi.requestAllContactsCapabilities();
         } catch (Exception e) {
             RcsServiceNotRegisteredException.assertException(e);
             throw new RcsGenericException(e);

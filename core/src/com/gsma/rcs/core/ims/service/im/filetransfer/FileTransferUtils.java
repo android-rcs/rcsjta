@@ -58,6 +58,7 @@ import org.xml.sax.SAXException;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -142,8 +143,8 @@ public class FileTransferUtils {
             byte[] fileIconData = out.toByteArray();
 
             // Generate fileIcon content
-            Uri fileIconUri = ContentManager.generateUriForReceivedContent(fileIconName,
-                    "image/jpeg", rcsSettings);
+            Uri fileIconUri = Uri.fromFile(new File(rcsSettings.getFileIconRootDirectory().concat(
+                    fileIconName)));
             fileIcon = ContentManager.createMmContent(fileIconUri, fileIconData.length,
                     fileIconName);
             // persist the fileIcon content
@@ -212,8 +213,8 @@ public class FileTransferUtils {
                 return null;
             }
             String iconName = buildFileiconUrl(ChatUtils.getContributionId(request), mimeType);
-            Uri fileIconUri = ContentManager.generateUriForReceivedContent(iconName, mimeType,
-                    rcsSettings);
+            Uri fileIconUri = Uri.fromFile(new File(rcsSettings.getFileIconRootDirectory().concat(
+                    iconName)));
             byte[] fileIconData = Base64.decodeBase64(mimeType.getBytes(UTF8));
             result = ContentManager.createMmContent(fileIconUri, fileIconData.length, iconName);
             result.writeData2File(fileIconData);

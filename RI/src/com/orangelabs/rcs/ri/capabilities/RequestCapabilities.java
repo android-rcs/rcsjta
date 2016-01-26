@@ -197,14 +197,14 @@ public class RequestCapabilities extends RcsActivity {
         if (capabilities != null) {
             // Set capabilities
             imageCSh.setChecked(capabilities
-                    .hasCapabilities(Capabilities.CAPABILITY_IMAGE_SHARING_SUPPORT));
+                    .hasCapabilities(Capabilities.CAPABILITY_IMAGE_SHARING));
             videoCSh.setChecked(capabilities
-                    .hasCapabilities(Capabilities.CAPABILITY_VIDEO_SHARING_SUPPORT));
+                    .hasCapabilities(Capabilities.CAPABILITY_VIDEO_SHARING));
             ft.setChecked(capabilities
-                    .hasCapabilities(Capabilities.CAPABILITY_FILE_TRANSFER_SUPPORT));
-            im.setChecked(capabilities.hasCapabilities(Capabilities.CAPABILITY_IM_SUPPORT));
+                    .hasCapabilities(Capabilities.CAPABILITY_FILE_TRANSFER));
+            im.setChecked(capabilities.hasCapabilities(Capabilities.CAPABILITY_IM));
             geoloc.setChecked(capabilities
-                    .hasCapabilities(Capabilities.CAPABILITY_GEOLOC_PUSH_SUPPORT));
+                    .hasCapabilities(Capabilities.CAPABILITY_GEOLOC_PUSH));
         }
         // Set extensions
         extensions.setVisibility(View.VISIBLE);
