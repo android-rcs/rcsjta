@@ -209,16 +209,15 @@ public final class MultimediaSessionService extends RcsService {
 
     /**
      * Initiates a new session for real time messaging with a remote contact and for a given service
-     * extension. The messages are exchanged in real time during the session are specified by the
-     * parameter accept-types and accept-wrapped-types.
-     * The parameter contact supports the following formats: MSISDN in national or international
-     * format, SIP address, SIP-URI or Tel-URI. If the format of the contact is not supported an
-     * exception is thrown.
+     * extension. The messages exchanged in real time during the session are specified by parameters
+     * accept-types and accept-wrapped-types. The parameter contact supports the following formats:
+     * MSISDN in national or international format, SIP address, SIP-URI or Tel-URI. If the format of
+     * the contact is not supported an exception is thrown.
      *
      * @param serviceId Service ID
      * @param contact Contact identifier
-     * @param acceptType Accept-types related to exchanged messages
-     * @param acceptWrappedType Accept-wrapped-types related to exchanged messages
+     * @param acceptTypes Accept-types related to exchanged messages (may be null or empty)
+     * @param acceptWrappedTypes Accept-wrapped-types related to exchanged messages (may be null or empty)
      * @return MultimediaMessagingSession
      * @throws RcsServiceNotRegisteredException
      * @throws RcsPermissionDeniedException
@@ -226,8 +225,8 @@ public final class MultimediaSessionService extends RcsService {
      * @throws RcsGenericException
      */
     public MultimediaMessagingSession initiateMessagingSession(String serviceId, ContactId contact,
-                                                               String[] acceptType,
-                                                               String[] acceptWrappedType)
+                                                               String[] acceptTypes,
+                                                               String[] acceptWrappedTypes)
             throws RcsServiceNotRegisteredException, RcsPermissionDeniedException,
             RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
@@ -235,7 +234,7 @@ public final class MultimediaSessionService extends RcsService {
         }
         try {
             IMultimediaMessagingSession sessionIntf = mApi.initiateMessagingSession2(serviceId,
-                    contact, acceptType, acceptWrappedType);
+                    contact, acceptTypes, acceptWrappedTypes);
             if (sessionIntf != null) {
                 return new MultimediaMessagingSession(sessionIntf);
 

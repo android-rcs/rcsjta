@@ -60,7 +60,7 @@ public class ImmManager extends Thread {
      * Constructor
      *
      * @param sipService SIP service
-     * @param rcsSettings
+     * @param rcsSettings RCS settings
      */
     public ImmManager(SipService sipService, RcsSettings rcsSettings) {
         mSipService = sipService;
@@ -81,13 +81,12 @@ public class ImmManager extends Thread {
      * Background processing
      */
     public void run() {
-        InstantMultimediaMessage msg = null;
+        InstantMultimediaMessage msg;
         while ((msg = (InstantMultimediaMessage) mBuffer.getObject()) != null) {
             try {
                 sendSipMessage(msg, null);// TODO: add sip.instance
             } catch (PayloadException e) {
-                sLogger.error(new StringBuilder("Failed to send instant multimedia message")
-                        .toString(), e);
+                sLogger.error("Failed to send instant multimedia message", e);
             } catch (NetworkException e) {
                 if (sLogger.isActivated()) {
                     sLogger.debug(e.getMessage());
@@ -97,8 +96,7 @@ public class ImmManager extends Thread {
                  * Intentionally catch runtime exceptions as else it will abruptly end the thread
                  * and eventually bring the whole system down, which is not intended.
                  */
-                sLogger.error(new StringBuilder("Failed to send instant multimedia message")
-                        .toString(), e);
+                sLogger.error("Failed to send instant multimedia message", e);
             }
         }
     }
@@ -136,7 +134,7 @@ public class ImmManager extends Thread {
 
                 /* Create a second MESSAGE request with the right token */
                 if (sLogger.isActivated()) {
-                    sLogger.info("Send second MESSAGE.");
+                    sLogger.info("Send second MESSAGE");
                 }
                 SipRequest msg = SipMessageFactory.createMessage(dialogPath,
                         imm.getFeatureTag(), imm.getContentType(), imm.getContent());
@@ -155,8 +153,8 @@ public class ImmManager extends Thread {
                 }
                 break;
             default:
-                throw new NetworkException(new StringBuilder("Instant multimedia message has failed: ")
-                        .append(statusCode).append(" response received").toString());
+                throw new NetworkException("Instant multimedia message has failed: " + statusCode +
+                        " response received");
         }
     }
 
@@ -183,7 +181,7 @@ public class ImmManager extends Thread {
 
             // Create MESSAGE request
             if (sLogger.isActivated()) {
-                sLogger.info("Send first MESSAGE.");
+                sLogger.info("Send first MESSAGE");
             }
             SipRequest msg = SipMessageFactory.createMessage(dialogPath,
                     imm.getFeatureTag(), imm.getContentType(), imm.getContent());
@@ -196,14 +194,12 @@ public class ImmManager extends Thread {
             analyzeSipResponse(ctx, authenticationAgent, dialogPath, imm);
 
         } catch (InvalidArgumentException e) {
-            throw new PayloadException(new StringBuilder(
-                    "Unable to set authorization header for remoteInstanceId : ").append(
-                    remoteInstanceId).toString(), e);
+            throw new PayloadException("Unable to set authorization header for remoteInstanceId: " +
+                    remoteInstanceId, e);
 
         } catch (ParseException e) {
-            throw new PayloadException(new StringBuilder(
-                    "Unable to set authorization header for remoteInstanceId : ").append(
-                    remoteInstanceId).toString(), e);
+            throw new PayloadException("Unable to set authorization header for remoteInstanceId: " +
+                    remoteInstanceId, e);
         }
     }
 
@@ -211,10 +207,10 @@ public class ImmManager extends Thread {
      * Instant multimedia message
      */
     private static class InstantMultimediaMessage {
-        private ContactId mRemote;
-        private String mFeatureTag;
-        private byte[] mContent;
-        private String mContentType;
+        private final ContactId mRemote;
+        private final String mFeatureTag;
+        private final byte[] mContent;
+        private final String mContentType;
 
         public InstantMultimediaMessage(ContactId remote, String featureTag, byte[] content,
                                         String contentType) {

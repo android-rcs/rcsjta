@@ -50,9 +50,9 @@ public class OriginatingSipMsrpSession extends GenericSipMsrpSession {
     private static final Logger sLogger = Logger.getLogger(OriginatingSipMsrpSession.class
             .getSimpleName());
 
-    private String[] mAcceptType = new String[0];
+    private final String[] mAcceptTypes;
 
-    private String[] mAcceptWrappedType = new String[0];
+    private final String[] mAcceptWrappedTypes;
 
     /**
      * Constructor
@@ -63,17 +63,17 @@ public class OriginatingSipMsrpSession extends GenericSipMsrpSession {
      * @param rcsSettings
      * @param timestamp Local timestamp for the session
      * @param contactManager
-     * @param acceptType Accept-types related to exchanged messages
-     * @param acceptWrappedType Accept-wrapped-types related to exchanged messages
+     * @param acceptTypes Accept-types related to exchanged messages
+     * @param acceptWrappedTypes Accept-wrapped-types related to exchanged messages
      */
     public OriginatingSipMsrpSession(SipService parent, ContactId contact, String featureTag,
                                      RcsSettings rcsSettings, long timestamp,
                                      ContactManager contactManager,
-                                     String[] acceptType, String[] acceptWrappedType) {
+                                     String[] acceptTypes, String[] acceptWrappedTypes) {
         super(parent, contact, featureTag, rcsSettings, timestamp, contactManager);
 
-        mAcceptType = acceptType;
-        mAcceptWrappedType = acceptWrappedType;
+        mAcceptTypes = acceptTypes;
+        mAcceptWrappedTypes = acceptWrappedTypes;
 
         createOriginatingDialogPath();
     }
@@ -92,7 +92,7 @@ public class OriginatingSipMsrpSession extends GenericSipMsrpSession {
             }
 
             /* Build SDP offer */
-            String sdp = generateSdp(localSetup, mAcceptType, mAcceptWrappedType);
+            String sdp = generateSdp(localSetup, mAcceptTypes, mAcceptWrappedTypes);
 
             /* Set the local SDP part in the dialog path */
             getDialogPath().setLocalContent(sdp);

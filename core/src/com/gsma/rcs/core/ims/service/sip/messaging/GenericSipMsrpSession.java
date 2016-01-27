@@ -138,11 +138,11 @@ public abstract class GenericSipMsrpSession extends GenericSipSession implements
      * Generate SDP
      * 
      * @param setup Setup mode
-     * @param acceptType Accept-types related to exchanged messages
-     * @param acceptWrappedType Accept-wrapped-types related to exchanged messages
+     * @param acceptTypes Accept-types related to exchanged messages
+     * @param acceptWrappedTypes Accept-wrapped-types related to exchanged messages
      * @return SDP built
      */
-    public String generateSdp(String setup, String[] acceptType, String[] acceptWrappedType) {
+    public String generateSdp(String setup, String[] acceptTypes, String[] acceptWrappedTypes) {
         int msrpPort;
         if ("active".equals(setup)) {
             msrpPort = 9; /* See RFC4145, Page 4 */
@@ -164,22 +164,22 @@ public abstract class GenericSipMsrpSession extends GenericSipSession implements
             .append("a=path:").append(getMsrpMgr().getLocalMsrpPath()).append(SipUtils.CRLF)
             .append("a=max-size:").append(getMaxMessageSize()).append(SipUtils.CRLF);
 
-        if (acceptType != null && acceptType.length > 0) {
+        if (acceptTypes != null && acceptTypes.length > 0) {
             StringBuffer types = new StringBuffer();
-            types.append(acceptType[0]);
-            for(int i=1; i < acceptType.length; i++) {
-                types.append(" ").append(acceptType[i]);
+            types.append(acceptTypes[0]);
+            for(int i=1; i < acceptTypes.length; i++) {
+                types.append(" ").append(acceptTypes[i]);
             }
             sdp.append("a=accept-types:").append(types).append(SipUtils.CRLF);
         } else {
             sdp.append("a=accept-types:").append(GenericSipMsrpSession.MIME_TYPE).append(SipUtils.CRLF);
         }
 
-        if (acceptWrappedType != null && acceptWrappedType.length > 0) {
+        if (acceptWrappedTypes != null && acceptWrappedTypes.length > 0) {
             StringBuffer types = new StringBuffer();
-            types.append(acceptWrappedType[0]);
-            for(int i=1; i < acceptWrappedType.length; i++) {
-                types.append(" ").append(acceptWrappedType[i]);
+            types.append(acceptWrappedTypes[0]);
+            for(int i=1; i < acceptWrappedTypes.length; i++) {
+                types.append(" ").append(acceptWrappedTypes[i]);
             }
             sdp.append("a=accept-wrapped-types:").append(types).append(SipUtils.CRLF);
         }

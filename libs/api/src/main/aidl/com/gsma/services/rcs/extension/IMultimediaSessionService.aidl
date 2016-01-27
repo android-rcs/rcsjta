@@ -32,7 +32,7 @@ interface IMultimediaSessionService {
 	
 	IMultimediaMessagingSession initiateMessagingSession(in String serviceId, in ContactId contact);
 	
-	IMultimediaMessagingSession initiateMessagingSession2(in String serviceId, in ContactId contact, in String[] acceptType, in String[] acceptWrappedType);
+	IMultimediaMessagingSession initiateMessagingSession2(in String serviceId, in ContactId contact, in String[] acceptTypes, in String[] acceptWrappedTypes);
 
 	List<IBinder> getStreamingSessions(in String serviceId);
 	

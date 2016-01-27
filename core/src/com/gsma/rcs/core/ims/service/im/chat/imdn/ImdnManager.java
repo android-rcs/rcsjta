@@ -139,8 +139,8 @@ public class ImdnManager extends Thread {
                             delivery.getRemote(), delivery.getMsgId());
                 }
             } catch (PayloadException e) {
-                sLogger.error(new StringBuilder("Failed to send delivery status for chatId : ")
-                        .append(delivery.getChatId()).toString(), e);
+                sLogger.error("Failed to send delivery status for chatId: " +
+                        delivery.getChatId(), e);
             } catch (NetworkException e) {
                 if (sLogger.isActivated()) {
                     sLogger.debug(e.getMessage());
@@ -150,8 +150,8 @@ public class ImdnManager extends Thread {
                  * Intentionally catch runtime exceptions as else it will abruptly end the thread
                  * and eventually bring the whole system down, which is not intended.
                  */
-                sLogger.error(new StringBuilder("Failed to send delivery status for chatId : ")
-                        .append(delivery.getChatId()).toString(), e);
+                sLogger.error("Failed to send delivery status for chatId: " +
+                        delivery.getChatId(), e);
             }
         }
     }
@@ -211,7 +211,7 @@ public class ImdnManager extends Thread {
 
                 /* Create a second MESSAGE request with the right token */
                 if (sLogger.isActivated()) {
-                    sLogger.info("Send second MESSAGE.");
+                    sLogger.info("Send second MESSAGE");
                 }
                 SipRequest msg = SipMessageFactory.createMessage(dialogPath,
                         FeatureTags.FEATURE_OMA_IM, CpimMessage.MIME_TYPE, cpim.getBytes(UTF8));
@@ -230,8 +230,8 @@ public class ImdnManager extends Thread {
                 }
                 break;
             default:
-                throw new NetworkException(new StringBuilder("Delivery report has failed: ")
-                        .append(statusCode).append(" response received").toString());
+                throw new NetworkException("Delivery report has failed: " + statusCode +
+                    " response received");
         }
     }
 
@@ -276,7 +276,7 @@ public class ImdnManager extends Thread {
 
             // Create MESSAGE request
             if (sLogger.isActivated()) {
-                sLogger.info("Send first MESSAGE.");
+                sLogger.info("Send first MESSAGE");
             }
             SipRequest msg = SipMessageFactory.createMessage(dialogPath,
                     FeatureTags.FEATURE_OMA_IM, CpimMessage.MIME_TYPE, cpim.getBytes(UTF8));
@@ -289,14 +289,11 @@ public class ImdnManager extends Thread {
             analyzeSipResponse(ctx, authenticationAgent, dialogPath, cpim);
 
         } catch (InvalidArgumentException e) {
-            throw new PayloadException(new StringBuilder(
-                    "Unable to set authorization header for remoteInstanceId : ").append(
-                    remoteInstanceId).toString(), e);
-
+            throw new PayloadException("Unable to set authorization header for remoteInstanceId: " +
+                    remoteInstanceId, e);
         } catch (ParseException e) {
-            throw new PayloadException(new StringBuilder(
-                    "Unable to set authorization header for remoteInstanceId : ").append(
-                    remoteInstanceId).toString(), e);
+            throw new PayloadException("Unable to set authorization header for remoteInstanceId: " +
+                    remoteInstanceId, e);
         }
     }
 
@@ -304,11 +301,11 @@ public class ImdnManager extends Thread {
      * Delivery status
      */
     private static class DeliveryStatus {
-        private String mChatId;
-        private ContactId mRemote;
-        private String mMsgId;
-        private String mStatus;
-        private long mTimestamp;
+        private final String mChatId;
+        private final ContactId mRemote;
+        private final String mMsgId;
+        private final String mStatus;
+        private final long mTimestamp;
 
         public DeliveryStatus(String chatId, ContactId remote, String msgId, String status,
                 long timestamp) {

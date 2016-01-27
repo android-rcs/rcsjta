@@ -181,17 +181,18 @@ public class SipService extends ImsService {
      *
      * @param contact           Remote contact Id
      * @param featureTag        Feature tag of the service
-     * @param acceptType        Accept-types related to exchanged messages
-     * @param acceptWrappedType Accept-wrapped-types related to exchanged messages
+     * @param acceptTypes        Accept-types related to exchanged messages
+     * @param acceptWrappedTypes Accept-wrapped-types related to exchanged messages
      * @return SIP session
      */
     public GenericSipMsrpSession createMsrpSession(ContactId contact, String featureTag,
-                                                   String[] acceptType, String[] acceptWrappedType) {
+                                                   String[] acceptTypes,
+                                                   String[] acceptWrappedTypes) {
         if (sLogger.isActivated()) {
             sLogger.info("Initiate a MSRP session with contact " + contact);
         }
         return new OriginatingSipMsrpSession(this, contact, featureTag, mRcsSettings,
-                System.currentTimeMillis(), mContactManager, acceptType, acceptWrappedType);
+                System.currentTimeMillis(), mContactManager, acceptTypes, acceptWrappedTypes);
     }
 
     /**
@@ -428,8 +429,7 @@ public class SipService extends ImsService {
     public void sendInstantMultimediaMessage(ContactId contact, String featureTag,
                                              byte[] content, String contentType) {
         if (sLogger.isActivated()) {
-            sLogger.debug(new StringBuilder("Send instant multimedia message to contact ")
-                    .append(contact).toString());
+            sLogger.debug("Send instant multimedia message to contact " + contact);
         }
         mImmManager.sendMessage(contact, featureTag, content, contentType);
     }

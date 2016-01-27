@@ -85,15 +85,17 @@ public class SipIntentManager {
         if (content == null) {
             return null;
         }
+        content = content.toLowerCase();
 
         Intent intent = null;
-        if (request.getMethod().equals(Request.INVITE)) {
-            if (content.toLowerCase().contains("msrp")) {
+        String method = request.getMethod();
+        if (Request.INVITE.equals(method)) {
+            if (content.contains("msrp")) {
                 intent = new Intent(MultimediaMessagingSessionIntent.ACTION_NEW_INVITATION);
-            } else if (content.toLowerCase().contains("rtp")) {
+            } else if (content.contains("rtp")) {
                 intent = new Intent(MultimediaStreamingSessionIntent.ACTION_NEW_INVITATION);
             }
-        } else if (request.getMethod().equals(Request.MESSAGE)) {
+        } else if (Request.MESSAGE.equals(method)) {
             intent = new Intent(InstantMultimediaMessageIntent.ACTION_NEW_INSTANT_MESSAGE);
         } else {
             return null;

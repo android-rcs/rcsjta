@@ -315,14 +315,14 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
      *
      * @param serviceId Service ID
      * @param contact Contact ID
-     * @param acceptType Accept-types related to exchanged messages
-     * @param acceptWrappedType Accept-wrapped-types related to exchanged messages
+     * @param acceptTypes Accept-types related to exchanged messages (may be null or empty)
+     * @param acceptWrappedTypes Accept-wrapped-types related to exchanged messages (may be null or empty)
      * @return Multimedia messaging session
      * @throws RemoteException
      */
     public IMultimediaMessagingSession initiateMessagingSession2(String serviceId, ContactId contact,
-                                                                 String[] acceptType,
-                                                                 String[] acceptWrappedType)
+                                                                 String[] acceptTypes,
+                                                                 String[] acceptWrappedTypes)
             throws RemoteException {
         if (TextUtils.isEmpty(serviceId)) {
             throw new ServerApiIllegalArgumentException("serviceId must not be null or empty!");
@@ -338,7 +338,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
             String featureTag = FeatureTags.FEATURE_RCSE + "=\""
                     + FeatureTags.FEATURE_RCSE_IARI_EXTENSION + "." + serviceId + "\"";
             final GenericSipMsrpSession session = mSipService
-                    .createMsrpSession(contact, featureTag, acceptType, acceptWrappedType);
+                    .createMsrpSession(contact, featureTag, acceptTypes, acceptWrappedTypes);
             MultimediaMessagingSessionImpl multiMediaMessaging = new MultimediaMessagingSessionImpl(
                     session.getSessionID(), mMultimediaMessagingSessionEventBroadcaster,
                     mSipService, this, Direction.OUTGOING, contact, serviceId, State.INITIATING);
