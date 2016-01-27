@@ -53,14 +53,11 @@ public class IsComposingParser extends DefaultHandler {
      */
     private static final long SECONDS_TO_MILLISECONDS_CONVERSION_RATE = 1000;
 
-    private StringBuffer accumulator = null;
+    private StringBuilder mAccumulator;
 
-    private IsComposingInfo isComposingInfo = null;
+    private IsComposingInfo isComposingInfo;
 
-    /**
-     * The logger
-     */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private static final Logger sLogger = Logger.getLogger(IsComposingParser.class.getSimpleName());
 
     private final InputSource mInputSource;
 
@@ -76,7 +73,6 @@ public class IsComposingParser extends DefaultHandler {
     /**
      * Parse the is composing input
      * 
-     * @throws IsComposingParser
      * @throws ParserConfigurationException
      * @throws SAXException
      * @throws ParseFailureException
@@ -95,73 +91,73 @@ public class IsComposingParser extends DefaultHandler {
     }
 
     public void startDocument() {
-        if (logger.isActivated()) {
-            logger.debug("Start document");
-        }
-        accumulator = new StringBuffer();
+        mAccumulator = new StringBuilder();
     }
 
     public void characters(char buffer[], int start, int length) {
-        accumulator.append(buffer, start, length);
+        mAccumulator.append(buffer, start, length);
     }
 
     public void startElement(String namespaceURL, String localName, String qname, Attributes attr) {
-        accumulator.setLength(0);
-
-        if (localName.equals("isComposing")) {
+        mAccumulator.setLength(0);
+        if ("isComposing".equals(localName)) {
             isComposingInfo = new IsComposingInfo();
         }
-
     }
 
     public void endElement(String namespaceURL, String localName, String qname) {
-        if (localName.equals("state")) {
-            if (isComposingInfo != null) {
-                isComposingInfo.setState(accumulator.toString());
-            }
-        } else if (localName.equals("lastactive")) {
-            if (isComposingInfo != null) {
-                isComposingInfo.setLastActiveDate(accumulator.toString());
-            }
-        } else if (localName.equals("contenttype")) {
-            if (isComposingInfo != null) {
-                isComposingInfo.setContentType(accumulator.toString());
-            }
-        } else if (localName.equals("refresh")) {
-            if (isComposingInfo != null) {
-                long time = Long.parseLong(accumulator.toString())
-                        * SECONDS_TO_MILLISECONDS_CONVERSION_RATE;
-                isComposingInfo.setRefreshTime(time);
-            }
-        } else if (localName.equals("isComposing")) {
-            if (logger.isActivated()) {
-                logger.debug("Watcher document is complete");
-            }
+        switch (localName) {
+            case "state":
+                if (isComposingInfo != null) {
+                    isComposingInfo.setState(mAccumulator.toString());
+                }
+                break;
+            case "lastactive":
+                if (isComposingInfo != null) {
+                    isComposingInfo.setLastActiveDate(mAccumulator.toString());
+                }
+                break;
+            case "contenttype":
+                if (isComposingInfo != null) {
+                    isComposingInfo.setContentType(mAccumulator.toString());
+                }
+                break;
+            case "refresh":
+                if (isComposingInfo != null) {
+                    long time = Long.parseLong(mAccumulator.toString())
+                            * SECONDS_TO_MILLISECONDS_CONVERSION_RATE;
+                    isComposingInfo.setRefreshTime(time);
+                }
+                break;
+            case "isComposing":
+                if (sLogger.isActivated()) {
+                    sLogger.debug("Watcher document is complete");
+                }
+                break;
         }
     }
 
     public void endDocument() {
-        if (logger.isActivated()) {
-            logger.debug("End document");
-        }
     }
 
     public void warning(SAXParseException exception) {
-        if (logger.isActivated()) {
-            logger.error("Warning: line " + exception.getLineNumber() + ": "
+        if (sLogger.isActivated()) {
+            sLogger.error("Warning: line " + exception.getLineNumber() + ": "
                     + exception.getMessage());
         }
     }
 
     public void error(SAXParseException exception) {
-        if (logger.isActivated()) {
-            logger.error("Error: line " + exception.getLineNumber() + ": " + exception.getMessage());
+        if (sLogger.isActivated()) {
+            sLogger.error("Error: line " + exception.getLineNumber() + ": "
+                    + exception.getMessage());
         }
     }
 
     public void fatalError(SAXParseException exception) throws SAXException {
-        if (logger.isActivated()) {
-            logger.error("Fatal: line " + exception.getLineNumber() + ": " + exception.getMessage());
+        if (sLogger.isActivated()) {
+            sLogger.error("Fatal: line " + exception.getLineNumber() + ": "
+                    + exception.getMessage());
         }
         throw exception;
     }
