@@ -1,5 +1,8 @@
-/*
+/*******************************************************************************
+ * Software Name : RCS IMS Stack
+ * 
  * Copyright (C) 2016 Sony Mobile Communications Inc.
+ * Copyright (C) 2010-2016 Orange.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -12,13 +15,17 @@
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations under
  * the License.
- */
+ *******************************************************************************/
 
 package com.gsma.rcs.provisioning.https;
 
-import static com.gsma.rcs.utils.StringUtils.UTF16;
 import static com.gsma.rcs.utils.StringUtils.PDUS;
+import static com.gsma.rcs.utils.StringUtils.UTF16;
 
+import com.gsma.rcs.core.Core;
+import com.gsma.rcs.core.ims.network.ImsNetworkInterface;
+import com.gsma.rcs.core.ims.network.NetworkException;
+import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
@@ -47,11 +54,13 @@ public class ProvisioningPushSMSReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context ctx, Intent intent) {
         final boolean logActivated = sLogger.isActivated();
+        String action = intent.getAction();
         if (logActivated) {
-            sLogger.debug(new StringBuilder("Configuration SMS receiver - Received broadcast: ")
-                    .append(intent.getAction()).toString());
+            sLogger.debug("Configuration SMS receiver - Received broadcast: " + action);
         }
-
+        if (!HttpsProvisioningUtils.ACTION_BINARY_SMS_RECEIVED.equals(action)) {
+            return;
+        }
         Bundle bundle = intent.getExtras();
         if (bundle == null) {
             if (logActivated) {
@@ -59,18 +68,15 @@ public class ProvisioningPushSMSReceiver extends BroadcastReceiver {
             }
             return;
         }
-
         Object[] pdus = (Object[]) bundle.get(PDUS);
         if (pdus == null || pdus.length == 0) {
             if (logActivated) {
-                sLogger.debug("Bundle contains no raw pdus");
+                sLogger.debug("Bundle contains no raw PDUs");
             }
             return;
         }
-
         final SmsMessage msg = SmsMessage.createFromPdu((byte[]) pdus[0]);
         final String smsData = new String(msg.getUserData(), UTF16);
-
         if (logActivated) {
             sLogger.debug("Binary SMS received with :".concat(smsData));
         }
@@ -83,9 +89,8 @@ public class ProvisioningPushSMSReceiver extends BroadcastReceiver {
             final TelephonyManager telephonyManager = (TelephonyManager) ctx
                     .getSystemService(Context.TELEPHONY_SERVICE);
 
-            /* Check for IMSI(fresh provisioning) or private_user_id(re-provisioning) in smsData */
-            if (smsData.contains(telephonyManager.getSubscriberId())
-                    || smsData.contains(rcsSettings.getUserProfileImsPrivateId())) {
+            if (smsData.contains(telephonyManager.getSubscriberId())) {
+                /* IMSI in smsData : fresh provisioning */
                 LauncherUtils.stopRcsService(ctx);
                 final ContactManager contactManager = ContactManager.getInstance(ctx,
                         contentResolver, localContentResolver, rcsSettings);
@@ -94,7 +99,36 @@ public class ProvisioningPushSMSReceiver extends BroadcastReceiver {
                 LauncherUtils.resetRcsConfig(ctx, localContentResolver, rcsSettings, messagingLog,
                         contactManager);
                 LauncherUtils.launchRcsService(ctx, true, false, rcsSettings);
+            } else if (smsData.contains(rcsSettings.getUserProfileImsPrivateId())) {
+                /* private_user_id in smsData : re-provisioning */
+                /* First unregister from IMS then re-provision */
+                tryUnRegister();
+                HttpsProvisioningService.reProvisioning(ctx);
             }
         }
+    }
+
+    private void tryUnRegister() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Core core = Core.getInstance();
+                    if (core != null) {
+                        ImsNetworkInterface networkInterface = core.getImsModule()
+                                .getCurrentNetworkInterface();
+                        if (networkInterface.isRegistered()) {
+                            networkInterface.unregister();
+                        }
+                    }
+                } catch (NetworkException e) {
+                    if (sLogger.isActivated()) {
+                        sLogger.debug("Unable to unregister, error=" + e.getMessage());
+                    }
+                } catch (PayloadException | RuntimeException e) {
+                    sLogger.error("Unable to unregister!", e);
+                }
+            }
+        }).start();
     }
 }
