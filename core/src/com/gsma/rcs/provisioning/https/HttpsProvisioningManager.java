@@ -78,6 +78,7 @@ import java.net.URL;
  * @author hlxn7157
  * @author G. LE PESSOT
  * @author Deutsche Telekom AG
+ * @author yplo6403
  */
 public class HttpsProvisioningManager {
     /**
@@ -140,7 +141,7 @@ public class HttpsProvisioningManager {
     /**
      * Handler to process messages & runnable associated with background thread.
      */
-    private final Handler mProvisioningOperationHandler;
+    private Handler mProvisioningOperationHandler;
 
     /**
      * Retry after 511 "Network authentication required" counter
@@ -155,7 +156,7 @@ public class HttpsProvisioningManager {
 
     private final ContactManager mContactManager;
 
-    private final RcsAccountManager mRcsAccountManager;
+    private RcsAccountManager mRcsAccountManager;
 
     private final String mImsi;
 
@@ -175,7 +176,8 @@ public class HttpsProvisioningManager {
      */
     private static Uri.Builder sHttpsReqUriBuilder;
 
-    private static final Logger sLogger = Logger.getLogger(HttpsProvisioningManager.class.getName());
+    private static final Logger sLogger = Logger
+            .getLogger(HttpsProvisioningManager.class.getName());
 
     /**
      * Constructor
@@ -205,16 +207,14 @@ public class HttpsProvisioningManager {
         mRcsSettings = rcsSettings;
         mMessagingLog = messagingLog;
         mContactManager = contactManager;
-
-        mProvisioningOperationHandler = allocateBgHandler(PROVISIONING_OPERATIONS_THREAD_NAME);
-
-        mRcsAccountManager = new RcsAccountManager(mCtx, contactManager);
     }
 
     /**
      * Initialize Provisioning Manager
      */
     /* package private */void initialize() {
+        mProvisioningOperationHandler = allocateBgHandler(PROVISIONING_OPERATIONS_THREAD_NAME);
+        mRcsAccountManager = new RcsAccountManager(mCtx, mContactManager);
         mNetworkCnx = new HttpsProvisioningConnection(this, mCtx);
         mSmsManager = new HttpsProvisioningSMS(this, mCtx);
     }

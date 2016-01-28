@@ -11,3 +11,4 @@ bin
 build
 doclava
 local.properties
+/gradle.properties
