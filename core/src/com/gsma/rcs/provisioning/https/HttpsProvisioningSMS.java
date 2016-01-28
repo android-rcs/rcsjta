@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -106,33 +106,32 @@ public class HttpsProvisioningSMS {
                     @Override
                     public void run() {
                         try {
-                            // @FIXME: Below code block needs a complete refactor, However at this
-                            // moment due to other prior tasks the refactoring task has been kept in
-                            // backlog.
+                            String action = intent.getAction();
                             if (logActivated) {
                                 sLogger.debug("SMS provider receiver - Received broadcast: "
-                                        .concat(intent.toString()));
+                                        + action);
                             }
-
-                            if (!HttpsProvisioningUtils.ACTION_BINARY_SMS_RECEIVED.equals(intent
-                                    .getAction())) {
+                            if (!HttpsProvisioningUtils.ACTION_BINARY_SMS_RECEIVED.equals(action)) {
                                 return;
                             }
-
                             Bundle bundle = intent.getExtras();
                             if (bundle == null) {
                                 return;
                             }
-
+                            Object[] pdus = (Object[]) bundle.get(PDUS);
+                            if (pdus == null || pdus.length == 0) {
+                                if (logActivated) {
+                                    sLogger.debug("Bundle contains no raw PDUs");
+                                }
+                                return;
+                            }
                             if (logActivated) {
                                 sLogger.debug("Receiving binary SMS");
                             }
-
-                            Object[] pdus = (Object[]) bundle.get(PDUS);
                             SmsMessage[] msgs = new SmsMessage[pdus.length];
-                            byte[] data = null;
+                            byte[] data;
                             byte[] smsBuffer = new byte[0];
-                            byte[] smsBufferTemp = null;
+                            byte[] smsBufferTemp;
 
                             for (int i = 0; i < msgs.length; i++) {
                                 msgs[i] = SmsMessage.createFromPdu((byte[]) pdus[i]);
@@ -155,21 +154,15 @@ public class HttpsProvisioningSMS {
                             unregisterSmsProvisioningReceiver();
 
                         } catch (UnsupportedEncodingException e) {
-                            sLogger.error(
-                                    new StringBuilder("'").append(OTP_SMS_ENCODING_FORMAT)
-                                            .append("'format not supported for requestUri : ")
-                                            .append(requestUri).toString(), e);
+                            sLogger.error("'" + OTP_SMS_ENCODING_FORMAT
+                                    + "'format not supported for requestUri : " + requestUri, e);
                         } catch (RcsAccountException e) {
-                            sLogger.error(
-                                    new StringBuilder(
-                                            "Failed to update Config with OTP for requestUri : ")
-                                            .append(requestUri).toString(), e);
+                            sLogger.error("Failed to update Config with OTP for requestUri : "
+                                    + requestUri, e);
                         } catch (IOException e) {
                             if (sLogger.isActivated()) {
-                                sLogger.debug(new StringBuilder(
-                                        "Failed to update Config with OTP for requestUri : ")
-                                        .append(requestUri).append(", Message=")
-                                        .append(e.getMessage()).toString());
+                                sLogger.debug("Failed to update Config with OTP for requestUri : "
+                                        + requestUri + ", Message=" + e.getMessage());
                             }
                             /* Start the RCS service */
                             if (mManager.isFirstProvisioningAfterBoot()) {
@@ -187,10 +180,8 @@ public class HttpsProvisioningSMS {
                              * such exceptions will eventually lead to exit the system and thus can
                              * bring the whole system down, which is not intended.
                              */
-                            sLogger.error(
-                                    new StringBuilder(
-                                            "Failed to update Config with OTP for requestUri : ")
-                                            .append(requestUri).toString(), e);
+                            sLogger.error("Failed to update Config with OTP for requestUri : "
+                                    + requestUri, e);
                         }
                     }
                 });

@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -81,7 +81,7 @@ public class HttpsProvisioningUtils {
      * 
      * @return String(4)
      */
-    /* package private */ static String getRcsVersion() {
+    /* package private */static String getRcsVersion() {
         return "5.1B";
     }
 
@@ -90,7 +90,7 @@ public class HttpsProvisioningUtils {
      * 
      * @return String(15)
      */
-    /* package private */ static String getRcsProfile() {
+    /* package private */static String getRcsProfile() {
         return "joyn_blackbird";
     }
 }
