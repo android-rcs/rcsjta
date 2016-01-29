@@ -67,7 +67,7 @@ public class MultimediaSessionServiceConfigurationImpl extends
     }
 
     @Override
-    public long getInactivityTimeout() throws RemoteException {
+    public long getMessagingSessionInactivityTimeout() throws RemoteException {
         try {
             // Note: We use the value of the call composer for a MM session
             // even if it's not very good. Then it's up to the application to

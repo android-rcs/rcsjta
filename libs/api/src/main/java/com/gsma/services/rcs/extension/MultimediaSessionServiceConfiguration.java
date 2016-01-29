@@ -59,14 +59,14 @@ public class MultimediaSessionServiceConfiguration {
     }
 
     /**
-     * Returns the inactivity timeout of a multimedia session.
+     * Returns the inactivity timeout of a multimedia messaging session.
      *
      * @return long Timeout in milliseconds
      * @throws RcsGenericException
      */
-    public long getInactivityTimeout() throws RcsGenericException {
+    public long getMessagingSessionInactivityTimeout() throws RcsGenericException {
         try {
-            return mIConfig.getInactivityTimeout();
+            return mIConfig.getMessagingSessionInactivityTimeout();
         } catch (Exception e) {
             throw new RcsGenericException(e);
         }
