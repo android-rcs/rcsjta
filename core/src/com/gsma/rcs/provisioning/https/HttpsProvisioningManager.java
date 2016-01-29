@@ -78,6 +78,7 @@ import java.net.URL;
  * @author hlxn7157
  * @author G. LE PESSOT
  * @author Deutsche Telekom AG
+ * @author yplo6403
  */
 public class HttpsProvisioningManager {
     /**
@@ -129,6 +130,10 @@ public class HttpsProvisioningManager {
 
     private int mRetryCount = 0;
 
+    private HttpsProvisioningSMS mSmsManager;
+
+    private HttpsProvisioningConnection mNetworkCnx;
+
     private final LocalContentResolver mLocalContentResolver;
 
     private final Context mCtx;
@@ -136,11 +141,7 @@ public class HttpsProvisioningManager {
     /**
      * Handler to process messages & runnable associated with background thread.
      */
-    private final Handler mProvisioningOperationHandler;
-
-    private final HttpsProvisioningSMS mSmsManager;
-
-    private final HttpsProvisioningConnection mNetworkCnx;
+    private Handler mProvisioningOperationHandler;
 
     /**
      * Retry after 511 "Network authentication required" counter
@@ -155,7 +156,7 @@ public class HttpsProvisioningManager {
 
     private final ContactManager mContactManager;
 
-    private final RcsAccountManager mRcsAccountManager;
+    private RcsAccountManager mRcsAccountManager;
 
     private final String mImsi;
 
@@ -175,8 +176,8 @@ public class HttpsProvisioningManager {
      */
     private static Uri.Builder sHttpsReqUriBuilder;
 
-    private static final Logger sLogger = Logger.getLogger(HttpsProvisioningManager.class
-            .getSimpleName());
+    private static final Logger sLogger = Logger
+            .getLogger(HttpsProvisioningManager.class.getName());
 
     /**
      * Constructor
@@ -206,13 +207,16 @@ public class HttpsProvisioningManager {
         mRcsSettings = rcsSettings;
         mMessagingLog = messagingLog;
         mContactManager = contactManager;
+    }
 
+    /**
+     * Initialize Provisioning Manager
+     */
+    /* package private */void initialize() {
         mProvisioningOperationHandler = allocateBgHandler(PROVISIONING_OPERATIONS_THREAD_NAME);
-
-        mNetworkCnx = new HttpsProvisioningConnection(this, context);
-        mSmsManager = new HttpsProvisioningSMS(this, context, localContentResolver, rcsSettings,
-                messagingLog, contactManager);
-        mRcsAccountManager = new RcsAccountManager(mCtx, contactManager);
+        mRcsAccountManager = new RcsAccountManager(mCtx, mContactManager);
+        mNetworkCnx = new HttpsProvisioningConnection(this, mCtx);
+        mSmsManager = new HttpsProvisioningSMS(this, mCtx);
     }
 
     private Handler allocateBgHandler(String threadName) {

@@ -91,12 +91,12 @@ public class RcsSettings {
     final private Map<String, Object> mCache;
 
     /**
-     * Create singleton instance
+     * Get or Create Singleton instance of RcsSettings.
      * 
      * @param localContentResolver Local content resolver
      * @return RcsSettings instance
      */
-    public static RcsSettings createInstance(LocalContentResolver localContentResolver) {
+    public static RcsSettings getInstance(LocalContentResolver localContentResolver) {
         if (sInstance != null) {
             return sInstance;
         }
@@ -111,7 +111,7 @@ public class RcsSettings {
     /**
      * Constructor
      * 
-     * @param localContentResolver Content resolver
+     * @param localContentResolver Local content resolver
      */
     private RcsSettings(LocalContentResolver localContentResolver) {
         super();

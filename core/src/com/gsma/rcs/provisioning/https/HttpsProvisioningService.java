@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -56,6 +56,7 @@ import java.io.IOException;
  * @author hlxn7157
  * @author G. LE PESSOT
  * @author Deutsche Telekom AG
+ * @author yplo6403
  */
 public class HttpsProvisioningService extends Service {
     /**
@@ -93,8 +94,8 @@ public class HttpsProvisioningService extends Service {
      */
     private static final String ACTION_RETRY = "com.gsma.rcs.provisioning.https.HttpsProvisioningService.ACTION_RETRY";
 
-    private static final Logger sLogger = Logger.getLogger(HttpsProvisioningService.class
-            .getSimpleName());
+    private static final Logger sLogger = Logger
+            .getLogger(HttpsProvisioningService.class.getName());
 
     @Override
     public void onCreate() {
@@ -104,10 +105,10 @@ public class HttpsProvisioningService extends Service {
         mContext = getApplicationContext();
         ContentResolver contentResolver = mContext.getContentResolver();
         mLocalContentResolver = new LocalContentResolver(contentResolver);
-        mRcsSettings = RcsSettings.createInstance(mLocalContentResolver);
-        mMessagingLog = MessagingLog.createInstance(mLocalContentResolver, mRcsSettings);
+        mRcsSettings = RcsSettings.getInstance(mLocalContentResolver);
+        mMessagingLog = MessagingLog.getInstance(mLocalContentResolver, mRcsSettings);
         mRetryIntent = PendingIntent.getBroadcast(mContext, 0, new Intent(ACTION_RETRY), 0);
-        mContactManager = ContactManager.createInstance(mContext, contentResolver,
+        mContactManager = ContactManager.getInstance(mContext, contentResolver,
                 mLocalContentResolver, mRcsSettings);
     }
 
@@ -150,10 +151,10 @@ public class HttpsProvisioningService extends Service {
         mHttpsProvisioningMng = new HttpsProvisioningManager(imei, imsi, mContext,
                 mLocalContentResolver, mRetryIntent, first, user, mRcsSettings, mMessagingLog,
                 mContactManager);
+        mHttpsProvisioningMng.initialize();
         if (logActivated) {
-            sLogger.debug(new StringBuilder("Provisioning (first=").append(first)
-                    .append(") (user=").append(user).append(") (version=").append(version)
-                    .append(")").toString());
+            sLogger.debug("Provisioning (first=" + first + ") (user=" + user + ") (version="
+                    + version + ")");
         }
 
         boolean requestConfig = false;
@@ -168,10 +169,10 @@ public class HttpsProvisioningService extends Service {
         } else if (Version.RESETED_NOQUERY.toInt() == version) {
             // Nothing to do
         } else if (Version.DISABLED_NOQUERY.toInt() == version) {
-            if (user == true) {
+            if (user) {
                 requestConfig = true;
             }
-        } else if (Version.DISABLED_DORMANT.toInt() == version && user == true) {
+        } else if (Version.DISABLED_DORMANT.toInt() == version && user) {
             requestConfig = true;
         } else { // version > 0
             long expiration = LauncherUtils.getProvisioningExpirationDate(this);
@@ -198,10 +199,10 @@ public class HttpsProvisioningService extends Service {
                         delay = validity;
                     }
                     if (logActivated) {
-                        sLogger.debug(new StringBuilder("Configuration will expire at ").append(
-                                DateUtils.formatDateTime(mContext, expiration,
+                        sLogger.debug("Configuration will expire at "
+                                + DateUtils.formatDateTime(mContext, expiration,
                                         DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_TIME
-                                                | DateUtils.FORMAT_NUMERIC_DATE)).toString());
+                                                | DateUtils.FORMAT_NUMERIC_DATE));
                     }
                     startRetryAlarm(this, mRetryIntent, delay);
                 }
@@ -242,9 +243,8 @@ public class HttpsProvisioningService extends Service {
 
                     } catch (IOException e) {
                         if (sLogger.isActivated()) {
-                            sLogger.debug(new StringBuilder(
-                                    "Unable to handle connection event, Message=").append(
-                                    e.getMessage()).toString());
+                            sLogger.debug("Unable to handle connection event, Message="
+                                    + e.getMessage());
                         }
                         /* Start the RCS service */
                         if (mHttpsProvisioningMng.isFirstProvisioningAfterBoot()) {
@@ -278,8 +278,8 @@ public class HttpsProvisioningService extends Service {
      */
     public static void startRetryAlarm(Context context, PendingIntent intent, long delay) {
         if (sLogger.isActivated()) {
-            sLogger.debug(new StringBuilder("Retry HTTP configuration update in ").append(
-                    DateUtils.formatElapsedTime(delay / 1000)).toString());
+            sLogger.debug("Retry HTTP configuration update in "
+                    + DateUtils.formatElapsedTime(delay / 1000));
         }
         AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         TimerUtils.setExactTimer(am, System.currentTimeMillis() + delay, intent);
@@ -331,21 +331,13 @@ public class HttpsProvisioningService extends Service {
                     try {
                         mHttpsProvisioningMng.updateConfig();
 
-                    } catch (RcsAccountException e) {
-                        sLogger.error("Failed to update configuration!", e);
-
-                    } catch (RuntimeException e) {
-                        /*
-                         * Intentionally catch runtime exceptions as else it will abruptly end the
-                         * thread and eventually bring the whole system down, which is not intended.
-                         */
+                    } catch (RcsAccountException | RuntimeException e) {
                         sLogger.error("Failed to update configuration!", e);
 
                     } catch (IOException e) {
                         if (sLogger.isActivated()) {
-                            sLogger.debug(new StringBuilder(
-                                    "Unable to handle connection event, Message=").append(
-                                    e.getMessage()).toString());
+                            sLogger.debug("Unable to handle connection event, Message="
+                                    + e.getMessage());
                         }
                         /* Start the RCS service */
                         if (mHttpsProvisioningMng.isFirstProvisioningAfterBoot()) {
@@ -367,23 +359,33 @@ public class HttpsProvisioningService extends Service {
 
     /**
      * Start the HTTPs provisioning service
-     * 
-     * @param context the application context
+     *
+     * @param ctx the application context
      * @param firstLaunch first launch after (re)boot
      * @param userLaunch launch is requested by user action
      */
-    public static void startHttpsProvisioningService(Context context, boolean firstLaunch,
+    public static void startHttpsProvisioningService(Context ctx, boolean firstLaunch,
             boolean userLaunch) {
         if (sLogger.isActivated()) {
-            sLogger.debug(new StringBuilder("startHttpsProvisioningService (first=")
-                    .append(firstLaunch).append(") (user=").append(userLaunch).append(")")
-                    .toString());
+            sLogger.debug("startHttpsProvisioningService (first=" + firstLaunch + ") (user="
+                    + userLaunch + ")");
         }
-        // Start HTTPS provisioning service
-        Intent provisioningIntent = new Intent(context, HttpsProvisioningService.class);
+        Intent provisioningIntent = new Intent(ctx, HttpsProvisioningService.class);
         provisioningIntent.putExtra(FIRST_KEY, firstLaunch);
         provisioningIntent.putExtra(USER_KEY, userLaunch);
-        context.startService(provisioningIntent);
+        ctx.startService(provisioningIntent);
+    }
+
+    /**
+     * Re-provision
+     *
+     * @param ctx the application context
+     */
+    public static void reProvisioning(Context ctx) {
+        if (sLogger.isActivated()) {
+            sLogger.debug("Request re-provisioning");
+        }
+        ctx.sendBroadcast(new Intent(ACTION_RETRY));
     }
 
 }

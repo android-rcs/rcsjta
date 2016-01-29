@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2016 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.service;
@@ -39,7 +43,7 @@ public class DeviceBoot extends BroadcastReceiver {
         if (logger.isActivated())
             logger.debug("Start RCS service after boot");
         LocalContentResolver localContentResolver = new LocalContentResolver(context);
-        RcsSettings rcsSettings = RcsSettings.createInstance(localContentResolver);
+        RcsSettings rcsSettings = RcsSettings.getInstance(localContentResolver);
         LauncherUtils.launchRcsService(context, true, false, rcsSettings);
     }
 }

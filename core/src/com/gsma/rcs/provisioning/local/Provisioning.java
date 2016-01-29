@@ -53,7 +53,7 @@ public class Provisioning extends TabActivity {
         LocalContentResolver localContentResolver = new LocalContentResolver(
                 getApplicationContext());
         AndroidFactory
-                .setApplicationContext(this, RcsSettings.createInstance(localContentResolver));
+                .setApplicationContext(this, RcsSettings.getInstance(localContentResolver));
 
         // Set tabs
         final TabHost tabHost = getTabHost();

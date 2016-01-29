@@ -169,11 +169,11 @@ public class RichCallHistory {
     }
 
     /**
-     * Create instance
+     * Get or Create Singleton instance of RichCallHistory
      * 
      * @param localContentResolver Local content resolver
      */
-    public static RichCallHistory createInstance(LocalContentResolver localContentResolver) {
+    public static RichCallHistory getInstance(LocalContentResolver localContentResolver) {
         if (sInstance != null) {
             return sInstance;
         }
