@@ -389,6 +389,8 @@
     <string name="label_history_log_image_sharing">Image share</string>
     <string name="label_history_log_video_sharing">Video share</string>
     <string name="label_history_log_geoloc_sharing">Geoloc share</string>
+    <string name="LabelPermissionsError">You must accept permissions to use RSC RI</string>
+    <string name="LabelTitlePermissionsError">ALERT</string>
 
     <!-- States -->
 

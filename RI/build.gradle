@@ -24,7 +24,7 @@ android {
 
     //Google maps
     //compileSdkVersion rootProject.compileSdkVersion
-    compileSdkVersion "Google Inc.:Google APIs:21"
+    compileSdkVersion "Google Inc.:Google APIs:23"
     buildToolsVersion rootProject.buildToolsVersion
 
     defaultConfig {

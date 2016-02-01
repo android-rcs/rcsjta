@@ -3,5 +3,7 @@
 
     <string name="app_name">RCS template</string>
     <string name="button_connect">Generate RCS provisioning template</string>
+    <string name="LabelPermissionsError">You must accept permissions to use RSC Provisioning template</string>
+    <string name="LabelTitlePermissionsError">ALERT</string>
 
 </resources>

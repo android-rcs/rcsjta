@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,13 +21,17 @@
 
 package com.gsma.rcs.tools.http.provisioning;
 
+import android.Manifest;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -47,7 +51,10 @@ import java.net.CookieManager;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.NoSuchElementException;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -69,6 +76,15 @@ public class ProvisioningTemplateActivity extends Activity {
      * Pattern to extract Uri from SIP header
      */
     private final static Pattern PATTERN_EXTRACT_URI = Pattern.compile(REGEXP_EXTRACT_URI);
+
+    /**
+     * List of permissions needed for service Just need to ask one permission per dangerous group
+     */
+    private static final Set<String> sAllPermissionsList = new HashSet<>(
+            Arrays.asList(Manifest.permission.WRITE_EXTERNAL_STORAGE));
+
+    private static final int MY_PERMISSION_REQUEST_ALL = 5428;
+    private Set<String> mPermissionsToAsk;
 
     /**
      * get URI from SIP identity header
@@ -98,18 +114,26 @@ public class ProvisioningTemplateActivity extends Activity {
 
         @Override
         public void onClick(View v) {
-            TextView textView = (TextView) findViewById(R.id.result);
-            ProgressBar progressBar = (ProgressBar) findViewById(R.id.pBAsync);
-            try {
-                URL url = new URL("http" + "://" + buildProvisioningAddress());
-                HttpProvisioningClient client = new HttpProvisioningClient(url, progressBar,
-                        textView, mButton);
-                client.execute();
-            } catch (MalformedURLException e) {
-                textView.setText("MalformedURLException occurred: " + e.getMessage() + "!");
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                askPermissions();
+            } else {
+                onClickAfterCheckPermissions();
             }
         }
     };
+
+    private void onClickAfterCheckPermissions() {
+        TextView textView = (TextView) findViewById(R.id.result);
+        ProgressBar progressBar = (ProgressBar) findViewById(R.id.pBAsync);
+        try {
+            URL url = new URL("http" + "://" + buildProvisioningAddress());
+            HttpProvisioningClient client = new HttpProvisioningClient(url, progressBar, textView,
+                    mButton);
+            client.execute();
+        } catch (MalformedURLException e) {
+            textView.setText("MalformedURLException occurred: " + e.getMessage() + "!");
+        }
+    }
 
     private class HttpProvisioningClient extends AsyncTask<Object, Integer, String> {
 
@@ -181,8 +205,8 @@ public class ProvisioningTemplateActivity extends Activity {
                             String msisdn = extractMsisdnFromProvisioningResponse(content);
                             saveProvisioningTemplate(content, msisdn);
                         } catch (NoSuchElementException e) {
-                            return "Second request failed: code=" + respCode + " message='" + e.getMessage()
-                                    + "'!";
+                            return "Second request failed: code=" + respCode + " message='"
+                                    + e.getMessage() + "'!";
                         }
 
                         return "Success! /sdcard/provisioning_template.xml is available";
@@ -233,11 +257,12 @@ public class ProvisioningTemplateActivity extends Activity {
             uriBuilder.authority(buildProvisioningAddress());
             uriBuilder.appendQueryParameter(PARAM_RCS_VERSION, "5.1B");
             uriBuilder.appendQueryParameter(PARAM_RCS_PROFILE, "joyn_blackbird");
-            uriBuilder.appendQueryParameter(PARAM_TERMINAL_MODEL, Build.DEVICE );
+            uriBuilder.appendQueryParameter(PARAM_TERMINAL_MODEL, Build.DEVICE);
             return new URL(uriBuilder.build().toString());
         }
 
-        private void saveProvisioningTemplate(String provisioning, String msisdn) throws FileNotFoundException {
+        private void saveProvisioningTemplate(String provisioning, String msisdn)
+                throws FileNotFoundException {
             File dirProvTemplate = Environment.getExternalStorageDirectory();
             PrintWriter out = null;
             try {
@@ -270,5 +295,62 @@ public class ProvisioningTemplateActivity extends Activity {
     private int getMobileNetworkCode() {
         Configuration config = getResources().getConfiguration();
         return config.mnc;
+    }
+
+    /**
+     * Main function to ask permissions
+     */
+    private void askPermissions() {
+        mPermissionsToAsk = getNotGrantedPermissions();
+        if (mPermissionsToAsk.size() > 0 && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            requestPermissions(mPermissionsToAsk.toArray(new String[mPermissionsToAsk.size()]),
+                    MY_PERMISSION_REQUEST_ALL);
+        } else {
+            onClickAfterCheckPermissions();
+        }
+    }
+
+    /**
+     * Check all permissions's status
+     * 
+     * @return Set of permissions that are not granted
+     */
+    private Set<String> getNotGrantedPermissions() {
+        Set<String> permissionsToAsk = new HashSet<>();
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            return permissionsToAsk;
+        }
+        for (String permission : sAllPermissionsList) {
+            if (PackageManager.PERMISSION_GRANTED != checkSelfPermission(permission)) {
+                permissionsToAsk.add(permission);
+            }
+        }
+        return permissionsToAsk;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        switch (requestCode) {
+            case MY_PERMISSION_REQUEST_ALL:
+                Set<String> grantedPermissions = new HashSet<>();
+                for (int i = 0; i < permissions.length; i++) {
+                    if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {
+                        grantedPermissions.add(permissions[i]);
+                    } else if (grantResults[i] == PackageManager.PERMISSION_DENIED) {
+                        Log.w("Permissions", "Permission Denied: " + permissions[i]);
+                    }
+                }
+                if (grantedPermissions.equals(mPermissionsToAsk)) {
+                    onClickAfterCheckPermissions();
+                } else {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(
+                            ProvisioningTemplateActivity.this);
+                    builder.setMessage(getString(R.string.LabelPermissionsError)).setTitle(
+                            getString(R.string.LabelTitlePermissionsError));
+                    AlertDialog dialog = builder.create();
+                    dialog.show();
+                }
+                break;
+        }
     }
 }

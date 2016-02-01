@@ -16,7 +16,7 @@ allprojects {
     }
 }
 
-project.ext.set("compileSdkVersion", 22)
+project.ext.set("compileSdkVersion", 23)
 project.ext.set("minSdkVersion", 12)
-project.ext.set("targetSdkVersion", 22)
-project.ext.set("buildToolsVersion", "22.0.1")
+project.ext.set("targetSdkVersion", 23)
+project.ext.set("buildToolsVersion", "23.0.2")
