@@ -295,7 +295,7 @@ public class FileUtils {
      * @param destination Uri of the destination file
      * @throws IOException if the copy operation fails
      */
-    public static void copyFile(Uri source, Uri destination) throws IOException {
+    private static void copyFile(Uri source, Uri destination) throws IOException {
         FileInputStream sourceStream = null;
         FileOutputStream destStream = null;
         try {
@@ -304,7 +304,7 @@ public class FileUtils {
             destStream = (FileOutputStream) AndroidFactory.getApplicationContext()
                     .getContentResolver().openOutputStream(destination);
             byte buffer[] = new byte[1024];
-            int length = 0;
+            int length;
 
             while ((length = sourceStream.read(buffer)) > 0) {
                 destStream.write(buffer, 0, length);
@@ -318,9 +318,9 @@ public class FileUtils {
     /**
      * Create copy of sent file in respective sent directory.
      * 
-     * @param file
-     * @param rcsSettings
-     * @return Uri of copy of file
+     * @param file The file Uri to copy
+     * @param rcsSettings The RcsSettings accessor
+     * @return Uri of copy or created file
      * @throws IOException
      */
     public static Uri createCopyOfSentFile(Uri file, RcsSettings rcsSettings) throws IOException {

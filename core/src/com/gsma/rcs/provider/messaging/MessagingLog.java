@@ -616,4 +616,14 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
     public void addGroupChatFailedDeliveryMessage(String chatId, ChatMessage msg) {
         mMessageLog.addGroupChatFailedDeliveryMessage(chatId, msg);
     }
+
+    @Override
+    public Uri getFile(String fileTransferId) {
+        return mFileTransferLog.getFile(fileTransferId);
+    }
+
+    @Override
+    public Direction getFileTransferDirection(String fileTransferId) {
+        return mFileTransferLog.getFileTransferDirection(fileTransferId);
+    }
 }
