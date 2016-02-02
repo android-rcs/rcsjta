@@ -101,6 +101,7 @@ public class GroupFileTransferDeleteTask extends DeleteTask.GroupedByChatId {
         FileSharingSession session = mImService.getFileSharingSession(transferId);
         if (session == null) {
             mFileTransferService.ensureThumbnailIsDeleted(transferId);
+            mFileTransferService.ensureFileCopyIsDeletedIfExisting(transferId);
             mFileTransferService.removeGroupFileTransfer(transferId);
             return;
 
@@ -118,6 +119,7 @@ public class GroupFileTransferDeleteTask extends DeleteTask.GroupedByChatId {
             }
         }
         mFileTransferService.ensureThumbnailIsDeleted(transferId);
+        mFileTransferService.ensureFileCopyIsDeletedIfExisting(transferId);
         mFileTransferService.removeGroupFileTransfer(transferId);
     }
 

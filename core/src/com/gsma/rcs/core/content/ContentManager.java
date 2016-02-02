@@ -383,21 +383,22 @@ public class ContentManager {
          * same name exists, by appending _1 before the extension For example if image.jpeg exists,
          * next file will be image_1.jpeg, then image_2.jpeg etc.
          */
-        StringBuilder extension = new StringBuilder("");
-        if ((fileName != null) && (fileName.indexOf('.') != -1)) {
-            /* if extension is present, split it */
-            extension = new StringBuilder(".")
-                    .append(fileName.substring(fileName.lastIndexOf('.') + 1));
-            fileName = fileName.substring(0, fileName.lastIndexOf('.'));
+
+        if (fileName.indexOf('.') == -1) {
+            throw new RuntimeException("Filename without extension: fileName='" + fileName + "'!");
         }
+        /* if extension is present, split it */
+        int extPosition = fileName.lastIndexOf('.');
+        String extension = "." + fileName.substring(extPosition + 1);
+        fileName = fileName.substring(0, extPosition);
         String destination = fileName;
         int incrementIndex = 1;
-        while (new File(new StringBuilder(path).append(destination).append(extension).toString())
-                .exists()) {
-            destination = new StringBuilder(fileName).append('_').append(incrementIndex).toString();
+        File generatedFile = new File(path + destination + extension);
+        while (generatedFile.exists()) {
+            destination = fileName + '_' + incrementIndex;
+            generatedFile = new File(path + destination + extension);
             incrementIndex++;
         }
-        return Uri.fromFile(new File(new StringBuilder(path).append(destination).append(extension)
-                .toString()));
+        return Uri.fromFile(generatedFile);
     }
 }
