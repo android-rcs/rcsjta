@@ -163,6 +163,21 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
     }
 
     /**
+     * Ensure copy of file if existing is deleted
+     * 
+     * @param transferId Unique Id of file transfer
+     */
+    public void ensureFileCopyIsDeletedIfExisting(String transferId) {
+        if(Direction.INCOMING == mMessagingLog.getFileTransferDirection(transferId)){
+            return;
+        }
+        Uri file = mMessagingLog.getFile(transferId);
+        if (file != null) {
+            new File(file.getPath()).delete();
+        }
+    }
+
+    /**
      * Close API
      */
     public void close() {

@@ -211,6 +211,22 @@ public interface IFileTransferLog {
     FtHttpResumeUpload retrieveFtHttpResumeUpload(String tId);
 
     /**
+     * Get the Uri for a file transfer with specific id
+     * 
+     * @param fileTransferId specific id
+     * @return Uri Uri of the file
+     */
+    Uri getFile(String fileTransferId);
+
+    /**
+     * Get DIrection of file transfer with specific id
+     * 
+     * @param fileTransferId specific id
+     * @return Direction Direction of file transfer
+     */
+    Direction getFileTransferDirection(String fileTransferId);
+
+    /**
      * Get the chat id for a file transfer with specific id
      * 
      * @param fileTransferId specific id
