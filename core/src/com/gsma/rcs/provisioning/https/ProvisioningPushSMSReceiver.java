@@ -30,7 +30,9 @@ import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.provisioning.ProvisioningInfo;
 import com.gsma.rcs.service.LauncherUtils;
+import com.gsma.rcs.utils.NetworkUtils;
 import com.gsma.rcs.utils.logger.Logger;
 
 import android.content.BroadcastReceiver;
@@ -82,30 +84,40 @@ public class ProvisioningPushSMSReceiver extends BroadcastReceiver {
         }
 
         if (smsData.endsWith(HttpsProvisioningUtils.RESET_CONFIG_SUFFIX)) {
-            final ContentResolver contentResolver = ctx.getContentResolver();
-            final LocalContentResolver localContentResolver = new LocalContentResolver(
-                    contentResolver);
-            final RcsSettings rcsSettings = RcsSettings.getInstance(localContentResolver);
+            final ContentResolver resolver = ctx.getContentResolver();
+            final LocalContentResolver localResolver = new LocalContentResolver(resolver);
+            final RcsSettings rcsSettings = RcsSettings.getInstance(localResolver);
             final TelephonyManager telephonyManager = (TelephonyManager) ctx
                     .getSystemService(Context.TELEPHONY_SERVICE);
 
             if (smsData.contains(telephonyManager.getSubscriberId())) {
-                /* IMSI in smsData : fresh provisioning */
-                LauncherUtils.stopRcsService(ctx);
-                final ContactManager contactManager = ContactManager.getInstance(ctx,
-                        contentResolver, localContentResolver, rcsSettings);
-                final MessagingLog messagingLog = MessagingLog.getInstance(localContentResolver,
-                        rcsSettings);
-                LauncherUtils.resetRcsConfig(ctx, localContentResolver, rcsSettings, messagingLog,
-                        contactManager);
-                LauncherUtils.launchRcsService(ctx, true, false, rcsSettings);
+                resetConfigurationThenRestart(ctx, resolver, localResolver, rcsSettings);
             } else if (smsData.contains(rcsSettings.getUserProfileImsPrivateId())) {
-                /* private_user_id in smsData : re-provisioning */
-                /* First unregister from IMS then re-provision */
-                tryUnRegister();
-                HttpsProvisioningService.reProvisioning(ctx);
+                if (NetworkUtils.getNetworkAccessType() == NetworkUtils.NETWORK_ACCESS_WIFI) {
+                    tryUnRegister();
+                    /*
+                     * Only set version number to 0 in order to keep MSISDN and token.
+                     * Reprovisioning is done silently: the user is not prompted to enter its
+                     * MSISDN.
+                     */
+                    rcsSettings.setProvisioningVersion(ProvisioningInfo.Version.RESETED.toInt());
+                    HttpsProvisioningService.reProvisioning(ctx);
+                } else {
+                    resetConfigurationThenRestart(ctx, resolver, localResolver, rcsSettings);
+                }
             }
         }
+    }
+
+    private void resetConfigurationThenRestart(Context ctx, ContentResolver resolver,
+            LocalContentResolver localResolver, RcsSettings rcsSettings) {
+        /* IMSI in smsData : fresh provisioning */
+        LauncherUtils.stopRcsService(ctx);
+        final ContactManager contactManager = ContactManager.getInstance(ctx, resolver,
+                localResolver, rcsSettings);
+        final MessagingLog messagingLog = MessagingLog.getInstance(localResolver, rcsSettings);
+        LauncherUtils.resetRcsConfig(ctx, localResolver, rcsSettings, messagingLog, contactManager);
+        LauncherUtils.launchRcsService(ctx, true, false, rcsSettings);
     }
 
     private void tryUnRegister() {
