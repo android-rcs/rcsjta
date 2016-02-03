@@ -34,7 +34,11 @@ public class OneToOneFileTransferDeleteTask extends DeleteTask.GroupedByContactI
     private static final Logger sLogger = Logger.getLogger(OneToOneFileTransferDeleteTask.class
             .getName());
 
-    private static final String SELECTION_ALL_ONETOONE_FILETRANSFERS = FileTransferData.KEY_CHAT_ID + "=" + FileTransferData.KEY_CONTACT;
+    private static final String SELECTION_ALL_ONETOONE_FILETRANSFERS = FileTransferData.KEY_CHAT_ID
+            + "=" + FileTransferData.KEY_CONTACT;
+
+    private static final String SELECTION_ONETOONE_FILETRANSFER_BY_CHATID = FileTransferData.KEY_CHAT_ID
+            + "=?";
 
     private final FileTransferServiceImpl mFileTransferService;
 
@@ -84,7 +88,8 @@ public class OneToOneFileTransferDeleteTask extends DeleteTask.GroupedByContactI
             InstantMessagingService imService, LocalContentResolver contentResolver,
             ContactId contact) {
         super(contentResolver, FileTransferData.CONTENT_URI, FileTransferData.KEY_FT_ID,
-                FileTransferData.KEY_CONTACT, contact);
+                FileTransferData.KEY_CONTACT, SELECTION_ONETOONE_FILETRANSFER_BY_CHATID, contact
+                        .toString());
         mFileTransferService = fileTransferService;
         mImService = imService;
     }

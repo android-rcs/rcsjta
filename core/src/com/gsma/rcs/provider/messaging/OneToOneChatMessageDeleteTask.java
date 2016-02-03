@@ -37,6 +37,9 @@ public class OneToOneChatMessageDeleteTask extends DeleteTask.GroupedByContactId
     private static final String SELECTION_ONETOONE_CHATMESSAGES = new StringBuilder(
             MessageData.KEY_CHAT_ID).append("=").append(MessageData.KEY_CONTACT).toString();
 
+    private static final String SELECTION_ONETOONE_CHATMESSAGES_BY_CHATID = MessageData.KEY_CHAT_ID
+            + "=?";
+
     private final ChatServiceImpl mChatService;
 
     private final InstantMessagingService mImService;
@@ -89,7 +92,8 @@ public class OneToOneChatMessageDeleteTask extends DeleteTask.GroupedByContactId
             InstantMessagingService imService, LocalContentResolver contentResolver,
             ContactId contact) {
         super(contentResolver, MessageData.CONTENT_URI, MessageData.KEY_MESSAGE_ID,
-                MessageData.KEY_CONTACT, contact);
+                MessageData.KEY_CONTACT, SELECTION_ONETOONE_CHATMESSAGES_BY_CHATID, contact
+                        .toString());
         mChatService = chatService;
         mImService = imService;
         setAllAtOnce(true);
