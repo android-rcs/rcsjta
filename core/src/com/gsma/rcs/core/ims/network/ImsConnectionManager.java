@@ -550,16 +550,28 @@ public class ImsConnectionManager implements Runnable {
                             }
                             break;
                         }
-                        if (mImsModule.isInitializationFinished() && !mImsServicesStarted) {
-                            if (sLogger.isActivated()) {
-                                sLogger.debug("Registered to the IMS with success: start IMS services");
-                            }
-                            mImsModule.startImsServices();
-                            mImsServicesStarted = true;
-                        }
-                        // Reset number of failures
-                        nbFailures = 0;
 
+                        if (mCurrentNetworkInterface.isRegistered()) {
+                            if (mImsModule.isInitializationFinished() && !mImsServicesStarted) {
+                                if (sLogger.isActivated()) {
+                                    sLogger.debug("Registered to the IMS with success: "
+                                            + "start IMS services");
+                                }
+                                mImsModule.startImsServices();
+                                mImsServicesStarted = true;
+                            }
+
+                            // Reset number of failures
+                            nbFailures = 0;
+                        } else {
+                            if (sLogger.isActivated()) {
+                                sLogger.debug("Registration failed: IMS service is not started");
+                            }
+                            /* Increment number of failures */
+                            nbFailures++;
+                            /* Force to perform a new DNS lookup */
+                            mDnsResolvedFields = null;
+                        }
                     } else {
                         if (mImsModule.isInitializationFinished()) {
                             if (!mImsServicesStarted) {
