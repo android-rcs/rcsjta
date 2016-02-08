@@ -39,12 +39,11 @@ import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 
+import javax2.sip.header.ExtensionHeader;
 import gov2.nist.javax2.sip.header.ims.PPreferredServiceHeader;
 
 import java.text.ParseException;
 import java.util.Set;
-
-import javax2.sip.header.ExtensionHeader;
 
 /**
  * Abstract generic SIP session
@@ -104,9 +103,9 @@ public abstract class GenericSipSession extends ImsServiceSession {
     public SipRequest createInvite() throws PayloadException {
         String ext = new StringBuilder(FeatureTags.FEATURE_3GPP).append("=\"")
                 .append(FeatureTags.FEATURE_3GPP_EXTENSION).append("\"").toString();
-        SipRequest invite = SipMessageFactory.createInvite(getDialogPath(), new String[] {
+        SipRequest invite = SipMessageFactory.createInvite(getDialogPath(), new String[]{
                 getFeatureTag(), ext
-        }, new String[] {
+        }, new String[]{
                 getFeatureTag(), ext, SipUtils.EXPLICIT_REQUIRE
         }, getDialogPath().getLocalContent());
 
@@ -133,9 +132,9 @@ public abstract class GenericSipSession extends ImsServiceSession {
     public SipResponse create200OKResponse() throws PayloadException {
         String ext = FeatureTags.FEATURE_3GPP + "=\"" + FeatureTags.FEATURE_3GPP_EXTENSION + "\"";
         SipResponse resp = SipMessageFactory.create200OkInviteResponse(getDialogPath(),
-                new String[] {
+                new String[]{
                         getFeatureTag(), ext
-                }, new String[] {
+                }, new String[]{
                         getFeatureTag(), ext, SipUtils.EXPLICIT_REQUIRE
                 }, getDialogPath().getLocalContent());
         return resp;

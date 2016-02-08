@@ -27,7 +27,7 @@ import android.content.Intent;
  */
 public interface IMultimediaStreamingSessionEventBroadcaster {
 
-    public void broadcastPayloadReceived(ContactId contact, String sessionId, byte[] content, String contentType);
+    public void broadcastPayloadReceived(ContactId contact, String sessionId, byte[] content);
 
     public void broadcastStateChanged(ContactId contact, String sessionId, State state,
             ReasonCode reasonCode);

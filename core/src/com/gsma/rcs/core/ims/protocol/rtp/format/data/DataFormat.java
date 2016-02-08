@@ -28,7 +28,7 @@ public class DataFormat extends Format {
     /**
      * Encoding name
      */
-    public static final String ENCODING = "X-RCS";
+    public static final String ENCODING = "X-RCS/9000";
 
     /**
      * Payload type
@@ -40,5 +40,14 @@ public class DataFormat extends Format {
      */
     public DataFormat() {
         super(ENCODING, PAYLOAD);
+    }
+
+    /**
+     * Constructor
+     *
+     * @param encoding Encoding
+     */
+    public DataFormat(String encoding) {
+        super(encoding, PAYLOAD);
     }
 }

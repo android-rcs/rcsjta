@@ -52,20 +52,12 @@ public class MultimediaStreamingSessionEventBroadcaster implements
         mMultimediaStreamingListeners.unregister(listener);
     }
 
-    public void broadcastPayloadReceived(ContactId contact, String sessionId, byte[] content, String contentType) {
+    public void broadcastPayloadReceived(ContactId contact, String sessionId, byte[] content) {
         final int N = mMultimediaStreamingListeners.beginBroadcast();
         for (int i = 0; i < N; i++) {
             try {
                 mMultimediaStreamingListeners.getBroadcastItem(i).onPayloadReceived(contact,
                         sessionId, content);
-            } catch (RemoteException e) {
-                if (logger.isActivated()) {
-                    logger.error("Can't notify listener", e);
-                }
-            }
-            try {
-                mMultimediaStreamingListeners.getBroadcastItem(i).onPayloadReceived2(contact,
-                        sessionId, content, contentType);
             } catch (RemoteException e) {
                 if (logger.isActivated()) {
                     logger.error("Can't notify listener", e);

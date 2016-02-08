@@ -191,7 +191,6 @@ public class MultimediaStreamingSession extends MultimediaSession {
 
     /**
      * Sends a payload in real time
-     * @deprecated Use {@link #sendPayload(byte[] content, String contentType)} instead.
      *
      * @param content Payload content
      * @throws RcsPermissionDeniedException
@@ -201,25 +200,6 @@ public class MultimediaStreamingSession extends MultimediaSession {
             RcsGenericException {
         try {
             sessionIntf.sendPayload(content);
-        } catch (Exception e) {
-            RcsIllegalArgumentException.assertException(e);
-            RcsPermissionDeniedException.assertException(e);
-            throw new RcsGenericException(e);
-        }
-    }
-
-    /**
-     * Sends a payload in real time
-     *
-     * @param content Payload content
-     * @param contentType Payload content type
-     * @throws RcsPermissionDeniedException
-     * @throws RcsGenericException
-     */
-    public void sendPayload(byte[] content, String contentType) throws RcsPermissionDeniedException,
-            RcsGenericException {
-        try {
-            sessionIntf.sendPayload2(content, contentType);
         } catch (Exception e) {
             RcsIllegalArgumentException.assertException(e);
             RcsPermissionDeniedException.assertException(e);

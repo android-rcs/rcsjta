@@ -7,7 +7,7 @@ interface IMultimediaSessionServiceConfiguration {
 
 	int getMessageMaxLength();
 
-	long getMessagingSessionInactivityTimeout();
+	long getMessagingSessionInactivityTimeout(in String serviceId);
 
 	boolean isServiceActivated(in String serviceId);
 }

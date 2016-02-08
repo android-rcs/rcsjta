@@ -30,7 +30,7 @@ public class StreamingSessionUtils {
     public final static String SERVICE_ID = "ext.streaming";
 
     /**
-     * Service content type
+     * Encoding
      */
-    public final static String SERVICE_CONTENT_TYPE = "plain/text";
+    public final static String ENCODING = "TEXT/1";
 }

@@ -275,16 +275,18 @@ public class SipService extends ImsService {
     /**
      * Initiate a RTP session
      *
-     * @param contact    Remote contact
+     * @param contact Remote contact
      * @param featureTag Feature tag of the service
+     * @param encoding Encoding
      * @return SIP session
      */
-    public GenericSipRtpSession createRtpSession(ContactId contact, String featureTag) {
+    public GenericSipRtpSession createRtpSession(ContactId contact, String featureTag,
+                                                 String encoding) {
         if (sLogger.isActivated()) {
             sLogger.info("Initiate a RTP session with contact " + contact);
         }
         return new OriginatingSipRtpSession(this, contact, featureTag, mRcsSettings,
-                System.currentTimeMillis(), mContactManager);
+                System.currentTimeMillis(), mContactManager, encoding);
     }
 
     /**

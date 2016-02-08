@@ -311,7 +311,8 @@ public final class MultimediaSessionService extends RcsService {
      * type. The parameter contact supports the following formats: MSISDN in national or
      * international format, SIP address, SIP-URI or Tel-URI. If the format of the contact is not
      * supported an exception is thrown.
-     * 
+     * @deprecated Use {@link #initiateStreamingSession(String serviceId, ContactId contact, String encoding)} instead.
+     *
      * @param serviceId Service ID
      * @param contact Contact ID
      * @return MultimediaStreamingSession
@@ -329,6 +330,48 @@ public final class MultimediaSessionService extends RcsService {
         try {
             IMultimediaStreamingSession sessionIntf = mApi.initiateStreamingSession(serviceId,
                     contact);
+            if (sessionIntf != null) {
+                return new MultimediaStreamingSession(sessionIntf);
+
+            }
+            return null;
+
+        } catch (Exception e) {
+            RcsIllegalArgumentException.assertException(e);
+            RcsServiceNotRegisteredException.assertException(e);
+            RcsPermissionDeniedException.assertException(e);
+            throw new RcsGenericException(e);
+        }
+    }
+
+    /**
+     * Initiates a new session for real time streaming with a remote contact for a given service
+     * extension and encoding (ie. rtpmap format containing <encoding name>/<clock rate> and
+     * optional parameters if needed. The payload are exchanged in real time during the session and
+     * may be from any type. The parameter contact supports the following formats: MSISDN in national
+     * or international format, SIP address, SIP-URI or Tel-URI. If the format of the contact is not
+     * supported an exception is thrown.
+     *
+     * @param serviceId Service ID
+     * @param contact Contact ID
+     * @param encoding Encoding payload format
+     * @return MultimediaStreamingSession
+     * @throws RcsServiceNotRegisteredException
+     * @throws RcsPermissionDeniedException
+     * @throws RcsServiceNotAvailableException
+     * @throws RcsGenericException
+     */
+    public MultimediaStreamingSession initiateStreamingSession(String serviceId,
+                                                               ContactId contact,
+                                                               String encoding)
+            throws RcsServiceNotRegisteredException, RcsPermissionDeniedException,
+            RcsServiceNotAvailableException, RcsGenericException {
+        if (mApi == null) {
+            throw new RcsServiceNotAvailableException();
+        }
+        try {
+            IMultimediaStreamingSession sessionIntf = mApi.initiateStreamingSession2(serviceId,
+                    contact, encoding);
             if (sessionIntf != null) {
                 return new MultimediaStreamingSession(sessionIntf);
 

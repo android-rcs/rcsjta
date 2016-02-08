@@ -56,13 +56,15 @@ public class OriginatingSipRtpSession extends GenericSipRtpSession {
      * @param parent SIP service
      * @param contact Remote contact Id
      * @param featureTag Feature tag
-     * @param rcsSettings
+     * @param rcsSettings RCS settings
      * @param timestamp Local timestamp for the session
-     * @param contactManager
+     * @param contactManager Contacts
+     * @param encoding Encoding
      */
     public OriginatingSipRtpSession(SipService parent, ContactId contact, String featureTag,
-            RcsSettings rcsSettings, long timestamp, ContactManager contactManager) {
-        super(parent, contact, featureTag, rcsSettings, timestamp, contactManager);
+            RcsSettings rcsSettings, long timestamp, ContactManager contactManager, String encoding) {
+        super(parent, contact, featureTag, rcsSettings, timestamp, contactManager, encoding);
+        /* Create dialog path */
         createOriginatingDialogPath();
     }
 

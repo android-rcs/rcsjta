@@ -75,7 +75,9 @@ public class TerminatingSipRtpSession extends GenericSipRtpSession {
             ContactId contact, Intent sessionInvite, RcsSettings rcsSettings, long timestamp,
             ContactManager contactManager) {
         super(parent, contact, GenericSipSession.getIariFeatureTag(invite.getFeatureTags()),
-                rcsSettings, timestamp, contactManager);
+                rcsSettings, timestamp, contactManager,
+                GenericSipRtpSession.getEncoding(invite.getContent()));
+
         mSessionInvite = sessionInvite;
         mImsModule = imsModule;
         /* Create dialog path */
@@ -167,7 +169,7 @@ public class TerminatingSipRtpSession extends GenericSipRtpSession {
             }
 
             String sdp = generateSdp();
-
+            
             /* Set the local SDP part in the dialog path */
             dialogPath.setLocalContent(sdp);
 

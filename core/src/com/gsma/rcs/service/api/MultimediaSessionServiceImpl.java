@@ -23,6 +23,7 @@
 package com.gsma.rcs.service.api;
 
 import com.gsma.rcs.core.ims.network.sip.FeatureTags;
+import com.gsma.rcs.core.ims.protocol.rtp.format.data.DataFormat;
 import com.gsma.rcs.core.ims.service.sip.SipService;
 import com.gsma.rcs.core.ims.service.sip.messaging.GenericSipMsrpSession;
 import com.gsma.rcs.core.ims.service.sip.streaming.GenericSipRtpSession;
@@ -439,6 +440,27 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
      */
     public IMultimediaStreamingSession initiateStreamingSession(String serviceId, ContactId contact)
             throws RemoteException {
+        return initiateStreamingSession2(serviceId, contact, DataFormat.ENCODING);
+    }
+
+    /**
+     * Initiates a new session for real time streaming with a remote contact for a given service
+     * extension and encoding (ie. rtpmap format containing <encoding name>/<clock rate> and
+     * optional parameters if needed. The payload are exchanged in real time during the session and
+     * may be from any type. The parameter contact supports the following formats: MSISDN in national
+     * or international format, SIP address, SIP-URI or Tel-URI. If the format of the contact is not
+     * supported an exception is thrown.
+     *
+     * @param serviceId Service ID
+     * @param contact Contact ID
+     ** @param encoding Encoding payload format
+     * @return Multimedia streaming session
+     * @throws RemoteException
+     */
+    public IMultimediaStreamingSession initiateStreamingSession2(String serviceId,
+                                                                 ContactId contact,
+                                                                 String encoding)
+            throws RemoteException {
         if (TextUtils.isEmpty(serviceId)) {
             throw new ServerApiIllegalArgumentException("serviceId must not be null or empty!");
         }
@@ -452,7 +474,9 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
         try {
             String featureTag = FeatureTags.FEATURE_RCSE + "=\""
                     + FeatureTags.FEATURE_RCSE_IARI_EXTENSION + "." + serviceId + "\"";
-            final GenericSipRtpSession session = mSipService.createRtpSession(contact, featureTag);
+            final GenericSipRtpSession session = mSipService.createRtpSession(contact,
+                    featureTag,
+                    encoding);
 
             MultimediaStreamingSessionImpl multimediaStreaming = new MultimediaStreamingSessionImpl(
                     session.getSessionID(), mMultimediaStreamingSessionEventBroadcaster,

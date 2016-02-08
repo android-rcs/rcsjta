@@ -264,7 +264,8 @@ public class StreamingSessionView extends RcsActivity {
 
     private void startSession() {
         try {
-            mSession = mSessionService.initiateStreamingSession(mServiceId, mContact);
+            mSession = mSessionService.initiateStreamingSession(mServiceId, mContact,
+                    StreamingSessionUtils.ENCODING);
             mSessionId = mSession.getSessionId();
             showProgressDialog();
 
@@ -361,7 +362,7 @@ public class StreamingSessionView extends RcsActivity {
                 mCounter++;
                 final String data = "data".concat(mCounter.toString());
                 try {
-                    mSession.sendPayload(data.getBytes(), StreamingSessionUtils.SERVICE_CONTENT_TYPE);
+                    mSession.sendPayload(data.getBytes());
                     handler.post(new Runnable() {
                         public void run() {
                             /* Display Transmitted data */
@@ -465,11 +466,6 @@ public class StreamingSessionView extends RcsActivity {
 
             @Override
             public void onPayloadReceived(ContactId contact, String sessionId, final byte[] content) {
-                // Deprecated since TAPI 1.6
-            }
-
-            @Override
-            public void onPayloadReceived(ContactId contact, String sessionId, final byte[] content, String contentType) {
                 if (LogUtils.isActive) {
                     Log.d(LOGTAG, "onNewMessage contact=" + contact + " sessionId=" + sessionId);
                 }

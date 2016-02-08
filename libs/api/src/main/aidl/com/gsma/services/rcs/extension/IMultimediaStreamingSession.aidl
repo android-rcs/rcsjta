@@ -26,7 +26,5 @@ interface IMultimediaStreamingSession {
 	void abortSession();
 
 	void sendPayload(in byte[] content);
-
-	void sendPayload2(in byte[] content, in String contentType);
 }
 

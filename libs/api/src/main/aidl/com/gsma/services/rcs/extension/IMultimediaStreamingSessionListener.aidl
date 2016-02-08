@@ -10,6 +10,4 @@ interface IMultimediaStreamingSessionListener {
 	void onStateChanged(in ContactId contact, in String sessionId, in int state, in int reasonCode);
 
 	void onPayloadReceived(in ContactId contact, in String sessionId, in byte[] content);
-
-	void onPayloadReceived2(in ContactId contact, in String sessionId, in byte[] content, in String contentType);
 }

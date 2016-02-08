@@ -40,6 +40,8 @@ interface IMultimediaSessionService {
 	
 	IMultimediaStreamingSession initiateStreamingSession(in String serviceId, in ContactId contact);
 
+	IMultimediaStreamingSession initiateStreamingSession2(in String serviceId, in ContactId contact, in String encoding);
+
 	void sendInstantMultimediaMessage(in String serviceId, in ContactId contact, in byte[] content, String contentType);
 
 	int getServiceVersion();

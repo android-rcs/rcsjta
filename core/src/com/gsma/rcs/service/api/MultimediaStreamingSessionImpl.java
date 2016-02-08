@@ -398,22 +398,8 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
      * @throws RemoteException
      */
     public void sendPayload(final byte[] content) throws RemoteException {
-        sendPayload2(content, SipService.DEFAULT_MIME_TYPE);
-    }
-
-    /**
-     * Sends a payload in real time
-     *
-     * @param content Payload content
-     * @param content Payload content type
-     * @throws RemoteException
-     */
-    public void sendPayload2(final byte[] content, final String contentType) throws RemoteException {
         if (content == null || content.length == 0) {
             throw new ServerApiIllegalArgumentException("content must not be null or empty!");
-        }
-        if (contentType == null || contentType.length() == 0) {
-            throw new ServerApiIllegalArgumentException("content type must not be null or empty!");
         }
         mSipService.scheduleMultimediaStreamingOperation(new Runnable() {
             public void run() {
@@ -427,7 +413,7 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
                         return;
                     }
 
-                    session.sendPlayload(content, contentType);
+                    session.sendPlayload(content);
 
                 } catch (SessionNotEstablishedException e) {
                     if (sLogger.isActivated()) {
@@ -520,7 +506,7 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
     @Override
     public void onDataReceived(ContactId contact, byte[] data, String contentType) {
         synchronized (mLock) {
-            mBroadcaster.broadcastPayloadReceived(contact, mSessionId, data, contentType);
+            mBroadcaster.broadcastPayloadReceived(contact, mSessionId, data);
         }
     }
 

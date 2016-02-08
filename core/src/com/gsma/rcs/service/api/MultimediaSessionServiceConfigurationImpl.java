@@ -22,6 +22,7 @@
 
 package com.gsma.rcs.service.api;
 
+import com.gsma.rcs.core.ims.service.sip.EnrichCallingService;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.extension.IMultimediaSessionServiceConfiguration;
@@ -67,12 +68,13 @@ public class MultimediaSessionServiceConfigurationImpl extends
     }
 
     @Override
-    public long getMessagingSessionInactivityTimeout() throws RemoteException {
+    public long getMessagingSessionInactivityTimeout(String serviceId) throws RemoteException {
         try {
-            // Note: We use the value of the call composer for a MM session
-            // even if it's not very good. Then it's up to the application to
-            // use it or not finally in its side
-            return mRcsSettings.getCallComposerInactivityTimeout();
+            if (EnrichCallingService.CALL_COMPOSER_SERVICE_ID.equals(serviceId)) {
+                return mRcsSettings.getCallComposerInactivityTimeout();
+            } else {
+                return mRcsSettings.getChatIdleDuration();
+            }
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
                 sLogger.error(ExceptionUtil.getFullStackTrace(e));
