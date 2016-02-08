@@ -61,10 +61,11 @@ public class FileTransferHttpInfoParser extends DefaultHandler {
                 <content-type>[MIME-type for thumbnail]</content-type>
                 <data url = "[HTTPS URL for the thumbnail]" until = "[validity of the thumbnail]"/>
     </file-info>
-    <file-info type="file">
+    <file-info type="file" file-disposition="attach|render">
                 <file-size>[file size in bytes]</file-size>
                 <file-name>[original file name]</file-name>
                 <content-type>[MIME-type for file]</content-type>
+                <am:playing-length>[duration of the rram]</am:playing-length>
                <data url = "[HTTPS URL for the file]" until = "[validity of the file]"/>
     </file-info>
     <file>
@@ -178,6 +179,10 @@ public class FileTransferHttpInfoParser extends DefaultHandler {
                 if (type.equalsIgnoreCase("thumbnail")) {
                     mThumbnailInfo = new FileTransferHttpThumbnail(mRcsSettings);
                 }
+                String typeDispo = attr.getValue("file-disposition");
+                if (typeDispo != null) {
+                    mFtInfo.setFileDisposition(typeDispo.trim());
+                }
             }
         } else if (localName.equalsIgnoreCase("data")) {
             if (mFtInfo != null) {
@@ -244,6 +249,10 @@ public class FileTransferHttpInfoParser extends DefaultHandler {
                 mFtInfo.setMimeType(mAccumulator.toString().trim());
             } else if (mThumbnailInfo != null) {
                 mThumbnailInfo.setMimeType(mAccumulator.toString().trim());
+            }
+        } else if (localName.equalsIgnoreCase("playing-length")) {
+            if (mFtInfo != null) {
+                mFtInfo.setPlayingLength(Integer.parseInt(mAccumulator.toString().trim()));
             }
         }
     }

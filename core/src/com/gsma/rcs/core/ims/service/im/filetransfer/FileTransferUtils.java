@@ -46,6 +46,7 @@ import com.gsma.rcs.utils.CloseableUtils;
 import com.gsma.rcs.utils.FileUtils;
 import com.gsma.rcs.utils.MimeManager;
 import com.gsma.rcs.utils.logger.Logger;
+import com.gsma.services.rcs.filetransfer.FileTransfer.Disposition;
 
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
@@ -280,16 +281,37 @@ public class FileTransferUtils {
      * Create a content object from URI
      * 
      * @param uri Uri of file
+     * @param disposition File disposition
      * @return Content instance
      */
-    public static MmContent createMmContent(Uri uri) {
+    public static MmContent createMmContent(Uri uri, Disposition disposition) {
+        final FileDescription desc = FileFactory.getFactory().getFileDescription(uri);
+        MmContent content = ContentManager.createMmContent(uri, desc.getSize(), desc.getName());
+        if (disposition == Disposition.RENDER) {
+            content.setPlayable(true);
+        }
+        return content;
+    }
+
+    /**
+     * Create a content object for icon
+     *
+     * @param uri Uri of file
+     * @return Content instance
+     */
+    public static MmContent createIconContent(Uri uri) {
         final FileDescription desc = FileFactory.getFactory().getFileDescription(uri);
         return ContentManager.createMmContent(uri, desc.getSize(), desc.getName());
+
     }
 
     private static String getInfo(String fileType, Uri downloadUri, String name, String mimeType,
-            long size, long expiration) {
-        StringBuilder info = new StringBuilder("<file-info type=\"").append(fileType).append("\">");
+            long size, long expiration, String disposition) {
+        StringBuilder info = new StringBuilder("<file-info type=\"").append(fileType).append("\"");
+        if (disposition != null) {
+            info.append(" file-disposition=\"").append(disposition).append("\"");
+        }
+        info.append(">");
         if (size != 0) {
             info.append("<file-size>").append(size).append("</file-size>");
         }
@@ -307,7 +329,7 @@ public class FileTransferUtils {
     /**
      * Create HTTP file transfer info xml
      * 
-     * @param fileTransferData
+     * @param fileTransferData File transfer info
      * @return String
      */
     public static String createHttpFileTransferXml(FileTransferHttpInfoDocument fileTransferData) {
@@ -316,12 +338,13 @@ public class FileTransferUtils {
                 .append(UTF8_STR).append("\"?><file>");
         if (fileIcon != null) {
             String fileIconInfo = getInfo(FILEICON_INFO, fileIcon.getUri(), null,
-                    fileIcon.getMimeType(), fileIcon.getSize(), fileIcon.getExpiration());
+                    fileIcon.getMimeType(), fileIcon.getSize(), fileIcon.getExpiration(), null);
             info.append(fileIconInfo);
         }
         String fileInfo = getInfo(FILE_INFO, fileTransferData.getUri(),
                 fileTransferData.getFilename(), fileTransferData.getMimeType(),
-                fileTransferData.getSize(), fileTransferData.getExpiration());
+                fileTransferData.getSize(), fileTransferData.getExpiration(),
+                fileTransferData.getFileDisposition());
         info.append(fileInfo);
         info.append("</file>");
         return info.toString();

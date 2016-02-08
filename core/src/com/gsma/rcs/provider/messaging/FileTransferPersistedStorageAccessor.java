@@ -24,6 +24,7 @@ import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsService.ReadStatus;
 import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.filetransfer.FileTransfer.Disposition;
 import com.gsma.services.rcs.filetransfer.FileTransfer.ReasonCode;
 import com.gsma.services.rcs.filetransfer.FileTransfer.State;
 
@@ -44,6 +45,8 @@ public class FileTransferPersistedStorageAccessor {
     private ContactId mContact;
 
     private Boolean mRead;
+
+    private Disposition mDisposition;
 
     private Direction mDirection;
 
@@ -99,6 +102,11 @@ public class FileTransferPersistedStorageAccessor {
         mDirection = direction;
         mChatId = chatId;
         mFile = file.getUri();
+        if (file.isPlayable()) {
+            mDisposition = Disposition.RENDER;
+        } else {
+            mDisposition = Disposition.ATTACH;
+        }
         mFileIcon = fileIcon != null ? fileIcon.getUri() : null;
         mFileIconMimeType = fileIcon != null ? fileIcon.getEncoding() : null;
         mFileName = file.getName();
@@ -123,6 +131,8 @@ public class FileTransferPersistedStorageAccessor {
             }
             mDirection = Direction.valueOf(cursor.getInt(cursor
                     .getColumnIndexOrThrow(FileTransferData.KEY_DIRECTION)));
+            mDisposition= Disposition.valueOf(cursor.getInt(cursor
+                    .getColumnIndexOrThrow(FileTransferData.KEY_DISPOSITION)));
             mChatId = cursor.getString(cursor.getColumnIndexOrThrow(FileTransferData.KEY_CHAT_ID));
             mFileName = cursor.getString(cursor
                     .getColumnIndexOrThrow(FileTransferData.KEY_FILENAME));
@@ -310,6 +320,17 @@ public class FileTransferPersistedStorageAccessor {
                     "Reason code not found for file transfer ").append(mFileTransferId).toString());
         }
         return reasonCode;
+    }
+
+    public Disposition getDisposition() {
+        /*
+         * Utilizing cache here as disposition can't be changed in persistent storage after entry
+         * insertion anyway so no need to query for it multiple times.
+         */
+        if (mDisposition == null) {
+            cacheData();
+        }
+        return mDisposition;
     }
 
     public Direction getDirection() {

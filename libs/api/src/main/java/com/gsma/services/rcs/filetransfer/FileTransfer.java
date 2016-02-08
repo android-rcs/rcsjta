@@ -40,6 +40,58 @@ import android.util.SparseArray;
 public class FileTransfer {
 
     /**
+     * File disposition
+     */
+    public enum Disposition {
+        /**
+         * Attachment
+         */
+        ATTACH(0),
+
+        /**
+         * Render
+         */
+        RENDER(1);
+
+        private final int mValue;
+
+        private static SparseArray<Disposition> mValueToEnum = new SparseArray<Disposition>();
+        static {
+            for (Disposition entry : Disposition.values()) {
+                mValueToEnum.put(entry.toInt(), entry);
+            }
+        }
+
+        private Disposition(int value) {
+            mValue = value;
+        }
+
+        /**
+         * Returns the value of this Disposition as an integer.
+         *
+         * @return integer value
+         */
+        public final int toInt() {
+            return mValue;
+        }
+
+        /**
+         * Returns a Disposition instance representing the specified integer value.
+         *
+         * @param value the integer value
+         * @return State instance
+         */
+        public final static Disposition valueOf(int value) {
+            Disposition entry = mValueToEnum.get(value);
+            if (entry != null) {
+                return entry;
+            }
+            throw new IllegalArgumentException(new StringBuilder("No enum const class ")
+                    .append(State.class.getName()).append("").append(value).append("!").toString());
+        }
+    }
+
+    /**
      * File transfer state
      */
     public enum State {

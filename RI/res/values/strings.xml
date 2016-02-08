@@ -60,6 +60,10 @@
     <string name="error_api_permission_denied">RCS API permission denied</string>
     <string name="label_todo">Feature not yet implemented</string>
 	<string name="error_not_registered">Not registered to IMS</string>
+    <string name="label_uninitialized_disposition">disposition</string>
+    <string name="label_disposition">Disposition: %s</string>
+    <string name="label_attach">Attachment</string>
+    <string name="label_render">Render</string>
 
     <!-- About menu -->
     <string name="label_about_title">Reference Implementation</string>

@@ -50,10 +50,19 @@
         android:textAppearance="?android:attr/textAppearanceSmall" />
 
     <TextView
-        android:id="@+id/direction"
+        android:id="@+id/disposition"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/reason"
+        android:paddingBottom="5dip"
+        android:text="@string/label_uninitialized_disposition"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
+
+    <TextView
+        android:id="@+id/direction"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/disposition"
         android:paddingBottom="5dip"
         android:text="@string/label_uninitialized_direction"
         android:textAppearance="?android:attr/textAppearanceSmall" />

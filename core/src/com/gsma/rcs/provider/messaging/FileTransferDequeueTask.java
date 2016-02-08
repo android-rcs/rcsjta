@@ -37,6 +37,7 @@ import com.gsma.rcs.service.api.OneToOneChatImpl;
 import com.gsma.rcs.service.api.OneToOneFileTransferImpl;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.filetransfer.FileTransfer.Disposition;
 import com.gsma.services.rcs.filetransfer.FileTransfer.State;
 
 import android.content.Context;
@@ -71,6 +72,7 @@ public class FileTransferDequeueTask extends DequeueTask {
             mLogger.debug("Execute task to dequeue one-to-one and group file transfers");
         }
         String id = null;
+        Disposition disposition;
         ContactId contact = null;
         String chatId = null;
         boolean groupFile = false;
@@ -100,6 +102,7 @@ public class FileTransferDequeueTask extends DequeueTask {
             int chatIdIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_CHAT_ID);
             int stateIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_STATE);
             int fileSizeIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_FILESIZE);
+            int dispositionIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_DISPOSITION);
             while (cursor.moveToNext()) {
                 try {
                     if (!isImsConnected()) {
@@ -119,6 +122,7 @@ public class FileTransferDequeueTask extends DequeueTask {
                     contact = contactNumber != null ? ContactUtil
                             .createContactIdFromTrustedData(contactNumber) : null;
                     chatId = cursor.getString(chatIdIdx);
+                    disposition =  Disposition.valueOf(cursor.getInt(dispositionIdx));
                     groupFile = !chatId.equals(contactNumber);
                     State state = State.valueOf(cursor.getInt(stateIdx));
                     Uri file = Uri.parse(cursor.getString(fileIdx));
@@ -146,12 +150,13 @@ public class FileTransferDequeueTask extends DequeueTask {
                                     continue;
                                 }
                             }
-                            MmContent content = FileTransferUtils.createMmContent(file);
+                            MmContent content = FileTransferUtils.createMmContent(file,
+                                    disposition);
                             MmContent fileIconContent = null;
                             String fileIcon = cursor.getString(fileIconIdx);
                             if (fileIcon != null) {
                                 Uri fileIconUri = Uri.parse(fileIcon);
-                                fileIconContent = FileTransferUtils.createMmContent(fileIconUri);
+                                fileIconContent = FileTransferUtils.createIconContent(fileIconUri);
                             }
                             if (groupFile) {
                                 mFileTransferService.dequeueGroupFileTransfer(chatId, id, content,

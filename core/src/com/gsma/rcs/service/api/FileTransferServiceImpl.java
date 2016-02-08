@@ -59,6 +59,7 @@ import com.gsma.services.rcs.RcsServiceRegistration;
 import com.gsma.services.rcs.chat.GroupChat;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
+import com.gsma.services.rcs.filetransfer.FileTransfer.Disposition;
 import com.gsma.services.rcs.filetransfer.FileTransfer.ReasonCode;
 import com.gsma.services.rcs.filetransfer.FileTransfer.State;
 import com.gsma.services.rcs.filetransfer.IFileTransfer;
@@ -632,6 +633,25 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      */
     public IFileTransfer transferFile(final ContactId contact, Uri file, boolean attachFileIcon)
             throws RemoteException {
+        return transferFile2(contact, file, Disposition.ATTACH.toInt(), attachFileIcon);
+    }
+
+    /**
+     * Transfers a file to a contact. The parameter file contains the URI of the file to be
+     * transferred (for a local or a remote file). The parameter contact supports the following
+     * formats: MSISDN in national or international format, SIP address, SIP-URI or Tel-URI. If the
+     * format of the contact is not supported an exception is thrown.
+     *
+     * @param contact Contact
+     * @param file URI of file to transfer
+     * @param disposition File disposition
+     * @param attachFileIcon true if the stack must try to attach fileIcon
+     * @return FileTransfer
+     * @throws RemoteException
+     */
+    public IFileTransfer transferFile2(final ContactId contact, Uri file, int disposition,
+                                       boolean attachFileIcon)
+            throws RemoteException {
         if (contact == null) {
             throw new ServerApiIllegalArgumentException("contact must not be null!");
         }
@@ -652,7 +672,9 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
             MmContent fileIconContent = null;
             final MmContent content = ContentManager.createMmContent(localFile,
                     fileDescription.getSize(), fileDescription.getName());
-
+            if (Disposition.valueOf(disposition) == Disposition.RENDER) {
+                content.setPlayable(true);
+            }
             final String fileTransferId = IdGenerator.generateMessageID();
             if (attachFileIcon && MimeManager.isImageType(content.getEncoding())) {
                 fileIconContent = FileTransferUtils.createFileicon(localFile, fileTransferId,
@@ -804,6 +826,24 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
     @Override
     public IFileTransfer transferFileToGroupChat(final String chatId, Uri file,
             boolean attachFileIcon) throws RemoteException {
+        return transferFileToGroupChat2(chatId, file, Disposition.ATTACH.toInt(), attachFileIcon);
+    }
+
+    /**
+     * Transfers a file to participants. The parameter file contains the URI of the file to be
+     * transferred (for a local or a remote file).
+     *
+     * @param chatId ChatId of group chat
+     * @param file Uri of file to transfer
+     * @param disposition File disposition
+     * @param attachFileIcon true if the stack must try to attach fileIcon
+     * @return FileTransfer
+     * @throws RemoteException
+     */
+    @Override
+    public IFileTransfer transferFileToGroupChat2(final String chatId, Uri file,
+                                                  int disposition,
+                                                  boolean attachFileIcon) throws RemoteException {
         if (TextUtils.isEmpty(chatId)) {
             throw new ServerApiIllegalArgumentException("chatId must not be null or empty!");
         }
@@ -826,7 +866,9 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
             FileDescription fileDescription = FileFactory.getFactory().getFileDescription(localFile);
             final MmContent content = ContentManager.createMmContent(localFile,
                     fileDescription.getSize(), fileDescription.getName());
-
+            if (Disposition.valueOf(disposition) == Disposition.RENDER) {
+                content.setPlayable(true);
+            }
             final String fileTransferId = IdGenerator.generateMessageID();
             MmContent fileIconContent = null;
             if (attachFileIcon && MimeManager.isImageType(content.getEncoding())) {

@@ -136,6 +136,13 @@ public class FileTransferData {
     /* package private */static final String KEY_FILESIZE = FileTransferLog.FILESIZE;
 
     /**
+     * File transfer disposition
+     *
+     * @see Disposition
+     */
+    /* package private */static final String KEY_DISPOSITION = FileTransferLog.DISPOSITION;
+
+    /**
      * Incoming transfer or outgoing transfer
      * 
      * @see Direction

@@ -43,6 +43,7 @@ import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.ContributionIdGenerator;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingError;
+import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSessionListener;
 import com.gsma.rcs.core.ims.service.im.filetransfer.ImsFileSharingSession;
 import com.gsma.rcs.platform.AndroidFactory;
@@ -174,11 +175,10 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
             String ipAddress = getDialogPath().getSipStack().getLocalIpAddress();
             String encoding = getContent().getEncoding();
             long maxSize = mRcsSettings.getMaxFileTransferSize();
-            /* Set File-selector attribute */
             String selector = getFileSelectorAttribute();
             StringBuilder sdp = new StringBuilder(SdpUtils.buildFileSDP(ipAddress, localMsrpPort,
                     msrpMgr.getLocalSocketProtocol(), encoding, getFileTransferIdAttribute(),
-                    selector, "attachment", localSetup, msrpMgr.getLocalMsrpPath(),
+                    selector, getFileDisposition(), localSetup, msrpMgr.getLocalMsrpPath(),
                     SdpUtils.DIRECTION_SENDONLY, maxSize));
 
             /* Set File-location attribute */

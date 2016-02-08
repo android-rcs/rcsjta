@@ -61,4 +61,8 @@ interface IFileTransferService {
 	void clearFileTransferDeliveryExpiration(in List<String> transferIds);
 	
 	ICommonServiceConfiguration getCommonConfiguration();
+
+	IFileTransfer transferFile2(in ContactId contact, in Uri file, in int disposition, in boolean attachFileicon);
+
+	IFileTransfer transferFileToGroupChat2(in String chatId, in Uri file, in int disposition, in boolean attachFileicon);
 }

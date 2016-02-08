@@ -31,6 +31,7 @@ import com.gsma.rcs.core.ims.protocol.sdp.MediaAttribute;
 import com.gsma.rcs.core.ims.protocol.sdp.MediaDescription;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpParser;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
+import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSession;
 import com.gsma.rcs.platform.file.FileFactory;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.MimeManager;
@@ -327,7 +328,13 @@ public class ContentManager {
         long size = Long.parseLong(SipUtils.extractParameter(fileSelectorValue, "size:", "-1"));
         String filename = SipUtils.extractParameter(fileSelectorValue, "name:", "");
         Uri file = ContentManager.generateUriForReceivedContent(filename, mime, rcsSettings);
-        return ContentManager.createMmContent(file, size, filename);
+        MediaAttribute attr2 = desc.getMediaAttribute("file-disposition");
+        String fileDispoValue = attr2.getValue();
+        MmContent content = ContentManager.createMmContent(file, size, filename);
+        if (FileSharingSession.FILE_DISPOSITION_RENDER.equals(fileDispoValue)) {
+            content.setPlayable(true);
+        }
+        return content;
     }
 
     /**

@@ -105,7 +105,7 @@ public class FileTransferProvider extends ContentProvider {
             FileTransferData.KEY_TIMESTAMP_DISPLAYED, FileTransferData.KEY_STATE,
             FileTransferData.KEY_REASON_CODE, FileTransferData.KEY_READ_STATUS,
             FileTransferData.KEY_FILE_EXPIRATION, FileTransferData.KEY_FILEICON_EXPIRATION,
-            FileTransferData.KEY_EXPIRED_DELIVERY
+            FileTransferData.KEY_EXPIRED_DELIVERY, FileTransferData.KEY_DISPOSITION
     };
 
     private static final Set<String> COLUMNS_SET_ALLOWED_FOR_EXTERNAL_ACCESS = new HashSet<String>(
@@ -122,7 +122,7 @@ public class FileTransferProvider extends ContentProvider {
     public static final String DATABASE_NAME = "filetransfer.db";
 
     private static class DatabaseHelper extends SQLiteOpenHelper {
-        private static final int DATABASE_VERSION = 16;
+        private static final int DATABASE_VERSION = 17;
 
         public DatabaseHelper(Context ctx) {
             super(ctx, DATABASE_NAME, null, DATABASE_VERSION);
@@ -141,6 +141,7 @@ public class FileTransferProvider extends ContentProvider {
                     .append(FileTransferData.KEY_STATE).append(" INTEGER NOT NULL,")
                     .append(FileTransferData.KEY_REASON_CODE).append(" INTEGER NOT NULL,")
                     .append(FileTransferData.KEY_READ_STATUS).append(" INTEGER NOT NULL,")
+                    .append(FileTransferData.KEY_DISPOSITION).append(" INTEGER NOT NULL,")
                     .append(FileTransferData.KEY_DIRECTION).append(" INTEGER NOT NULL,")
                     .append(FileTransferData.KEY_TIMESTAMP).append(" INTEGER NOT NULL,")
                     .append(FileTransferData.KEY_TIMESTAMP_SENT).append(" INTEGER NOT NULL,")

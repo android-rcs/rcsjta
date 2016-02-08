@@ -101,6 +101,16 @@ public class FileTransferLog {
     public static final String MIME_TYPE = "mime_type";
 
     /**
+     * The name of the column containing the file disposition.
+     * <P>
+     * Type: INTEGER
+     * </P>
+     *
+     * @see Direction
+     */
+    public static final String DISPOSITION = "disposition";
+
+    /**
      * The name of the column containing the direction of the transfer.
      * <P>
      * Type: INTEGER

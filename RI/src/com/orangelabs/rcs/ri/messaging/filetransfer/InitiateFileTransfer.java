@@ -247,7 +247,8 @@ public class InitiateFileTransfer extends RcsActivity {
             /* Only take persistable permission for content Uris */
             takePersistableContentUriPermission(this, mFile);
             /* Initiate transfer */
-            mFileTransfer = mFileTransferService.transferFile(remote, mFile, tryToSendFileicon);
+            mFileTransfer = mFileTransferService.transferFile(remote, mFile,
+                    FileTransfer.Disposition.ATTACH, tryToSendFileicon);
             mFileTransferId = mFileTransfer.getTransferId();
             mProgressDialog = showProgressDialog(getString(R.string.label_command_in_progress));
             mProgressDialog.setOnCancelListener(new OnCancelListener() {

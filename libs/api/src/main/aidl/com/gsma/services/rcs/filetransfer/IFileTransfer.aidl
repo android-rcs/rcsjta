@@ -66,4 +66,6 @@ interface IFileTransfer {
 	long getFileIconExpiration();
 
 	boolean isExpiredDelivery();
+
+	int getDisposition();
 }

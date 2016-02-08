@@ -51,7 +51,8 @@ public class SendMultiFileGroupChat extends SendMultiFile implements ISendMultiF
             for (FileTransferProperties fileToTransfer : filesToTransfer) {
                 /* Initiate transfer */
                 FileTransfer fileTransfer = mFileTransferService.transferFileToGroupChat(mChatId,
-                        fileToTransfer.getUri(), fileToTransfer.isFileicon());
+                        fileToTransfer.getUri(), FileTransfer.Disposition.ATTACH,
+                        fileToTransfer.isFileicon());
                 String fileTransferId = fileTransfer.getTransferId();
                 mTransferIds.add(fileTransferId);
                 mFileTransfers.add(fileTransfer);

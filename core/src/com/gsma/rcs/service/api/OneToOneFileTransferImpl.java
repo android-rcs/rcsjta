@@ -52,6 +52,7 @@ import com.gsma.rcs.service.broadcaster.IOneToOneFileTransferBroadcaster;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.filetransfer.FileTransfer.Disposition;
 import com.gsma.services.rcs.filetransfer.FileTransfer.ReasonCode;
 import com.gsma.services.rcs.filetransfer.FileTransfer.State;
 import com.gsma.services.rcs.filetransfer.IFileTransfer;
@@ -356,6 +357,30 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
                 return mPersistentStorage.getReasonCode().toInt();
             }
             return getRcsReasonCode(session).toInt();
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
+    }
+
+    @Override
+    public int getDisposition() throws RemoteException {
+        try {
+            FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
+            if (session == null) {
+                return mPersistentStorage.getDisposition().toInt();
+            }
+            if (session.getContent().isPlayable()) {
+                return Disposition.RENDER.toInt();
+            }
+            return Disposition.ATTACH.toInt();
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
@@ -979,10 +1004,11 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
         mImService.scheduleImOperation(new Runnable() {
             public void run() {
                 try {
-                    MmContent file = FileTransferUtils.createMmContent(getFile());
+                    MmContent file = FileTransferUtils.createMmContent(getFile(),
+                            Disposition.valueOf(getDisposition()));
                     Uri fileIcon = getFileIcon();
                     MmContent fileIconContent = fileIcon != null ? FileTransferUtils
-                            .createMmContent(fileIcon) : null;
+                            .createIconContent(fileIcon) : null;
 
                     mFileTransferService.resendOneToOneFile(getRemoteContact(), file,
                             fileIconContent, mFileTransferId);

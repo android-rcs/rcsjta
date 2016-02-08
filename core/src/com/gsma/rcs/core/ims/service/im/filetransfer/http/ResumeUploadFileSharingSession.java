@@ -63,7 +63,7 @@ public class ResumeUploadFileSharingSession extends OriginatingHttpFileSharingSe
         super(imService, 
                 resumeUpload.getFileTransferId(), 
                 content, resumeUpload.getContact(),
-                resumeUpload.getFileicon() != null ? FileTransferUtils.createMmContent(resumeUpload.getFileicon()) : null, 
+                resumeUpload.getFileicon() != null ? FileTransferUtils.createIconContent(resumeUpload.getFileicon()) : null,
                 resumeUpload.getTId(), 
                 messagingLog, 
                 rcsSettings,

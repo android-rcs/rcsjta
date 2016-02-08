@@ -24,6 +24,7 @@ package com.gsma.rcs.core.ims.service.im.filetransfer.http;
 
 import com.gsma.rcs.core.content.ContentManager;
 import com.gsma.rcs.core.content.MmContent;
+import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSession;
 import com.gsma.rcs.provider.messaging.FileTransferData;
 import com.gsma.rcs.provider.settings.RcsSettings;
 
@@ -69,6 +70,16 @@ public class FileTransferHttpInfoDocument {
      * Filename
      */
     private String mFileName;
+
+    /**
+     * File disposition
+     */
+    private String mFileDispo = FileSharingSession.FILE_DISPOSITION_ATTACH;
+
+    /**
+     * Playing length
+     */
+    private int mPlayingLength = 0;
 
     private final RcsSettings mRcsSettings;
 
@@ -201,13 +212,53 @@ public class FileTransferHttpInfoDocument {
     }
 
     /**
+     * Sets the file disposition
+     *
+     * @param fileDispo File disposition
+     */
+    public void setFileDisposition(String fileDispo) {
+        mFileDispo = fileDispo;
+    }
+
+    /**
+     * Gets the file disposition
+     *
+     * @return File disposition
+     */
+    public String getFileDisposition() {
+        return mFileDispo;
+    }
+
+    /**
+     * Sets the playing length
+     *
+     * @param length Length in seconds
+     */
+    public void setPlayingLength(int length) {
+        mPlayingLength = length;
+    }
+
+    /**
+     * Gets the playing length or 0 is not set
+     *
+     * @return Length in seconds
+     */
+    public int getPlayingLength() {
+        return mPlayingLength;
+    }
+
+    /**
      * Gets local MmContent
      * 
      * @return local MmCOntent
      */
     public MmContent getLocalMmContent() {
-        return ContentManager.createMmContent(
+        MmContent content = ContentManager.createMmContent(
                 ContentManager.generateUriForReceivedContent(mFileName, mMimeType, mRcsSettings),
                 mSize, mFileName);
+        if (FileSharingSession.FILE_DISPOSITION_RENDER.equals(mFileDispo)) {
+            content.setPlayable(true);
+        }
+        return content;
     }
 }

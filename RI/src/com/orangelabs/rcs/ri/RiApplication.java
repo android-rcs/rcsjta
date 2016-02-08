@@ -21,6 +21,7 @@ package com.orangelabs.rcs.ri;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsServiceControl;
 
+import com.gsma.services.rcs.filetransfer.FileTransfer.Disposition;
 import com.orangelabs.rcs.api.connection.ConnectionManager;
 import com.orangelabs.rcs.api.connection.ConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.utils.LogUtils;
@@ -146,6 +147,8 @@ public class RiApplication extends Application {
 
     private static Map<Direction, String> sDirectionToString;
 
+    private static Map<Disposition, String> sDispositionToString;
+
     private static RcsServiceControl mRcsServiceControl;
 
     private static final String LOGTAG = LogUtils.getTag(RiApplication.class.getSimpleName());
@@ -158,6 +161,16 @@ public class RiApplication extends Application {
      */
     public static String getDirection(Direction direction) {
         return sDirectionToString.get(direction);
+    }
+
+    /**
+     * Gets disposition
+     *
+     * @param disposition Disposition
+     * @return String
+     */
+    public static String getDisposition(Disposition disposition) {
+        return sDispositionToString.get(disposition);
     }
 
     /* package private */static boolean sCnxManagerStarted = false;
@@ -193,6 +206,10 @@ public class RiApplication extends Application {
         sDirectionToString.put(Direction.OUTGOING, resources.getString(R.string.label_outgoing));
         sDirectionToString.put(Direction.IRRELEVANT,
                 resources.getString(R.string.label_direction_unknown));
+
+        sDispositionToString = new HashMap<>();
+        sDispositionToString.put(Disposition.ATTACH, resources.getString(R.string.label_attach));
+        sDispositionToString.put(Disposition.RENDER, resources.getString(R.string.label_render));
 
         mRcsServiceControl = RcsServiceControl.getInstance(mContext);
 

@@ -47,6 +47,15 @@ import java.util.Map;
  * @author jexa7410
  */
 public abstract class FileSharingSession extends ImsServiceSession {
+    /**
+     * File render disposition which means the file is player automatically
+     */
+    public final static String FILE_DISPOSITION_RENDER = "render";
+
+    /**
+     * File attachment disposition which means the file should be opened manually
+     */
+    public final static String FILE_DISPOSITION_ATTACH = "attachment";
 
     private String mContributionId;
 
@@ -72,20 +81,20 @@ public abstract class FileSharingSession extends ImsServiceSession {
 
     /**
      * Constructor
-     * 
-     * @param imService InstantMessagingService
-     * @param content Content to be shared
-     * @param contact Remote contactId
-     * @param remoteContact the remote contact URI
-     * @param fileIcon File icon
+     *
+     * @param imService      InstantMessagingService
+     * @param content        Content to be shared
+     * @param contact        Remote contactId
+     * @param remoteContact  the remote contact URI
+     * @param fileIcon       File icon
      * @param filetransferId File transfer identifier
-     * @param rcsSettings RCS settings accessor
-     * @param timestamp Local timestamp for the session
+     * @param rcsSettings    RCS settings accessor
+     * @param timestamp      Local timestamp for the session
      * @param contactManager Contact manager accessor
      */
     public FileSharingSession(InstantMessagingService imService, MmContent content,
-            ContactId contact, Uri remoteContact, MmContent fileIcon, String filetransferId,
-            RcsSettings rcsSettings, long timestamp, ContactManager contactManager) {
+                              ContactId contact, Uri remoteContact, MmContent fileIcon, String filetransferId,
+                              RcsSettings rcsSettings, long timestamp, ContactManager contactManager) {
         super(imService, contact, remoteContact, rcsSettings, timestamp, contactManager);
 
         mContent = content;
@@ -96,14 +105,14 @@ public abstract class FileSharingSession extends ImsServiceSession {
 
     /**
      * Check if the file sharing session is a HTTP transfer
-     * 
+     *
      * @return {@code true} if HTTP transfer, otherwise {@code false}
      */
     public abstract boolean isHttpTransfer();
 
     /**
      * Return the contribution ID
-     * 
+     *
      * @return Contribution ID
      */
     public String getContributionID() {
@@ -112,7 +121,7 @@ public abstract class FileSharingSession extends ImsServiceSession {
 
     /**
      * Set the contribution ID
-     * 
+     *
      * @param id Contribution ID
      */
     public void setContributionID(String id) {
@@ -121,7 +130,7 @@ public abstract class FileSharingSession extends ImsServiceSession {
 
     /**
      * Returns the content
-     * 
+     *
      * @return Content
      */
     public MmContent getContent() {
@@ -130,7 +139,7 @@ public abstract class FileSharingSession extends ImsServiceSession {
 
     /**
      * Returns the list of participants involved in the transfer
-     * 
+     *
      * @return List of participants
      */
     public Map<ContactId, ParticipantStatus> getParticipants() {
@@ -139,7 +148,7 @@ public abstract class FileSharingSession extends ImsServiceSession {
 
     /**
      * Set the content
-     * 
+     *
      * @param content Content
      */
     public void setContent(MmContent content) {
@@ -148,7 +157,7 @@ public abstract class FileSharingSession extends ImsServiceSession {
 
     /**
      * Returns the unique id for file transfer
-     * 
+     *
      * @return filetransferId String
      */
     public String getFileTransferId() {
@@ -165,7 +174,7 @@ public abstract class FileSharingSession extends ImsServiceSession {
 
     /**
      * Is file transferred
-     * 
+     *
      * @return Boolean
      */
     public boolean isFileTransferred() {
@@ -188,7 +197,7 @@ public abstract class FileSharingSession extends ImsServiceSession {
 
     /**
      * Is file transfer paused
-     * 
+     *
      * @return fileTransferPaused
      */
     public boolean isFileTransferPaused() {
@@ -197,7 +206,7 @@ public abstract class FileSharingSession extends ImsServiceSession {
 
     /**
      * Returns the fileIcon content
-     * 
+     *
      * @return Fileicon
      */
     public MmContent getFileicon() {
@@ -206,8 +215,8 @@ public abstract class FileSharingSession extends ImsServiceSession {
 
     /**
      * Check if file capacity is acceptable
-     * 
-     * @param fileSize File size in bytes
+     *
+     * @param fileSize    File size in bytes
      * @param rcsSettings RCS settings accessor
      * @return Error or null if file capacity is acceptable
      */
@@ -258,16 +267,30 @@ public abstract class FileSharingSession extends ImsServiceSession {
 
     /**
      * Returns the time when the file on the content server is no longer valid to download.
-     * 
+     *
      * @return time
      */
     public abstract long getFileExpiration();
 
     /**
      * Returns the time when the file icon on the content server is no longer valid to download.
-     * 
+     *
      * @return time
      */
     public abstract long getIconExpiration();
 
+    /**
+     * Returns the file-disposition
+     *
+     * @return String
+     */
+    public String getFileDisposition() {
+        String disposition;
+        if (getContent().isPlayable()) {
+            disposition = FileSharingSession.FILE_DISPOSITION_RENDER;
+        } else {
+            disposition = FileSharingSession.FILE_DISPOSITION_ATTACH;
+        }
+        return disposition;
+    }
 }

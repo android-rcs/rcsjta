@@ -25,6 +25,7 @@ package com.gsma.rcs.provider.messaging;
 import com.gsma.rcs.core.FileAccessException;
 import com.gsma.rcs.core.content.ContentManager;
 import com.gsma.rcs.core.content.MmContent;
+import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpThumbnail;
 import com.gsma.rcs.provider.CursorUtil;
@@ -39,6 +40,7 @@ import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsService.ReadStatus;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
+import com.gsma.services.rcs.filetransfer.FileTransfer.Disposition;
 import com.gsma.services.rcs.filetransfer.FileTransfer.ReasonCode;
 import com.gsma.services.rcs.filetransfer.FileTransfer.State;
 import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo;
@@ -151,6 +153,11 @@ public class FileTransferLog implements IFileTransferLog {
         values.put(FileTransferData.KEY_FILENAME, content.getName());
         values.put(FileTransferData.KEY_MIME_TYPE, content.getEncoding());
         values.put(FileTransferData.KEY_DIRECTION, direction.toInt());
+        if (content.isPlayable()) {
+            values.put(FileTransferData.KEY_DISPOSITION, FileTransfer.Disposition.RENDER.toInt());
+        } else {
+            values.put(FileTransferData.KEY_DISPOSITION, FileTransfer.Disposition.ATTACH.toInt());
+        }
         values.put(FileTransferData.KEY_TRANSFERRED, 0);
         values.put(FileTransferData.KEY_FILESIZE, content.getSize());
         if (fileIcon != null) {
@@ -935,11 +942,19 @@ public class FileTransferLog implements IFileTransferLog {
                 .getColumnIndexOrThrow(FileTransferData.KEY_FILEICON_SIZE));
         String fileIconMimeType = cursor.getString(cursor
                 .getColumnIndexOrThrow(FileTransferData.KEY_FILEICON_MIME_TYPE));
+        Disposition disposition = Disposition.valueOf(cursor
+                .getInt(cursor.getColumnIndexOrThrow(FileTransferData.KEY_DISPOSITION)));
         FileTransferHttpThumbnail fileIconData = fileIcon != null ? new FileTransferHttpThumbnail(
                 mRcsSettings, Uri.parse(fileIcon), fileIconMimeType, fileIconSize,
                 fileIconExpiration) : null;
-        return new FileTransferHttpInfoDocument(mRcsSettings, Uri.parse(file), fileName, size,
+        FileTransferHttpInfoDocument infoDoc = new FileTransferHttpInfoDocument(mRcsSettings, Uri.parse(file), fileName, size,
                 mimeType, fileExpiration, fileIconData);
+        if (disposition == FileTransfer.Disposition.RENDER) {
+            infoDoc.setFileDisposition(FileSharingSession.FILE_DISPOSITION_RENDER);
+        } else {
+            infoDoc.setFileDisposition(FileSharingSession.FILE_DISPOSITION_ATTACH);
+        }
+        return infoDoc;
     }
 
     @Override

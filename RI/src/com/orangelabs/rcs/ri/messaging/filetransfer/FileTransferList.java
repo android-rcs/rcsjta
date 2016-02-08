@@ -21,6 +21,7 @@ package com.orangelabs.rcs.ri.messaging.filetransfer;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
+import com.gsma.services.rcs.filetransfer.FileTransfer.Disposition;
 import com.gsma.services.rcs.filetransfer.FileTransfer.ReasonCode;
 import com.gsma.services.rcs.filetransfer.FileTransfer.State;
 import com.gsma.services.rcs.filetransfer.FileTransferLog;
@@ -76,6 +77,7 @@ public class FileTransferList extends RcsFragmentActivity implements
             FileTransferLog.FILESIZE,
             FileTransferLog.STATE,
             FileTransferLog.REASON_CODE,
+            FileTransferLog.DISPOSITION,
             FileTransferLog.DIRECTION,
             FileTransferLog.TIMESTAMP
     };
@@ -170,6 +172,10 @@ public class FileTransferList extends RcsFragmentActivity implements
                         RiApplication.sFileTransferReasonCodes[reason.toInt()]));
             }
 
+            Disposition disposition = Disposition.valueOf(cursor.getInt(holder.columnDisposition));
+            holder.dispositionText.setText(getString(R.string.label_disposition,
+                    RiApplication.getDisposition(disposition)));
+
             Direction direction = Direction.valueOf(cursor.getInt(holder.columnDirection));
             holder.directionText.setText(getString(R.string.label_direction,
                     RiApplication.getDirection(direction)));
@@ -192,6 +198,8 @@ public class FileTransferList extends RcsFragmentActivity implements
 
         int columnDirection;
 
+        int columnDisposition;
+
         int columnState;
 
         int columnReason;
@@ -210,6 +218,8 @@ public class FileTransferList extends RcsFragmentActivity implements
 
         TextView reasonText;
 
+        TextView dispositionText;
+
         TextView directionText;
 
         TextView timestamptext;
@@ -219,6 +229,7 @@ public class FileTransferList extends RcsFragmentActivity implements
             columnFilename = cursor.getColumnIndexOrThrow(FileTransferLog.FILENAME);
             columnFilesize = cursor.getColumnIndexOrThrow(FileTransferLog.FILESIZE);
             columnState = cursor.getColumnIndexOrThrow(FileTransferLog.STATE);
+            columnDisposition = cursor.getColumnIndexOrThrow(FileTransferLog.DISPOSITION);
             columnDirection = cursor.getColumnIndexOrThrow(FileTransferLog.DIRECTION);
             columnTimestamp = cursor.getColumnIndexOrThrow(FileTransferLog.TIMESTAMP);
             columnReason = cursor.getColumnIndexOrThrow(FileTransferLog.REASON_CODE);
@@ -226,6 +237,7 @@ public class FileTransferList extends RcsFragmentActivity implements
             filenameText = (TextView) base.findViewById(R.id.filename);
             filesizeText = (TextView) base.findViewById(R.id.filesize);
             stateText = (TextView) base.findViewById(R.id.state);
+            dispositionText = (TextView) base.findViewById(R.id.disposition);
             directionText = (TextView) base.findViewById(R.id.direction);
             timestamptext = (TextView) base.findViewById(R.id.date);
             reasonText = (TextView) base.findViewById(R.id.reason);

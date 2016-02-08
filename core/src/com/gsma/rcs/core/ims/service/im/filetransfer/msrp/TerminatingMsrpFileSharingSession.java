@@ -48,6 +48,7 @@ import com.gsma.rcs.core.ims.service.SessionTimerManager;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingError;
+import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSessionListener;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.gsma.rcs.core.ims.service.im.filetransfer.ImsFileSharingSession;
@@ -314,7 +315,7 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
             long maxSize = mRcsSettings.getMaxFileTransferSize();
             String sdp = SdpUtils.buildFileSDP(ipAddress, localMsrpPort,
                     msrpMgr.getLocalSocketProtocol(), getContent().getEncoding(), fileTransferId,
-                    fileSelector, null, localSetup, msrpMgr.getLocalMsrpPath(),
+                    fileSelector, getFileDisposition(), localSetup, msrpMgr.getLocalMsrpPath(),
                     SdpUtils.DIRECTION_RECVONLY, maxSize);
 
             /* Set the local SDP part in the dialog path */

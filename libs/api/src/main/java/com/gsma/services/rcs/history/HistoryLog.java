@@ -63,6 +63,14 @@ public class HistoryLog {
     public static final String MIME_TYPE = "mime_type";
 
     /**
+     * The name of the column containing the disposition.
+     * <P>
+     * Type: INTEGER
+     * </P>
+     */
+    public static final String DISPOSITION = "disposition";
+
+    /**
      * The name of the column containing the direction.
      * <P>
      * Type: INTEGER

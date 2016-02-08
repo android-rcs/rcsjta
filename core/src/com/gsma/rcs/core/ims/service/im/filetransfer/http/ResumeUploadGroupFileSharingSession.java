@@ -61,7 +61,8 @@ public class ResumeUploadGroupFileSharingSession extends OriginatingHttpGroupFil
         super(imService, 
                 resumeUpload.getFileTransferId(),
                 content,
-                resumeUpload.getFileicon() != null ? FileTransferUtils.createMmContent(resumeUpload.getFileicon()) : null, 
+                resumeUpload.getFileicon() != null ? FileTransferUtils.createIconContent(
+                        resumeUpload.getFileicon()) : null,
                 ImsModule.getImsUserProfile().getImConferenceUri(), 
                 resumeUpload.getChatId(),
                 resumeUpload.getTId(), 

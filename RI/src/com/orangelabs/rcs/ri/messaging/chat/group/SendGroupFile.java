@@ -85,7 +85,8 @@ public class SendGroupFile extends SendFile {
             /* Only take persistable permission for content Uris */
             takePersistableContentUriPermission(this, file);
             /* Initiate transfer */
-            mFileTransfer = mFileTransferService.transferFileToGroupChat(mChatId, file, fileIcon);
+            mFileTransfer = mFileTransferService.transferFileToGroupChat(mChatId, file,
+                    FileTransfer.Disposition.ATTACH, fileIcon);
             mTransferId = mFileTransfer.getTransferId();
             return true;
 
