@@ -99,6 +99,7 @@ public class OneToOneFileTransferDeleteTask extends DeleteTask.GroupedByContactI
         FileSharingSession session = mImService.getFileSharingSession(transferId);
         if (session == null) {
             mFileTransferService.ensureThumbnailIsDeleted(transferId);
+            mFileTransferService.ensureFileCopyIsDeletedIfExisting(transferId);
             mFileTransferService.removeOneToOneFileTransfer(transferId);
             return;
 
@@ -115,6 +116,8 @@ public class OneToOneFileTransferDeleteTask extends DeleteTask.GroupedByContactI
                 sLogger.debug(e.getMessage());
             }
         }
+        mFileTransferService.ensureThumbnailIsDeleted(transferId);
+        mFileTransferService.ensureFileCopyIsDeletedIfExisting(transferId);
         mFileTransferService.removeOneToOneFileTransfer(transferId);
     }
 

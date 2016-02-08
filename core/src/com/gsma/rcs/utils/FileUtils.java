@@ -22,7 +22,13 @@
 
 package com.gsma.rcs.utils;
 
+import com.gsma.rcs.core.content.ContentManager;
+import com.gsma.rcs.core.content.MmContent;
+import com.gsma.rcs.platform.AndroidFactory;
+import com.gsma.rcs.platform.file.FileDescription;
+import com.gsma.rcs.platform.file.FileFactory;
 import com.gsma.rcs.provider.CursorUtil;
+import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
 
 import android.content.ContentResolver;
@@ -280,5 +286,50 @@ public class FileUtils {
         } else {
             throw new IllegalArgumentException("Unsupported URI scheme '" + scheme + "'!");
         }
+    }
+
+    /**
+     * Copies a file. The destination is overwritten if it already exists.
+     * 
+     * @param source Uri of the source file
+     * @param destination Uri of the destination file
+     * @throws IOException if the copy operation fails
+     */
+    private static void copyFile(Uri source, Uri destination) throws IOException {
+        FileInputStream sourceStream = null;
+        FileOutputStream destStream = null;
+        try {
+            sourceStream = (FileInputStream) AndroidFactory.getApplicationContext()
+                    .getContentResolver().openInputStream(source);
+            destStream = (FileOutputStream) AndroidFactory.getApplicationContext()
+                    .getContentResolver().openOutputStream(destination);
+            byte buffer[] = new byte[1024];
+            int length;
+
+            while ((length = sourceStream.read(buffer)) > 0) {
+                destStream.write(buffer, 0, length);
+            }
+        } finally {
+            CloseableUtils.tryToClose(sourceStream);
+            CloseableUtils.tryToClose(destStream);
+        }
+    }
+
+    /**
+     * Create copy of sent file in respective sent directory.
+     * 
+     * @param file The file Uri to copy
+     * @param rcsSettings The RcsSettings accessor
+     * @return Uri of copy or created file
+     * @throws IOException
+     */
+    public static Uri createCopyOfSentFile(Uri file, RcsSettings rcsSettings) throws IOException {
+        FileDescription fileDescription = FileFactory.getFactory().getFileDescription(file);
+        MmContent content = ContentManager.createMmContent(file, fileDescription.getSize(),
+                fileDescription.getName());
+        Uri destination = ContentManager.generateUriForSentContent(content.getName(),
+                content.getEncoding(), rcsSettings);
+        copyFile(file, destination);
+        return destination;
     }
 }

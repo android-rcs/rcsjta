@@ -42,6 +42,8 @@ public abstract class FileFactory {
      */
     private static FileFactory mFactory;
 
+    public static final String SENT_DIRECTORY = "sent/";
+
     /**
      * Load the factory
      * 

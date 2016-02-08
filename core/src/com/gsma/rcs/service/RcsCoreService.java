@@ -26,6 +26,7 @@ import com.gsma.rcs.addressbook.AccountChangedReceiver;
 import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.CoreListener;
 import com.gsma.rcs.core.TerminalInfo;
+import com.gsma.rcs.core.content.ContentManager;
 import com.gsma.rcs.core.ims.ImsError;
 import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
@@ -318,6 +319,15 @@ public class RcsCoreService extends Service implements CoreListener {
             String fileIconDirectory = mRcsSettings.getFileIconRootDirectory();
             FileFactory.createDirectory(fileIconDirectory);
             FileFactory.setNoMedia(fileIconDirectory);
+            String sentPhotoDirectory = ContentManager.getSentPhotoRootDirectory(mRcsSettings);
+            FileFactory.createDirectory(sentPhotoDirectory);
+            FileFactory.setNoMedia(sentPhotoDirectory);
+            String sentVideoDirectory = ContentManager.getSentVideoRootDirectory(mRcsSettings);
+            FileFactory.createDirectory(sentVideoDirectory);
+            FileFactory.setNoMedia(sentVideoDirectory);
+            String sentFileDirectory = ContentManager.getSentFileRootDirectory(mRcsSettings);
+            FileFactory.createDirectory(sentFileDirectory);
+            FileFactory.setNoMedia(sentFileDirectory);
 
             // Init CPU manager
             mCpuManager = new CpuManager(mRcsSettings);

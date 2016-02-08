@@ -990,4 +990,22 @@ public class FileTransferLog implements IFileTransferLog {
                 Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), values, null,
                 null) > 0;
     }
+
+    @Override
+    public Uri getFile(String fileTransferId) {
+        Cursor cursor = getFileTransferData(FileTransferData.KEY_FILE, fileTransferId);
+        if (cursor == null) {
+            return null;
+        }
+        return Uri.parse(getDataAsString(cursor));
+    }
+
+    @Override
+    public Direction getFileTransferDirection(String fileTransferId) {
+        Cursor cursor = getFileTransferData(FileTransferData.KEY_DIRECTION, fileTransferId);
+        if (cursor == null) {
+            return null;
+        }
+        return Direction.valueOf(getDataAsInteger(cursor));
+    }
 }

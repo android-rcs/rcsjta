@@ -1,14 +1,14 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -35,6 +35,7 @@ import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provider.settings.RcsSettingsData.ConfigurationMode;
 import com.gsma.rcs.provider.settings.RcsSettingsData.TermsAndConditionsResponse;
+import com.gsma.rcs.service.Permissions.PermissionsManager;
 import com.gsma.rcs.provisioning.ProvisioningInfo.Version;
 import com.gsma.rcs.provisioning.https.HttpsProvisioningService;
 import com.gsma.rcs.utils.IntentUtils;
@@ -56,6 +57,7 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -64,7 +66,7 @@ import java.io.IOException;
 
 /**
  * RCS start service.
- * 
+ *
  * @author hlxn7157
  */
 public class StartService extends Service {
@@ -137,8 +139,8 @@ public class StartService extends Service {
         mRcsSettings = RcsSettings.getInstance(mLocalContentResolver);
         mMessagingLog = MessagingLog.getInstance(mLocalContentResolver, mRcsSettings);
 
-        mContactManager = ContactManager.getInstance(mCtx, contentResolver,
-                mLocalContentResolver, mRcsSettings);
+        mContactManager = ContactManager.getInstance(mCtx, contentResolver, mLocalContentResolver,
+                mRcsSettings);
         mAccountUtility = RcsAccountManager.getInstance(mCtx, mContactManager);
 
         mRcsAccountUsername = getString(R.string.rcs_core_account_username);
@@ -176,11 +178,37 @@ public class StartService extends Service {
 
     @Override
     public int onStartCommand(final Intent intent, final int flags, final int startId) {
-        final boolean logActivated = sLogger.isActivated();
-        if (logActivated) {
+        if (sLogger.isActivated()) {
             sLogger.debug("Start RCS service");
         }
         mStartServiceHandler = allocateBgHandler(STARTSERVICE_OPERATIONS_THREAD_NAME);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+
+            mStartServiceHandler.post(new Runnable() {
+
+                @Override
+                public void run() {
+                    PermissionsManager pm = PermissionsManager.getInstance();
+                    Boolean allPermissionsGranted = pm.requestForPermissionsAndWaitResponse(mCtx);
+                    if (allPermissionsGranted) {
+                        startCore(intent);
+                    } else {
+                        StartService.this.stopSelf();
+                    }
+                }
+            });
+        } else {
+            startCore(intent);
+        }
+
+        /*
+         * We want this service to continue running until it is explicitly stopped, so return
+         * sticky.
+         */
+        return START_STICKY;
+    }
+
+    private void startCore(final Intent intent) {
         ConfigurationMode mode = mRcsSettings.getConfigurationMode();
         if (sLogger.isActivated()) {
             sLogger.debug("onCreate ConfigurationMode=".concat(mode.toString()));
@@ -226,7 +254,7 @@ public class StartService extends Service {
                          * Services cannot be started: IMSI cannot be read from Telephony Manager or
                          * MCC from Android Configuration or MNC from the settings provider.
                          */
-                        if (logActivated) {
+                        if (sLogger.isActivated()) {
                             sLogger.warn("Can't create current user account: pool the telephony manager");
                         }
                         mPollingTelephonyManagerReceiver = getPollingTelephonyManagerReceiver();
@@ -262,12 +290,6 @@ public class StartService extends Service {
                 }
             }
         });
-
-        /*
-         * We want this service to continue running until it is explicitly stopped, so return
-         * sticky.
-         */
-        return START_STICKY;
     }
 
     /**
@@ -319,7 +341,7 @@ public class StartService extends Service {
 
     /**
      * Connection event
-     * 
+     *
      * @param action Connectivity action
      */
     private void connectionEvent(String action) {
@@ -354,7 +376,7 @@ public class StartService extends Service {
 
     /**
      * Check account
-     * 
+     *
      * @return true if an account is available
      * @throws IOException
      * @throws RcsAccountException
@@ -467,7 +489,7 @@ public class StartService extends Service {
 
     /**
      * Launch the RCS service.
-     * 
+     *
      * @param boot indicates if RCS is launched from the device boot
      * @param user indicates if RCS is launched from the user interface
      * @throws RcsAccountException
@@ -527,7 +549,7 @@ public class StartService extends Service {
 
     /**
      * Is the first RCs is launched ?
-     * 
+     *
      * @return true if it's the first time RCS is launched
      */
     private boolean isFirstLaunch() {
@@ -536,7 +558,7 @@ public class StartService extends Service {
 
     /**
      * Check if RCS account has changed since the last time we started the service
-     * 
+     *
      * @return true if the active account was changed
      */
     private boolean hasChangedAccount() {
@@ -553,7 +575,7 @@ public class StartService extends Service {
 
     /**
      * Set true if new user account
-     * 
+     *
      * @param value true if new user account
      */
     private void setNewUserAccount(boolean value) {
@@ -566,7 +588,7 @@ public class StartService extends Service {
 
     /**
      * Check if new user account
-     * 
+     *
      * @param context Application context
      * @return true if new user account
      */
@@ -578,7 +600,7 @@ public class StartService extends Service {
 
     /**
      * Launch the RCS start service
-     * 
+     *
      * @param context
      * @param boot start RCS service upon boot
      * @param user start RCS service upon user action

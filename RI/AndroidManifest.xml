@@ -6,7 +6,7 @@
 
     <uses-sdk
         android:minSdkVersion="12"
-        android:targetSdkVersion="22" />
+        android:targetSdkVersion="23" />
 
     <permission
         android:name="com.orangelabs.rcs.ri.permission.MAPS_RECEIVE"

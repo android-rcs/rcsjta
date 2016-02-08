@@ -163,6 +163,21 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
     }
 
     /**
+     * Ensure copy of file if existing is deleted
+     * 
+     * @param transferId Unique Id of file transfer
+     */
+    public void ensureFileCopyIsDeletedIfExisting(String transferId) {
+        if(Direction.INCOMING == mMessagingLog.getFileTransferDirection(transferId)){
+            return;
+        }
+        Uri file = mMessagingLog.getFile(transferId);
+        if (file != null) {
+            new File(file.getPath()).delete();
+        }
+    }
+
+    /**
      * Close API
      */
     public void close() {
@@ -632,14 +647,15 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
                     + attachFileIcon + ")");
         }
         try {
-            FileDescription fileDescription = FileFactory.getFactory().getFileDescription(file);
+            Uri localFile = FileUtils.createCopyOfSentFile(file, mRcsSettings);
+            FileDescription fileDescription = FileFactory.getFactory().getFileDescription(localFile);
             MmContent fileIconContent = null;
-            final MmContent content = ContentManager.createMmContent(file,
+            final MmContent content = ContentManager.createMmContent(localFile,
                     fileDescription.getSize(), fileDescription.getName());
 
             final String fileTransferId = IdGenerator.generateMessageID();
             if (attachFileIcon && MimeManager.isImageType(content.getEncoding())) {
-                fileIconContent = FileTransferUtils.createFileicon(file, fileTransferId,
+                fileIconContent = FileTransferUtils.createFileicon(localFile, fileTransferId,
                         mRcsSettings);
             }
             final long timestamp = System.currentTimeMillis();
@@ -806,8 +822,9 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
             sLogger.info("sendFile (file=" + file + ") (fileicon=" + attachFileIcon + ")");
         }
         try {
-            FileDescription fileDescription = FileFactory.getFactory().getFileDescription(file);
-            final MmContent content = ContentManager.createMmContent(file,
+            Uri localFile = FileUtils.createCopyOfSentFile(file, mRcsSettings);
+            FileDescription fileDescription = FileFactory.getFactory().getFileDescription(localFile);
+            final MmContent content = ContentManager.createMmContent(localFile,
                     fileDescription.getSize(), fileDescription.getName());
 
             final String fileTransferId = IdGenerator.generateMessageID();
