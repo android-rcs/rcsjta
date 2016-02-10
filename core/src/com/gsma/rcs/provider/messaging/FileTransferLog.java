@@ -228,6 +228,11 @@ public class FileTransferLog implements IFileTransferLog {
                     FileTransferData.UNKNOWN_EXPIRATION);
         }
         values.put(FileTransferData.KEY_FILE_EXPIRATION, FileTransferData.UNKNOWN_EXPIRATION);
+        if (content.isPlayable()) {
+            values.put(FileTransferData.KEY_DISPOSITION, FileTransfer.Disposition.RENDER.toInt());
+        } else {
+            values.put(FileTransferData.KEY_DISPOSITION, FileTransfer.Disposition.ATTACH.toInt());
+        }
         mLocalContentResolver.insert(FileTransferData.CONTENT_URI, values);
 
         try {
@@ -292,6 +297,11 @@ public class FileTransferLog implements IFileTransferLog {
                     FileTransferData.UNKNOWN_EXPIRATION);
         }
         values.put(FileTransferData.KEY_FILE_EXPIRATION, fileExpiration);
+        if (content.isPlayable()) {
+            values.put(FileTransferData.KEY_DISPOSITION, FileTransfer.Disposition.RENDER.toInt());
+        } else {
+            values.put(FileTransferData.KEY_DISPOSITION, FileTransfer.Disposition.ATTACH.toInt());
+        }
         mLocalContentResolver.insert(FileTransferData.CONTENT_URI, values);
     }
 
