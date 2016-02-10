@@ -46,7 +46,7 @@ public class FileUtils {
             if (ContentResolver.SCHEME_CONTENT.equals(file.getScheme())) {
                 if (cursor != null && cursor.moveToFirst()) {
                     return cursor.getString(cursor
-                            .getColumnIndexOrThrow(OpenableColumns.DISPLAY_NAME));
+                                    .getColumnIndexOrThrow(OpenableColumns.DISPLAY_NAME));
                 } else {
                     throw new IllegalArgumentException("Error in retrieving file name from the URI");
                 }
@@ -84,7 +84,7 @@ public class FileUtils {
             } else if (ContentResolver.SCHEME_FILE.equals(file.getScheme())) {
                 return (new File(file.getPath())).length();
             }
-            throw new IllegalArgumentException("Unsupported URI scheme");
+            throw new IllegalArgumentException("Unsupported URI scheme: " + file);
 
         } finally {
             if (cursor != null) {
@@ -130,19 +130,34 @@ public class FileUtils {
     }
 
     /**
-     *  Saves the read/write permission for later use by the stack.
+     * Saves the read/write permission for later use by the stack.
      * 
      * @param file Uri of file to transfer
      */
-    public static void takePersistableContentUriPermission(Context context, Uri file)
-             {
+    public static void takePersistableContentUriPermission(Context context, Uri file) {
         if (!(ContentResolver.SCHEME_CONTENT.equals(file.getScheme()))) {
             return;
         }
-        if (android.os.Build.VERSION.SDK_INT >=  Build.VERSION_CODES.KITKAT) {
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             ContentResolver contentResolver = context.getContentResolver();
             contentResolver.takePersistableUriPermission(file,
                     Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
         }
+    }
+
+    /**
+     * Converts byte size into human readable format
+     *
+     * @param bytes number of bytes to display
+     * @param si True is binary units or SI units else.
+     * @return String
+     */
+    public static String humanReadableByteCount(long bytes, boolean si) {
+        int unit = si ? 1000 : 1024;
+        if (bytes < unit)
+            return bytes + " B";
+        int exp = (int) (Math.log(bytes) / Math.log(unit));
+        String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp - 1) + (si ? "" : "i");
+        return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
     }
 }

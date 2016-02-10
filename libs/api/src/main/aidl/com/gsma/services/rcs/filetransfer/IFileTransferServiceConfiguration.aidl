@@ -9,6 +9,8 @@ interface IFileTransferServiceConfiguration {
 
 	long getMaxSize();
 
+    long getMaxAudioMessageDuration();
+
 	boolean isAutoAcceptEnabled();
 	
 	void setAutoAccept(in boolean enable);

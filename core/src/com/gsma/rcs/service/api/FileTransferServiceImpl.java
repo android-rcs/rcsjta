@@ -169,7 +169,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      * @param transferId Unique Id of file transfer
      */
     public void ensureFileCopyIsDeletedIfExisting(String transferId) {
-        if(Direction.INCOMING == mMessagingLog.getFileTransferDirection(transferId)){
+        if (Direction.INCOMING == mMessagingLog.getFileTransferDirection(transferId)) {
             return;
         }
         Uri file = mMessagingLog.getFile(transferId);
@@ -650,8 +650,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      * @throws RemoteException
      */
     public IFileTransfer transferFile2(final ContactId contact, Uri file, int disposition,
-                                       boolean attachFileIcon)
-            throws RemoteException {
+            boolean attachFileIcon) throws RemoteException {
         if (contact == null) {
             throw new ServerApiIllegalArgumentException("contact must not be null!");
         }
@@ -659,7 +658,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
             throw new ServerApiIllegalArgumentException("file must not be null!");
         }
         if (!FileUtils.isReadFromUriPossible(mCtx, file)) {
-            throw new ServerApiIllegalArgumentException("file '" + file.toString()
+            throw new ServerApiIllegalArgumentException("file '" + file
                     + "' must refer to a file that exists and that is readable by stack!");
         }
         if (sLogger.isActivated()) {
@@ -668,11 +667,13 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         }
         try {
             Uri localFile = FileUtils.createCopyOfSentFile(file, mRcsSettings);
-            FileDescription fileDescription = FileFactory.getFactory().getFileDescription(localFile);
+            FileDescription fileDescription = FileFactory.getFactory()
+                    .getFileDescription(localFile);
+            String mime = FileUtils.getMimeType(localFile);
             MmContent fileIconContent = null;
-            final MmContent content = ContentManager.createMmContent(localFile,
+            final MmContent content = ContentManager.createMmContent(localFile, mime,
                     fileDescription.getSize(), fileDescription.getName());
-            if (Disposition.valueOf(disposition) == Disposition.RENDER) {
+            if (Disposition.RENDER == Disposition.valueOf(disposition)) {
                 content.setPlayable(true);
             }
             final String fileTransferId = IdGenerator.generateMessageID();
@@ -841,9 +842,8 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      * @throws RemoteException
      */
     @Override
-    public IFileTransfer transferFileToGroupChat2(final String chatId, Uri file,
-                                                  int disposition,
-                                                  boolean attachFileIcon) throws RemoteException {
+    public IFileTransfer transferFileToGroupChat2(final String chatId, Uri file, int disposition,
+            boolean attachFileIcon) throws RemoteException {
         if (TextUtils.isEmpty(chatId)) {
             throw new ServerApiIllegalArgumentException("chatId must not be null or empty!");
         }
@@ -863,8 +863,10 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         }
         try {
             Uri localFile = FileUtils.createCopyOfSentFile(file, mRcsSettings);
-            FileDescription fileDescription = FileFactory.getFactory().getFileDescription(localFile);
-            final MmContent content = ContentManager.createMmContent(localFile,
+            FileDescription fileDescription = FileFactory.getFactory()
+                    .getFileDescription(localFile);
+            String mime = FileUtils.getMimeType(localFile);
+            final MmContent content = ContentManager.createMmContent(localFile, mime,
                     fileDescription.getSize(), fileDescription.getName());
             if (Disposition.valueOf(disposition) == Disposition.RENDER) {
                 content.setPlayable(true);

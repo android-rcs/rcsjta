@@ -72,7 +72,6 @@ public class FileTransferDequeueTask extends DequeueTask {
             mLogger.debug("Execute task to dequeue one-to-one and group file transfers");
         }
         String id = null;
-        Disposition disposition;
         ContactId contact = null;
         String chatId = null;
         boolean groupFile = false;
@@ -103,6 +102,7 @@ public class FileTransferDequeueTask extends DequeueTask {
             int stateIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_STATE);
             int fileSizeIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_FILESIZE);
             int dispositionIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_DISPOSITION);
+            int mimeIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_MIME_TYPE);
             while (cursor.moveToNext()) {
                 try {
                     if (!isImsConnected()) {
@@ -122,7 +122,8 @@ public class FileTransferDequeueTask extends DequeueTask {
                     contact = contactNumber != null ? ContactUtil
                             .createContactIdFromTrustedData(contactNumber) : null;
                     chatId = cursor.getString(chatIdIdx);
-                    disposition =  Disposition.valueOf(cursor.getInt(dispositionIdx));
+                    Disposition disposition = Disposition.valueOf(cursor.getInt(dispositionIdx));
+                    String mimeType = cursor.getString(mimeIdx);
                     groupFile = !chatId.equals(contactNumber);
                     State state = State.valueOf(cursor.getInt(stateIdx));
                     Uri file = Uri.parse(cursor.getString(fileIdx));
@@ -150,7 +151,7 @@ public class FileTransferDequeueTask extends DequeueTask {
                                     continue;
                                 }
                             }
-                            MmContent content = FileTransferUtils.createMmContent(file,
+                            MmContent content = FileTransferUtils.createMmContent(file, mimeType,
                                     disposition);
                             MmContent fileIconContent = null;
                             String fileIcon = cursor.getString(fileIconIdx);
@@ -210,16 +211,13 @@ public class FileTransferDequeueTask extends DequeueTask {
                 } catch (SessionUnavailableException | SessionNotEstablishedException
                         | FileAccessException | NetworkException e) {
                     if (logActivated) {
-                        mLogger.debug(new StringBuilder(
-                                "Failed to dequeue file transfer with fileTransferId '").append(id)
-                                .append("' on chat '").append(chatId).append("' due to: ")
-                                .append(e.getMessage()).toString());
+                        mLogger.debug("Failed to dequeue file transfer with fileTransferId '" + id
+                                + "' on chat '" + chatId + "' due to: " + e.getMessage());
                     }
 
                 } catch (PayloadException e) {
-                    mLogger.error(new StringBuilder(
-                            "Failed to dequeue file transfer with fileTransferId '").append(id)
-                            .append("' on chat '").append(chatId).toString(), e);
+                    mLogger.error("Failed to dequeue file transfer with fileTransferId '" + id
+                            + "' on chat '" + chatId, e);
                     setGroupFileTransferAsFailedDequeue(id, groupFile, contact, chatId);
 
                 } catch (RuntimeException e) {
@@ -229,9 +227,8 @@ public class FileTransferDequeueTask extends DequeueTask {
                      * so the bug can then be properly tracked down and fixed. We also mark the
                      * respective entry that failed to dequeue as FAILED.
                      */
-                    mLogger.error(new StringBuilder(
-                            "Failed to dequeue file transfer with fileTransferId '").append(id)
-                            .append("' and chatId '").append(chatId).append("'!").toString(), e);
+                    mLogger.error("Failed to dequeue file transfer with fileTransferId '" + id
+                            + "' and chatId '" + chatId + "'!", e);
                     setGroupFileTransferAsFailedDequeue(id, groupFile, contact, chatId);
                 }
             }
@@ -243,11 +240,8 @@ public class FileTransferDequeueTask extends DequeueTask {
              * can then be properly tracked down and fixed. We also mark the respective entry that
              * failed to dequeue as FAILED.
              */
-            mLogger.error(
-                    new StringBuilder(
-                            "Exception occurred while dequeueing file transfer with transferId '")
-                            .append(id).append("' and chatId '").append(chatId).append("'!")
-                            .toString(), e);
+            mLogger.error("Exception occurred while dequeueing file transfer with transferId '"
+                    + id + "' and chatId '" + chatId + "'!", e);
             if (id == null) {
                 return;
             }

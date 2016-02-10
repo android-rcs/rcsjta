@@ -66,9 +66,9 @@ public final class FileTransferService extends RcsService {
      */
     private IFileTransferService mApi;
 
-    private final Map<OneToOneFileTransferListener, WeakReference<IOneToOneFileTransferListener>> mOneToOneFileTransferListeners = new WeakHashMap<OneToOneFileTransferListener, WeakReference<IOneToOneFileTransferListener>>();
+    private final Map<OneToOneFileTransferListener, WeakReference<IOneToOneFileTransferListener>> mOneToOneFileTransferListeners = new WeakHashMap<>();
 
-    private final Map<GroupFileTransferListener, WeakReference<IGroupFileTransferListener>> mGroupFileTransferListeners = new WeakHashMap<GroupFileTransferListener, WeakReference<IGroupFileTransferListener>>();
+    private final Map<GroupFileTransferListener, WeakReference<IGroupFileTransferListener>> mGroupFileTransferListeners = new WeakHashMap<>();
 
     private static boolean sApiCompatible = false;
 
@@ -197,7 +197,7 @@ public final class FileTransferService extends RcsService {
      * Returns true if it is possible to initiate file transfer to the contact specified by the
      * contact parameter, else returns false.
      * 
-     * @param contact
+     * @param contact the remote contact
      * @return boolean
      * @throws RcsPersistentStorageException
      * @throws RcsServiceNotAvailableException
@@ -236,6 +236,7 @@ public final class FileTransferService extends RcsService {
      * @throws RcsServiceNotAvailableException
      * @throws RcsGenericException
      */
+    @Deprecated
     public FileTransfer transferFile(ContactId contact, Uri file, boolean attachFileIcon)
             throws RcsPersistentStorageException, RcsServiceNotAvailableException,
             RcsGenericException {
@@ -289,7 +290,7 @@ public final class FileTransferService extends RcsService {
      * Returns true if it is possible to initiate file transfer to the group chat specified by the
      * chatId parameter, else returns false.
      * 
-     * @param chatId
+     * @param chatId the chat ID
      * @return boolean
      * @throws RcsPersistentStorageException
      * @throws RcsServiceNotAvailableException
@@ -316,7 +317,7 @@ public final class FileTransferService extends RcsService {
      * @deprecated Use {@link #transferFileToGroupChat(String chatId, Uri file,
      * Disposition disposition, boolean attachFileIcon)} instead.
      *
-     * @param chatId
+     * @param chatId the chat ID
      * @param file Uri of file to transfer
      * @param attachFileIcon Attach file icon option. If true, the stack tries to attach fileIcon.
      *            FileIcon may not be attached if file is not an image or if local or remote contact
@@ -336,7 +337,7 @@ public final class FileTransferService extends RcsService {
     /**
      * Transfers a file to a group chat with an optional file icon.
      *
-     * @param chatId
+     * @param chatId the chat ID
      * @param file Uri of file to transfer
      * @param disposition File disposition
      * @param attachFileIcon Attach file icon option. If true, the stack tries to attach fileIcon.
@@ -380,7 +381,7 @@ public final class FileTransferService extends RcsService {
      * Mark a received file transfer as read (i.e. the invitation or the file has been displayed in
      * the UI).
      * 
-     * @param transferId
+     * @param transferId the file transfer ID
      * @throws RcsServiceNotAvailableException
      * @throws RcsPersistentStorageException
      * @throws RcsGenericException
@@ -402,7 +403,7 @@ public final class FileTransferService extends RcsService {
     /**
      * Returns a current file transfer from its unique ID
      * 
-     * @param transferId
+     * @param transferId the file transfer ID
      * @return FileTransfer File transfer or null if not found
      * @throws RcsPersistentStorageException
      * @throws RcsServiceNotAvailableException
@@ -447,7 +448,7 @@ public final class FileTransferService extends RcsService {
             IOneToOneFileTransferListener rcsListener = new OneToOneFileTransferListenerImpl(
                     listener);
             mOneToOneFileTransferListeners.put(listener,
-                    new WeakReference<IOneToOneFileTransferListener>(rcsListener));
+                    new WeakReference<>(rcsListener));
             mApi.addEventListener2(rcsListener);
         } catch (Exception e) {
             RcsIllegalArgumentException.assertException(e);
@@ -501,7 +502,7 @@ public final class FileTransferService extends RcsService {
         try {
             IGroupFileTransferListener rcsListener = new GroupFileTransferListenerImpl(listener);
             mGroupFileTransferListeners.put(listener,
-                    new WeakReference<IGroupFileTransferListener>(rcsListener));
+                    new WeakReference<>(rcsListener));
             mApi.addEventListener3(rcsListener);
         } catch (Exception e) {
             RcsIllegalArgumentException.assertException(e);
@@ -579,7 +580,7 @@ public final class FileTransferService extends RcsService {
      * Deletes file transfer corresponding to a given one to one chat specified by contact from
      * history and abort/reject any associated ongoing session if such exists.
      * 
-     * @param contact
+     * @param contact the remote contact
      * @throws RcsServiceNotAvailableException
      * @throws RcsGenericException
      */
@@ -600,7 +601,7 @@ public final class FileTransferService extends RcsService {
      * Deletes file transfer corresponding to a given group chat specified by chat id from history
      * and abort/reject any associated ongoing session if such exists.
      * 
-     * @param chatId
+     * @param chatId the chat ID
      * @throws RcsServiceNotAvailableException
      * @throws RcsGenericException
      */
@@ -621,7 +622,7 @@ public final class FileTransferService extends RcsService {
      * Deletes a file transfer by its unique id from history and abort/reject any associated ongoing
      * session if such exists.
      * 
-     * @param transferId
+     * @param transferId the file transfer ID
      * @throws RcsPersistentStorageException
      * @throws RcsServiceNotAvailableException
      * @throws RcsGenericException
@@ -644,7 +645,7 @@ public final class FileTransferService extends RcsService {
      * Disables and clears any delivery expiration for a set of file transfers regardless if the
      * delivery of them has expired already or not.
      * 
-     * @param transferIds
+     * @param transferIds the file transfer IDs
      * @throws RcsServiceNotAvailableException
      * @throws RcsPersistentStorageException
      * @throws RcsGenericException
@@ -656,7 +657,7 @@ public final class FileTransferService extends RcsService {
             throw new RcsServiceNotAvailableException();
         }
         try {
-            mApi.clearFileTransferDeliveryExpiration(new ArrayList<String>(transferIds));
+            mApi.clearFileTransferDeliveryExpiration(new ArrayList<>(transferIds));
         } catch (Exception e) {
             RcsIllegalArgumentException.assertException(e);
             RcsPersistentStorageException.assertException(e);

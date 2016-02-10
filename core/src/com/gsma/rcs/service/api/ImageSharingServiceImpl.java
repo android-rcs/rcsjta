@@ -34,6 +34,7 @@ import com.gsma.rcs.provider.sharing.ImageSharingPersistedStorageAccessor;
 import com.gsma.rcs.provider.sharing.RichCallHistory;
 import com.gsma.rcs.service.broadcaster.ImageSharingEventBroadcaster;
 import com.gsma.rcs.service.broadcaster.RcsServiceRegistrationEventBroadcaster;
+import com.gsma.rcs.utils.FileUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.ICommonServiceConfiguration;
 import com.gsma.services.rcs.IRcsServiceRegistrationListener;
@@ -75,7 +76,7 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 
     private final RcsSettings mRcsSettings;
 
-    private final Map<String, IImageSharing> mImageSharingCache = new HashMap<String, IImageSharing>();
+    private final Map<String, IImageSharing> mImageSharingCache = new HashMap<>();
 
     private static final Logger sLogger = Logger.getLogger(ImageSharingServiceImpl.class
             .getSimpleName());
@@ -121,8 +122,8 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
      */
     private void addImageSharing(ImageSharingImpl imageSharing, String sharingId) {
         if (sLogger.isActivated()) {
-            sLogger.debug(new StringBuilder("Add an image sharing in the list (size=")
-                    .append(mImageSharingCache.size()).append(")").toString());
+            sLogger.debug("Add an image sharing in the list (size=" + mImageSharingCache.size()
+                    + ")");
         }
 
         mImageSharingCache.put(sharingId, imageSharing);
@@ -281,8 +282,9 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
         ServerApiUtils.testIms();
         try {
             FileDescription desc = FileFactory.getFactory().getFileDescription(file);
-            MmContent content = ContentManager
-                    .createMmContent(file, desc.getSize(), desc.getName());
+            String mime = FileUtils.getMimeTypeFromExtension(desc.getName());
+            MmContent content = ContentManager.createMmContent(file, mime, desc.getSize(),
+                    desc.getName());
             long timestamp = System.currentTimeMillis();
             final ImageTransferSession session = mRichcallService.createImageSharingSession(
                     contact, content, null, timestamp);

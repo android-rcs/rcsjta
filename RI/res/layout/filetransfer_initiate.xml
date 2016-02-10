@@ -20,7 +20,7 @@
 
             <CheckBox
                 android:id="@+id/ft_thumb"
-                android:enabled="true"
+                android:enabled="false"
                 android:text="@string/label_ft_thumb" />
         </TableRow>
 
@@ -100,7 +100,14 @@
                 android:singleLine="true"
                 android:textStyle="bold" />
         </TableRow>
+        <CheckBox
+                android:id="@+id/send_audio_msg"
+                android:enabled="false"
+                android:text="@string/label_send_audio_msg" />
 
+        <TableRow>
+
+        </TableRow>
         <Button
             android:id="@+id/select_btn"
             android:layout_marginLeft="5dip"

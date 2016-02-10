@@ -86,7 +86,7 @@ public class FileTransferHttpInfoDocument {
     /**
      * Constructor
      * 
-     * @param rcsSettings
+     * @param rcsSettings the RCS settings accessor
      */
     public FileTransferHttpInfoDocument(RcsSettings rcsSettings) {
         mRcsSettings = rcsSettings;
@@ -151,7 +151,7 @@ public class FileTransferHttpInfoDocument {
     /**
      * Sets file URI
      * 
-     * @param file
+     * @param file the file Uri
      */
     public void setUri(Uri file) {
         mFile = file;
@@ -253,9 +253,9 @@ public class FileTransferHttpInfoDocument {
      * @return local MmCOntent
      */
     public MmContent getLocalMmContent() {
-        MmContent content = ContentManager.createMmContent(
-                ContentManager.generateUriForReceivedContent(mFileName, mMimeType, mRcsSettings),
-                mSize, mFileName);
+        Uri file = ContentManager.generateUriForReceivedContent(mFileName, mMimeType, mRcsSettings);
+        MmContent content = ContentManager.createMmContent(file, mMimeType, mSize,
+                mFileName);
         if (FileSharingSession.FILE_DISPOSITION_RENDER.equals(mFileDispo)) {
             content.setPlayable(true);
         }

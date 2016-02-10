@@ -1,21 +1,21 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
- *
+ * <p/>
  * Copyright (C) 2010 France Telecom S.A.
  * Copyright (C) 2014 Sony Mobile Communications Inc.
- *
+ * <p/>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p/>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p/>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
+ * <p/>
  * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
@@ -37,7 +37,7 @@ import javax2.sip.ListeningPoint;
 
 /**
  * RCS settings data constants
- * 
+ *
  * @author jexa7410
  * @author yplo6403
  */
@@ -90,7 +90,7 @@ public class RcsSettingsData {
      * Option for what ux-operation to react on when handling manual acceptance of one2one and group
      * chat invitations.
      */
-    public static enum ImSessionStartMode {
+    public enum ImSessionStartMode {
 
         /**
          * Group chat session is accepted when opening conversation
@@ -107,14 +107,15 @@ public class RcsSettingsData {
 
         private final int mValue;
 
-        private static SparseArray<ImSessionStartMode> mValueToEnum = new SparseArray<ImSessionStartMode>();
+        private static SparseArray<ImSessionStartMode> mValueToEnum = new SparseArray<>();
+
         static {
             for (ImSessionStartMode entry : ImSessionStartMode.values()) {
                 mValueToEnum.put(entry.toInt(), entry);
             }
         }
 
-        private ImSessionStartMode(int value) {
+        ImSessionStartMode(int value) {
             mValue = value;
         }
 
@@ -126,35 +127,34 @@ public class RcsSettingsData {
         }
 
         /**
-         * @param value
+         * @param value the value representing the IM session start mode
          * @return ImSessionStartMode
          */
-        public final static ImSessionStartMode valueOf(int value) {
+        public static ImSessionStartMode valueOf(int value) {
             ImSessionStartMode entry = mValueToEnum.get(value);
             if (entry != null) {
                 return entry;
             }
-            throw new IllegalArgumentException(new StringBuilder("No enum const class ")
-                    .append(ImSessionStartMode.class.getName()).append(".").append(value)
-                    .toString());
+            throw new IllegalArgumentException("No enum const class " + ImSessionStartMode.class.getName() + "." + value);
         }
 
     }
 
-    public static enum TermsAndConditionsResponse {
+    public enum TermsAndConditionsResponse {
 
         NO_ANSWER(0), DECLINED(1), ACCEPTED(2);
 
         private final int mValue;
 
-        private static SparseArray<TermsAndConditionsResponse> mValueToEnum = new SparseArray<TermsAndConditionsResponse>();
+        private static SparseArray<TermsAndConditionsResponse> mValueToEnum = new SparseArray<>();
+
         static {
             for (TermsAndConditionsResponse entry : TermsAndConditionsResponse.values()) {
                 mValueToEnum.put(entry.toInt(), entry);
             }
         }
 
-        private TermsAndConditionsResponse(int value) {
+        TermsAndConditionsResponse(int value) {
             mValue = value;
         }
 
@@ -166,22 +166,21 @@ public class RcsSettingsData {
         }
 
         /**
-         * @param value
+         * @param value the value representing the Terms and Condition response
          * @return TermAndConditionsResponse
          */
-        public final static TermsAndConditionsResponse valueOf(int value) {
+        public static TermsAndConditionsResponse valueOf(int value) {
             TermsAndConditionsResponse entry = mValueToEnum.get(value);
             if (entry != null) {
                 return entry;
             }
-            throw new IllegalArgumentException(new StringBuilder("No enum const class ")
-                    .append(TermsAndConditionsResponse.class.getName()).append(".").append(value)
-                    .toString());
+            throw new IllegalArgumentException("No enum const class " +
+                    TermsAndConditionsResponse.class.getName() + "." + value);
         }
 
     }
 
-    public static enum ImMsgTech {
+    public enum ImMsgTech {
 
         SIMPLE_IM(0),
 
@@ -189,14 +188,15 @@ public class RcsSettingsData {
 
         private final int mValue;
 
-        private static SparseArray<ImMsgTech> mValueToEnum = new SparseArray<ImMsgTech>();
+        private static SparseArray<ImMsgTech> mValueToEnum = new SparseArray<>();
+
         static {
             for (ImMsgTech entry : ImMsgTech.values()) {
                 mValueToEnum.put(entry.toInt(), entry);
             }
         }
 
-        private ImMsgTech(int value) {
+        ImMsgTech(int value) {
             mValue = value;
         }
 
@@ -208,16 +208,15 @@ public class RcsSettingsData {
         }
 
         /**
-         * @param value
-         * @return ImSessionStartMode
+         * @param value the value representing the IM message tech
+         * @return ImMsgTech
          */
-        public final static ImMsgTech valueOf(int value) {
+        public static ImMsgTech valueOf(int value) {
             ImMsgTech entry = mValueToEnum.get(value);
             if (entry != null) {
                 return entry;
             }
-            throw new IllegalArgumentException(new StringBuilder("No enum const class ")
-                    .append(ImMsgTech.class.getName()).append(".").append(value).toString());
+            throw new IllegalArgumentException("No enum const class " + ImMsgTech.class.getName() + "." + value);
         }
 
     }
@@ -241,14 +240,15 @@ public class RcsSettingsData {
 
         private int mValue;
 
-        private static SparseArray<NetworkAccessType> mValueToEnum = new SparseArray<NetworkAccessType>();
+        private static SparseArray<NetworkAccessType> mValueToEnum = new SparseArray<>();
+
         static {
             for (NetworkAccessType entry : NetworkAccessType.values()) {
                 mValueToEnum.put(entry.toInt(), entry);
             }
         }
 
-        private NetworkAccessType(int value) {
+        NetworkAccessType(int value) {
             mValue = value;
         }
 
@@ -260,7 +260,7 @@ public class RcsSettingsData {
         }
 
         /**
-         * @param value
+         * @param value the value representing the network access type.
          * @return NetworkAccessType
          */
         public static NetworkAccessType valueOf(int value) {
@@ -268,8 +268,7 @@ public class RcsSettingsData {
             if (entry != null) {
                 return entry;
             }
-            throw new IllegalArgumentException(new StringBuilder("No enum const class ")
-                    .append(NetworkAccessType.class.getName()).append(".").append(value).toString());
+            throw new IllegalArgumentException("No enum const class " + NetworkAccessType.class.getName() + "." + value);
         }
 
     }
@@ -293,14 +292,15 @@ public class RcsSettingsData {
 
         private int mValue;
 
-        private static SparseArray<EnableRcseSwitch> mValueToEnum = new SparseArray<EnableRcseSwitch>();
+        private static SparseArray<EnableRcseSwitch> mValueToEnum = new SparseArray<>();
+
         static {
             for (EnableRcseSwitch entry : EnableRcseSwitch.values()) {
                 mValueToEnum.put(entry.toInt(), entry);
             }
         }
 
-        private EnableRcseSwitch(int value) {
+        EnableRcseSwitch(int value) {
             mValue = value;
         }
 
@@ -312,16 +312,15 @@ public class RcsSettingsData {
         }
 
         /**
-         * @param value
-         * @return NetworkAccessType
+         * @param value the value representing the enable RCSe switch
+         * @return EnableRcseSwitch
          */
         public static EnableRcseSwitch valueOf(int value) {
             EnableRcseSwitch entry = mValueToEnum.get(value);
             if (entry != null) {
                 return entry;
             }
-            throw new IllegalArgumentException(new StringBuilder("No enum const class ")
-                    .append(EnableRcseSwitch.class.getName()).append(".").append(value).toString());
+            throw new IllegalArgumentException("No enum const class " + EnableRcseSwitch.class.getName() + "." + value);
         }
 
     }
@@ -341,14 +340,15 @@ public class RcsSettingsData {
 
         private int mValue;
 
-        private static SparseArray<ConfigurationMode> mValueToEnum = new SparseArray<ConfigurationMode>();
+        private static SparseArray<ConfigurationMode> mValueToEnum = new SparseArray<>();
+
         static {
             for (ConfigurationMode entry : ConfigurationMode.values()) {
                 mValueToEnum.put(entry.toInt(), entry);
             }
         }
 
-        private ConfigurationMode(int value) {
+        ConfigurationMode(int value) {
             mValue = value;
         }
 
@@ -360,7 +360,7 @@ public class RcsSettingsData {
         }
 
         /**
-         * @param value
+         * @param value the value representing the configuration mode
          * @return ConfigurationMode
          */
         public static ConfigurationMode valueOf(int value) {
@@ -368,8 +368,7 @@ public class RcsSettingsData {
             if (entry != null) {
                 return entry;
             }
-            throw new IllegalArgumentException(new StringBuilder("No enum const class ")
-                    .append(ConfigurationMode.class.getName()).append(".").append(value).toString());
+            throw new IllegalArgumentException("No enum const class " + ConfigurationMode.class.getName() + "." + value);
         }
     }
 
@@ -406,14 +405,15 @@ public class RcsSettingsData {
 
         private int mValue;
 
-        private static SparseArray<GsmaRelease> mValueToEnum = new SparseArray<GsmaRelease>();
+        private static SparseArray<GsmaRelease> mValueToEnum = new SparseArray<>();
+
         static {
             for (GsmaRelease entry : GsmaRelease.values()) {
                 mValueToEnum.put(entry.toInt(), entry);
             }
         }
 
-        private GsmaRelease(int value) {
+        GsmaRelease(int value) {
             mValue = value;
         }
 
@@ -425,7 +425,7 @@ public class RcsSettingsData {
         }
 
         /**
-         * @param value
+         * @param value the value representing the GSMA release
          * @return GsmaRelease
          */
         public static GsmaRelease valueOf(int value) {
@@ -433,8 +433,7 @@ public class RcsSettingsData {
             if (entry != null) {
                 return entry;
             }
-            throw new IllegalArgumentException(new StringBuilder("No enum const class ")
-                    .append(GsmaRelease.class.getName()).append(".").append(value).toString());
+            throw new IllegalArgumentException("No enum const class " + GsmaRelease.class.getName() + "." + value);
         }
 
     }
@@ -529,6 +528,12 @@ public class RcsSettingsData {
      */
     public static final String MAX_VIDEO_SHARE_DURATION = "MaxVideoShareDuration";
     /* package private */static final Long DEFAULT_MAX_VSH_DURATION = 54000000L;
+
+    /**
+     * Max Audio Message Duration in millisecond
+     */
+    public static final String MAX_AUDIO_MESSAGE_DURATION = "MaxAudioMessageDuration";
+    /* package private */static final Long DEFAULT_MAX_AUDIO_DURATION = 600000L;
 
     /**
      * Max number of simultaneous chat sessions
@@ -1251,6 +1256,13 @@ public class RcsSettingsData {
     public static final String DIRECTORY_PATH_VIDEOS = "DirectoryPathVideos";
     /* package private */static final String DEFAULT_DIRECTORY_PATH_VIDEOS = Environment
             .getExternalStorageDirectory() + "/rcs/videos/";
+
+    /**
+     * Directory path for audios
+     */
+    public static final String DIRECTORY_PATH_AUDIOS = "DirectoryPathAudios";
+    /* package private */static final String DEFAULT_DIRECTORY_PATH_AUDIOS = Environment
+            .getExternalStorageDirectory() + "/rcs/audios/";
 
     /**
      * Directory path for files

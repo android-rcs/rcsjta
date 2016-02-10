@@ -25,10 +25,10 @@ import com.gsma.services.rcs.filetransfer.FileTransferService;
 import com.gsma.services.rcs.filetransfer.GroupFileTransferListener;
 import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo;
 
+import android.util.Log;
+
 import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.utils.LogUtils;
-
-import android.util.Log;
 
 import java.util.List;
 import java.util.Set;
@@ -50,6 +50,7 @@ public class SendMultiFileGroupChat extends SendMultiFile implements ISendMultiF
         try {
             for (FileTransferProperties fileToTransfer : filesToTransfer) {
                 /* Initiate transfer */
+                // TODO SL
                 FileTransfer fileTransfer = mFileTransferService.transferFileToGroupChat(mChatId,
                         fileToTransfer.getUri(), FileTransfer.Disposition.ATTACH,
                         fileToTransfer.isFileicon());

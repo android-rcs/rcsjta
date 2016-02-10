@@ -1,21 +1,21 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
- *
+ * <p/>
  * Copyright (C) 2010 France Telecom S.A.
  * Copyright (C) 2014 Sony Mobile Communications Inc.
- *
+ * <p/>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p/>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p/>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
+ * <p/>
  * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
@@ -23,10 +23,7 @@
 package com.gsma.rcs.utils;
 
 import com.gsma.rcs.core.content.ContentManager;
-import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.platform.AndroidFactory;
-import com.gsma.rcs.platform.file.FileDescription;
-import com.gsma.rcs.platform.file.FileFactory;
 import com.gsma.rcs.provider.CursorUtil;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
@@ -36,6 +33,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Process;
 import android.provider.OpenableColumns;
@@ -49,7 +47,7 @@ import java.io.InputStream;
 
 /**
  * File utilities
- * 
+ *
  * @author YPLO6403
  */
 public class FileUtils {
@@ -58,7 +56,7 @@ public class FileUtils {
 
     /**
      * Copy a file to a directory
-     * 
+     *
      * @param srcFile the source file (may not be null)
      * @param destDir the destination directory (may not be null)
      * @param preserveFileDate whether to preserve the file date
@@ -70,7 +68,7 @@ public class FileUtils {
         if (srcFile == null) {
             throw new IllegalArgumentException("Source is null");
         }
-        if (srcFile.exists() == false) {
+        if (!srcFile.exists()) {
             throw new FileNotFoundException("Source '" + srcFile + "' does not exist");
         }
         if (srcFile.isDirectory()) {
@@ -79,19 +77,19 @@ public class FileUtils {
         if (destDir == null) {
             throw new IllegalArgumentException("Destination is null");
         }
-        if (destDir.exists() == false) {
+        if (!destDir.exists()) {
             // Create directory if it does not exist
-            if (destDir.mkdir() == false) {
+            if (!destDir.mkdir()) {
                 throw new IOException("Destination '" + destDir + "' directory cannot be created");
             }
         } else {
-            if (destDir.isDirectory() == false) {
+            if (!destDir.isDirectory()) {
                 throw new IllegalArgumentException("Destination '" + destDir
                         + "' is not a directory");
             }
         }
         File destFile = new File(destDir, srcFile.getName());
-        if (destFile.exists() && destFile.canWrite() == false) {
+        if (destFile.exists() && !destFile.canWrite()) {
             throw new IOException("Destination '" + destFile + "' file exists but is read-only");
         }
         FileInputStream input = new FileInputStream(srcFile);
@@ -118,7 +116,7 @@ public class FileUtils {
 
     /**
      * get the oldest file from the list
-     * 
+     *
      * @param files list of files
      * @return the oldest one or null
      */
@@ -141,14 +139,13 @@ public class FileUtils {
 
     /**
      * Delete a directory recursively
-     * 
+     *
      * @param dir the directory
      * @throws IOException
      */
     public static void deleteDirectory(File dir) throws IOException {
         if (!dir.isDirectory()) {
-            throw new IllegalArgumentException(new StringBuilder(dir.getPath()).append(
-                    " should always be a directory!").toString());
+            throw new IllegalArgumentException(dir.getPath() + " should always be a directory!");
         }
         String[] children = dir.list();
         for (String childname : children) {
@@ -156,25 +153,22 @@ public class FileUtils {
             if (child.isDirectory()) {
                 deleteDirectory(child);
                 if (!child.delete()) {
-                    throw new IOException(new StringBuilder("Failed to delete file : ").append(
-                            child.getPath()).toString());
+                    throw new IOException("Failed to delete file : " + child.getPath());
                 }
             } else {
                 if (!child.delete()) {
-                    throw new IOException(new StringBuilder("Failed to delete file : ").append(
-                            child.getPath()).toString());
+                    throw new IOException("Failed to delete file : " + child.getPath());
                 }
             }
         }
         if (!dir.delete()) {
-            throw new IOException(new StringBuilder("Failed to delete directory : ").append(
-                    dir.getPath()).toString());
+            throw new IOException("Failed to delete directory : " + dir.getPath());
         }
     }
 
     /**
      * Fetch the file name from URI
-     * 
+     *
      * @param ctx Context
      * @param file URI
      * @return fileName String
@@ -186,9 +180,12 @@ public class FileUtils {
             cursor = ctx.getContentResolver().query(file, null, null, null, null);
             if (ContentResolver.SCHEME_CONTENT.equals(scheme)) {
                 if (cursor != null && cursor.moveToFirst()) {
-                    String displayName = cursor.getString(cursor
+                    /*
+                     * Warning: OpenableColumns.DISPLAY_NAME does not have to be a filename (eg. for
+                     * audio files)
+                     */
+                    return cursor.getString(cursor
                             .getColumnIndexOrThrow(OpenableColumns.DISPLAY_NAME));
-                    return displayName;
                 }
                 throw new IllegalArgumentException("Error in retrieving file name from the URI");
 
@@ -205,7 +202,7 @@ public class FileUtils {
 
     /**
      * Fetch the file size from URI
-     * 
+     *
      * @param ctx Context
      * @param file URI
      * @return fileSize long
@@ -217,9 +214,8 @@ public class FileUtils {
             cursor = ctx.getContentResolver().query(file, null, null, null, null);
             if (ContentResolver.SCHEME_CONTENT.equals(scheme)) {
                 if (cursor != null && cursor.moveToFirst()) {
-                    return Long.valueOf(
-                            cursor.getString(cursor.getColumnIndexOrThrow(OpenableColumns.SIZE)))
-                            .longValue();
+                    return Long.valueOf(cursor.getString(cursor
+                            .getColumnIndexOrThrow(OpenableColumns.SIZE)));
                 }
                 throw new IllegalArgumentException("Error in retrieving file size form the URI");
 
@@ -236,9 +232,9 @@ public class FileUtils {
 
     /**
      * Test if the stack can read data from this Uri.
-     * 
-     * @param file
-     * @return
+     *
+     * @param file the file Uri
+     * @return True is the stack can read data from this Uri.
      */
     public static boolean isReadFromUriPossible(Context ctx, Uri file) {
         String scheme = file.getScheme();
@@ -254,14 +250,13 @@ public class FileUtils {
                 return true;
 
             } catch (SecurityException e) {
-                sLogger.error(new StringBuilder("Failed to read from uri :").append(file)
-                        .toString(), e);
+                sLogger.error("Failed to read from uri :" + file, e);
                 return false;
 
             } catch (IOException e) {
                 if (sLogger.isActivated()) {
-                    sLogger.debug(new StringBuilder("Failed to read from uri :").append(file)
-                            .append(", Message=").append(e.getMessage()).toString());
+                    sLogger.debug("Failed to read from uri :" + file + ", Message="
+                            + e.getMessage());
                 }
                 return false;
 
@@ -278,8 +273,7 @@ public class FileUtils {
                 return new File(path).canRead();
 
             } catch (SecurityException e) {
-                sLogger.error(new StringBuilder("Failed to read from uri :").append(file)
-                        .toString(), e);
+                sLogger.error("Failed to read from uri :" + file, e);
                 return false;
             }
 
@@ -290,7 +284,7 @@ public class FileUtils {
 
     /**
      * Copies a file. The destination is overwritten if it already exists.
-     * 
+     *
      * @param source Uri of the source file
      * @param destination Uri of the destination file
      * @throws IOException if the copy operation fails
@@ -315,21 +309,90 @@ public class FileUtils {
         }
     }
 
+    private static String getMimeTypeFromFile(Context ctx, Uri file) {
+        MediaMetadataRetriever mmr = new MediaMetadataRetriever();
+        mmr.setDataSource(ctx, file);
+        return mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_MIMETYPE);
+    }
+
     /**
      * Create copy of sent file in respective sent directory.
-     * 
+     *
      * @param file The file Uri to copy
      * @param rcsSettings The RcsSettings accessor
-     * @return Uri of copy or created file
+     * @return Uri of copied file
      * @throws IOException
      */
     public static Uri createCopyOfSentFile(Uri file, RcsSettings rcsSettings) throws IOException {
-        FileDescription fileDescription = FileFactory.getFactory().getFileDescription(file);
-        MmContent content = ContentManager.createMmContent(file, fileDescription.getSize(),
-                fileDescription.getName());
-        Uri destination = ContentManager.generateUriForSentContent(content.getName(),
-                content.getEncoding(), rcsSettings);
+        String mimeType = getMimeType(file);
+        Context ctx = AndroidFactory.getApplicationContext();
+        String fileName = getFileName(ctx, file);
+        String extension = MimeManager.getFileExtension(fileName);
+        /*
+         * Checks if filename contains extension.
+         */
+        if (extension == null) {
+            /*
+             * If extension is not provided by filename then guess extension from MimeType.
+             */
+            extension = MimeManager.getInstance().getExtensionFromMimeType(mimeType);
+            if (extension == null) {
+                throw new RuntimeException("Cannot retrieve file extension for Uri='" + file + "'!");
+            }
+            fileName = fileName + "." + extension;
+        }
+        Uri destination = ContentManager.generateUriForSentContent(fileName, mimeType, rcsSettings);
         copyFile(file, destination);
         return destination;
+    }
+
+    /**
+     * Gets the mime-type from file Uri
+     * 
+     * @param file the file Uri
+     * @return the mime-type or null
+     */
+    public static String getMimeType(Uri file) {
+        String scheme = file.getScheme();
+        Context ctx = AndroidFactory.getApplicationContext();
+        ContentResolver cr = ctx.getContentResolver();
+        if (ContentResolver.SCHEME_CONTENT.equals(scheme)) {
+            return cr.getType(file);
+        }
+        if (ContentResolver.SCHEME_FILE.equals(scheme)) {
+            String path = file.getPath();
+            if (path == null) {
+                throw new RuntimeException("Invalid file path for Uri='" + file + "'!");
+            }
+            String extension = MimeManager.getFileExtension(path);
+            if (extension == null) {
+                throw new IllegalArgumentException("No file extension Uri='" + file + "'!");
+            }
+            String mimeType = MimeManager.getInstance().getMimeType(extension);
+            if (MimeManager.isVideoType(mimeType)) {
+                /*
+                 * Warning: Audio and Video files share the same extensions so we need to retrieve
+                 * mime type directly from file.
+                 */
+                String mimeTypeFromMediaFile = getMimeTypeFromFile(ctx, file);
+                if (mimeTypeFromMediaFile != null) {
+                    mimeType = mimeTypeFromMediaFile;
+                }
+            }
+            return mimeType;
+        }
+        throw new IllegalArgumentException("Unsupported URI scheme '" + scheme + "'!");
+    }
+
+    /**
+     * Gets mime type from extesion pparsed from path or filename
+     * 
+     * @param pathOrFilename the path or filename
+     * @return the mime type or null if not found
+     */
+
+    public static String getMimeTypeFromExtension(String pathOrFilename) {
+        String ext = MimeManager.getFileExtension(pathOrFilename);
+        return MimeManager.getInstance().getMimeType(ext);
     }
 }

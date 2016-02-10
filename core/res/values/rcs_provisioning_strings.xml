@@ -73,6 +73,7 @@
     <string name="Threshold_warning_on_file_transfer_size">Threshold warning on file transfer size:</string>
     <string name="Max_size_of_an_image_share">Max size of an image share:</string>
     <string name="Max_duration_of_a_video_share_milliseconds">Max duration of a video share (milliseconds):</string>
+    <string name="Max_duration_of_audio_message_milliseconds">Max duration of a audio message (milliseconds):</string>
     <string name="Max_number_of_simultaneous_chat_sessions">Max number of simultaneous chat sessions:</string>
     <string name="Max_number_of_simultaneous_file_transfer_sessions">Max number of simultaneous file transfer sessions:</string>
     <string name="Max_number_of_concurrent_outgoing_file_transfer_sessions">Max number of concurrent outgoing file transfer sessions:</string>

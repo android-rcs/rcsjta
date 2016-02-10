@@ -95,10 +95,6 @@ public class ReceiveFileTransfer extends RcsActivity {
 
     private OnClickListener mAcceptBtnListener;
 
-    private android.view.View.OnClickListener mBtnPauseListener;
-
-    private android.view.View.OnClickListener mBtnResumeListener;
-
     private OneToOneFileTransferListener mFileTransferListener;
 
     private GroupFileTransferListener mGroupFtListener;
@@ -119,14 +115,6 @@ public class ReceiveFileTransfer extends RcsActivity {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.filetransfer_receive);
         initialize();
-        /* Set pause and resume button */
-        mPauseBtn = (Button) findViewById(R.id.pause_btn);
-        mPauseBtn.setOnClickListener(mBtnPauseListener);
-        mPauseBtn.setEnabled(false);
-        mResumeBtn = (Button) findViewById(R.id.resume_btn);
-        mResumeBtn.setOnClickListener(mBtnResumeListener);
-        mResumeBtn.setEnabled(false);
-        mProgressBar = (ProgressBar) findViewById(R.id.progress_bar);
 
         /* Register to API connection manager */
         if (!isServiceConnected(RcsServiceName.FILE_TRANSFER, RcsServiceName.CONTACT)) {
@@ -631,7 +619,7 @@ public class ReceiveFileTransfer extends RcsActivity {
             }
         };
 
-        mBtnPauseListener = new android.view.View.OnClickListener() {
+        View.OnClickListener btnPauseListener = new View.OnClickListener() {
             @Override
             public void onClick(View arg0) {
                 try {
@@ -651,7 +639,7 @@ public class ReceiveFileTransfer extends RcsActivity {
             }
         };
 
-        mBtnResumeListener = new android.view.View.OnClickListener() {
+        View.OnClickListener btnResumeListener = new View.OnClickListener() {
             @Override
             public void onClick(View arg0) {
                 try {
@@ -702,6 +690,14 @@ public class ReceiveFileTransfer extends RcsActivity {
                 }
             }
         };
+         /* Set pause and resume button */
+        mPauseBtn = (Button) findViewById(R.id.pause_btn);
+        mPauseBtn.setOnClickListener(btnPauseListener);
+        mPauseBtn.setEnabled(false);
+        mResumeBtn = (Button) findViewById(R.id.resume_btn);
+        mResumeBtn.setOnClickListener(btnResumeListener);
+        mResumeBtn.setEnabled(false);
+        mProgressBar = (ProgressBar) findViewById(R.id.progress_bar);
     }
 
     /**

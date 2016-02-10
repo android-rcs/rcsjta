@@ -78,7 +78,7 @@ public class RcsSettingsProvider extends ContentProvider {
     }
 
     private static class DatabaseHelper extends SQLiteOpenHelper {
-        private static final int DATABASE_VERSION = 119;
+        private static final int DATABASE_VERSION = 120;
 
         /**
          * Add a parameter in the db
@@ -120,9 +120,8 @@ public class RcsSettingsProvider extends ContentProvider {
 
         @Override
         public void onCreate(SQLiteDatabase db) {
-            db.execSQL(new StringBuilder("CREATE TABLE IF NOT EXISTS ").append(TABLE).append('(')
-                    .append(RcsSettingsData.KEY_KEY).append(" TEXT NOT NULL PRIMARY KEY,")
-                    .append(RcsSettingsData.KEY_VALUE).append(" TEXT)").toString());
+            db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE + '(' + RcsSettingsData.KEY_KEY
+                    + " TEXT NOT NULL PRIMARY KEY," + RcsSettingsData.KEY_VALUE + " TEXT)");
 
             /* Insert default values for parameters */
             addParameter(db, RcsSettingsData.SERVICE_ACTIVATED,
@@ -157,6 +156,8 @@ public class RcsSettingsProvider extends ContentProvider {
                     RcsSettingsData.DEFAULT_MAX_ISH_SIZE);
             addParameter(db, RcsSettingsData.MAX_VIDEO_SHARE_DURATION,
                     RcsSettingsData.DEFAULT_MAX_VSH_DURATION);
+            addParameter(db, RcsSettingsData.MAX_AUDIO_MESSAGE_DURATION,
+                    RcsSettingsData.DEFAULT_MAX_AUDIO_DURATION);
             addParameter(db, RcsSettingsData.MAX_CHAT_SESSIONS,
                     RcsSettingsData.DEFAULT_MAX_CHAT_SESSIONS);
             addParameter(db, RcsSettingsData.MAX_FILE_TRANSFER_SESSIONS,
@@ -353,6 +354,8 @@ public class RcsSettingsProvider extends ContentProvider {
                     RcsSettingsData.DEFAULT_DIRECTORY_PATH_PHOTOS);
             addParameter(db, RcsSettingsData.DIRECTORY_PATH_VIDEOS,
                     RcsSettingsData.DEFAULT_DIRECTORY_PATH_VIDEOS);
+            addParameter(db, RcsSettingsData.DIRECTORY_PATH_AUDIOS,
+                    RcsSettingsData.DEFAULT_DIRECTORY_PATH_AUDIOS);
             addParameter(db, RcsSettingsData.DIRECTORY_PATH_FILES,
                     RcsSettingsData.DEFAULT_DIRECTORY_PATH_FILES);
             addParameter(db, RcsSettingsData.DIRECTORY_PATH_FILEICONS,
@@ -432,7 +435,7 @@ public class RcsSettingsProvider extends ContentProvider {
             /*
              * Get all the pairs key/value of the old table to insert them back after update
              */
-            ArrayList<ContentValues> valuesList = new ArrayList<ContentValues>();
+            ArrayList<ContentValues> valuesList = new ArrayList<>();
             while (oldDataCursor.moveToNext()) {
                 String key = null;
                 String value = null;
@@ -473,8 +476,7 @@ public class RcsSettingsProvider extends ContentProvider {
         if (TextUtils.isEmpty(selection)) {
             return SELECTION_WITH_KEY_ONLY;
         }
-        return new StringBuilder("(").append(SELECTION_WITH_KEY_ONLY).append(") AND (")
-                .append(selection).append(')').toString();
+        return "(" + SELECTION_WITH_KEY_ONLY + ") AND (" + selection + ')';
     }
 
     private String[] getSelectionArgsWithKey(String[] selectionArgs, String key) {
@@ -503,8 +505,7 @@ public class RcsSettingsProvider extends ContentProvider {
                 return CursorType.TYPE_ITEM;
 
             default:
-                throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
-                        .append(uri).append("!").toString());
+                throw new IllegalArgumentException("Unsupported URI " + uri + "!");
         }
     }
 
@@ -529,8 +530,7 @@ public class RcsSettingsProvider extends ContentProvider {
                     return cursor;
 
                 default:
-                    throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
-                            .append(uri).append("!").toString());
+                    throw new IllegalArgumentException("Unsupported URI " + uri + "!");
             }
         }
         /*
@@ -563,20 +563,17 @@ public class RcsSettingsProvider extends ContentProvider {
                 return count;
 
             default:
-                throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
-                        .append(uri).append("!").toString());
+                throw new IllegalArgumentException("Unsupported URI " + uri + "!");
         }
     }
 
     @Override
     public Uri insert(Uri uri, ContentValues initialValues) {
-        throw new UnsupportedOperationException(new StringBuilder("Cannot insert URI ").append(uri)
-                .append("!").toString());
+        throw new UnsupportedOperationException("Cannot insert URI " + uri + "!");
     }
 
     @Override
     public int delete(Uri uri, String where, String[] whereArgs) {
-        throw new UnsupportedOperationException(new StringBuilder("Cannot delete URI ").append(uri)
-                .append("!").toString());
+        throw new UnsupportedOperationException("Cannot delete URI " + uri + "!");
     }
 }

@@ -17,6 +17,7 @@
     <uses-permission android:name="android.permission.READ_CONTACTS" />
     <uses-permission android:name="android.permission.WRITE_CONTACTS" />
     <uses-permission android:name="android.permission.CALL_PHONE" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -186,7 +187,6 @@
             android:name="com.orangelabs.rcs.ri.messaging.filetransfer.FileTransferServiceConfigActivity"
             android:icon="@drawable/ri_quick_ft_icon"
             android:label="@string/menu_ft_config" />
-
         <service
             android:name="com.orangelabs.rcs.ri.messaging.filetransfer.FileTransferIntentService"
             android:exported="false" />
@@ -296,6 +296,7 @@
         <activity
             android:name="com.orangelabs.rcs.ri.messaging.GroupDeliveryInfoList"
             android:label="@string/title_group_delivery_info" />
+
         <activity
             android:name="com.orangelabs.rcs.ri.messaging.chat.group.GroupChatList"
             android:icon="@drawable/ri_quick_chat_icon"
@@ -464,9 +465,6 @@
         <activity
             android:name="com.orangelabs.rcs.ri.extension.streaming.StreamingSessionList"
             android:label="@string/menu_streaming_sessions_list" />
-        <activity
-            android:name="com.orangelabs.rcs.ri.extension.SendInstantMessage"
-            android:label="@string/menu_instant_message" />
 
         <receiver
             android:name="com.orangelabs.rcs.ri.extension.SessionInvitationReceiver"
@@ -492,20 +490,6 @@
         <service
             android:name=".extension.MultiMediaSessionIntentService"
             android:exported="false" />
-
-
-        <receiver
-            android:name="com.orangelabs.rcs.ri.extension.InstantMessageReceiver"
-            android:exported="true" >
-            <intent-filter>
-                <action android:name="com.gsma.services.rcs.extension.action.NEW_INSTANT_MESSAGE" />
-
-                <data android:mimeType="com.gsma.services.rcs/ext.messaging" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </receiver>
 
         <!-- File Upload API -->
 
@@ -541,6 +525,9 @@
         <activity
             android:name="com.orangelabs.rcs.ri.history.sharing.SharingDetailView"
             android:label="@string/title_history_log_item" />
+        <activity
+            android:name=".messaging.filetransfer.AudioMessageRecordActivity"
+            android:label="@string/menu_transfer_file" />
 
         <receiver
             android:name="com.orangelabs.rcs.ri.messaging.chat.single.UndeliveredMessageReceiver"

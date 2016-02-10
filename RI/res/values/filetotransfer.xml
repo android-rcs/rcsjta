@@ -4,6 +4,7 @@
     <string-array name="select_filetotransfer">
         <item>Image from gallery</item>
         <item>Text file from explorer</item>
+        <item>Audio from explorer</item>
     </string-array>
 
 </resources>

@@ -47,6 +47,7 @@
     <string name="label_progress_bar">Progress:</string>
     <string name="label_file">Selected file:</string>
     <string name="label_size">Size:</string>
+    <string name="label_duration">Duration (sec):</string>
     <string name="label_receive_image">Received image %s</string>
     <string name="label_remote">Remote contact:</string>
     <string name="label_select_file">Select file</string>
@@ -60,11 +61,10 @@
     <string name="error_api_permission_denied">RCS API permission denied</string>
     <string name="label_todo">Feature not yet implemented</string>
 	<string name="error_not_registered">Not registered to IMS</string>
-    <string name="label_uninitialized_disposition">disposition</string>
-    <string name="label_disposition">Disposition: %s</string>
+	<string name="label_uninitialized_disposition">disposition</string>
+	<string name="label_disposition">Disposition: %s</string>
     <string name="label_attach">Attachment</string>
     <string name="label_render">Render</string>
-
     <!-- About menu -->
     <string name="label_about_title">Reference Implementation</string>
     <string name="label_about_app_version">App release %s</string>
@@ -76,8 +76,6 @@
     <string name="menu_contacts">Contacts</string>
     <string name="menu_address_book">Native address book</string>
     <string name="menu_list_rcs_contacts">All RCS contacts</string>
-    <string name="menu_list_online_contacts">Online RCS contacts</string>
-    <string name="menu_list_supported_contacts">Contacts supporting a service</string>
     <string name="label_ext_tag">Extension tag:</string>
     <string name="menu_contact_vcard">Contact visit card</string>
     <string name="label_vcard">Visit card:</string>
@@ -109,8 +107,6 @@
     <string name="label_capabilities_empty">No capabilities</string>
     <string name="label_contact">Contact %s</string>
     <string name="label_capabilities_geolocation_push">Geolocation push</string>
-    <string name="label_capabilities_ip_voice_call">IP voice call</string>
-    <string name="label_capabilities_ip_video_call">IP video call</string>
     <string name="label_automata">Automata:</string>
     <string name="label_capabilities_timestamp">Last refresh:</string>
     <string name="label_no_capabilities">No capabilities for %s</string>
@@ -144,6 +140,7 @@
     <string name="label_ft_isAutoAccept">AA enabled:</string>
     <string name="label_ft_isAutoAcceptInRoaming">AA enabled in roaming:</string>
     <string name="label_MaxFileTransfers">Max file transfers:</string>
+    <string name="label_max_audio_duration">Max audio file duration (msec):</string>
     <string name="label_GroupFileTransferSupported">Group supported:</string>
     <string name="menu_file_transfer_config">File transfer service configuration</string>
     <string name="label_ft_ImageResizeOption">Image resize option:</string>
@@ -194,6 +191,7 @@
     <string name="label_no_subject">no subject</string>
     <string name="label_no_contact">&#8230;</string>
     <string name="label_ft_thumb">Thumbnail</string>
+    <string name="label_send_audio_msg">Audio message</string>
     <string name="menu_send_file">Send file</string>
     <string name="label_geoloc_msg">Geoloc</string>
     <string name="label_gc_from_subject">From: %1$s\nSubject: %2$s</string>
@@ -295,7 +293,6 @@
     <string name="label_send_message">Send message</string>
     <string name="label_recv_instant_messsage">Instant multimedia message from %s:</string>
     <string name="label_instant_message_sent">Message has been sent!</string>
-
     <!-- Geolocation push -->
     <string name="label_select_geoloc">Select from google map\n(Internet connectivity required)</string>
     <string name="menu_showus_map">Show us in a map</string>
@@ -395,6 +392,13 @@
     <string name="label_history_log_geoloc_sharing">Geoloc share</string>
     <string name="LabelPermissionsError">You must accept permissions to use RSC RI</string>
     <string name="LabelTitlePermissionsError">ALERT</string>
+    <string name="menu_record_audio">Record audio</string>
+    <string name="label_play_record">Play record</string>
+    <string name="label_start_record">Start audio record</string>
+    <string name="label_stop_record">Stop audio record</string>
+    <string name="label_audio_record">Recorded file:</string>
+    <string name="max_audio_record_reached">Maximum duration is reached!</string>
+    <string name="msg_audio_record_success">Audio recorded successfully</string>
 
     <!-- States -->
 

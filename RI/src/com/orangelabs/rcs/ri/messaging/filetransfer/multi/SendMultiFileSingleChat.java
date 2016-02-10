@@ -25,10 +25,10 @@ import com.gsma.services.rcs.filetransfer.FileTransfer;
 import com.gsma.services.rcs.filetransfer.FileTransferService;
 import com.gsma.services.rcs.filetransfer.OneToOneFileTransferListener;
 
+import android.util.Log;
+
 import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.utils.LogUtils;
-
-import android.util.Log;
 
 import java.util.List;
 import java.util.Set;
@@ -54,9 +54,9 @@ public class SendMultiFileSingleChat extends SendMultiFile implements ISendMulti
                     Log.d(LOGTAG, "Transfer file '" + fileToTransfer.getFilename()
                             + "' to contact=" + contact + " icon=" + fileToTransfer.isFileicon());
                 }
+                // TODO SL
                 FileTransfer fileTransfer = mFileTransferService.transferFile(contact,
-                        fileToTransfer.getUri(),
-                        FileTransfer.Disposition.ATTACH,
+                        fileToTransfer.getUri(), FileTransfer.Disposition.ATTACH,
                         fileToTransfer.isFileicon());
                 mFileTransfers.add(fileTransfer);
                 mTransferIds.add(fileTransfer.getTransferId());

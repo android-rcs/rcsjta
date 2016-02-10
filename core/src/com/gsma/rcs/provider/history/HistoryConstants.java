@@ -53,7 +53,7 @@ import java.util.Set;
             HistoryLogData.KEY_READ_STATUS, HistoryLogData.KEY_CHAT_ID, HistoryLogData.KEY_CONTENT,
             HistoryLogData.KEY_FILEICON, HistoryLogData.KEY_FILEICON_MIME_TYPE,
             HistoryLogData.KEY_FILENAME, HistoryLogData.KEY_FILESIZE,
-            HistoryLogData.KEY_TRANSFERRED, HistoryLogData.KEY_DURATION
+            HistoryLogData.KEY_TRANSFERRED, HistoryLogData.KEY_DURATION, HistoryLogData.KEY_DISPOSITION
     };
 
     /* package private */static final Set<String> PROTECTED_INTERNAL_DATABASES = getProtectedInternalDatabases();
@@ -62,16 +62,16 @@ import java.util.Set;
 
     /* package private */static final Set<HistoryMemberDatabase> INTERNAL_MEMBERS = getInternalMembers();
 
-    private static final Set<String> getProtectedInternalDatabases() {
-        Set<String> protectedInternalDatabases = new HashSet<String>();
+    private static Set<String> getProtectedInternalDatabases() {
+        Set<String> protectedInternalDatabases = new HashSet<>();
         protectedInternalDatabases.add(RcsSettingsProvider.DATABASE_NAME);
         protectedInternalDatabases.add(ContactProvider.DATABASE_NAME);
         protectedInternalDatabases.add(GroupDeliveryInfoProvider.DATABASE_NAME);
         return protectedInternalDatabases;
     }
 
-    private static final Set<Integer> getInternalMemberIds() {
-        Set<Integer> internalMemberIds = new HashSet<Integer>();
+    private static Set<Integer> getInternalMemberIds() {
+        Set<Integer> internalMemberIds = new HashSet<>();
         internalMemberIds.add(GroupChatData.HISTORYLOG_MEMBER_ID);
         internalMemberIds.add(MessageData.HISTORYLOG_MEMBER_ID);
         internalMemberIds.add(FileTransferData.HISTORYLOG_MEMBER_ID);
@@ -81,8 +81,8 @@ import java.util.Set;
         return internalMemberIds;
     }
 
-    private static final Set<HistoryMemberDatabase> getInternalMembers() {
-        Set<HistoryMemberDatabase> internalMembers = new HashSet<HistoryMemberDatabase>();
+    private static Set<HistoryMemberDatabase> getInternalMembers() {
+        Set<HistoryMemberDatabase> internalMembers = new HashSet<>();
         internalMembers.add(new HistoryMemberDatabase(GroupChatData.HISTORYLOG_MEMBER_ID,
                 GroupChatData.CONTENT_URI, ChatProvider.DATABASE_NAME, null,
                 ChatProvider.TABLE_GROUP_CHAT, getGroupChatProviderColumnMapping()));
@@ -104,8 +104,8 @@ import java.util.Set;
         return internalMembers;
     }
 
-    private static final Map<String, String> getGroupChatProviderColumnMapping() {
-        Map<String, String> columnMapping = new HashMap<String, String>();
+    private static Map<String, String> getGroupChatProviderColumnMapping() {
+        Map<String, String> columnMapping = new HashMap<>();
         columnMapping.put(HistoryLogData.KEY_PROVIDER_ID,
                 String.valueOf(GroupChatData.HISTORYLOG_MEMBER_ID));
         columnMapping.put(HistoryLogData.KEY_BASECOLUMN_ID, ChatLog.GroupChat.BASECOLUMN_ID);
@@ -119,8 +119,8 @@ import java.util.Set;
         return columnMapping;
     }
 
-    private static final Map<String, String> getChatMessageProviderColumnMapping() {
-        Map<String, String> columnMapping = new HashMap<String, String>();
+    private static Map<String, String> getChatMessageProviderColumnMapping() {
+        Map<String, String> columnMapping = new HashMap<>();
         columnMapping.put(HistoryLogData.KEY_PROVIDER_ID,
                 String.valueOf(MessageData.HISTORYLOG_MEMBER_ID));
         columnMapping.put(HistoryLogData.KEY_BASECOLUMN_ID, ChatLog.Message.BASECOLUMN_ID);
@@ -143,8 +143,8 @@ import java.util.Set;
         return columnMapping;
     }
 
-    private static final Map<String, String> getFileTransferProviderColumnMapping() {
-        Map<String, String> columnMapping = new HashMap<String, String>();
+    private static Map<String, String> getFileTransferProviderColumnMapping() {
+        Map<String, String> columnMapping = new HashMap<>();
         columnMapping.put(HistoryLogData.KEY_PROVIDER_ID,
                 String.valueOf(FileTransferData.HISTORYLOG_MEMBER_ID));
         columnMapping.put(HistoryLogData.KEY_BASECOLUMN_ID, FileTransferLog.BASECOLUMN_ID);
@@ -168,11 +168,12 @@ import java.util.Set;
         columnMapping.put(HistoryLogData.KEY_FILENAME, FileTransferLog.FILENAME);
         columnMapping.put(HistoryLogData.KEY_FILESIZE, FileTransferLog.FILESIZE);
         columnMapping.put(HistoryLogData.KEY_TRANSFERRED, FileTransferLog.TRANSFERRED);
+        columnMapping.put(HistoryLogData.KEY_DISPOSITION, FileTransferLog.DISPOSITION);
         return columnMapping;
     }
 
-    private static final Map<String, String> getImageSharingProviderColumnMapping() {
-        Map<String, String> columnMapping = new HashMap<String, String>();
+    private static Map<String, String> getImageSharingProviderColumnMapping() {
+        Map<String, String> columnMapping = new HashMap<>();
         columnMapping.put(HistoryLogData.KEY_PROVIDER_ID,
                 String.valueOf(ImageSharingData.HISTORYLOG_MEMBER_ID));
         columnMapping.put(HistoryLogData.KEY_BASECOLUMN_ID, ImageSharingLog.BASECOLUMN_ID);
@@ -190,8 +191,8 @@ import java.util.Set;
         return columnMapping;
     }
 
-    private static final Map<String, String> getVideoSharingProviderColumnMapping() {
-        Map<String, String> columnMapping = new HashMap<String, String>();
+    private static Map<String, String> getVideoSharingProviderColumnMapping() {
+        Map<String, String> columnMapping = new HashMap<>();
         columnMapping.put(HistoryLogData.KEY_PROVIDER_ID,
                 String.valueOf(VideoSharingData.HISTORYLOG_MEMBER_ID));
         columnMapping.put(HistoryLogData.KEY_BASECOLUMN_ID, VideoSharingLog.BASECOLUMN_ID);
@@ -205,8 +206,8 @@ import java.util.Set;
         return columnMapping;
     }
 
-    private static final Map<String, String> getGeolocSharingProviderColumnMapping() {
-        Map<String, String> columnMapping = new HashMap<String, String>();
+    private static Map<String, String> getGeolocSharingProviderColumnMapping() {
+        Map<String, String> columnMapping = new HashMap<>();
         columnMapping.put(HistoryLogData.KEY_PROVIDER_ID,
                 String.valueOf(GeolocSharingData.HISTORYLOG_MEMBER_ID));
         columnMapping.put(HistoryLogData.KEY_BASECOLUMN_ID, GeolocSharingLog.BASECOLUMN_ID);

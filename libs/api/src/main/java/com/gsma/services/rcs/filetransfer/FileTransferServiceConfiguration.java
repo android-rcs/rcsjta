@@ -57,14 +57,14 @@ public class FileTransferServiceConfiguration {
 
         private int mValue;
 
-        private static SparseArray<ImageResizeOption> mValueToEnum = new SparseArray<ImageResizeOption>();
+        private static SparseArray<ImageResizeOption> mValueToEnum = new SparseArray<>();
         static {
             for (ImageResizeOption entry : ImageResizeOption.values()) {
                 mValueToEnum.put(entry.toInt(), entry);
             }
         }
 
-        private ImageResizeOption(int value) {
+        ImageResizeOption(int value) {
             mValue = value;
         }
 
@@ -84,7 +84,7 @@ public class FileTransferServiceConfiguration {
         /**
          * Returns a ImageResizeOption instance representing the specified int value.
          * 
-         * @param value
+         * @param value the int value representing the ImageResizeOption
          * @return ImageResizeOption instance
          */
         public static ImageResizeOption valueOf(int value) {
@@ -102,7 +102,7 @@ public class FileTransferServiceConfiguration {
     /**
      * Constructor
      * 
-     * @param iFtServiceConfig
+     * @param iFtServiceConfig the file transfer service configuration interface
      * @hide
      */
     /* package private */FileTransferServiceConfiguration(
@@ -111,9 +111,24 @@ public class FileTransferServiceConfiguration {
     }
 
     /**
+     * Returns the maximum audio message duration.
+     *
+     * @return long maximum audio message duration
+     * @throws RcsGenericException
+     */
+    public long getMaxAudioMessageDuration() throws RcsGenericException {
+        try {
+            return mIFtServiceConfig.getMaxAudioMessageDuration();
+
+        } catch (Exception e) {
+            throw new RcsGenericException(e);
+        }
+    }
+
+    /**
      * Returns the file transfer size threshold when the user should be warned about the potential
      * charges associated to the transfer of a large file. It returns 0 if there no need to warn.
-     * 
+     *
      * @return long Size in bytes
      * @throws RcsGenericException
      */
@@ -161,7 +176,7 @@ public class FileTransferServiceConfiguration {
      * The Auto Accept Mode can only be modified by client application if isAutoAcceptChangeable is
      * true.
      * 
-     * @param enable
+     * @param enable True if file transfer is auto accepted
      * @throws RcsPersistentStorageException
      * @throws RcsGenericException
      */
@@ -200,7 +215,7 @@ public class FileTransferServiceConfiguration {
      * The AutoAcceptInRoaming can only be modified by client application if
      * isAutoAcceptModeChangeable is true and if the AutoAccept Mode in normal conditions is true.
      * 
-     * @param enable
+     * @param enable True if file transfer is auto accepted in roaming
      * @throws RcsPermissionDeniedException
      * @throws RcsPersistentStorageException
      * @throws RcsGenericException
@@ -268,7 +283,7 @@ public class FileTransferServiceConfiguration {
     /**
      * Sets the image resize option for file transfer.
      * 
-     * @param option
+     * @param option the image resize option for file transfer.
      * @throws RcsGenericException
      */
     public void setImageResizeOption(ImageResizeOption option) throws RcsGenericException {

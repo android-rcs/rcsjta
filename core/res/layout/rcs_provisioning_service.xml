@@ -179,6 +179,23 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:paddingTop="5dip"
+                android:text="@string/Max_duration_of_audio_message_milliseconds"/>
+
+            <EditText
+                android:id="@+id/MaxAudioMessageDuration"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:inputType="number"
+                android:lines="1"
+                android:maxLength="13" />
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="5dip"
+
                 android:text="@string/Max_number_of_simultaneous_chat_sessions" />
 
             <EditText
@@ -371,6 +388,14 @@
 
             <EditText
                 android:id="@+id/DirectoryPathVideos"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:inputType="textUri" />
+
+            <EditText
+                android:id="@+id/DirectoryPathAudios"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="5dip"
