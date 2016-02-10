@@ -21,19 +21,6 @@ package com.orangelabs.rcs.ri;
 import com.gsma.services.rcs.RcsPermissionDeniedException;
 import com.gsma.services.rcs.contact.ContactUtil;
 
-import com.orangelabs.rcs.api.connection.utils.ExceptionUtil;
-import com.orangelabs.rcs.api.connection.utils.RcsListActivity;
-import com.orangelabs.rcs.ri.capabilities.TestCapabilitiesApi;
-import com.orangelabs.rcs.ri.contacts.TestContactsApi;
-import com.orangelabs.rcs.ri.extension.TestMultimediaSessionApi;
-import com.orangelabs.rcs.ri.history.TestHistoryLogApi;
-import com.orangelabs.rcs.ri.intents.TestIntentApps;
-import com.orangelabs.rcs.ri.messaging.TestMessagingApi;
-import com.orangelabs.rcs.ri.service.TestServiceApi;
-import com.orangelabs.rcs.ri.sharing.TestSharingApi;
-import com.orangelabs.rcs.ri.upload.InitiateFileUpload;
-import com.orangelabs.rcs.ri.utils.LogUtils;
-
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -47,6 +34,19 @@ import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+
+import com.orangelabs.rcs.api.connection.utils.ExceptionUtil;
+import com.orangelabs.rcs.api.connection.utils.RcsListActivity;
+import com.orangelabs.rcs.ri.capabilities.TestCapabilitiesApi;
+import com.orangelabs.rcs.ri.contacts.TestContactsApi;
+import com.orangelabs.rcs.ri.extension.TestMultimediaSessionApi;
+import com.orangelabs.rcs.ri.history.TestHistoryLogApi;
+import com.orangelabs.rcs.ri.intents.TestIntentApps;
+import com.orangelabs.rcs.ri.messaging.TestMessagingApi;
+import com.orangelabs.rcs.ri.service.TestServiceApi;
+import com.orangelabs.rcs.ri.sharing.TestSharingApi;
+import com.orangelabs.rcs.ri.upload.InitiateFileUpload;
+import com.orangelabs.rcs.ri.utils.LogUtils;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -76,7 +76,8 @@ public class RI extends RcsListActivity {
             android.Manifest.permission.READ_CONTACTS,
             android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.CAMERA,
             android.Manifest.permission.CALL_PHONE,
-            android.Manifest.permission.WRITE_EXTERNAL_STORAGE));
+            android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            android.Manifest.permission.RECORD_AUDIO));
 
     private static final int MY_PERMISSION_REQUEST_ALL = 5428;
     private Set<String> mPermissionsToAsk;
@@ -236,7 +237,8 @@ public class RI extends RcsListActivity {
             requestPermissions(mPermissionsToAsk.toArray(new String[mPermissionsToAsk.size()]),
                     MY_PERMISSION_REQUEST_ALL);
         } else {
-            startActivityFromItemClick(mListViewStartActivity, mViewStartActivity, mPositionStartActivity, mIdStartActivity);
+            startActivityFromItemClick(mListViewStartActivity, mViewStartActivity,
+                    mPositionStartActivity, mIdStartActivity);
         }
     }
 
@@ -271,7 +273,8 @@ public class RI extends RcsListActivity {
                     }
                 }
                 if (grantedPermissions.equals(mPermissionsToAsk)) {
-                    startActivityFromItemClick(mListViewStartActivity, mViewStartActivity, mPositionStartActivity, mIdStartActivity);
+                    startActivityFromItemClick(mListViewStartActivity, mViewStartActivity,
+                            mPositionStartActivity, mIdStartActivity);
                 } else {
                     AlertDialog.Builder builder = new AlertDialog.Builder(RI.this);
                     builder.setMessage(getString(R.string.LabelPermissionsError)).setTitle(
