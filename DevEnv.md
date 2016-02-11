@@ -1,7 +1,9 @@
 #Prerequisites
-Configure the ANDROID_HOME environment variable based on the location of the Android SDK. 
+- Check that your git environment and IDE are configured to use JDK 1.7.
 
-Also add the ANDROID_HOME/tools and ANDROID_HOME/platform-tools to your PATH. 
+- Configure the ANDROID_HOME environment variable based on the location of the Android SDK. 
+
+- Add the ANDROID_HOME/tools and ANDROID_HOME/platform-tools to your PATH. 
 
 #Build the whole SDK
 
@@ -44,8 +46,16 @@ From a console, enter the command:
 
 # Apply the same source code format #
 
-The formatting guidelines are in the file called android-formatting-rules.xml in the _eclipse_ directory. There are also as set of rules of how to order the imports in the file called android.importorder.
+The formatting guidelines are in the file called android-formatting-rules.xml in the _eclipse_ directory. 
 
-From Eclipse and the menu Preferences/Java/Code Style/Formatter, import the file /eclipse/android-formatting from your branch.
+In the same directory, there are also as set of rules of how to order the imports in the file called android.importorder.
 
-From Eclipse and the menu Preferences/Java/Code Style/Organize Imports, import the file /eclipse/android.importorder from your branch.
+* Eclipse IDE
+
+From the menu Preferences/Java/Code Style/Formatter, import the file /eclipse/android-formatting from your branch.
+
+From the menu Preferences/Java/Code Style/Organize Imports, import the file /eclipse/android.importorder from your branch.
+
+* Android Studio IDE
+
+For Android Studio, please refer to the dedicated [wiki page](https://github.com/android-rcs/rcsjta/wiki/Android-studio).
