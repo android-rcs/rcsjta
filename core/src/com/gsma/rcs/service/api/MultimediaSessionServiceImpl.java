@@ -22,6 +22,7 @@
 
 package com.gsma.rcs.service.api;
 
+import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.FeatureTags;
 import com.gsma.rcs.core.ims.protocol.rtp.format.data.DataFormat;
 import com.gsma.rcs.core.ims.service.sip.SipService;
@@ -309,21 +310,20 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
     /**
      * Initiates a new session for real time messaging with a remote contact and for a given service
      * extension. The messages are exchanged in real time during the session are specified by the
-     * parameter accept-types and accept-wrapped-types.
-     * The parameter contact supports the following formats: MSISDN in national or international
-     * format, SIP address, SIP-URI or Tel-URI. If the format of the contact is not supported an
-     * exception is thrown.
+     * parameter accept-types and accept-wrapped-types. The parameter contact supports the following
+     * formats: MSISDN in national or international format, SIP address, SIP-URI or Tel-URI. If the
+     * format of the contact is not supported an exception is thrown.
      *
      * @param serviceId Service ID
      * @param contact Contact ID
      * @param acceptTypes Accept-types related to exchanged messages (may be null or empty)
-     * @param acceptWrappedTypes Accept-wrapped-types related to exchanged messages (may be null or empty)
+     * @param acceptWrappedTypes Accept-wrapped-types related to exchanged messages (may be null or
+     *            empty)
      * @return Multimedia messaging session
      * @throws RemoteException
      */
-    public IMultimediaMessagingSession initiateMessagingSession2(String serviceId, ContactId contact,
-                                                                 String[] acceptTypes,
-                                                                 String[] acceptWrappedTypes)
+    public IMultimediaMessagingSession initiateMessagingSession2(String serviceId,
+            ContactId contact, String[] acceptTypes, String[] acceptWrappedTypes)
             throws RemoteException {
         if (TextUtils.isEmpty(serviceId)) {
             throw new ServerApiIllegalArgumentException("serviceId must not be null or empty!");
@@ -338,8 +338,8 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
         try {
             String featureTag = FeatureTags.FEATURE_RCSE + "=\""
                     + FeatureTags.FEATURE_RCSE_IARI_EXTENSION + "." + serviceId + "\"";
-            final GenericSipMsrpSession session = mSipService
-                    .createMsrpSession(contact, featureTag, acceptTypes, acceptWrappedTypes);
+            final GenericSipMsrpSession session = mSipService.createMsrpSession(contact,
+                    featureTag, acceptTypes, acceptWrappedTypes);
             MultimediaMessagingSessionImpl multiMediaMessaging = new MultimediaMessagingSessionImpl(
                     session.getSessionID(), mMultimediaMessagingSessionEventBroadcaster,
                     mSipService, this, Direction.OUTGOING, contact, serviceId, State.INITIATING);
@@ -447,9 +447,9 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
      * Initiates a new session for real time streaming with a remote contact for a given service
      * extension and encoding (ie. rtpmap format containing <encoding name>/<clock rate> and
      * optional parameters if needed. The payload are exchanged in real time during the session and
-     * may be from any type. The parameter contact supports the following formats: MSISDN in national
-     * or international format, SIP address, SIP-URI or Tel-URI. If the format of the contact is not
-     * supported an exception is thrown.
+     * may be from any type. The parameter contact supports the following formats: MSISDN in
+     * national or international format, SIP address, SIP-URI or Tel-URI. If the format of the
+     * contact is not supported an exception is thrown.
      *
      * @param serviceId Service ID
      * @param contact Contact ID
@@ -458,9 +458,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
      * @throws RemoteException
      */
     public IMultimediaStreamingSession initiateStreamingSession2(String serviceId,
-                                                                 ContactId contact,
-                                                                 String encoding)
-            throws RemoteException {
+            ContactId contact, String encoding) throws RemoteException {
         if (TextUtils.isEmpty(serviceId)) {
             throw new ServerApiIllegalArgumentException("serviceId must not be null or empty!");
         }
@@ -474,8 +472,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
         try {
             String featureTag = FeatureTags.FEATURE_RCSE + "=\""
                     + FeatureTags.FEATURE_RCSE_IARI_EXTENSION + "." + serviceId + "\"";
-            final GenericSipRtpSession session = mSipService.createRtpSession(contact,
-                    featureTag,
+            final GenericSipRtpSession session = mSipService.createRtpSession(contact, featureTag,
                     encoding);
 
             MultimediaStreamingSessionImpl multimediaStreaming = new MultimediaStreamingSessionImpl(
@@ -709,12 +706,11 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
     }
 
     /**
-     * Sends an instant multimedia message to a remote contact and for a given service
-     * extension. The content takes part of the message, so any multimedia session is
-     * needed to exchange content here.
-     * The parameter contact supports the following formats: MSISDN in national or international
-     * format, SIP address, SIP-URI or Tel-URI. If the format of the contact is not supported an
-     * exception is thrown.
+     * Sends an instant multimedia message to a remote contact and for a given service extension.
+     * The content takes part of the message, so any multimedia session is needed to exchange
+     * content here. The parameter contact supports the following formats: MSISDN in national or
+     * international format, SIP address, SIP-URI or Tel-URI. If the format of the contact is not
+     * supported an exception is thrown.
      *
      * @param serviceId Service ID
      * @param contact Contact identifier
@@ -722,8 +718,8 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
      * @param contentType Content type of the the message
      * @throws RemoteException
      */
-    public void sendInstantMultimediaMessage(String serviceId, ContactId contact, byte[] content, String contentType)
-            throws RemoteException {
+    public void sendInstantMultimediaMessage(final String serviceId, final ContactId contact,
+            final byte[] content, final String contentType) throws RemoteException {
         if (TextUtils.isEmpty(serviceId)) {
             throw new ServerApiIllegalArgumentException("serviceId must not be null or empty!");
         }
@@ -740,20 +736,32 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
             sLogger.info("Send an instant multimedia message to " + contact);
         }
         ServerApiUtils.testImsExtension(serviceId);
-        try {
-            String featureTag = FeatureTags.FEATURE_RCSE + "=\""
-                    + FeatureTags.FEATURE_RCSE_IARI_EXTENSION + "." + serviceId + "\"";
-            mSipService.sendInstantMultimediaMessage(contact, featureTag, content, contentType);
-        } catch (ServerApiBaseException e) {
-            if (!e.shouldNotBeLogged()) {
-                sLogger.error(ExceptionUtil.getFullStackTrace(e));
-            }
-            throw e;
+        mSipService.scheduleMultimediaMessageOperation(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    String featureTag = FeatureTags.FEATURE_RCSE + "=\""
+                            + FeatureTags.FEATURE_RCSE_IARI_EXTENSION + "." + serviceId + "\"";
+                    mSipService.sendInstantMultimediaMessage(contact, featureTag, content,
+                            contentType);
 
-        } catch (Exception e) {
-            sLogger.error(ExceptionUtil.getFullStackTrace(e));
-            throw new ServerApiGenericException(e);
-        }
+                } catch (NetworkException e) {
+                    if (sLogger.isActivated()) {
+                        sLogger.debug(e.getMessage());
+                    }
+
+                } catch (RuntimeException e) {
+                    /*
+                     * Normally we are not allowed to catch runtime exceptions as these are genuine
+                     * bugs which should be handled/fixed within the code. However the cases when we
+                     * are executing operations on a thread unhandling such exceptions will
+                     * eventually lead to exit the system and thus can bring the whole system down,
+                     * which is not intended.
+                     */
+                    sLogger.error("Failed to send message for service ID:".concat(serviceId), e);
+                }
+            }
+        });
     }
 
     /**
@@ -764,7 +772,8 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
      * @param content Message content
      * @param contentType Message content type
      */
-    public void receiveSipInstantMessage(Intent intent, ContactId contact, byte[] content, String contentType) {
+    public void receiveSipInstantMessage(Intent intent, ContactId contact, byte[] content,
+            String contentType) {
         intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
         IntentUtils.tryToSetReceiverForegroundFlag(intent);
         intent.putExtra(InstantMultimediaMessageIntent.EXTRA_CONTACT, (Parcelable) contact);

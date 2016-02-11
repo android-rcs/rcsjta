@@ -45,12 +45,15 @@ public abstract class MultimediaMessagingSessionListener {
 
     /**
      * Callback called when a multimedia message or data is received.
-     * @deprecated Use {@link #onMessageReceived(ContactId contact, String sessionId, byte[] content, String contentType)} instead.
      * 
+     * @deprecated Use
+     *             {@link #onMessageReceived(ContactId contact, String sessionId, byte[] content, String contentType)}
+     *             instead.
      * @param contact Contact ID
      * @param sessionId Session ID
      * @param content Message content
      */
+    @Deprecated
     public abstract void onMessageReceived(ContactId contact, String sessionId, byte[] content);
 
     /**
@@ -61,7 +64,8 @@ public abstract class MultimediaMessagingSessionListener {
      * @param content Message content
      * @param contentType Message content type
      */
-    public abstract void onMessageReceived(ContactId contact, String sessionId, byte[] content, String contentType);
+    public abstract void onMessageReceived(ContactId contact, String sessionId, byte[] content,
+            String contentType);
 
     /**
      * Callback called when multimedia messages have been flushed.

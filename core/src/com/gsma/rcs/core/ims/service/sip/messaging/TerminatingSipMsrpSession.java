@@ -74,12 +74,12 @@ public class TerminatingSipMsrpSession extends GenericSipMsrpSession {
      * 
      * @param parent SIP service
      * @param invite Initial INVITE request
-     * @param imsModule
-     * @param contact
-     * @param sessionInvite
-     * @param rcsSettings
+     * @param imsModule the IMS module
+     * @param contact the remote contact
+     * @param sessionInvite the session invitate
+     * @param rcsSettings the ECS settings accessor
      * @param timestamp Local timestamp for the session
-     * @param contactManager
+     * @param contactManager the contact manager
      */
     public TerminatingSipMsrpSession(SipService parent, SipRequest invite, ImsModule imsModule,
             ContactId contact, Intent sessionInvite, RcsSettings rcsSettings, long timestamp,
@@ -168,8 +168,8 @@ public class TerminatingSipMsrpSession extends GenericSipMsrpSession {
                     return;
 
                 default:
-                    throw new IllegalArgumentException(new StringBuilder(
-                            "Unknown invitation answer in run; answer=").append(answer).toString());
+                    throw new IllegalArgumentException("Unknown invitation answer in run; answer="
+                            + answer);
             }
 
             /* Parse the remote SDP part */
@@ -206,7 +206,7 @@ public class TerminatingSipMsrpSession extends GenericSipMsrpSession {
             if (attr3 != null) {
                 StringTokenizer st = new StringTokenizer(attr3.getValue(), " ");
                 acceptType = new String[st.countTokens()];
-                int i=0;
+                int i = 0;
                 while (st.hasMoreTokens()) {
                     acceptType[i] = st.nextToken();
                     i++;
@@ -219,7 +219,7 @@ public class TerminatingSipMsrpSession extends GenericSipMsrpSession {
             if (attr4 != null) {
                 StringTokenizer st = new StringTokenizer(attr4.getValue(), " ");
                 acceptWrappedType = new String[st.countTokens()];
-                int i=0;
+                int i = 0;
                 while (st.hasMoreTokens()) {
                     acceptWrappedType[i] = st.nextToken();
                     i++;
@@ -309,26 +309,14 @@ public class TerminatingSipMsrpSession extends GenericSipMsrpSession {
                 handleError(new SipSessionError(SipSessionError.SESSION_INITIATION_FAILED));
             }
 
-        } catch (PayloadException e) {
-            sLogger.error(
-                    new StringBuilder("Session initiation has failed for CallId=")
-                            .append(getDialogPath().getCallId()).append(" ContactId=")
-                            .append(getRemoteContact()).toString(), e);
+        } catch (PayloadException | RuntimeException e) {
+            sLogger.error("Session initiation has failed for CallId=" + getDialogPath().getCallId()
+                    + " ContactId=" + getRemoteContact(), e);
             handleError(new SipSessionError(SipSessionError.MEDIA_FAILED, e));
 
         } catch (NetworkException e) {
             handleError(new SipSessionError(SipSessionError.MEDIA_FAILED, e));
 
-        } catch (RuntimeException e) {
-            /**
-             * Intentionally catch runtime exceptions as else it will abruptly end the thread and
-             * eventually bring the whole system down, which is not intended.
-             */
-            sLogger.error(
-                    new StringBuilder("Session initiation has failed for CallId=")
-                            .append(getDialogPath().getCallId()).append(" ContactId=")
-                            .append(getRemoteContact()).toString(), e);
-            handleError(new SipSessionError(SipSessionError.MEDIA_FAILED, e));
         }
     }
 

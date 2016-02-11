@@ -60,16 +60,15 @@ public class OriginatingSipMsrpSession extends GenericSipMsrpSession {
      * @param parent SIP service
      * @param contact Remote contact Id
      * @param featureTag Feature tag
-     * @param rcsSettings
+     * @param rcsSettings the RCS settings accessor
      * @param timestamp Local timestamp for the session
-     * @param contactManager
+     * @param contactManager the contact manager
      * @param acceptTypes Accept-types related to exchanged messages
      * @param acceptWrappedTypes Accept-wrapped-types related to exchanged messages
      */
     public OriginatingSipMsrpSession(SipService parent, ContactId contact, String featureTag,
-                                     RcsSettings rcsSettings, long timestamp,
-                                     ContactManager contactManager,
-                                     String[] acceptTypes, String[] acceptWrappedTypes) {
+            RcsSettings rcsSettings, long timestamp, ContactManager contactManager,
+            String[] acceptTypes, String[] acceptWrappedTypes) {
         super(parent, contact, featureTag, rcsSettings, timestamp, contactManager);
 
         mAcceptTypes = acceptTypes;
@@ -109,47 +108,15 @@ public class OriginatingSipMsrpSession extends GenericSipMsrpSession {
 
             sendInvite(invite);
 
-        } catch (InvalidArgumentException e) {
-            sLogger.error(
-                    new StringBuilder("Session initiation has failed for CallId=")
-                            .append(getDialogPath().getCallId()).append(" ContactId=")
-                            .append(getRemoteContact()).toString(), e);
-            handleError(new SipSessionError(SipSessionError.SESSION_INITIATION_FAILED, e));
-
-        } catch (ParseException e) {
-            sLogger.error(
-                    new StringBuilder("Session initiation has failed for CallId=")
-                            .append(getDialogPath().getCallId()).append(" ContactId=")
-                            .append(getRemoteContact()).toString(), e);
-            handleError(new SipSessionError(SipSessionError.SESSION_INITIATION_FAILED, e));
-
-        } catch (FileAccessException e) {
-            sLogger.error(
-                    new StringBuilder("Session initiation has failed for CallId=")
-                            .append(getDialogPath().getCallId()).append(" ContactId=")
-                            .append(getRemoteContact()).toString(), e);
-            handleError(new SipSessionError(SipSessionError.SESSION_INITIATION_FAILED, e));
-
-        } catch (PayloadException e) {
-            sLogger.error(
-                    new StringBuilder("Session initiation has failed for CallId=")
-                            .append(getDialogPath().getCallId()).append(" ContactId=")
-                            .append(getRemoteContact()).toString(), e);
+        } catch (InvalidArgumentException | PayloadException | FileAccessException | ParseException
+                | RuntimeException e) {
+            sLogger.error("Session initiation has failed for CallId=" + getDialogPath().getCallId()
+                    + " ContactId=" + getRemoteContact(), e);
             handleError(new SipSessionError(SipSessionError.SESSION_INITIATION_FAILED, e));
 
         } catch (NetworkException e) {
             handleError(new SipSessionError(SipSessionError.SESSION_INITIATION_FAILED, e));
 
-        } catch (RuntimeException e) {
-            /**
-             * Intentionally catch runtime exceptions as else it will abruptly end the thread and
-             * eventually bring the whole system down, which is not intended.
-             */
-            sLogger.error(
-                    new StringBuilder("Session initiation has failed for CallId=")
-                            .append(getDialogPath().getCallId()).append(" ContactId=")
-                            .append(getRemoteContact()).toString(), e);
-            handleError(new SipSessionError(SipSessionError.SESSION_INITIATION_FAILED, e));
         }
     }
 

@@ -48,7 +48,8 @@ public class SessionActivityManager extends PeriodicRefresher {
      */
     private final long mTimeout;
 
-    private static final Logger sLogger = Logger.getLogger(SessionActivityManager.class.getSimpleName());
+    private static final Logger sLogger = Logger.getLogger(SessionActivityManager.class
+            .getSimpleName());
 
     /**
      * Constructor
@@ -78,11 +79,9 @@ public class SessionActivityManager extends PeriodicRefresher {
             }
             return;
         }
-
         if (sLogger.isActivated()) {
             sLogger.info("Start the activity manager for " + mTimeout + "ms");
         }
-
         // Reset the inactivity timestamp
         updateActivity();
 
@@ -97,8 +96,6 @@ public class SessionActivityManager extends PeriodicRefresher {
         if (sLogger.isActivated()) {
             sLogger.info("Stop the activity manager");
         }
-
-        // Stop timer
         stopTimer();
     }
 
@@ -113,19 +110,16 @@ public class SessionActivityManager extends PeriodicRefresher {
         long inactivityPeriod = System.currentTimeMillis() - mActivityTimestamp;
         long remainingPeriod = timeout - inactivityPeriod;
         if (sLogger.isActivated()) {
-            sLogger.debug(new StringBuilder("Check inactivity period: inactivity=")
-                    .append(inactivityPeriod).append(", remaining=").append(remainingPeriod)
-                    .toString());
+            sLogger.debug("Check inactivity period: inactivity=" + inactivityPeriod
+                    + ", remaining=" + remainingPeriod);
         }
-
         if (inactivityPeriod >= timeout) {
             if (sLogger.isActivated()) {
-                sLogger.debug(new StringBuilder("No activity on the session during ")
-                        .append(timeout).append("ms: abort the session").toString());
+                sLogger.debug("No activity on the session during " + timeout
+                        + "ms: abort the session");
             }
             mSession.handleInactivityEvent();
         } else {
-            // Restart timer
             startTimer(System.currentTimeMillis(), remainingPeriod);
         }
     }

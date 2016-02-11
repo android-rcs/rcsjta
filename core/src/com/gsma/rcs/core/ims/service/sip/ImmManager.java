@@ -24,9 +24,11 @@ package com.gsma.rcs.core.ims.service.sip;
 
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.NetworkException;
+import com.gsma.rcs.core.ims.network.sip.SipManager;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
+import com.gsma.rcs.core.ims.protocol.sip.SipInterface;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
 import com.gsma.rcs.core.ims.service.SessionAuthenticationAgent;
@@ -85,18 +87,14 @@ public class ImmManager extends Thread {
         while ((msg = (InstantMultimediaMessage) mBuffer.getObject()) != null) {
             try {
                 sendSipMessage(msg, null);// TODO: add sip.instance
-            } catch (PayloadException e) {
+
+            } catch (PayloadException | RuntimeException e) {
                 sLogger.error("Failed to send instant multimedia message", e);
+
             } catch (NetworkException e) {
                 if (sLogger.isActivated()) {
                     sLogger.debug(e.getMessage());
                 }
-            } catch (RuntimeException e) {
-                /*
-                 * Intentionally catch runtime exceptions as else it will abruptly end the thread
-                 * and eventually bring the whole system down, which is not intended.
-                 */
-                sLogger.error("Failed to send instant multimedia message", e);
             }
         }
     }
@@ -111,14 +109,15 @@ public class ImmManager extends Thread {
      */
     public void sendMessage(ContactId remote, String featureTag, byte[] content, String contentType) {
         // Add request in the buffer for background processing
-        InstantMultimediaMessage msg = new InstantMultimediaMessage(remote, featureTag, content, contentType);
+        InstantMultimediaMessage msg = new InstantMultimediaMessage(remote, featureTag, content,
+                contentType);
         mBuffer.addObject(msg);
     }
 
     private void analyzeSipResponse(SipTransactionContext ctx,
-                                    SessionAuthenticationAgent authenticationAgent,
-                                    SipDialogPath dialogPath, InstantMultimediaMessage imm)
-            throws NetworkException, PayloadException, InvalidArgumentException, ParseException {
+            SessionAuthenticationAgent authenticationAgent, SipDialogPath dialogPath,
+            InstantMultimediaMessage imm) throws NetworkException, PayloadException,
+            InvalidArgumentException, ParseException {
         int statusCode = ctx.getStatusCode();
         switch (statusCode) {
             case Response.PROXY_AUTHENTICATION_REQUIRED:
@@ -136,8 +135,8 @@ public class ImmManager extends Thread {
                 if (sLogger.isActivated()) {
                     sLogger.info("Send second MESSAGE");
                 }
-                SipRequest msg = SipMessageFactory.createMessage(dialogPath,
-                        imm.getFeatureTag(), imm.getContentType(), imm.getContent());
+                SipRequest msg = SipMessageFactory.createMessage(dialogPath, imm.getFeatureTag(),
+                        imm.getContentType(), imm.getContent());
 
                 /* Set the Authorization header */
                 authenticationAgent.setProxyAuthorizationHeader(msg);
@@ -146,6 +145,7 @@ public class ImmManager extends Thread {
 
                 analyzeSipResponse(ctx, authenticationAgent, dialogPath, imm);
                 break;
+
             case Response.OK:
             case Response.ACCEPTED:
                 if (sLogger.isActivated()) {
@@ -153,8 +153,8 @@ public class ImmManager extends Thread {
                 }
                 break;
             default:
-                throw new NetworkException("Instant multimedia message has failed: " + statusCode +
-                        " response received");
+                throw new NetworkException("Instant multimedia message has failed: " + statusCode
+                        + " response received");
         }
     }
 
@@ -164,18 +164,18 @@ public class ImmManager extends Thread {
             if (sLogger.isActivated()) {
                 sLogger.debug("Send instant multimedia message");
             }
-
+            ImsModule imsModule = mSipService.getImsModule();
             // Create authentication agent
             SessionAuthenticationAgent authenticationAgent = new SessionAuthenticationAgent(
-                    mSipService.getImsModule());
+                    imsModule);
             // @FIXME: This should be an URI instead of String
             String toUri = PhoneUtils.formatContactIdToUri(imm.getRemote()).toString();
+            SipManager sipManager = imsModule.getSipManager();
+            SipInterface sipInterface = sipManager.getSipStack();
             // Create a dialog path
-            SipDialogPath dialogPath = new SipDialogPath(
-                    mSipService.getImsModule().getSipManager().getSipStack(),
-                    mSipService.getImsModule().getSipManager().getSipStack().generateCallId(),
-                    1, toUri, ImsModule.getImsUserProfile().getPublicUri(), toUri,
-                    mSipService.getImsModule().getSipManager().getSipStack().getServiceRoutePath(),
+            SipDialogPath dialogPath = new SipDialogPath(sipInterface,
+                    sipInterface.generateCallId(), 1, toUri, ImsModule.getImsUserProfile()
+                            .getPublicUri(), toUri, sipInterface.getServiceRoutePath(),
                     mRcsSettings);
             dialogPath.setRemoteSipInstance(remoteInstanceId);
 
@@ -183,23 +183,14 @@ public class ImmManager extends Thread {
             if (sLogger.isActivated()) {
                 sLogger.info("Send first MESSAGE");
             }
-            SipRequest msg = SipMessageFactory.createMessage(dialogPath,
-                    imm.getFeatureTag(), imm.getContentType(), imm.getContent());
-
-            // Send MESSAGE request
-            SipTransactionContext ctx = mSipService.getImsModule().getSipManager()
-                    .sendSipMessageAndWait(msg);
-
-            // Analyze received message
+            SipRequest msg = SipMessageFactory.createMessage(dialogPath, imm.getFeatureTag(),
+                    imm.getContentType(), imm.getContent());
+            SipTransactionContext ctx = sipManager.sendSipMessageAndWait(msg);
             analyzeSipResponse(ctx, authenticationAgent, dialogPath, imm);
 
-        } catch (InvalidArgumentException e) {
-            throw new PayloadException("Unable to set authorization header for remoteInstanceId: " +
-                    remoteInstanceId, e);
-
-        } catch (ParseException e) {
-            throw new PayloadException("Unable to set authorization header for remoteInstanceId: " +
-                    remoteInstanceId, e);
+        } catch (InvalidArgumentException | ParseException e) {
+            throw new PayloadException("Unable to set authorization header for remoteInstanceId: "
+                    + remoteInstanceId, e);
         }
     }
 
@@ -213,7 +204,7 @@ public class ImmManager extends Thread {
         private final String mContentType;
 
         public InstantMultimediaMessage(ContactId remote, String featureTag, byte[] content,
-                                        String contentType) {
+                String contentType) {
             mRemote = remote;
             mFeatureTag = featureTag;
             mContent = content;

@@ -54,8 +54,6 @@ public class ServiceExtensionManager {
 
     private final Core mCore;
 
-    private final ImsModule mImsModule;
-
     private ExternalCapabilityMonitoring mExternalCapabilityMonitoring;
 
     private ExecutorService mUpdateExecutor;
@@ -72,11 +70,10 @@ public class ServiceExtensionManager {
      */
     public ServiceExtensionManager(ImsModule imsModule, Context ctx, Core core,
             RcsSettings rcsSettings) {
-        mImsModule = imsModule;
         mCtx = ctx;
         mCore = core;
         mRcsSettings = rcsSettings;
-        mSupportedExtensionUpdater = new SupportedExtensionUpdater(mCtx, mImsModule, mRcsSettings,
+        mSupportedExtensionUpdater = new SupportedExtensionUpdater(mCtx, imsModule, mRcsSettings,
                 this);
     }
 
@@ -169,7 +166,7 @@ public class ServiceExtensionManager {
      * @return the set of extensions
      */
     public static Set<String> getExtensions(String extensions) {
-        Set<String> result = new HashSet<String>();
+        Set<String> result = new HashSet<>();
         if (TextUtils.isEmpty(extensions)) {
             return result;
         }

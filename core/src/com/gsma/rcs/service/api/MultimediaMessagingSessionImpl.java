@@ -294,9 +294,7 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
                      * eventually lead to exit the system and thus can bring the whole system down,
                      * which is not intended.
                      */
-                    sLogger.error(
-                            new StringBuilder("Failed to accept session with ID: ").append(
-                                    mSessionId).toString(), e);
+                    sLogger.error("Failed to accept session with ID: ".concat(mSessionId), e);
                 }
             }
         });
@@ -333,9 +331,7 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
                      * eventually lead to exit the system and thus can bring the whole system down,
                      * which is not intended.
                      */
-                    sLogger.error(
-                            new StringBuilder("Failed to reject session with ID: ").append(
-                                    mSessionId).toString(), e);
+                    sLogger.error("Failed to reject session with ID: ".concat(mSessionId), e);
                 }
             }
         });
@@ -370,27 +366,14 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
                     ServerApiUtils.testImsExtension(session.getServiceId());
                     session.terminateSession(TerminationReason.TERMINATION_BY_USER);
 
-                } catch (PayloadException e) {
-                    sLogger.error(
-                            new StringBuilder("Failed to abort session with ID: ").append(
-                                    mSessionId).toString(), e);
+                } catch (PayloadException | RuntimeException e) {
+                    sLogger.error("Failed to abort session with ID: ".concat(mSessionId), e);
 
                 } catch (NetworkException e) {
                     if (sLogger.isActivated()) {
                         sLogger.debug(e.getMessage());
                     }
 
-                } catch (RuntimeException e) {
-                    /*
-                     * Normally we are not allowed to catch runtime exceptions as these are genuine
-                     * bugs which should be handled/fixed within the code. However the cases when we
-                     * are executing operations on a thread unhandling such exceptions will
-                     * eventually lead to exit the system and thus can bring the whole system down,
-                     * which is not intended.
-                     */
-                    sLogger.error(
-                            new StringBuilder("Failed to abort session with ID: ").append(
-                                    mSessionId).toString(), e);
                 }
             }
         });
@@ -434,8 +417,8 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
                     }
 
                     /* Do not consider max message size if null */
-                    if (session.getMaxMessageSize() != 0
-                            && content.length > session.getMaxMessageSize()) {
+                    int maxMessageSize = session.getMaxMessageSize();
+                    if (maxMessageSize != 0 && content.length > maxMessageSize) {
                         sLogger.error("Failed to send message: max length exceeded!");
                         return;
                     }
@@ -454,9 +437,8 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
                      * eventually lead to exit the system and thus can bring the whole system down,
                      * which is not intended.
                      */
-                    sLogger.error(new StringBuilder(
-                            "Failed to send message within session with ID: ").append(mSessionId)
-                            .toString(), e);
+                    sLogger.error(
+                            "Failed to send message within session with ID: ".concat(mSessionId), e);
                 }
             }
         });
@@ -489,8 +471,8 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
                      * eventually lead to exit the system and thus can bring the whole system down,
                      * which is not intended.
                      */
-                    sLogger.error("Failed to flush messages for session with ID: ".
-                            concat(mSessionId), e);
+                    sLogger.error(
+                            "Failed to flush messages for session with ID: ".concat(mSessionId), e);
                 }
             }
         });
@@ -511,8 +493,7 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
     @Override
     public void onSessionAborted(ContactId contact, TerminationReason reason) {
         if (sLogger.isActivated()) {
-            sLogger.debug(new StringBuilder("Session aborted (terminationReason ").append(reason)
-                    .append(")").toString());
+            sLogger.debug("Session aborted (terminationReason " + reason + ")");
         }
         synchronized (mLock) {
             switch (reason) {
@@ -533,8 +514,7 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
                     removeSession(contact, State.ABORTED, ReasonCode.ABORTED_BY_INACTIVITY);
                     break;
                 default:
-                    throw new IllegalArgumentException(new StringBuilder(
-                            "Unknown TerminationReason=").append(reason).toString());
+                    throw new IllegalArgumentException("Unknown TerminationReason=" + reason);
             }
         }
     }
@@ -599,8 +579,7 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
                 handleSessionRejected(ReasonCode.REJECTED_BY_REMOTE, contact);
                 break;
             default:
-                throw new IllegalArgumentException(new StringBuilder(
-                        "Unknown reason RejectedReason=").append(reason).append("!").toString());
+                throw new IllegalArgumentException("Unknown reason RejectedReason=" + reason + "!");
         }
     }
 

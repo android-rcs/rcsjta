@@ -60,9 +60,9 @@ public class CapabilityUtils {
      * @return List of tags
      */
     public static String[] getSupportedFeatureTags(boolean richcall, RcsSettings rcsSettings) {
-        List<String> tags = new ArrayList<String>();
-        List<String> icsiTags = new ArrayList<String>();
-        List<String> iariTags = new ArrayList<String>();
+        List<String> tags = new ArrayList<>();
+        List<String> icsiTags = new ArrayList<>();
+        List<String> iariTags = new ArrayList<>();
 
         // Video share support
         if (rcsSettings.isVideoSharingSupported() && richcall
@@ -229,10 +229,9 @@ public class CapabilityUtils {
             } else if (tag.contains(FeatureTags.FEATURE_RCSE_GC_SF)) {
                 capaBuilder.setGroupChatStoreForward(true);
 
-            } else
-            if (tag.contains(FeatureTags.FEATURE_RCSE_IARI_EXTENSION + ".ext") ||
-                    tag.contains(FeatureTags.FEATURE_RCSE_IARI_EXTENSION + ".mnc") ||
-                        tag.contains(FeatureTags.FEATURE_RCSE_ICSI_EXTENSION + ".gsma")) {
+            } else if (tag.contains(FeatureTags.FEATURE_RCSE_IARI_EXTENSION + ".ext")
+                    || tag.contains(FeatureTags.FEATURE_RCSE_IARI_EXTENSION + ".mnc")
+                    || tag.contains(FeatureTags.FEATURE_RCSE_ICSI_EXTENSION + ".gsma")) {
                 // Support an RCS extension
                 String serviceId = extractServiceId(tag);
                 if (!"gsma.rcs.extension".equals(serviceId)) {
@@ -250,7 +249,7 @@ public class CapabilityUtils {
 
             /* Get supported video codecs */
             Vector<MediaDescription> mediaVideo = parser.getMediaDescriptions("video");
-            Vector<String> videoCodecs = new Vector<String>();
+            Vector<String> videoCodecs = new Vector<>();
             for (int i = 0; i < mediaVideo.size(); i++) {
                 MediaDescription desc = mediaVideo.get(i);
                 MediaAttribute attr = desc.getMediaAttribute("rtpmap");
@@ -275,14 +274,13 @@ public class CapabilityUtils {
 
             // Check supported image formats
             Vector<MediaDescription> mediaImage = parser.getMediaDescriptions("message");
-            Vector<String> imgFormats = new Vector<String>();
+            Vector<String> imgFormats = new Vector<>();
             for (int i = 0; i < mediaImage.size(); i++) {
                 MediaDescription desc = mediaImage.get(i);
                 MediaAttribute attr = desc.getMediaAttribute("accept-types");
                 if (attr != null) {
                     String[] types = attr.getValue().split(" ");
-                    for (int j = 0; j < types.length; j++) {
-                        String fmt = types[j];
+                    for (String fmt : types) {
                         if ((fmt != null) && MimeManager.getInstance().isMimeTypeSupported(fmt)) {
                             imgFormats.addElement(fmt);
                         }
@@ -316,7 +314,6 @@ public class CapabilityUtils {
             boolean image = rcsSettings.isImageSharingSupported();
             boolean geoloc = rcsSettings.isGeoLocationPushSupported();
             if (video | image) {
-                // Changed by Deutsche Telekom
                 String mimeTypes = null;
                 String protocol = null;
                 String selector = null;
@@ -329,26 +326,23 @@ public class CapabilityUtils {
                     Vector<VideoFormat> videoFormats = MediaRegistry.getSupportedVideoFormats();
                     StringBuilder videoSharingConfig = new StringBuilder();
                     for (VideoFormat videoFormat : videoFormats) {
-                        videoSharingConfig.append("m=video 0 RTP/AVP " + videoFormat.getPayload()
-                                + SipUtils.CRLF);
-                        videoSharingConfig.append("a=rtpmap:" + videoFormat.getPayload() + " "
-                                + videoFormat.getCodec() + SipUtils.CRLF);
+                        videoSharingConfig.append("m=video 0 RTP/AVP ")
+                                .append(videoFormat.getPayload()).append(SipUtils.CRLF);
+                        videoSharingConfig.append("a=rtpmap:").append(videoFormat.getPayload())
+                                .append(" ").append(videoFormat.getCodec()).append(SipUtils.CRLF);
                     }
 
-                    // Changed by Deutsche Telekom
                     media = videoSharingConfig.toString();
                 }
-
                 // Add image and geoloc config
                 if (image || geoloc) {
                     StringBuilder supportedTransferFormats = new StringBuilder();
 
                     // Get supported image formats
-                    // Changed by Deutsche Telekom
                     Set<String> imageMimeTypes = MimeManager.getInstance()
                             .getSupportedImageMimeTypes();
                     for (String imageMimeType : imageMimeTypes) {
-                        supportedTransferFormats.append(imageMimeType + " ");
+                        supportedTransferFormats.append(imageMimeType).append(" ");
                     }
 
                     // Get supported geoloc
@@ -356,14 +350,11 @@ public class CapabilityUtils {
                         supportedTransferFormats.append(GeolocContent.ENCODING);
                     }
 
-                    // Changed by Deutsche Telekom
                     mimeTypes = supportedTransferFormats.toString().trim();
                     protocol = SdpUtils.MSRP_PROTOCOL;
                     selector = "";
                     maxSize = ImageTransferSession.getMaxImageSharingSize(rcsSettings);
                 }
-
-                // Changed by Deutsche Telekom
                 sdp = SdpUtils.buildCapabilitySDP(ipAddress, protocol, mimeTypes, selector, media,
                         maxSize);
             }
@@ -381,9 +372,11 @@ public class CapabilityUtils {
         String[] values = featureTag.split("=");
         String value = StringUtils.removeQuotes(values[1]);
         if (featureTag.contains(FeatureTags.FEATURE_RCSE_IARI_EXTENSION)) {
-            return value.substring(FeatureTags.FEATURE_RCSE_IARI_EXTENSION.length() + 1, value.length());
+            return value.substring(FeatureTags.FEATURE_RCSE_IARI_EXTENSION.length() + 1,
+                    value.length());
         } else {
-            return value.substring(FeatureTags.FEATURE_RCSE_ICSI_EXTENSION.length() + 1, value.length());
+            return value.substring(FeatureTags.FEATURE_RCSE_ICSI_EXTENSION.length() + 1,
+                    value.length());
         }
     }
 }
