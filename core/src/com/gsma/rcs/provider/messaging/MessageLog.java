@@ -105,6 +105,8 @@ public class MessageLog implements IMessageLog {
             + Status.DELIVERED.toInt()
             + ","
             + Status.DISPLAYED.toInt() + ")";
+    private static final String SELECTION_BY_UNDELIVERED_STATUS = MessageData.KEY_STATUS
+            + " NOT IN(" + Status.DELIVERED.toInt() + "," + Status.DISPLAYED.toInt() + ")";
 
     private static final String ORDER_BY_TIMESTAMP_ASC = MessageData.KEY_TIMESTAMP.concat(" ASC");
 
@@ -382,7 +384,7 @@ public class MessageLog implements IMessageLog {
         values.put(MessageData.KEY_STATUS, status.toInt());
         values.put(MessageData.KEY_REASON_CODE, reasonCode.toInt());
         return mLocalContentResolver.update(Uri.withAppendedPath(MessageData.CONTENT_URI, msgId),
-                values, null, null) > 0;
+                values, SELECTION_BY_UNDELIVERED_STATUS, null) > 0;
     }
 
     @Override

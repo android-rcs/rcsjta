@@ -110,6 +110,9 @@ public class FileTransferLog implements IFileTransferLog {
             + ","
             + State.DISPLAYED.toInt() + ")";
 
+    private static final String SELECTION_BY_UNDELIVERED_STATUS = FileTransferData.KEY_STATE
+            + " NOT IN(" + State.DELIVERED.toInt() + "," + State.DISPLAYED.toInt() + ")";
+
     private static final String ORDER_BY_TIMESTAMP_ASC = FileTransferData.KEY_TIMESTAMP
             .concat(" ASC");
 
@@ -321,8 +324,8 @@ public class FileTransferLog implements IFileTransferLog {
         values.put(FileTransferData.KEY_STATE, state.toInt());
         values.put(FileTransferData.KEY_REASON_CODE, reasonCode.toInt());
         return mLocalContentResolver.update(
-                Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), values, null,
-                null) > 0;
+                Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), values,
+                SELECTION_BY_UNDELIVERED_STATUS, null) > 0;
     }
 
     @Override
