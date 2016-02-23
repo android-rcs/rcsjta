@@ -76,7 +76,7 @@ public class SendGroupFile extends SendFile {
     }
 
     @Override
-    public boolean transferFile(Uri file, boolean fileIcon) {
+    public boolean transferFile(Uri file, FileTransfer.Disposition disposition, boolean fileIcon) {
         try {
             if (LogUtils.isActive) {
                 Log.d(LOGTAG, "initiateTransfer filename=" + mFilename + " size=" + mFilesize
@@ -85,9 +85,8 @@ public class SendGroupFile extends SendFile {
             /* Only take persistable permission for content Uris */
             takePersistableContentUriPermission(this, file);
             /* Initiate transfer */
-            // TODO SL
             mFileTransfer = mFileTransferService.transferFileToGroupChat(mChatId, file,
-                    FileTransfer.Disposition.RENDER, fileIcon);
+                    disposition, fileIcon);
             mTransferId = mFileTransfer.getTransferId();
             return true;
 
@@ -176,7 +175,6 @@ public class SendGroupFile extends SendFile {
                             case STARTED:
                                 //$FALL-THROUGH$
                             case TRANSFERRED:
-                                hideProgressDialog();
                                 /* Display transfer state started */
                                 statusView.setText(_state);
                                 break;

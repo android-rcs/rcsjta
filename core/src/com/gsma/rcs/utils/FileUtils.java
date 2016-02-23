@@ -355,9 +355,8 @@ public class FileUtils {
     public static String getMimeType(Uri file) {
         String scheme = file.getScheme();
         Context ctx = AndroidFactory.getApplicationContext();
-        ContentResolver cr = ctx.getContentResolver();
         if (ContentResolver.SCHEME_CONTENT.equals(scheme)) {
-            return cr.getType(file);
+            return ctx.getContentResolver().getType(file);
         }
         if (ContentResolver.SCHEME_FILE.equals(scheme)) {
             String path = file.getPath();

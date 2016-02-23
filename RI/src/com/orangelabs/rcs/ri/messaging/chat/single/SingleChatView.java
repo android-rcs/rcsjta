@@ -20,6 +20,8 @@ package com.orangelabs.rcs.ri.messaging.chat.single;
 
 import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.RcsGenericException;
+import com.gsma.services.rcs.RcsPermissionDeniedException;
+import com.gsma.services.rcs.RcsPersistentStorageException;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsService.ReadStatus;
 import com.gsma.services.rcs.RcsServiceException;
@@ -39,16 +41,6 @@ import com.gsma.services.rcs.filetransfer.FileTransfer;
 import com.gsma.services.rcs.filetransfer.FileTransferIntent;
 import com.gsma.services.rcs.filetransfer.FileTransferLog;
 import com.gsma.services.rcs.history.HistoryLog;
-
-import com.orangelabs.rcs.api.connection.utils.ExceptionUtil;
-import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.messaging.chat.ChatView;
-import com.orangelabs.rcs.ri.messaging.chat.IsComposingManager;
-import com.orangelabs.rcs.ri.messaging.chat.IsComposingManager.INotifyComposing;
-import com.orangelabs.rcs.ri.messaging.geoloc.DisplayGeoloc;
-import com.orangelabs.rcs.ri.utils.LogUtils;
-import com.orangelabs.rcs.ri.utils.RcsContactUtil;
-import com.orangelabs.rcs.ri.utils.Smileys;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -70,6 +62,18 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView.AdapterContextMenuInfo;
+
+import com.orangelabs.rcs.api.connection.utils.ExceptionUtil;
+import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.messaging.chat.ChatView;
+import com.orangelabs.rcs.ri.messaging.chat.IsComposingManager;
+import com.orangelabs.rcs.ri.messaging.chat.IsComposingManager.INotifyComposing;
+import com.orangelabs.rcs.ri.messaging.geoloc.DisplayGeoloc;
+import com.orangelabs.rcs.ri.utils.ContactUtil;
+import com.orangelabs.rcs.ri.utils.LogUtils;
+import com.orangelabs.rcs.ri.utils.RcsContactUtil;
+import com.orangelabs.rcs.ri.utils.Smileys;
+import com.orangelabs.rcs.ri.utils.Utils;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -96,13 +100,6 @@ public class SingleChatView extends ChatView {
     private ContactId mContact;
 
     private OneToOneChat mChat;
-
-    /**
-     * List of items for contextual menu
-     */
-    private final static int MENU_ITEM_DELETE = 0;
-
-    private final static int MENU_ITEM_RESEND = 1;
 
     private static final String LOGTAG = LogUtils.getTag(SingleChatView.class.getSimpleName());
 
@@ -307,36 +304,88 @@ public class SingleChatView extends ChatView {
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_1to1_talk_item, menu);
         // Get the list item position
         AdapterContextMenuInfo info = (AdapterContextMenuInfo) menuInfo;
         Cursor cursor = (Cursor) mAdapter.getItem(info.position);
         // Adapt the contextual menu according to the selected item
-        menu.add(0, MENU_ITEM_DELETE, MENU_ITEM_DELETE, R.string.menu_delete_message);
+        /* Check if message can be played */
+        int providerId = cursor.getInt(cursor.getColumnIndexOrThrow(HistoryLog.PROVIDER_ID));
         Direction direction = Direction.valueOf(cursor.getInt(cursor
                 .getColumnIndexOrThrow(HistoryLog.DIRECTION)));
+        if (FileTransferLog.HISTORYLOG_MEMBER_ID == providerId) {
+            String mimeType = cursor.getString(cursor.getColumnIndexOrThrow(HistoryLog.MIME_TYPE));
+            boolean isImage = Utils.isImageType(mimeType);
+            if (isImage || Utils.isAudioType(mimeType)) {
+                if (Direction.INCOMING == direction) {
+                    FileTransfer.State state = FileTransfer.State.valueOf(cursor.getInt(cursor
+                            .getColumnIndexOrThrow(HistoryLog.STATUS)));
+                    if (FileTransfer.State.TRANSFERRED != state
+                            && FileTransfer.State.DELIVERED != state
+                            && FileTransfer.State.DISPLAYED != state) {
+                        // Incoming file transfer must be complete to be playable
+                        menu.findItem(R.id.menu_display_content).setVisible(false);
+                        menu.findItem(R.id.menu_listen_content).setVisible(false);
+                    } else {
+                        if (isImage) {
+                            menu.findItem(R.id.menu_listen_content).setVisible(false);
+                        } else {
+                            menu.findItem(R.id.menu_display_content).setVisible(false);
+                        }
+                    }
+                } else {
+                    if (isImage) {
+                        menu.findItem(R.id.menu_listen_content).setVisible(false);
+                    } else {
+                        menu.findItem(R.id.menu_display_content).setVisible(false);
+                    }
+                }
+            } else {
+                // only image or audio files are playable
+                menu.findItem(R.id.menu_display_content).setVisible(false);
+                menu.findItem(R.id.menu_listen_content).setVisible(false);
+            }
+        } else {
+            // Only file are playable
+            menu.findItem(R.id.menu_display_content).setVisible(false);
+            menu.findItem(R.id.menu_listen_content).setVisible(false);
+        }
+        /* Check if message can be resent */
         if (Direction.OUTGOING != direction) {
+            menu.findItem(R.id.menu_resend_message).setVisible(false);
             return;
         }
-        int providerId = cursor.getInt(cursor.getColumnIndexOrThrow(HistoryLog.PROVIDER_ID));
-        if (ChatLog.Message.HISTORYLOG_MEMBER_ID == providerId) {
-            Content.Status status = Content.Status.valueOf(cursor.getInt(cursor
-                    .getColumnIndexOrThrow(HistoryLog.STATUS)));
-            if (Content.Status.FAILED == status) {
-                menu.add(0, MENU_ITEM_RESEND, MENU_ITEM_RESEND, R.string.menu_resend_message);
-            }
-            // TODO depending on mime-type allow user to view file image
+        String id = cursor.getString(cursor.getColumnIndexOrThrow(HistoryLog.ID));
+        try {
+            if (ChatLog.Message.HISTORYLOG_MEMBER_ID == providerId) {
+                String number = cursor.getString(cursor.getColumnIndexOrThrow(HistoryLog.CONTACT));
+                if (number != null) {
+                    ContactId contact = ContactUtil.formatContact(number);
+                    OneToOneChat chat = mChatService.getOneToOneChat(contact);
+                    if (chat == null || !chat.isAllowedToSendMessage()) {
+                        menu.findItem(R.id.menu_resend_message).setVisible(false);
+                    }
+                }
 
-        } else if (FileTransferLog.HISTORYLOG_MEMBER_ID == providerId) {
-            FileTransfer.State state = FileTransfer.State.valueOf(cursor.getInt(cursor
-                    .getColumnIndexOrThrow(HistoryLog.STATUS)));
-            if (FileTransfer.State.FAILED == state) {
-                menu.add(0, MENU_ITEM_RESEND, MENU_ITEM_RESEND, R.string.menu_resend_message);
+            } else if (FileTransferLog.HISTORYLOG_MEMBER_ID == providerId) {
+                FileTransfer transfer = mFileTransferService.getFileTransfer(id);
+                if (transfer == null || !transfer.isAllowedToResendTransfer()) {
+                    menu.findItem(R.id.menu_resend_message).setVisible(false);
+                }
             }
+        } catch (RcsServiceNotAvailableException e) {
+            menu.findItem(R.id.menu_resend_message).setVisible(false);
+
+        } catch (RcsGenericException | RcsPersistentStorageException e) {
+            menu.findItem(R.id.menu_resend_message).setVisible(false);
+            showException(e);
         }
     }
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
+        FileTransfer fileTransfer;
         AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
         Cursor cursor = (Cursor) (mAdapter.getItem(info.position));
         int providerId = cursor.getInt(cursor.getColumnIndexOrThrow(HistoryLog.PROVIDER_ID));
@@ -344,36 +393,52 @@ public class SingleChatView extends ChatView {
         if (LogUtils.isActive) {
             Log.d(LOGTAG, "onContextItemSelected Id=".concat(messageId));
         }
-        switch (item.getItemId()) {
-            case MENU_ITEM_RESEND:
-                try {
+        try {
+            switch (item.getItemId()) {
+                case R.id.menu_resend_message:
                     if (ChatLog.Message.HISTORYLOG_MEMBER_ID == providerId) {
                         mChat.resendMessage(messageId);
                     } else {
-                        FileTransfer fileTransfer = mFileTransferService.getFileTransfer(messageId);
+                        fileTransfer = mFileTransferService.getFileTransfer(messageId);
                         if (fileTransfer != null) {
                             fileTransfer.resendTransfer();
                         }
                     }
-                } catch (RcsServiceException e) {
-                    showException(e);
-                }
-                return true;
+                    return true;
 
-            case MENU_ITEM_DELETE:
-                try {
+                case R.id.menu_delete_message:
                     if (ChatLog.Message.HISTORYLOG_MEMBER_ID == providerId) {
                         mChatService.deleteMessage(messageId);
                     } else {
                         mFileTransferService.deleteFileTransfer(messageId);
                     }
-                } catch (RcsServiceException e) {
-                    showException(e);
-                }
-                return true;
+                    return true;
 
-            default:
-                return super.onContextItemSelected(item);
+                case R.id.menu_display_content:
+                    fileTransfer = mFileTransferService.getFileTransfer(messageId);
+                    if (fileTransfer != null) {
+                        Utils.showPicture(this, fileTransfer.getFile());
+                    }
+                    return true;
+
+                case R.id.menu_listen_content:
+                    fileTransfer = mFileTransferService.getFileTransfer(messageId);
+                    if (fileTransfer != null) {
+                        Utils.playAudio(this, fileTransfer.getFile());
+                    }
+                    return true;
+
+                default:
+                    return super.onContextItemSelected(item);
+            }
+
+        } catch (RcsGenericException | RcsPermissionDeniedException | RcsPersistentStorageException e) {
+            showException(e);
+            return true;
+
+        } catch (RcsServiceNotAvailableException e) {
+            Utils.displayLongToast(this, getString(R.string.label_service_not_available));
+            return true;
         }
     }
 
@@ -422,7 +487,7 @@ public class SingleChatView extends ChatView {
         try {
             cursor = getContentResolver().query(mUriHistoryProvider, PROJECTION_UNREAD_MESSAGE,
                     UNREADS_WHERE_CLAUSE, where_args, ORDER_CHAT_MSG);
-            if (!cursor.moveToFirst()) {
+            if (cursor == null || !cursor.moveToFirst()) {
                 return unReadMessageIDs;
             }
             int msgIdcolumIdx = cursor.getColumnIndexOrThrow(HistoryLog.ID);
@@ -533,7 +598,7 @@ public class SingleChatView extends ChatView {
                     PROJ_UNDELIVERED_MSG, SEL_UNDELIVERED_MESSAGES, new String[] {
                         contact.toString()
                     }, null);
-            if (!cursor.moveToFirst()) {
+            if (cursor == null || !cursor.moveToFirst()) {
                 return messageIds;
             }
             int messageIdColumnIdx = cursor.getColumnIndexOrThrow(ChatLog.Message.MESSAGE_ID);
@@ -557,7 +622,7 @@ public class SingleChatView extends ChatView {
                     PROJ_UNDELIVERED_FT, SEL_UNDELIVERED_FTS, new String[] {
                         contact.toString()
                     }, null);
-            if (!cursor.moveToFirst()) {
+            if (cursor == null || !cursor.moveToFirst()) {
                 return ids;
             }
             int idColumnIdx = cursor.getColumnIndexOrThrow(FileTransferLog.FT_ID);

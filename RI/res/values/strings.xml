@@ -12,7 +12,7 @@
     <string name="label_confirm_close">Do you confirm ?\nThis will close the session.</string>
     <string name="menu_close_session">Quit</string>
     <string name="menu_clear_log">Clear log</string>
-    <string name="label_file_size">Size: %1$s Kb</string>
+    <string name="label_file_size">Size: %1$s</string>
     <string name="label_command_in_progress">Command in progress…</string>
     <string name="label_session_not_found">Session not found</string>
     <string name="label_api_not_compatible">API is not compatible</string>
@@ -51,6 +51,7 @@
     <string name="label_receive_image">Received image %s</string>
     <string name="label_remote">Remote contact:</string>
     <string name="label_select_file">Select file</string>
+    <string name="label_select_audio_file">Select audio file</string>
     <string name="label_invalid_contacts">Invalid list of participants</string>
     <string name="label_uninitialized_contact">+33XXXXXXX</string>
     <string name="label_uninitialized_text">blah, blah, blah</string>
@@ -133,7 +134,7 @@
     <string name="label_transfer_failed_capacity_too_small">Not enough free space on device storage for File Transfer</string>
     <string name="label_transfer_session_has_expired">Session has expired (timeout or any other error)</string>
     <string name="label_ft_state_changed">%1$s (%2$s)</string>
-    <string name="label_ft_from_size">From: %1$s\nSize: %2$s Kb</string>
+    <string name="label_ft_from_size">From: %1$s\nSize: %2$s</string>
     <string name="menu_ft_config">File transfer configuration</string>
     <string name="label_ft_WarnSize">File size warning:</string>
     <string name="label_ft_MaxSize">Max file size:</string>
@@ -184,7 +185,7 @@
     <string name="label_subject">Subject: </string>
     <string name="label_subject_notif">Subject: %s</string>
     <string name="label_max_participants">Can\'t add participants: max number of participants is reached (max=%d)</string>
-    <string name="label_sharing_warn_size">Do you confirm sending a file of %d KB?</string>
+    <string name="label_sharing_warn_size">Do you confirm sending a file of %1$s ?</string>
     <string name="label_me">Me</string>
     <string name="label_chat_empty">No chat</string>
     <string name="label_no_participant_found">No participant found or available</string>
@@ -227,6 +228,7 @@
     <string name="label_sharing_failed">Sharing failed (%1$s)</string>
     <string name="label_sharing_rejected">Sharing rejected (%1$s)</string>
     <string name="menu_sharing_delete">Delete</string>
+    <string name="menu_sharing_display">Display</string>
     <string name="label_delete_sharing_success">Sharing successfully deleted</string>
 
     <!-- Image sharing menu -->
@@ -363,6 +365,8 @@
     <string name="menu_view_groupdelivery">View delivery information</string>
     <string name="menu_delete_message">Delete</string>
     <string name="menu_resend_message">Resend</string>
+    <string name="menu_display_content">Display</string>
+    <string name="menu_listen_content">Listen to</string>
 
     <!-- Chat session menu -->
     <string name="menu_delete_chat_session">Delete</string>

@@ -30,10 +30,8 @@ import com.gsma.services.rcs.filetransfer.OneToOneFileTransferListener;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.net.Uri;
@@ -54,7 +52,6 @@ import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TableRow;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.orangelabs.rcs.api.connection.ConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.api.connection.utils.ExceptionUtil;
@@ -98,8 +95,6 @@ public class InitiateFileTransfer extends RcsActivity {
     private long mFilesize = -1;
 
     private FileTransfer mFileTransfer;
-
-    private Dialog mProgressDialog;
 
     private static final String LOGTAG = LogUtils.getTag(InitiateFileTransfer.class.getName());
 
@@ -162,7 +157,6 @@ public class InitiateFileTransfer extends RcsActivity {
                             remoteContact.toString()
                         });
                 mSpinner.setAdapter(adapter);
-
                 mSizeTextView.setText(FileUtils.humanReadableByteCount(mFilesize, true));
                 mUriTextView.setText(mFilename);
                 /* Check if session still exists */
@@ -224,21 +218,13 @@ public class InitiateFileTransfer extends RcsActivity {
             mFileTransfer = mFileTransferService.transferFile(remote, mFile, dispo,
                     tryToSendFileicon);
             mFileTransferId = mFileTransfer.getTransferId();
-            mProgressDialog = showProgressDialog(getString(R.string.label_command_in_progress));
-            mProgressDialog.setOnCancelListener(new OnCancelListener() {
-                public void onCancel(DialogInterface dialog) {
-                    Toast.makeText(InitiateFileTransfer.this,
-                            getString(R.string.label_transfer_cancelled), Toast.LENGTH_SHORT)
-                            .show();
-                    quitSession();
-                }
-            });
             /* Disable UI */
             mSpinner.setEnabled(false);
             /* Hide buttons */
             mInviteBtn.setVisibility(View.INVISIBLE);
             mSelectBtn.setVisibility(View.INVISIBLE);
-            mIconCheckBox.setVisibility(View.INVISIBLE);
+            mIconCheckBox.setEnabled(false);
+            mAudioMessageCheckBox.setEnabled(false);
 
         } catch (RcsServiceException e) {
             showExceptionThenExit(e);
@@ -299,16 +285,18 @@ public class InitiateFileTransfer extends RcsActivity {
                 }
                 mFile = data.getData();
                 if (LogUtils.isActive) {
-                    Log.d(LOGTAG, "Selected file uri:" + mFile);
+                    Log.d(LOGTAG, "Selected file uri:".concat(mFile.toString()));
                 }
                 displaySelectedFileInfo();
                 mInviteBtn.setEnabled(true);
                 if (RC_SELECT_AUDIO == requestCode) {
                     mAudioMessageCheckBox.setEnabled(true);
                     mIconCheckBox.setEnabled(false);
+                    mIconCheckBox.setChecked(false);
                 } else {
-                    mAudioMessageCheckBox.setEnabled(false);
                     mIconCheckBox.setEnabled(true);
+                    mAudioMessageCheckBox.setChecked(false);
+                    mAudioMessageCheckBox.setEnabled(false);
                 }
                 break;
 
@@ -320,16 +308,10 @@ public class InitiateFileTransfer extends RcsActivity {
                 }
                 displaySelectedFileInfo();
                 mInviteBtn.setEnabled(true);
-                mAudioMessageCheckBox.setEnabled(true);
+                mAudioMessageCheckBox.setChecked(true);
                 mIconCheckBox.setEnabled(false);
+                mIconCheckBox.setChecked(false);
                 break;
-        }
-    }
-
-    private void hideProgressDialog() {
-        if (mProgressDialog != null && mProgressDialog.isShowing()) {
-            mProgressDialog.dismiss();
-            mProgressDialog = null;
         }
     }
 
@@ -584,8 +566,6 @@ public class InitiateFileTransfer extends RcsActivity {
                         TextView statusView = (TextView) findViewById(R.id.progress_status);
                         switch (state) {
                             case STARTED:
-                                /* Session is well established : hide progress dialog */
-                                hideProgressDialog();
                                 /* Display session status */
                                 statusView.setText(_state);
                                 break;
@@ -606,7 +586,6 @@ public class InitiateFileTransfer extends RcsActivity {
                                 break;
 
                             case TRANSFERRED:
-                                hideProgressDialog(); // TODO check if required
                                 /* Display transfer progress */
                                 statusView.setText(_state);
 

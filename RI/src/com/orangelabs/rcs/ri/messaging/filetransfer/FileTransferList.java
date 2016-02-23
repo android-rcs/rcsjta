@@ -18,8 +18,12 @@
 
 package com.orangelabs.rcs.ri.messaging.filetransfer;
 
+import com.gsma.services.rcs.RcsGenericException;
+import com.gsma.services.rcs.RcsPermissionDeniedException;
+import com.gsma.services.rcs.RcsPersistentStorageException;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
 import com.gsma.services.rcs.filetransfer.FileTransfer.Disposition;
 import com.gsma.services.rcs.filetransfer.FileTransfer.ReasonCode;
@@ -27,16 +31,10 @@ import com.gsma.services.rcs.filetransfer.FileTransfer.State;
 import com.gsma.services.rcs.filetransfer.FileTransferLog;
 import com.gsma.services.rcs.filetransfer.FileTransferService;
 
-import com.orangelabs.rcs.api.connection.ConnectionManager.RcsServiceName;
-import com.orangelabs.rcs.api.connection.utils.RcsFragmentActivity;
-import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.RiApplication;
-import com.orangelabs.rcs.ri.utils.LogUtils;
-import com.orangelabs.rcs.ri.utils.RcsContactUtil;
-
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
@@ -55,6 +53,14 @@ import android.widget.CursorAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.orangelabs.rcs.api.connection.ConnectionManager.RcsServiceName;
+import com.orangelabs.rcs.api.connection.utils.RcsFragmentActivity;
+import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.RiApplication;
+import com.orangelabs.rcs.ri.utils.LogUtils;
+import com.orangelabs.rcs.ri.utils.RcsContactUtil;
+import com.orangelabs.rcs.ri.utils.Utils;
+
 import java.text.DateFormat;
 import java.util.Date;
 
@@ -70,16 +76,18 @@ public class FileTransferList extends RcsFragmentActivity implements
     // @formatter:off
     private static final String[] PROJECTION = new String[] {
             FileTransferLog.BASECOLUMN_ID,
-            FileTransferLog.CHAT_ID,
             FileTransferLog.FT_ID,
             FileTransferLog.CONTACT,
+            FileTransferLog.FILE,
             FileTransferLog.FILENAME,
             FileTransferLog.FILESIZE,
+            FileTransferLog.TRANSFERRED,
             FileTransferLog.STATE,
             FileTransferLog.REASON_CODE,
             FileTransferLog.DISPOSITION,
             FileTransferLog.DIRECTION,
-            FileTransferLog.TIMESTAMP
+            FileTransferLog.TIMESTAMP,
+            FileTransferLog.MIME_TYPE
     };
     // @formatter:on
 
@@ -90,12 +98,6 @@ public class FileTransferList extends RcsFragmentActivity implements
     private FileTransferService mFileTransferService;
 
     private static final String LOGTAG = LogUtils.getTag(FileTransferList.class.getSimpleName());
-
-    /**
-     * List of items for contextual menu
-     */
-    private final static int MENU_ITEM_DELETE = 0;
-    private final static int MENU_ITEM_RESEND = 1;
 
     /**
      * The loader's unique ID. Loader IDs are specific to the Activity in which they reside.
@@ -286,23 +288,57 @@ public class FileTransferList extends RcsFragmentActivity implements
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
-        /* Check file transfer API is connected */
-        if (!isServiceConnected(RcsServiceName.FILE_TRANSFER)) {
-            showMessage(R.string.label_service_not_available);
-            return;
-        }
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_log_ft_item, menu);
+        menu.findItem(R.id.menu_display_content).setVisible(false);
+        menu.findItem(R.id.menu_resend_message).setVisible(false);
+        menu.findItem(R.id.menu_listen_content).setVisible(false);
+
         AdapterContextMenuInfo info = (AdapterContextMenuInfo) menuInfo;
         Cursor cursor = (Cursor) mAdapter.getItem(info.position);
-        menu.add(0, MENU_ITEM_DELETE, 0, R.string.menu_delete_message);
 
+        /* Check if message can be played */
+        Direction dir = Direction.valueOf(cursor.getInt(cursor
+                .getColumnIndexOrThrow(FileTransferLog.DIRECTION)));
+        String mimeType = cursor.getString(cursor.getColumnIndexOrThrow(FileTransferLog.MIME_TYPE));
+        boolean isImage = Utils.isImageType(mimeType);
+        if (isImage || Utils.isAudioType(mimeType)) {
+            /* File mime type is playable */
+            if (Direction.INCOMING == dir) {
+                Long transferred = cursor.getLong(cursor
+                        .getColumnIndexOrThrow(FileTransferLog.TRANSFERRED));
+                Long size = cursor.getLong(cursor.getColumnIndexOrThrow(FileTransferLog.FILESIZE));
+                if (size.equals(transferred)) {
+                    // Incoming file transfer must be complete to be playable
+                    if (isImage) {
+                        menu.findItem(R.id.menu_display_content).setVisible(true);
+                    } else {
+                        menu.findItem(R.id.menu_listen_content).setVisible(true);
+                    }
+                }
+            } else {
+                /* Outgoing file is playable */
+                if (isImage) {
+                    menu.findItem(R.id.menu_display_content).setVisible(true);
+                } else {
+                    menu.findItem(R.id.menu_listen_content).setVisible(true);
+                }
+            }
+        }
         /* Check if message can be resent */
         String transferId = cursor.getString(cursor.getColumnIndexOrThrow(FileTransferLog.FT_ID));
         try {
             FileTransfer transfer = mFileTransferService.getFileTransfer(transferId);
-            if (transfer != null && transfer.isAllowedToResendTransfer()) {
-                menu.add(0, MENU_ITEM_RESEND, 1, R.string.menu_resend_message);
+            if (Direction.OUTGOING == dir && transfer != null
+                    && transfer.isAllowedToResendTransfer()) {
+                menu.findItem(R.id.menu_resend_message).setVisible(true);
             }
-        } catch (RcsServiceException e) {
+
+        } catch (RcsServiceNotAvailableException e) {
+            menu.findItem(R.id.menu_resend_message).setVisible(false);
+
+        } catch (RcsGenericException | RcsPersistentStorageException e) {
+            menu.findItem(R.id.menu_resend_message).setVisible(false);
             showExceptionThenExit(e);
         }
     }
@@ -314,13 +350,9 @@ public class FileTransferList extends RcsFragmentActivity implements
         String transferId = cursor.getString(cursor.getColumnIndexOrThrow(FileTransferLog.FT_ID));
         try {
             switch (item.getItemId()) {
-                case MENU_ITEM_RESEND:
+                case R.id.menu_resend_message:
                     if (LogUtils.isActive) {
                         Log.d(LOGTAG, "onContextItemSelected resend ftId=".concat(transferId));
-                    }
-                    if (!isServiceConnected(RcsServiceName.FILE_TRANSFER)) {
-                        showMessage(R.string.label_service_not_available);
-                        return true;
                     }
                     FileTransfer transfer = mFileTransferService.getFileTransfer(transferId);
                     if (transfer != null) {
@@ -328,21 +360,35 @@ public class FileTransferList extends RcsFragmentActivity implements
                     }
                     return true;
 
-                case MENU_ITEM_DELETE:
+                case R.id.menu_delete_message:
                     if (LogUtils.isActive) {
                         Log.d(LOGTAG, "onContextItemSelected delete ftId=".concat(transferId));
                     }
-                    if (!isServiceConnected(RcsServiceName.FILE_TRANSFER)) {
-                        showMessage(R.string.label_service_not_available);
-                        return true;
-                    }
                     mFileTransferService.deleteFileTransfer(transferId);
                     return true;
+
+                case R.id.menu_display_content:
+                    String file = cursor.getString(cursor
+                            .getColumnIndexOrThrow(FileTransferLog.FILE));
+                    Utils.showPicture(this, Uri.parse(file));
+                    return true;
+
+                case R.id.menu_listen_content:
+                    file = cursor.getString(cursor.getColumnIndexOrThrow(FileTransferLog.FILE));
+                    Utils.playAudio(this, Uri.parse(file));
+                    return true;
+
+                default:
+                    return super.onContextItemSelected(item);
             }
-        } catch (RcsServiceException e) {
+        } catch (RcsGenericException | RcsPermissionDeniedException | RcsPersistentStorageException e) {
             showExceptionThenExit(e);
+            return true;
+
+        } catch (RcsServiceNotAvailableException e) {
+            showMessage(R.string.label_service_not_available);
+            return true;
         }
-        return super.onContextItemSelected(item);
     }
 
     @Override

@@ -23,9 +23,11 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.OpenableColumns;
+import android.webkit.MimeTypeMap;
 
 import java.io.File;
 
@@ -46,7 +48,7 @@ public class FileUtils {
             if (ContentResolver.SCHEME_CONTENT.equals(file.getScheme())) {
                 if (cursor != null && cursor.moveToFirst()) {
                     return cursor.getString(cursor
-                                    .getColumnIndexOrThrow(OpenableColumns.DISPLAY_NAME));
+                            .getColumnIndexOrThrow(OpenableColumns.DISPLAY_NAME));
                 } else {
                     throw new IllegalArgumentException("Error in retrieving file name from the URI");
                 }
@@ -65,15 +67,15 @@ public class FileUtils {
     /**
      * Fetch the file size from URI
      * 
-     * @param context Context
+     * @param ctx Context
      * @param file URI
      * @return fileSize long
      * @throws IllegalArgumentException
      */
-    public static long getFileSize(Context context, Uri file) throws IllegalArgumentException {
+    public static long getFileSize(Context ctx, Uri file) throws IllegalArgumentException {
         Cursor cursor = null;
         try {
-            cursor = context.getContentResolver().query(file, null, null, null, null);
+            cursor = ctx.getContentResolver().query(file, null, null, null, null);
             if (ContentResolver.SCHEME_CONTENT.equals(file.getScheme())) {
                 if (cursor != null && cursor.moveToFirst()) {
                     return Long.valueOf(cursor.getString(cursor
@@ -91,6 +93,54 @@ public class FileUtils {
                 cursor.close();
             }
         }
+    }
+
+    private static String getMimeTypeFromFile(Context ctx, Uri file) {
+        MediaMetadataRetriever mmr = new MediaMetadataRetriever();
+        mmr.setDataSource(ctx, file);
+        return mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_MIMETYPE);
+    }
+
+    /**
+     * Gets the mime-type from file Uri
+     *
+     * @param ctx the context
+     * @param file the file Uri
+     * @return the mime-type
+     */
+    public static String getMimeType(Context ctx, Uri file) {
+        String scheme = file.getScheme();
+        if (ContentResolver.SCHEME_CONTENT.equals(scheme)) {
+            return ctx.getContentResolver().getType(file);
+        }
+        if (ContentResolver.SCHEME_FILE.equals(scheme)) {
+            String path = file.getPath();
+            if (path == null) {
+                throw new RuntimeException("Invalid file path for Uri='" + file + "'!");
+            }
+            String extension = MimeTypeMap.getFileExtensionFromUrl(path);
+            if (extension != null) {
+                String result = MimeTypeMap.getSingleton().getMimeTypeFromExtension(
+                        extension.toLowerCase());
+                if (result == null) {
+                    throw new IllegalArgumentException("Invalid mime type for extension='"
+                            + extension + "'!");
+                }
+                if (Utils.isVideoType(result)) {
+                    /*
+                     * Warning: Audio and Video files share the same extensions so we need to
+                     * retrieve mime type directly from file.
+                     */
+                    String mimeTypeFromMediaFile = getMimeTypeFromFile(ctx, file);
+                    if (mimeTypeFromMediaFile != null) {
+                        return mimeTypeFromMediaFile;
+                    }
+                }
+                return result;
+            }
+            throw new IllegalArgumentException("Invalid extension for URI='" + file + "'!");
+        }
+        throw new IllegalArgumentException("Unsupported URI scheme '" + scheme + "'!");
     }
 
     private static Intent forgeIntentToOpenFile() {

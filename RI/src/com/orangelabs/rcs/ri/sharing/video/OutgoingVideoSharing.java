@@ -25,6 +25,36 @@ import com.gsma.services.rcs.sharing.video.VideoSharing;
 import com.gsma.services.rcs.sharing.video.VideoSharingListener;
 import com.gsma.services.rcs.sharing.video.VideoSharingService;
 
+import android.Manifest;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.res.Configuration;
+import android.graphics.PixelFormat;
+import android.hardware.Camera;
+import android.hardware.Camera.Parameters;
+import android.hardware.Camera.Size;
+import android.net.Uri;
+import android.os.Bundle;
+import android.os.Handler;
+import android.support.v4.app.ActivityCompat;
+import android.util.Log;
+import android.view.Display;
+import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.Surface;
+import android.view.SurfaceHolder;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.WindowManager;
+import android.widget.Button;
+import android.widget.Spinner;
+import android.widget.TextView;
+import android.widget.Toast;
+
 import com.orangelabs.rcs.api.connection.ConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.api.connection.utils.ExceptionUtil;
 import com.orangelabs.rcs.api.connection.utils.RcsActivity;
@@ -42,42 +72,13 @@ import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.RcsContactUtil;
 import com.orangelabs.rcs.ri.utils.RcsSessionUtil;
 
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnCancelListener;
-import android.content.Intent;
-import android.content.res.Configuration;
-import android.graphics.PixelFormat;
-import android.hardware.Camera;
-import android.hardware.Camera.Parameters;
-import android.hardware.Camera.Size;
-import android.net.Uri;
-import android.os.Bundle;
-import android.os.Handler;
-import android.util.Log;
-import android.view.Display;
-import android.view.KeyEvent;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.view.Surface;
-import android.view.SurfaceHolder;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.WindowManager;
-import android.widget.Button;
-import android.widget.Spinner;
-import android.widget.TextView;
-import android.widget.Toast;
-
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Set;
 
 /**
  * Initiate video sharing.
- * 
+ *
  * @author Jean-Marc AUFFRET
  * @author Philippe LEMORDANT
  */
@@ -144,11 +145,6 @@ public class OutgoingVideoSharing extends RcsActivity implements VideoPlayerList
      * Video surface holder
      */
     private SurfaceHolder mSurface;
-
-    /**
-     * Progress dialog
-     */
-    private Dialog mProgressDialog;
 
     /**
      * Spinner for contact selection
@@ -383,6 +379,10 @@ public class OutgoingVideoSharing extends RcsActivity implements VideoPlayerList
             // Initiate a GSM call before to be able to share content
             Intent intent = new Intent(Intent.ACTION_CALL);
             intent.setData(Uri.parse("tel:".concat(phoneNumber)));
+            if (ActivityCompat.checkSelfPermission(OutgoingVideoSharing.this,
+                    Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+                return;
+            }
             startActivity(intent);
         }
     };
@@ -436,16 +436,6 @@ public class OutgoingVideoSharing extends RcsActivity implements VideoPlayerList
 
             mSwitchCamBtn.setEnabled(true);
 
-            // Display a progress dialog
-            mProgressDialog = showProgressDialog(getString(R.string.label_command_in_progress));
-            mProgressDialog.setOnCancelListener(new OnCancelListener() {
-                public void onCancel(DialogInterface dialog) {
-                    Toast.makeText(OutgoingVideoSharing.this,
-                            getString(R.string.label_sharing_cancelled), Toast.LENGTH_SHORT).show();
-                    quitSession();
-                }
-            });
-
             // Hide buttons
             mInviteBtn.setVisibility(View.GONE);
             mDialBtn.setVisibility(View.GONE);
@@ -463,16 +453,6 @@ public class OutgoingVideoSharing extends RcsActivity implements VideoPlayerList
             switchCamera();
         }
     };
-
-    private void hideProgressDialog() {
-        if (mProgressDialog == null) {
-            return;
-        }
-        if (mProgressDialog.isShowing()) {
-            mProgressDialog.dismiss();
-        }
-        mProgressDialog = null;
-    }
 
     private void quitSession() {
         try {
@@ -898,7 +878,6 @@ public class OutgoingVideoSharing extends RcsActivity implements VideoPlayerList
                             switchCamBtn.setEnabled(true);
 
                             // Session is established : hide progress dialog
-                            hideProgressDialog();
                             break;
 
                         case ABORTED:

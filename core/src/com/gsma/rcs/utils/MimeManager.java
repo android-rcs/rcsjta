@@ -154,7 +154,7 @@ public class MimeManager {
         if (mimeType != null) {
             return mimeType;
         }
-        mimeType = (MimeTypeMap.getSingleton()).getMimeTypeFromExtension(extension);
+        mimeType = (MimeTypeMap.getSingleton()).getMimeTypeFromExtension(extension.toLowerCase());
         return (mimeType != null) ? mimeType : DEFAULT_FILE_ENCONDING;
     }
 

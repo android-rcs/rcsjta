@@ -26,15 +26,6 @@ import com.gsma.services.rcs.upload.FileUpload;
 import com.gsma.services.rcs.upload.FileUploadInfo;
 import com.gsma.services.rcs.upload.FileUploadListener;
 
-import com.orangelabs.rcs.api.connection.ConnectionManager.RcsServiceName;
-import com.orangelabs.rcs.api.connection.utils.ExceptionUtil;
-import com.orangelabs.rcs.api.connection.utils.RcsActivity;
-import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.utils.FileUtils;
-import com.orangelabs.rcs.ri.utils.LogUtils;
-import com.orangelabs.rcs.ri.utils.RcsSessionUtil;
-import com.orangelabs.rcs.ri.utils.Utils;
-
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.net.Uri;
@@ -48,6 +39,15 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
+import com.orangelabs.rcs.api.connection.ConnectionManager.RcsServiceName;
+import com.orangelabs.rcs.api.connection.utils.ExceptionUtil;
+import com.orangelabs.rcs.api.connection.utils.RcsActivity;
+import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.utils.FileUtils;
+import com.orangelabs.rcs.ri.utils.LogUtils;
+import com.orangelabs.rcs.ri.utils.RcsSessionUtil;
+import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
  * Initiate file upload
@@ -157,8 +157,8 @@ public class InitiateFileUpload extends RcsActivity {
         switch (requestCode) {
             case SELECT_IMAGE:
                 /* Display file info */
-                mFilesize = FileUtils.getFileSize(this, mFile) / 1024;
-                uriEdit.setText(mFilesize + " KB");
+                mFilesize = FileUtils.getFileSize(this, mFile);
+                uriEdit.setText(FileUtils.humanReadableByteCount(mFilesize, true));
                 /* Enable upload button */
                 mUploadBtn.setEnabled(true);
                 break;

@@ -39,24 +39,9 @@ import com.gsma.services.rcs.filetransfer.FileTransferService;
 import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo;
 import com.gsma.services.rcs.history.HistoryLog;
 
-import com.orangelabs.rcs.api.connection.utils.ExceptionUtil;
-import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.RiApplication;
-import com.orangelabs.rcs.ri.messaging.GroupDeliveryInfoList;
-import com.orangelabs.rcs.ri.messaging.chat.ChatView;
-import com.orangelabs.rcs.ri.messaging.chat.IsComposingManager;
-import com.orangelabs.rcs.ri.messaging.chat.IsComposingManager.INotifyComposing;
-import com.orangelabs.rcs.ri.messaging.geoloc.DisplayGeoloc;
-import com.orangelabs.rcs.ri.utils.LogUtils;
-import com.orangelabs.rcs.ri.utils.RcsContactUtil;
-import com.orangelabs.rcs.ri.utils.Smileys;
-import com.orangelabs.rcs.ri.utils.Utils;
-
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -72,6 +57,19 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView.AdapterContextMenuInfo;
+
+import com.orangelabs.rcs.api.connection.utils.ExceptionUtil;
+import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.RiApplication;
+import com.orangelabs.rcs.ri.messaging.GroupDeliveryInfoList;
+import com.orangelabs.rcs.ri.messaging.chat.ChatView;
+import com.orangelabs.rcs.ri.messaging.chat.IsComposingManager;
+import com.orangelabs.rcs.ri.messaging.chat.IsComposingManager.INotifyComposing;
+import com.orangelabs.rcs.ri.messaging.geoloc.DisplayGeoloc;
+import com.orangelabs.rcs.ri.utils.LogUtils;
+import com.orangelabs.rcs.ri.utils.RcsContactUtil;
+import com.orangelabs.rcs.ri.utils.Smileys;
+import com.orangelabs.rcs.ri.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -111,8 +109,6 @@ public class GroupChatView extends ChatView {
     private String mChatId;
 
     private GroupChat mGroupChat;
-
-    private Dialog mProgressDialog;
 
     private Set<ContactId> mParticipants = new HashSet<>();
 
@@ -400,34 +396,11 @@ public class GroupChatView extends ChatView {
             mChatId = mGroupChat.getChatId();
             setCursorLoader(firstLoad);
             sChatIdOnForeground = mChatId;
+            return true;
+
         } catch (RcsServiceException e) {
             showExceptionThenExit(e);
             return false;
-        }
-        /* Display a progress dialog waiting for the session to start */
-        mProgressDialog = showProgressDialog(getString(R.string.label_command_in_progress));
-        mProgressDialog.setOnCancelListener(new OnCancelListener() {
-            public void onCancel(DialogInterface dialog) {
-                Utils.displayToast(GroupChatView.this,
-                        getString(R.string.label_chat_initiation_canceled));
-                quitSession();
-            }
-        });
-        return true;
-    }
-
-    private void quitSession() {
-        try {
-            /* check if the session is not already stopped */
-            if (mGroupChat != null) {
-                mGroupChat.leave();
-            }
-        } catch (RcsServiceException e) {
-            showException(e);
-
-        } finally {
-            mGroupChat = null;
-            finish();
         }
     }
 
@@ -594,13 +567,6 @@ public class GroupChatView extends ChatView {
             showException(e);
         }
         return true;
-    }
-
-    private void hideProgressDialog() {
-        if (mProgressDialog != null && mProgressDialog.isShowing()) {
-            mProgressDialog.dismiss();
-            mProgressDialog = null;
-        }
     }
 
     /**
@@ -777,8 +743,6 @@ public class GroupChatView extends ChatView {
                     public void run() {
                         switch (state) {
                             case STARTED:
-                                /* Session is well established : hide progress dialog. */
-                                hideProgressDialog();
                                 break;
 
                             case ABORTED:

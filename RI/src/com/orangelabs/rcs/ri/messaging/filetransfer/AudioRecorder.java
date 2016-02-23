@@ -18,12 +18,12 @@
 
 package com.orangelabs.rcs.ri.messaging.filetransfer;
 
+import com.orangelabs.rcs.ri.utils.LogUtils;
+
 import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Environment;
 import android.util.Log;
-
-import com.orangelabs.rcs.ri.utils.LogUtils;
 
 import java.io.File;
 import java.io.IOException;

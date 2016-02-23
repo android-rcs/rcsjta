@@ -25,6 +25,26 @@ import com.gsma.services.rcs.sharing.geoloc.GeolocSharing;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharingListener;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharingService;
 
+import android.Manifest;
+import android.content.Intent;
+import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
+import android.net.Uri;
+import android.os.Bundle;
+import android.os.Handler;
+import android.support.v4.app.ActivityCompat;
+import android.util.Log;
+import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
+import android.widget.ProgressBar;
+import android.widget.Spinner;
+import android.widget.TextView;
+
 import com.orangelabs.rcs.api.connection.ConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.api.connection.utils.ExceptionUtil;
 import com.orangelabs.rcs.api.connection.utils.RcsActivity;
@@ -37,32 +57,11 @@ import com.orangelabs.rcs.ri.utils.ContactUtil;
 import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.Utils;
 
-import android.app.Dialog;
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnCancelListener;
-import android.content.Intent;
-import android.content.pm.ActivityInfo;
-import android.net.Uri;
-import android.os.Bundle;
-import android.os.Handler;
-import android.util.Log;
-import android.view.KeyEvent;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.Button;
-import android.widget.ProgressBar;
-import android.widget.Spinner;
-import android.widget.TextView;
-import android.widget.Toast;
-
 import java.util.Set;
 
 /**
  * Initiate geoloc sharing
- * 
+ *
  * @author vfml3370
  * @author yplo6403
  */
@@ -76,8 +75,6 @@ public class InitiateGeolocSharing extends RcsActivity {
      * UI handler
      */
     private final Handler mHandler = new Handler();
-
-    private Dialog mProgressDialog;
 
     private Geoloc mGeoloc;
 
@@ -172,13 +169,6 @@ public class InitiateGeolocSharing extends RcsActivity {
         }
     }
 
-    private void hideProgressDialog() {
-        if (mProgressDialog != null && mProgressDialog.isShowing()) {
-            mProgressDialog.dismiss();
-            mProgressDialog = null;
-        }
-    }
-
     private void updateProgressBar(long currentSize, long totalSize) {
         TextView statusView = (TextView) findViewById(R.id.progress_status);
         ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress_bar);
@@ -265,8 +255,6 @@ public class InitiateGeolocSharing extends RcsActivity {
                         TextView statusView = (TextView) findViewById(R.id.progress_status);
                         switch (state) {
                             case STARTED:
-                                // Session is established: hide progress dialog
-                                hideProgressDialog();
                                 // Display session status
                                 statusView.setText(_state);
                                 break;
@@ -287,7 +275,6 @@ public class InitiateGeolocSharing extends RcsActivity {
                                 break;
 
                             case TRANSFERRED:
-                                hideProgressDialog();
                                 /* Display transfer progress */
                                 statusView.setText(_state);
                                 /* Make sure progress bar is at the end */
@@ -339,31 +326,20 @@ public class InitiateGeolocSharing extends RcsActivity {
                     mGeolocSharing = mGeolocSharingService.shareGeoloc(contact, mGeoloc);
                     mSharingId = mGeolocSharing.getSharingId();
 
+                    // Disable UI
+                    mSpinner.setEnabled(false);
+
+                    // Hide buttons
+                    Button inviteBtn = (Button) findViewById(R.id.invite_btn);
+                    inviteBtn.setVisibility(View.INVISIBLE);
+                    Button selectBtn = (Button) findViewById(R.id.select_btn);
+                    selectBtn.setVisibility(View.INVISIBLE);
+                    Button dialBtn = (Button) findViewById(R.id.dial_btn);
+                    dialBtn.setVisibility(View.INVISIBLE);
+
                 } catch (RcsServiceException e) {
                     showExceptionThenExit(e);
                 }
-
-                // Display a progress dialog
-                mProgressDialog = showProgressDialog(getString(R.string.label_command_in_progress));
-                mProgressDialog.setOnCancelListener(new OnCancelListener() {
-                    public void onCancel(DialogInterface dialog) {
-                        Toast.makeText(InitiateGeolocSharing.this,
-                                getString(R.string.label_sharing_cancelled), Toast.LENGTH_SHORT)
-                                .show();
-                        quitSession();
-                    }
-                });
-
-                // Disable UI
-                mSpinner.setEnabled(false);
-
-                // Hide buttons
-                Button inviteBtn = (Button) findViewById(R.id.invite_btn);
-                inviteBtn.setVisibility(View.INVISIBLE);
-                Button selectBtn = (Button) findViewById(R.id.select_btn);
-                selectBtn.setVisibility(View.INVISIBLE);
-                Button dialBtn = (Button) findViewById(R.id.dial_btn);
-                dialBtn.setVisibility(View.INVISIBLE);
             }
         };
 
@@ -384,6 +360,10 @@ public class InitiateGeolocSharing extends RcsActivity {
                 // Initiate a GSM call before to be able to share content
                 Intent intent = new Intent(Intent.ACTION_CALL);
                 intent.setData(Uri.parse("tel:".concat(phoneNumber)));
+                if (ActivityCompat.checkSelfPermission(InitiateGeolocSharing.this,
+                        Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+                    return;
+                }
                 startActivity(intent);
             }
         };

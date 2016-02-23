@@ -76,7 +76,7 @@ public class SendSingleFile extends SendFile {
     }
 
     @Override
-    public boolean transferFile(Uri file, boolean fileicon) {
+    public boolean transferFile(Uri file, FileTransfer.Disposition dispo, boolean fileicon) {
         try {
             if (LogUtils.isActive) {
                 Log.d(LOGTAG, "initiateTransfer mFilename=" + mFilename + " size=" + mFilesize);
@@ -84,9 +84,7 @@ public class SendSingleFile extends SendFile {
             /* Only take persistable permission for content Uris */
             takePersistableContentUriPermission(this, file);
             /* Initiate transfer */
-            // TODO SL
-            mFileTransfer = mFileTransferService.transferFile(mContact, file,
-                    FileTransfer.Disposition.RENDER, fileicon);
+            mFileTransfer = mFileTransferService.transferFile(mContact, file, dispo, fileicon);
             mTransferId = mFileTransfer.getTransferId();
             return true;
 
@@ -162,7 +160,6 @@ public class SendSingleFile extends SendFile {
                             case STARTED:
                                 //$FALL-THROUGH$
                             case TRANSFERRED:
-                                hideProgressDialog();
                                 /* Display transfer state started */
                                 statusView.setText(_state);
                                 break;

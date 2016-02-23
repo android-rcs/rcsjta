@@ -281,6 +281,7 @@ public class SingleChatList extends RcsFragmentActivity implements
         }
         menu.add(0, CHAT_MENU_ITEM_OPEN, CHAT_MENU_ITEM_OPEN, R.string.menu_open_chat_session);
         menu.add(0, CHAT_MENU_ITEM_DELETE, CHAT_MENU_ITEM_DELETE, R.string.menu_delete_chat_session);
+
     }
 
     @Override

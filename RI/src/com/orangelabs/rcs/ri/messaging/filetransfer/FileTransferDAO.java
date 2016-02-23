@@ -24,9 +24,6 @@ import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
 import com.gsma.services.rcs.filetransfer.FileTransferLog;
 
-import com.orangelabs.rcs.ri.utils.ContactUtil;
-import com.orangelabs.rcs.ri.utils.LogUtils;
-
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
@@ -35,6 +32,9 @@ import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
+
+import com.orangelabs.rcs.ri.utils.ContactUtil;
+import com.orangelabs.rcs.ri.utils.LogUtils;
 
 /**
  * File transfer Data Object
@@ -82,6 +82,8 @@ public class FileTransferDAO implements Parcelable {
     private final FileTransfer.ReasonCode mReasonCode;
 
     private static ContentResolver sContentResolver;
+
+    private FileTransfer.Disposition mDisposition;
 
     private static final String LOGTAG = LogUtils.getTag(FileTransferDAO.class.getSimpleName());
 
@@ -149,6 +151,10 @@ public class FileTransferDAO implements Parcelable {
         return mThumbnail;
     }
 
+    public FileTransfer.Disposition getDisposition() {
+        return mDisposition;
+    }
+
     /**
      * Returns the time when the file on the content server is no longer valid to download.
      * 
@@ -211,6 +217,7 @@ public class FileTransferDAO implements Parcelable {
         mReasonCode = FileTransfer.ReasonCode.valueOf(source.readInt());
         mFileExpiration = source.readLong();
         mFileIconExpiration = source.readLong();
+        mDisposition = FileTransfer.Disposition.valueOf(source.readInt());
     }
 
     private FileTransferDAO(ContentResolver resolver, String fileTransferId) {
@@ -219,7 +226,7 @@ public class FileTransferDAO implements Parcelable {
             cursor = resolver.query(
                     Uri.withAppendedPath(FileTransferLog.CONTENT_URI, fileTransferId), null, null,
                     null, null);
-            if (!cursor.moveToFirst()) {
+            if (cursor == null || !cursor.moveToFirst()) {
                 throw new SQLException(
                         "Failed to find Filetransfer with ID: ".concat(fileTransferId));
             }
@@ -251,6 +258,9 @@ public class FileTransferDAO implements Parcelable {
             mSizeTransferred = cursor.getLong(cursor
                     .getColumnIndexOrThrow(FileTransferLog.TRANSFERRED));
             mSize = cursor.getLong(cursor.getColumnIndexOrThrow(FileTransferLog.FILESIZE));
+            mDisposition = FileTransfer.Disposition.valueOf(cursor.getInt(cursor
+                    .getColumnIndexOrThrow(FileTransferLog.DISPOSITION)));
+
             String fileicon = cursor.getString(cursor
                     .getColumnIndexOrThrow(FileTransferLog.FILEICON));
             if (fileicon != null) {
@@ -320,6 +330,7 @@ public class FileTransferDAO implements Parcelable {
         dest.writeInt(mReasonCode.toInt());
         dest.writeLong(mFileExpiration);
         dest.writeLong(mFileIconExpiration);
+        dest.writeInt(mDisposition.toInt());
     }
 
     public static final Parcelable.Creator<FileTransferDAO> CREATOR = new Parcelable.Creator<FileTransferDAO>() {
@@ -338,7 +349,7 @@ public class FileTransferDAO implements Parcelable {
      * Gets instance of File Transfer from RCS provider
      * 
      * @param context the context
-     * @param fileTransferId the file transfer ID
+     * @param fileTransferId the file tr ansfer ID
      * @return instance or null if entry not found
      */
     public static FileTransferDAO getFileTransferDAO(final Context context,

@@ -54,10 +54,10 @@ public class SendMultiFileSingleChat extends SendMultiFile implements ISendMulti
                     Log.d(LOGTAG, "Transfer file '" + fileToTransfer.getFilename()
                             + "' to contact=" + contact + " icon=" + fileToTransfer.isFileicon());
                 }
-                // TODO SL
                 FileTransfer fileTransfer = mFileTransferService.transferFile(contact,
-                        fileToTransfer.getUri(), FileTransfer.Disposition.ATTACH,
-                        fileToTransfer.isFileicon());
+                        fileToTransfer.getUri(),
+                        fileToTransfer.isAudioMessage() ? FileTransfer.Disposition.RENDER
+                                : FileTransfer.Disposition.ATTACH, fileToTransfer.isFileicon());
                 mFileTransfers.add(fileTransfer);
                 mTransferIds.add(fileTransfer.getTransferId());
             }

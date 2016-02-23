@@ -18,8 +18,10 @@
 
 package com.orangelabs.rcs.ri.sharing.image;
 
+import com.gsma.services.rcs.RcsGenericException;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.sharing.image.ImageSharing.ReasonCode;
 import com.gsma.services.rcs.sharing.image.ImageSharing.State;
@@ -27,18 +29,10 @@ import com.gsma.services.rcs.sharing.image.ImageSharingListener;
 import com.gsma.services.rcs.sharing.image.ImageSharingLog;
 import com.gsma.services.rcs.sharing.image.ImageSharingService;
 
-import com.orangelabs.rcs.api.connection.ConnectionManager.RcsServiceName;
-import com.orangelabs.rcs.api.connection.utils.ExceptionUtil;
-import com.orangelabs.rcs.api.connection.utils.RcsFragmentActivity;
-import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.RiApplication;
-import com.orangelabs.rcs.ri.utils.LogUtils;
-import com.orangelabs.rcs.ri.utils.RcsContactUtil;
-import com.orangelabs.rcs.ri.utils.Utils;
-
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.LoaderManager;
@@ -58,6 +52,15 @@ import android.widget.CursorAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.orangelabs.rcs.api.connection.ConnectionManager.RcsServiceName;
+import com.orangelabs.rcs.api.connection.utils.ExceptionUtil;
+import com.orangelabs.rcs.api.connection.utils.RcsFragmentActivity;
+import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.RiApplication;
+import com.orangelabs.rcs.ri.utils.LogUtils;
+import com.orangelabs.rcs.ri.utils.RcsContactUtil;
+import com.orangelabs.rcs.ri.utils.Utils;
+
 import java.text.DateFormat;
 import java.util.Arrays;
 import java.util.Date;
@@ -75,10 +78,12 @@ public class ImageSharingList extends RcsFragmentActivity implements
     // @formatter:off
     private static final String[] PROJECTION = new String[] {
         ImageSharingLog.BASECOLUMN_ID,
-        ImageSharingLog.SHARING_ID, 
-        ImageSharingLog.CONTACT, 
+        ImageSharingLog.SHARING_ID,
+        ImageSharingLog.CONTACT,
+        ImageSharingLog.TRANSFERRED,
+        ImageSharingLog.FILE,
         ImageSharingLog.FILENAME,
-        ImageSharingLog.FILESIZE, 
+        ImageSharingLog.FILESIZE,
         ImageSharingLog.STATE,
         ImageSharingLog.REASON_CODE,
         ImageSharingLog.DIRECTION,
@@ -95,11 +100,6 @@ public class ImageSharingList extends RcsFragmentActivity implements
     private ImageSharingListAdapter mAdapter;
 
     private boolean mImageSharingListenerSet = false;
-
-    /**
-     * List of items for contextual menu
-     */
-    private static final int MENU_ITEM_DELETE = 0;
 
     private Handler mHandler = new Handler();
 
@@ -297,11 +297,25 @@ public class ImageSharingList extends RcsFragmentActivity implements
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
-        if (!isServiceConnected(RcsServiceName.IMAGE_SHARING)) {
-            showMessage(R.string.label_service_not_available);
-            return;
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_log_ish_item, menu);
+        menu.findItem(R.id.menu_sharing_display).setVisible(false);
+
+        AdapterContextMenuInfo info = (AdapterContextMenuInfo) menuInfo;
+        Cursor cursor = (Cursor) mAdapter.getItem(info.position);
+        /* Check if message can be played */
+        Direction dir = Direction.valueOf(cursor.getInt(cursor
+                .getColumnIndexOrThrow(ImageSharingLog.DIRECTION)));
+        if (Direction.INCOMING == dir) {
+            Long transferred = cursor.getLong(cursor.getColumnIndexOrThrow(ImageSharingLog.TRANSFERRED));
+            Long size = cursor.getLong(cursor.getColumnIndexOrThrow(ImageSharingLog.FILESIZE));
+            if (size.equals(transferred)) {
+                // Incoming file transfer must be complete to be playable
+                menu.findItem(R.id.menu_sharing_display).setVisible(true);
+            }
+        } else {
+            menu.findItem(R.id.menu_sharing_display).setVisible(true);
         }
-        menu.add(0, MENU_ITEM_DELETE, MENU_ITEM_DELETE, R.string.menu_sharing_delete);
     }
 
     @Override
@@ -314,30 +328,36 @@ public class ImageSharingList extends RcsFragmentActivity implements
         if (LogUtils.isActive) {
             Log.d(LOGTAG, "onContextItemSelected sharing ID=".concat(sharingId));
         }
-        switch (item.getItemId()) {
-            case MENU_ITEM_DELETE:
-                if (!isServiceConnected(RcsServiceName.IMAGE_SHARING)) {
-                    showMessage(R.string.label_service_not_available);
-                    return true;
-                }
-                /* Delete messages for contact */
-                if (LogUtils.isActive) {
-                    Log.d(LOGTAG, "Delete image sharing ID=".concat(sharingId));
-                }
-                try {
+        try {
+            switch (item.getItemId()) {
+                case R.id.menu_sharing_delete:
+                    /* Delete messages for contact */
+                    if (LogUtils.isActive) {
+                        Log.d(LOGTAG, "Delete image sharing ID=".concat(sharingId));
+                    }
                     if (!mImageSharingListenerSet) {
                         mImageSharingService.addEventListener(mImageSharingListener);
                         mImageSharingListenerSet = true;
                     }
                     mImageSharingService.deleteImageSharing(sharingId);
+                    return true;
 
-                } catch (RcsServiceException e) {
-                    showExceptionThenExit(e);
-                }
-                return true;
+                case R.id.menu_sharing_display:
+                    String file = cursor.getString(cursor
+                            .getColumnIndexOrThrow(ImageSharingLog.FILE));
+                    Utils.showPicture(this, Uri.parse(file));
+                    return true;
 
-            default:
-                return super.onContextItemSelected(item);
+                default:
+                    return super.onContextItemSelected(item);
+            }
+        } catch (RcsServiceNotAvailableException e) {
+            showMessage(R.string.label_service_not_available);
+            return true;
+
+        } catch (RcsGenericException e) {
+            showExceptionThenExit(e);
+            return true;
         }
     }
 

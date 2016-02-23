@@ -18,14 +18,14 @@
 
 package com.orangelabs.rcs.ri.utils;
 
-import com.orangelabs.rcs.ri.R;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.widget.Toast;
+
+import com.orangelabs.rcs.ri.R;
 
 import java.util.Random;
 import java.util.Set;
@@ -34,12 +34,11 @@ import java.util.Set;
  * Utility functions
  * 
  * @author Jean-Marc AUFFRET
+ * @author Philippe LEMORDANT
  */
 public class Utils {
 
     private static final Random sPendingIntentIdGenerator = new Random();
-
-    private static final String LOGTAG = LogUtils.getTag(Utils.class.getSimpleName());
 
     /**
      * Gets a unique ID for pending intent
@@ -71,21 +70,58 @@ public class Utils {
     }
 
     /**
-     * Show a picture and exit activity
+     * Shows a picture
      * 
      * @param activity Activity
      * @param uri Picture to be displayed
      */
-    public static void showPictureAndExit(final Activity activity, Uri uri) {
-        if (activity.isFinishing()) {
-            return;
-        }
-        String filename = FileUtils.getFileName(activity, uri);
-        Toast.makeText(activity, activity.getString(R.string.label_receive_image, filename),
-                Toast.LENGTH_LONG).show();
+    public static void showPicture(final Activity activity, Uri uri) {
         Intent intent = new Intent();
         intent.setAction(android.content.Intent.ACTION_VIEW);
         intent.setDataAndType(uri, "image/*");
+        activity.startActivity(intent);
+    }
+
+    /**
+     * Checks if mime type is an image type
+     *
+     * @param mime MIME type
+     * @return True if mime type is an image type
+     */
+    public static boolean isImageType(String mime) {
+        return mime.toLowerCase().startsWith("image/");
+    }
+
+    /**
+     * Checks if mime type is an audio type
+     *
+     * @param mime MIME type
+     * @return True if mime type is an audio type
+     */
+    public static boolean isAudioType(String mime) {
+        return mime.toLowerCase().startsWith("audio/");
+    }
+
+    /**
+     * Checks if mime type is an video type
+     *
+     * @param mime MIME type
+     * @return True if mime type is an video type
+     */
+    public static boolean isVideoType(String mime) {
+        return mime.toLowerCase().startsWith("video/");
+    }
+
+    /**
+     * Plays audio document
+     * 
+     * @param activity Activity
+     * @param uri Uri of audio file to be played
+     */
+    public static void playAudio(final Activity activity, Uri uri) {
+        Intent intent = new Intent();
+        intent.setAction(android.content.Intent.ACTION_VIEW);
+        intent.setDataAndType(uri, "audio/");
         activity.startActivity(intent);
     }
 
@@ -116,12 +152,11 @@ public class Utils {
      */
     public static String getProgressLabel(long currentSize, long totalSize) {
         StringBuilder value = new StringBuilder();
-        value.append(currentSize / 1024);
+        value.append(FileUtils.humanReadableByteCount(currentSize, true));
         if (totalSize != 0) {
             value.append('/');
-            value.append(totalSize / 1024);
+            value.append(FileUtils.humanReadableByteCount(totalSize, true));
         }
-        value.append(" Kb");
         return value.toString();
     }
 
