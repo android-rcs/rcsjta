@@ -57,45 +57,58 @@ import java.util.Set;
  * Class to interface the 'filetransfer' table
  */
 public class FileTransferLog implements IFileTransferLog {
-    private static final String SELECTION_FILE_BY_T_ID = new StringBuilder(
-            FileTransferData.KEY_UPLOAD_TID).append("=?").toString();
+    private static final String SELECTION_FILE_BY_T_ID = FileTransferData.KEY_UPLOAD_TID + "=?";
 
-    private static final String SELECTION_BY_PAUSED_BY_SYSTEM = new StringBuilder(
-            FileTransferData.KEY_STATE).append("=").append(State.PAUSED.toInt()).append(" AND ")
-            .append(FileTransferData.KEY_REASON_CODE).append("=")
-            .append(ReasonCode.PAUSED_BY_SYSTEM.toInt()).toString();
+    private static final String SELECTION_BY_PAUSED_BY_SYSTEM = FileTransferData.KEY_STATE + "="
+            + State.PAUSED.toInt() + " AND " + FileTransferData.KEY_REASON_CODE + "="
+            + ReasonCode.PAUSED_BY_SYSTEM.toInt();
 
-    private static final String SELECTION_BY_EQUAL_CHAT_ID_AND_CONTACT = new StringBuilder(
-            FileTransferData.KEY_CHAT_ID).append("=").append(FileTransferData.KEY_CONTACT)
-            .toString();
+    private static final String SELECTION_BY_EQUAL_CHAT_ID_AND_CONTACT = FileTransferData.KEY_CHAT_ID
+            + "=" + FileTransferData.KEY_CONTACT;
 
-    private static final String SELECTION_BY_QUEUED_AND_UPLOADED_BUT_NOT_TRANSFERRED_FILE_TRANSFERS = new StringBuilder(
-            FileTransferData.KEY_STATE).append("=").append(State.QUEUED.toInt()).append(" OR (")
-            .append(FileTransferData.KEY_STATE).append("=").append(State.STARTED.toInt())
-            .append(" AND ").append(FileTransferData.KEY_DIRECTION).append("=")
-            .append(Direction.OUTGOING.toInt()).append(" AND ")
-            .append(FileTransferData.KEY_DOWNLOAD_URI).append(" IS NOT NULL)").toString();
+    private static final String SELECTION_BY_QUEUED_AND_UPLOADED_BUT_NOT_TRANSFERRED_FILE_TRANSFERS = FileTransferData.KEY_STATE
+            + "="
+            + State.QUEUED.toInt()
+            + " OR ("
+            + FileTransferData.KEY_STATE
+            + "="
+            + State.STARTED.toInt()
+            + " AND "
+            + FileTransferData.KEY_DIRECTION
+            + "="
+            + Direction.OUTGOING.toInt()
+            + " AND "
+            + FileTransferData.KEY_DOWNLOAD_URI
+            + " IS NOT NULL)";
 
-    private static final String SELECTION_BY_INTERRUPTED_FILE_TRANSFERS = new StringBuilder(
-            FileTransferData.KEY_STATE).append(" IN ('").append(State.STARTED.toInt())
-            .append("','").append(State.INVITED.toInt()).append("','")
-            .append(State.ACCEPTING.toInt()).append("','").append(State.INITIATING.toInt())
-            .append("')").toString();
+    private static final String SELECTION_BY_INTERRUPTED_FILE_TRANSFERS = FileTransferData.KEY_STATE
+            + " IN ('"
+            + State.STARTED.toInt()
+            + "','"
+            + State.INVITED.toInt()
+            + "','"
+            + State.ACCEPTING.toInt() + "','" + State.INITIATING.toInt() + "')";
 
-    private static final String SELECTION_BY_NOT_DISPLAYED = new StringBuilder(
-            FileTransferData.KEY_STATE).append("<>").append(State.DISPLAYED.toInt()).toString();
+    private static final String SELECTION_BY_NOT_DISPLAYED = FileTransferData.KEY_STATE + "<>"
+            + State.DISPLAYED.toInt();
 
     private static final int FILE_TRANSFER_DELIVERY_EXPIRED = 1;
 
     private static final int FILE_TRANSFER_DELIVERY_EXPIRATION_NOT_APPLICABLE = 0;
 
-    private static final String SELECTION_BY_UNDELIVERED_ONETOONE_FILE_TRANSFERS = new StringBuilder(
-            FileTransferData.KEY_EXPIRED_DELIVERY).append("<>")
-            .append(FILE_TRANSFER_DELIVERY_EXPIRED).append(" AND ")
-            .append(FileTransferData.KEY_DELIVERY_EXPIRATION).append("<>")
-            .append(FILE_TRANSFER_DELIVERY_EXPIRATION_NOT_APPLICABLE).append(" AND ")
-            .append(FileTransferData.KEY_STATE).append(" NOT IN(").append(State.DELIVERED.toInt())
-            .append(",").append(State.DISPLAYED.toInt()).append(")").toString();
+    private static final String SELECTION_BY_UNDELIVERED_ONETOONE_FILE_TRANSFERS = FileTransferData.KEY_EXPIRED_DELIVERY
+            + "<>"
+            + FILE_TRANSFER_DELIVERY_EXPIRED
+            + " AND "
+            + FileTransferData.KEY_DELIVERY_EXPIRATION
+            + "<>"
+            + FILE_TRANSFER_DELIVERY_EXPIRATION_NOT_APPLICABLE
+            + " AND "
+            + FileTransferData.KEY_STATE
+            + " NOT IN("
+            + State.DELIVERED.toInt()
+            + ","
+            + State.DISPLAYED.toInt() + ")";
 
     private static final String ORDER_BY_TIMESTAMP_ASC = FileTransferData.KEY_TIMESTAMP
             .concat(" ASC");
@@ -134,13 +147,10 @@ public class FileTransferLog implements IFileTransferLog {
             ReasonCode reasonCode, long timestamp, long timestampSent, long fileExpiration,
             long fileIconExpiration) {
         if (logger.isActivated()) {
-            logger.debug(new StringBuilder("Add file transfer entry Id=").append(fileTransferId)
-                    .append(", contact=").append(contact).append(", filename=")
-                    .append(content.getName()).append(", size=").append(content.getSize())
-                    .append(", MIME=").append(content.getEncoding()).append(", state=")
-                    .append(state).append(", reasonCode=").append(reasonCode)
-                    .append(", timestamp=").append(timestamp).append(", timestampSent=")
-                    .append(timestampSent).toString());
+            logger.debug("Add file transfer entry Id=" + fileTransferId + ", contact=" + contact
+                    + ", filename=" + content.getName() + ", size=" + content.getSize() + ", MIME="
+                    + content.getEncoding() + ", state=" + state + ", reasonCode=" + reasonCode
+                    + ", timestamp=" + timestamp + ", timestampSent=" + timestampSent);
 
         }
         ContentValues values = new ContentValues();
@@ -179,10 +189,9 @@ public class FileTransferLog implements IFileTransferLog {
             MmContent content, MmContent thumbnail, Set<ContactId> recipients, State state,
             ReasonCode reasonCode, long timestamp, long timestampSent) {
         if (logger.isActivated()) {
-            logger.debug(new StringBuilder("addOutgoingGroupFileTransfer: Id=")
-                    .append(fileTransferId).append(", chatId=").append(chatId).append(" filename=")
-                    .append(content.getName()).append(", size=").append(content.getSize())
-                    .append(", MIME=").append(content.getEncoding()).toString());
+            logger.debug("addOutgoingGroupFileTransfer: Id=" + fileTransferId + ", chatId="
+                    + chatId + " filename=" + content.getName() + ", size=" + content.getSize()
+                    + ", MIME=" + content.getEncoding());
         }
         ContentValues values = new ContentValues();
         values.put(FileTransferData.KEY_FT_ID, fileTransferId);
@@ -241,14 +250,12 @@ public class FileTransferLog implements IFileTransferLog {
             ReasonCode reasonCode, long timestamp, long timestampSent, long fileExpiration,
             long fileIconExpiration) {
         if (logger.isActivated()) {
-            logger.debug(new StringBuilder("Add incoming file transfer entry: fileTransferId=")
-                    .append(fileTransferId).append(", chatId=").append(chatId).append(", contact=")
-                    .append(contact).append(", filename=").append(content.getName())
-                    .append(", size=").append(content.getSize()).append(", MIME=")
-                    .append(content.getEncoding()).append(", state=").append(state)
-                    .append(", reasonCode=").append(reasonCode).append(", timestamp=")
-                    .append(timestamp).append(", timestampSent=").append(timestampSent)
-                    .append(", expiration=").append(fileExpiration).toString());
+            logger.debug("Add incoming file transfer entry: fileTransferId=" + fileTransferId
+                    + ", chatId=" + chatId + ", contact=" + contact + ", filename="
+                    + content.getName() + ", size=" + content.getSize() + ", MIME="
+                    + content.getEncoding() + ", state=" + state + ", reasonCode=" + reasonCode
+                    + ", timestamp=" + timestamp + ", timestampSent=" + timestampSent
+                    + ", expiration=" + fileExpiration);
         }
         ContentValues values = new ContentValues();
         values.put(FileTransferData.KEY_FT_ID, fileTransferId);
@@ -294,17 +301,16 @@ public class FileTransferLog implements IFileTransferLog {
     public boolean setFileTransferStateAndReasonCode(String fileTransferId, State state,
             ReasonCode reasonCode) {
         if (logger.isActivated()) {
-            logger.debug(new StringBuilder("setFileTransferStateAndReasonCode: fileTransferId=")
-                    .append(fileTransferId).append(", state=").append(state)
-                    .append(", reasonCode=").append(reasonCode).toString());
+            logger.debug("setFileTransferStateAndReasonCode: fileTransferId=" + fileTransferId
+                    + ", state=" + state + ", reasonCode=" + reasonCode);
         }
 
         switch (state) {
             case DELIVERED:
             case DISPLAYED:
-                throw new IllegalArgumentException(new StringBuilder("State that requires ")
-                        .append("timestamp passed, use specific method taking timestamp")
-                        .append(" to set state ").append(state.toString()).toString());
+                throw new IllegalArgumentException("State that requires "
+                        + "timestamp passed, use specific method taking timestamp"
+                        + " to set state " + state.toString());
             default:
         }
 
@@ -319,8 +325,7 @@ public class FileTransferLog implements IFileTransferLog {
     @Override
     public void markFileTransferAsRead(String fileTransferId) {
         if (logger.isActivated()) {
-            logger.debug(new StringBuilder("markFileTransferAsRead  (fileTransferId=")
-                    .append(fileTransferId).append(")").toString());
+            logger.debug("markFileTransferAsRead  (fileTransferId=" + fileTransferId + ")");
         }
         ContentValues values = new ContentValues();
         values.put(FileTransferData.KEY_READ_STATUS, ReadStatus.READ.toInt());
@@ -357,8 +362,8 @@ public class FileTransferLog implements IFileTransferLog {
     public boolean setFileTransferred(String fileTransferId, MmContent content,
             long fileExpiration, long fileIconExpiration, long deliveryExpiration) {
         if (logger.isActivated()) {
-            logger.debug(new StringBuilder("setFileTransferred (Id=").append(fileTransferId)
-                    .append(") (uri=").append(content.getUri()).append(")").toString());
+            logger.debug("setFileTransferred (Id=" + fileTransferId + ") (uri=" + content.getUri()
+                    + ")");
         }
         ContentValues values = new ContentValues();
         values.put(FileTransferData.KEY_STATE, State.TRANSFERRED.toInt());
@@ -389,8 +394,8 @@ public class FileTransferLog implements IFileTransferLog {
     @Override
     public boolean setFileUploadTId(String fileTransferId, String tId) {
         if (logger.isActivated()) {
-            logger.debug(new StringBuilder("setFileUploadTId (tId=").append(tId)
-                    .append(") (fileTransferId=").append(fileTransferId).append(")").toString());
+            logger.debug("setFileUploadTId (tId=" + tId + ") (fileTransferId=" + fileTransferId
+                    + ")");
         }
         ContentValues values = new ContentValues();
         values.put(FileTransferData.KEY_UPLOAD_TID, tId);
@@ -402,9 +407,8 @@ public class FileTransferLog implements IFileTransferLog {
     @Override
     public boolean setFileDownloadAddress(String fileTransferId, Uri downloadAddress) {
         if (logger.isActivated()) {
-            logger.debug(new StringBuilder("setFileDownloadAddress (address=")
-                    .append(downloadAddress).append(") (fileTransferId=").append(fileTransferId)
-                    .append(")").toString());
+            logger.debug("setFileDownloadAddress (address=" + downloadAddress
+                    + ") (fileTransferId=" + fileTransferId + ")");
         }
         ContentValues values = new ContentValues();
         values.put(FileTransferData.KEY_DOWNLOAD_URI, downloadAddress.toString());
@@ -416,8 +420,8 @@ public class FileTransferLog implements IFileTransferLog {
     @Override
     public boolean setRemoteSipId(String fileTransferId, String remoteInstanceId) {
         if (logger.isActivated()) {
-            logger.debug(new StringBuilder("setRemoteSipId (sip ID=").append(fileTransferId)
-                    .append(") (fileTransferId=").append(fileTransferId).append(")").toString());
+            logger.debug("setRemoteSipId (sip ID=" + fileTransferId + ") (fileTransferId="
+                    + fileTransferId + ")");
         }
         ContentValues values = new ContentValues();
         values.put(FileTransferData.KEY_REMOTE_SIP_ID, remoteInstanceId);
@@ -800,10 +804,9 @@ public class FileTransferLog implements IFileTransferLog {
     public boolean setFileTransferStateAndTimestamp(String fileTransferId, State state,
             ReasonCode reasonCode, long timestamp, long timestampSent) {
         if (logger.isActivated()) {
-            logger.debug(new StringBuilder("setFileTransferStateAndTimestamp: fileTransferId=")
-                    .append(fileTransferId).append(", state=").append(state)
-                    .append(", reasonCode=").append(reasonCode).append(", timestamp=")
-                    .append(timestamp).append(", timestampSent=").append(timestampSent).toString());
+            logger.debug("setFileTransferStateAndTimestamp: fileTransferId=" + fileTransferId
+                    + ", state=" + state + ", reasonCode=" + reasonCode + ", timestamp="
+                    + timestamp + ", timestampSent=" + timestampSent);
         }
 
         ContentValues values = new ContentValues();
@@ -819,9 +822,8 @@ public class FileTransferLog implements IFileTransferLog {
     @Override
     public boolean setFileTransferDelivered(String fileTransferId, long timestampDelivered) {
         if (logger.isActivated()) {
-            logger.debug(new StringBuilder("setFileTransferDelivered fileTransferId=")
-                    .append(fileTransferId).append(", timestampDelivered=")
-                    .append(timestampDelivered).toString());
+            logger.debug("setFileTransferDelivered fileTransferId=" + fileTransferId
+                    + ", timestampDelivered=" + timestampDelivered);
         }
 
         ContentValues values = new ContentValues();
@@ -838,9 +840,8 @@ public class FileTransferLog implements IFileTransferLog {
     @Override
     public boolean setFileTransferDisplayed(String fileTransferId, long timestampDisplayed) {
         if (logger.isActivated()) {
-            logger.debug(new StringBuilder("setFileTransferDisplayed fileTransferId=")
-                    .append(fileTransferId).append(", timestampDisplayed=")
-                    .append(timestampDisplayed).toString());
+            logger.debug("setFileTransferDisplayed fileTransferId=" + fileTransferId
+                    + ", timestampDisplayed=" + timestampDisplayed);
         }
 
         ContentValues values = new ContentValues();
@@ -860,12 +861,12 @@ public class FileTransferLog implements IFileTransferLog {
         ContentValues values = new ContentValues();
         values.put(FileTransferData.KEY_EXPIRED_DELIVERY, 0);
         values.put(FileTransferData.KEY_DELIVERY_EXPIRATION, 0);
-        List<String> parameters = new ArrayList<String>();
+        List<String> parameters = new ArrayList<>();
         for (int i = 0; i < fileTransferIds.size(); i++) {
             parameters.add("?");
         }
-        String selection = new StringBuilder(FileTransferData.KEY_FT_ID).append(" IN (")
-                .append(TextUtils.join(",", parameters)).append(")").toString();
+        String selection = FileTransferData.KEY_FT_ID + " IN (" + TextUtils.join(",", parameters)
+                + ")";
         mLocalContentResolver.update(FileTransferData.CONTENT_URI, values, selection,
                 fileTransferIds.toArray(new String[fileTransferIds.size()]));
     }
@@ -948,8 +949,8 @@ public class FileTransferLog implements IFileTransferLog {
         Cursor cursor = null;
         try {
             Uri contentUri = Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId);
-            CursorUtil.assertCursorIsNotNull(cursor, FileTransferData.CONTENT_URI);
             cursor = mLocalContentResolver.query(contentUri, null, null, null, null);
+            CursorUtil.assertCursorIsNotNull(cursor, FileTransferData.CONTENT_URI);
             if (!cursor.moveToNext()) {
                 return null;
             }
@@ -963,9 +964,8 @@ public class FileTransferLog implements IFileTransferLog {
     @Override
     public void setFileTransferTimestamps(String fileTransferId, long timestamp, long timestampSent) {
         if (logger.isActivated()) {
-            logger.debug(new StringBuilder("setFileTransferTimestamps: fileTransferId=")
-                    .append(fileTransferId).append(", timestamp=").append(timestamp)
-                    .append(", timestampSent=").append(timestampSent).toString());
+            logger.debug("setFileTransferTimestamps: fileTransferId=" + fileTransferId
+                    + ", timestamp=" + timestamp + ", timestampSent=" + timestampSent);
         }
         ContentValues values = new ContentValues();
         values.put(FileTransferData.KEY_TIMESTAMP, timestamp);
@@ -978,9 +978,8 @@ public class FileTransferLog implements IFileTransferLog {
     @Override
     public boolean setFileInfoDequeued(String fileTransferId, long deliveryExpiration) {
         if (logger.isActivated()) {
-            logger.debug(new StringBuilder("setFileInfoDequeued (Id=").append(fileTransferId)
-                    .append(") (deliveryExpiration=").append(deliveryExpiration).append(")")
-                    .toString());
+            logger.debug("setFileInfoDequeued (Id=" + fileTransferId + ") (deliveryExpiration="
+                    + deliveryExpiration + ")");
         }
         ContentValues values = new ContentValues();
         values.put(FileTransferData.KEY_STATE, State.TRANSFERRED.toInt());
