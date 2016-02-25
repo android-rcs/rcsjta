@@ -35,8 +35,8 @@ import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
-import com.gsma.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoParser;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpThumbnail;
+import com.gsma.rcs.core.ims.service.im.filetransfer.http.FileTransferXmlParser;
 import com.gsma.rcs.platform.AndroidFactory;
 import com.gsma.rcs.platform.file.FileDescription;
 import com.gsma.rcs.platform.file.FileFactory;
@@ -54,10 +54,8 @@ import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.net.Uri;
 
-import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -239,10 +237,9 @@ public class FileTransferUtils {
     public static FileTransferHttpInfoDocument parseFileTransferHttpDocument(byte[] xml,
             RcsSettings rcsSettings) throws PayloadException {
         try {
-            InputSource ftHttpInput = new InputSource(new ByteArrayInputStream(xml));
-            FileTransferHttpInfoParser ftHttpParser = new FileTransferHttpInfoParser(ftHttpInput,
-                    rcsSettings).parse();
-            return ftHttpParser.getFtInfo();
+            FileTransferXmlParser ftHttpParser = new FileTransferXmlParser(xml, rcsSettings);
+            ftHttpParser.parse();
+            return ftHttpParser.getFileTransferInfo();
 
         } catch (ParserConfigurationException | ParseFailureException | SAXException e) {
             throw new PayloadException("Can't parse FT HTTP document!", e);
@@ -265,8 +262,7 @@ public class FileTransferUtils {
         if (message == null || !FileTransferUtils.isFileTransferHttpType(message.getMimeType())) {
             return null;
         }
-        byte[] xml = message.getContent().getBytes(UTF8);
-        return parseFileTransferHttpDocument(xml, rcsSettings);
+        return parseFileTransferHttpDocument(message.getContent().getBytes(UTF8), rcsSettings);
     }
 
     /**
@@ -297,11 +293,10 @@ public class FileTransferUtils {
         final FileDescription desc = FileFactory.getFactory().getFileDescription(uri);
         String mime = FileUtils.getMimeTypeFromExtension(uri.getPath());
         return ContentManager.createMmContent(uri, mime, desc.getSize(), desc.getName());
-
     }
 
     private static String getInfo(String fileType, Uri downloadUri, String name, String mimeType,
-            long size, long expiration, String disposition) {
+            long size, long expiration, String disposition, int playingLength) {
         StringBuilder info = new StringBuilder("<file-info type=\"").append(fileType).append("\"");
         if (disposition != null) {
             info.append(" file-disposition=\"").append(disposition).append("\"");
@@ -315,6 +310,9 @@ public class FileTransferUtils {
         }
         if (mimeType != null) {
             info.append("<content-type>").append(mimeType).append("</content-type>");
+        }
+        if (playingLength != -1) {
+            info.append("<am:playing-length>").append(playingLength).append("</am:playing-length>");
         }
         info.append("<data url = \"").append(downloadUri.toString()).append("\"  until=\"")
                 .append(expiration).append("\"/></file-info>");
@@ -333,13 +331,13 @@ public class FileTransferUtils {
                 .append(UTF8_STR).append("\"?><file>");
         if (fileIcon != null) {
             String fileIconInfo = getInfo(FILEICON_INFO, fileIcon.getUri(), null,
-                    fileIcon.getMimeType(), fileIcon.getSize(), fileIcon.getExpiration(), null);
+                    fileIcon.getMimeType(), fileIcon.getSize(), fileIcon.getExpiration(), null, -1);
             info.append(fileIconInfo);
         }
         String fileInfo = getInfo(FILE_INFO, fileTransferData.getUri(),
                 fileTransferData.getFilename(), fileTransferData.getMimeType(),
                 fileTransferData.getSize(), fileTransferData.getExpiration(),
-                fileTransferData.getFileDisposition());
+                fileTransferData.getFileDisposition(), fileTransferData.getPlayingLength());
         info.append(fileInfo);
         info.append("</file>");
         return info.toString();

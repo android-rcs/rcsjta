@@ -303,6 +303,7 @@ public class FileUtils {
             while ((length = sourceStream.read(buffer)) > 0) {
                 destStream.write(buffer, 0, length);
             }
+
         } finally {
             CloseableUtils.tryToClose(sourceStream);
             CloseableUtils.tryToClose(destStream);
@@ -310,9 +311,41 @@ public class FileUtils {
     }
 
     private static String getMimeTypeFromFile(Context ctx, Uri file) {
-        MediaMetadataRetriever mmr = new MediaMetadataRetriever();
-        mmr.setDataSource(ctx, file);
-        return mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_MIMETYPE);
+        MediaMetadataRetriever mmr = null;
+        try {
+            mmr = new MediaMetadataRetriever();
+            mmr.setDataSource(ctx, file);
+            return mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_MIMETYPE);
+
+        } finally {
+            if (mmr != null) {
+                mmr.release();
+            }
+        }
+    }
+
+    /**
+     * Gets the duration from file Uri
+     * @param ctx the context
+     * @param file the file Uri
+     * @return the duration in ms or -1 if it cannot be retrieved
+     */
+    public static long getDurationFromFile(Context ctx, Uri file) {
+        MediaMetadataRetriever mmr = null;
+        try {
+            mmr = new MediaMetadataRetriever();
+            mmr.setDataSource(ctx, file);
+            return Long
+                    .parseLong(mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION));
+
+        } catch (NumberFormatException e) {
+            return -1;
+
+        } finally {
+            if (mmr != null) {
+                mmr.release();
+            }
+        }
     }
 
     /**

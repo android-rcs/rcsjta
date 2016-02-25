@@ -79,7 +79,7 @@ public class FileTransferHttpInfoDocument {
     /**
      * Playing length
      */
-    private int mPlayingLength = 0;
+    private int mPlayingLength = -1;
 
     private final RcsSettings mRcsSettings;
 
@@ -239,9 +239,9 @@ public class FileTransferHttpInfoDocument {
     }
 
     /**
-     * Gets the playing length or 0 is not set
+     * Gets the playing length or -1 if not set
      *
-     * @return Length in seconds
+     * @return playing length in seconds
      */
     public int getPlayingLength() {
         return mPlayingLength;

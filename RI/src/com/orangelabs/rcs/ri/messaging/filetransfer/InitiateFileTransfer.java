@@ -308,7 +308,7 @@ public class InitiateFileTransfer extends RcsActivity {
                 }
                 displaySelectedFileInfo();
                 mInviteBtn.setEnabled(true);
-                mAudioMessageCheckBox.setChecked(true);
+                mAudioMessageCheckBox.setEnabled(true);
                 mIconCheckBox.setEnabled(false);
                 mIconCheckBox.setChecked(false);
                 break;

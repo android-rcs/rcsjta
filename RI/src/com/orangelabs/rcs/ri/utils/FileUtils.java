@@ -96,9 +96,17 @@ public class FileUtils {
     }
 
     private static String getMimeTypeFromFile(Context ctx, Uri file) {
-        MediaMetadataRetriever mmr = new MediaMetadataRetriever();
-        mmr.setDataSource(ctx, file);
-        return mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_MIMETYPE);
+        MediaMetadataRetriever mmr = null;
+        try {
+            mmr = new MediaMetadataRetriever();
+            mmr.setDataSource(ctx, file);
+            return mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_MIMETYPE);
+
+        } finally {
+            if (mmr != null) {
+                mmr.release();
+            }
+        }
     }
 
     /**
