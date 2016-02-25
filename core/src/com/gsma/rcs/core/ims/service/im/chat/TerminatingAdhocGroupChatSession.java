@@ -89,13 +89,7 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession {
         String subject = ChatUtils.getSubject(invite);
         setSubject(subject);
         createTerminatingDialogPath(invite);
-
-        if (contact != null) {
-            String fromUri = invite.getFrom();
-            if (fromUri != null) {
-                setRemoteDisplayName(SipUtils.getDisplayNameFromUri(fromUri));
-            }
-        }
+        setRemoteDisplayName(SipUtils.getDisplayNameFromInvite(invite));
         String chatId = ChatUtils.getContributionId(invite);
         setContributionID(chatId);
         if (shouldBeAutoAccepted()) {

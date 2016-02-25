@@ -222,9 +222,7 @@ public abstract class ImsServiceSession extends Thread {
         mDialogPath.setRemoteTag(invite.getFromTag());
         mDialogPath.setRemoteContent(invite.getContent());
         mDialogPath.setSessionExpireTime(invite.getSessionTimerExpire());
-        if (remoteParty != null) {
-            mRemoteDisplayName = SipUtils.getDisplayNameFromUri(remoteParty);
-        }
+        mRemoteDisplayName = SipUtils.getDisplayNameFromInvite(invite);
     }
 
     /**

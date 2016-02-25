@@ -109,7 +109,6 @@ public class SipService extends ImsService {
         super(parent, true);
         mContactManager = contactManager;
         mRcsSettings = rcsSettings;
-
         mMultimediaMessagingOperationHandler = allocateBgHandler(MM_MESSAGING_OPERATION_THREAD_NAME);
         mMultimediaStreamingOperationHandler = allocateBgHandler(MM_STREAMING_OPERATION_THREAD_NAME);
         mMultimediaMessageOperationHandler = allocateBgHandler(MM_INSTANT_MESSAGE_OPERATION_THREAD_NAME);
@@ -210,9 +209,8 @@ public class SipService extends ImsService {
             }
             // Test if the contact is blocked
             ContactId remote = ContactUtil.createContactIdFromValidatedData(number);
-            mContactManager.setContactDisplayName(remote,
-                    SipUtils.getDisplayNameFromUri(invite.getFrom()));
-
+            mContactManager
+                    .setContactDisplayName(remote, SipUtils.getDisplayNameFromInvite(invite));
             if (mContactManager.isBlockedForContact(remote)) {
                 if (sLogger.isActivated()) {
                     sLogger.debug("Contact " + remote
@@ -221,10 +219,8 @@ public class SipService extends ImsService {
                 sendErrorResponse(invite, Response.DECLINE);
                 return;
             }
-
             final TerminatingSipMsrpSession session = new TerminatingSipMsrpSession(this, invite,
                     getImsModule(), remote, sessionInvite, mRcsSettings, timestamp, mContactManager);
-
             mMultimediaMessagingOperationHandler.post(new Runnable() {
 
                 @Override
@@ -245,13 +241,11 @@ public class SipService extends ImsService {
                     }
                 }
             });
-
         } catch (NetworkException e) {
             if (sLogger.isActivated()) {
                 sLogger.debug("Failed to receive generic MSRP session invitation! ("
                         + e.getMessage() + ")");
             }
-
         } catch (PayloadException | RuntimeException e) {
             sLogger.error("Failed to receive generic MSRP session invitation!", e);
         }
@@ -295,9 +289,8 @@ public class SipService extends ImsService {
             }
             // Test if the contact is blocked
             ContactId remote = ContactUtil.createContactIdFromValidatedData(number);
-            mContactManager.setContactDisplayName(remote,
-                    SipUtils.getDisplayNameFromUri(invite.getFrom()));
-
+            mContactManager
+                    .setContactDisplayName(remote, SipUtils.getDisplayNameFromInvite(invite));
             if (mContactManager.isBlockedForContact(remote)) {
                 if (sLogger.isActivated()) {
                     sLogger.debug("Contact " + remote
@@ -306,10 +299,8 @@ public class SipService extends ImsService {
                 sendErrorResponse(invite, Response.DECLINE);
                 return;
             }
-
             final TerminatingSipRtpSession session = new TerminatingSipRtpSession(this, invite,
                     getImsModule(), remote, sessionInvite, mRcsSettings, timestamp, mContactManager);
-
             mMultimediaStreamingOperationHandler.post(new Runnable() {
 
                 @Override
@@ -330,13 +321,11 @@ public class SipService extends ImsService {
                     }
                 }
             });
-
         } catch (NetworkException e) {
             if (sLogger.isActivated()) {
                 sLogger.debug("Failed to receive generic RTP session invitation! ("
                         + e.getMessage() + ")");
             }
-
         } catch (PayloadException | RuntimeException e) {
             sLogger.error("Failed to receive generic RTP session invitation!", e);
         }
@@ -435,8 +424,7 @@ public class SipService extends ImsService {
             // Test if the contact is blocked
             final ContactId remote = ContactUtil.createContactIdFromValidatedData(number);
             mContactManager.setContactDisplayName(remote,
-                    SipUtils.getDisplayNameFromUri(message.getFrom()));
-
+                    SipUtils.getDisplayNameFromInvite(message));
             if (mContactManager.isBlockedForContact(remote)) {
                 if (sLogger.isActivated()) {
                     sLogger.debug("Contact " + remote
@@ -445,12 +433,10 @@ public class SipService extends ImsService {
                 sendErrorResponse(message, Response.DECLINE);
                 return;
             }
-
             /* Send automatically a 200 Ok */
             getImsModule().getSipManager().sendSipResponse(
                     SipMessageFactory.createResponse(message, IdGenerator.getIdentifier(),
                             Response.OK));
-
             Set<String> featureTags = message.getFeatureTags();
             String iariFeatureTag = GenericSipSession.getIariFeatureTag(featureTags);
             if (iariFeatureTag == null) {
@@ -461,7 +447,6 @@ public class SipService extends ImsService {
                 return;
             }
             final String serviceId = CapabilityUtils.extractServiceId(iariFeatureTag);
-
             mMultimediaMessageOperationHandler.post(new Runnable() {
 
                 @Override
@@ -485,7 +470,6 @@ public class SipService extends ImsService {
             if (sLogger.isActivated()) {
                 sLogger.debug("Failed to receive generic instant message! (" + e.getMessage() + ")");
             }
-
         } catch (PayloadException | RuntimeException e) {
             sLogger.error("Failed to receive instant message!", e);
         }
