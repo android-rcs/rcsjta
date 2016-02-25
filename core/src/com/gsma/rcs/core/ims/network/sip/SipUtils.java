@@ -653,7 +653,7 @@ public class SipUtils {
      * @param uri URI
      * @return Display name or null
      */
-    public static String getDisplayNameFromUri(String uri) {
+    private static String getDisplayNameFromUri(String uri) {
         int index0 = uri.indexOf("\"");
         if (index0 != -1) {
             int index1 = uri.indexOf("\"", index0 + 1);
@@ -671,5 +671,32 @@ public class SipUtils {
                     new StringBuilder("Unable to extract content from invite : ").append(invite)
                             .toString());
         }
+    }
+
+    /**
+     * Get display name from Invite
+     * 
+     * @param invite
+     * @return Display name
+     */
+    public static String getDisplayNameFromInvite(SipRequest invite) {
+        String displayName;
+        String assertedHeader = getAssertedIdentityHeader(invite);
+        if (assertedHeader != null) {
+            // To get Display name from P-Asserted-Identity header as per spec section 2.5.2.1
+            displayName = getDisplayNameFromUri(assertedHeader);
+        } else {
+            // To get Display name from FROM header as per spec section 2.5.3.3
+            displayName = getDisplayNameFromUri(invite.getFrom());
+        }
+        if (displayName != null) {
+            return displayName;
+        }
+        // To get Display name from Contact header as per RFC3261
+        String contactHeader = invite.getContactAddress();
+        if (contactHeader != null) {
+            displayName = getDisplayNameFromUri(contactHeader);
+        }
+        return displayName;
     }
 }

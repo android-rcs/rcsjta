@@ -227,6 +227,19 @@ public abstract class SipMessage {
     }
 
     /**
+     * Return the ContactAddress
+     * 
+     * @return String
+     */
+    public String getContactAddress() {
+        ContactHeader header = (ContactHeader) mStackMessage.getHeader(ContactHeader.NAME);
+        if (header != null) {
+            return header.getAddress().toString();
+        }
+        return null;
+    }
+
+    /**
      * Return the contact URI
      * 
      * @return String or null
