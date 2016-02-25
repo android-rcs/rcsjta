@@ -86,8 +86,7 @@ public class NetworkUtils {
                 return getNetworkSubType(networkInfo.getSubtype());
 
             default:
-                throw new IllegalArgumentException(new StringBuilder("Unknown network type : ")
-                        .append(networkType).append("!").toString());
+                return NETWORK_ACCESS_UNKNOWN;
         }
     }
 
@@ -121,11 +120,8 @@ public class NetworkUtils {
                 /* TelephonyManager.NETWORK_TYPE_LTE (available on API level 11) ~10+ Mbps */
             case 13:
                 return NETWORK_ACCESS_4G;
-
             default:
-                throw new IllegalArgumentException(new StringBuilder(
-                        "Unknown sub-type for mobile network : ").append(subType).append("!")
-                        .toString());
+                return NETWORK_ACCESS_UNKNOWN;
         }
     }
 }
