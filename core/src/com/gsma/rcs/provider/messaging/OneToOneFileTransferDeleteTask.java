@@ -34,9 +34,7 @@ public class OneToOneFileTransferDeleteTask extends DeleteTask.GroupedByContactI
     private static final Logger sLogger = Logger.getLogger(OneToOneFileTransferDeleteTask.class
             .getName());
 
-    private static final String SELECTION_ALL_ONETOONE_FILETRANSFERS = new StringBuilder(
-            FileTransferData.KEY_CHAT_ID).append("=").append(FileTransferData.KEY_CONTACT)
-            .toString();
+    private static final String SELECTION_ALL_ONETOONE_FILETRANSFERS = FileTransferData.KEY_CHAT_ID + "=" + FileTransferData.KEY_CONTACT;
 
     private final FileTransferServiceImpl mFileTransferService;
 
@@ -48,7 +46,6 @@ public class OneToOneFileTransferDeleteTask extends DeleteTask.GroupedByContactI
      * @param fileTransferService the file transfer service impl
      * @param imService the IM service
      * @param contentResolver the content resolver
-     * @param imsLock the IMS operation lock
      */
     public OneToOneFileTransferDeleteTask(FileTransferServiceImpl fileTransferService,
             InstantMessagingService imService, LocalContentResolver contentResolver) {
@@ -64,7 +61,6 @@ public class OneToOneFileTransferDeleteTask extends DeleteTask.GroupedByContactI
      * @param fileTransferService the file transfer service impl
      * @param imService the IM service
      * @param contentResolver the content resolver
-     * @param imsLock the IMS operation lock
      * @param transferId the transfer id
      */
     public OneToOneFileTransferDeleteTask(FileTransferServiceImpl fileTransferService,
@@ -82,7 +78,6 @@ public class OneToOneFileTransferDeleteTask extends DeleteTask.GroupedByContactI
      * @param fileTransferService the file transfer service impl
      * @param imService the IM service
      * @param contentResolver the content resolver
-     * @param imsLock the IMS operation lock
      * @param contact the contact id
      */
     public OneToOneFileTransferDeleteTask(FileTransferServiceImpl fileTransferService,
