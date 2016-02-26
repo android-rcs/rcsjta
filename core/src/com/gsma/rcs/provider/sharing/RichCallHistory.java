@@ -1,21 +1,21 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
- *
+ * <p/>
  * Copyright (C) 2010 France Telecom S.A.
  * Copyright (C) 2014 Sony Mobile Communications Inc.
- *
+ * <p/>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p/>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p/>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
+ * <p/>
  * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
@@ -41,7 +41,7 @@ import android.net.Uri;
 
 /**
  * Rich call history
- * 
+ *
  * @author Jean-Marc AUFFRET
  */
 public class RichCallHistory {
@@ -59,33 +59,41 @@ public class RichCallHistory {
 
     private static final int FIRST_COLUMN_IDX = 0;
 
-    private static final String SELECTION_BY_INTERRUPTED_GEOLOC_SHARINGS = new StringBuilder(
-            GeolocSharingData.KEY_STATE).append(" IN ('")
-            .append(GeolocSharing.State.STARTED.toInt()).append("','")
-            .append(GeolocSharing.State.INVITED.toInt()).append("','")
-            .append(GeolocSharing.State.ACCEPTING.toInt()).append("','")
-            .append(GeolocSharing.State.INITIATING.toInt()).append("')").toString();
+    private static final String SELECTION_BY_INTERRUPTED_GEOLOC_SHARINGS = GeolocSharingData.KEY_STATE
+            + " IN ('"
+            + GeolocSharing.State.STARTED.toInt()
+            + "','"
+            + GeolocSharing.State.INVITED.toInt()
+            + "','"
+            + GeolocSharing.State.ACCEPTING.toInt()
+            + "','" + GeolocSharing.State.INITIATING.toInt() + "')";
 
-    private static final String SELECTION_BY_INTERRUPTED_IMAGE_SHARINGS = new StringBuilder(
-            ImageSharingData.KEY_STATE).append(" IN ('").append(ImageSharing.State.STARTED.toInt())
-            .append("','").append(ImageSharing.State.INVITED.toInt()).append("','")
-            .append(ImageSharing.State.ACCEPTING.toInt()).append("','")
-            .append(ImageSharing.State.INITIATING.toInt()).append("')").toString();
+    private static final String SELECTION_BY_INTERRUPTED_IMAGE_SHARINGS = ImageSharingData.KEY_STATE
+            + " IN ('"
+            + ImageSharing.State.STARTED.toInt()
+            + "','"
+            + ImageSharing.State.INVITED.toInt()
+            + "','"
+            + ImageSharing.State.ACCEPTING.toInt()
+            + "','" + ImageSharing.State.INITIATING.toInt() + "')";
 
-    private static final String SELECTION_BY_INTERRUPTED_VIDEO_SHARINGS = new StringBuilder(
-            VideoSharingData.KEY_STATE).append(" IN ('").append(VideoSharing.State.STARTED.toInt())
-            .append("','").append(VideoSharing.State.INVITED.toInt()).append("','")
-            .append(VideoSharing.State.ACCEPTING.toInt()).append("','")
-            .append(VideoSharing.State.INITIATING.toInt()).append("')").toString();
+    private static final String SELECTION_BY_INTERRUPTED_VIDEO_SHARINGS = VideoSharingData.KEY_STATE
+            + " IN ('"
+            + VideoSharing.State.STARTED.toInt()
+            + "','"
+            + VideoSharing.State.INVITED.toInt()
+            + "','"
+            + VideoSharing.State.ACCEPTING.toInt()
+            + "','" + VideoSharing.State.INITIATING.toInt() + "')";
 
     private static final String ORDER_BY_TIMESTAMP_ASC = GeolocSharingData.KEY_TIMESTAMP
             .concat(" ASC");
 
     /**
      * Get image transfer info from its unique Id
-     * 
-     * @param columnName
-     * @param sharingId
+     *
+     * @param columnName the column name
+     * @param sharingId the sharing ID
      * @return Cursor the caller of this method has to close the cursor if a cursor is returned
      */
     private Cursor getImageTransferData(String columnName, String sharingId) {
@@ -104,9 +112,9 @@ public class RichCallHistory {
 
     /**
      * Get video sharing info from its unique Id
-     * 
-     * @param columnName
-     * @param sharingId
+     *
+     * @param columnName the column name
+     * @param sharingId the sharing ID
      * @return Cursor the caller of this method has to close the cursor if a cursor is returned
      */
     private Cursor getVideoSharingData(String columnName, String sharingId) {
@@ -125,7 +133,7 @@ public class RichCallHistory {
 
     /**
      * Get geoloc sharing data
-     * 
+     *
      * @param columnName Column name
      * @param sharingId Sharing ID
      * @return Cursor
@@ -168,9 +176,18 @@ public class RichCallHistory {
         }
     }
 
+    private String getDataAsString(Cursor cursor) {
+        try {
+            return cursor.getString(FIRST_COLUMN_IDX);
+
+        } finally {
+            CursorUtil.close(cursor);
+        }
+    }
+
     /**
      * Get or Create Singleton instance of RichCallHistory
-     * 
+     *
      * @param localContentResolver Local content resolver
      */
     public static RichCallHistory getInstance(LocalContentResolver localContentResolver) {
@@ -187,7 +204,7 @@ public class RichCallHistory {
 
     /**
      * Returns instance
-     * 
+     *
      * @return Instance
      */
     public static RichCallHistory getInstance() {
@@ -198,7 +215,7 @@ public class RichCallHistory {
 
     /**
      * Constructor
-     * 
+     *
      * @param localContentResolver Local content resolver
      */
     private RichCallHistory(LocalContentResolver localContentResolver) {
@@ -208,8 +225,8 @@ public class RichCallHistory {
 
     /**
      * Read the total size of transferred image
-     * 
-     * @param sharingId
+     *
+     * @param sharingId the sharing ID
      * @return the total size
      */
     private Long getImageSharingTotalSize(String sharingId) {
@@ -224,7 +241,7 @@ public class RichCallHistory {
 
     /**
      * Add a new video sharing in the call history
-     * 
+     *
      * @param sharingId Session ID
      * @param contact Remote contact ID
      * @param direction Call event direction
@@ -238,9 +255,8 @@ public class RichCallHistory {
             VideoContent content, VideoSharing.State state, VideoSharing.ReasonCode reasonCode,
             long timestamp) {
         if (logger.isActivated()) {
-            logger.debug(new StringBuilder("Add new video sharing for contact ").append(contact)
-                    .append(": sharingId=").append(sharingId).append(", state=").append(state)
-                    .append(", reasonCode=").append(reasonCode).toString());
+            logger.debug("Add new video sharing for contact " + contact + ": sharingId="
+                    + sharingId + ", state=" + state + ", reasonCode=" + reasonCode);
         }
 
         ContentValues values = new ContentValues();
@@ -259,19 +275,18 @@ public class RichCallHistory {
 
     /**
      * Set the video sharing state, reason code and duration
-     * 
+     *
      * @param sharingId sharing ID of the entry
      * @param state New state
      * @param reasonCode Reason Code
-     * @param duration
+     * @param duration Duration
      * @return true if updated
      */
     public boolean setVideoSharingStateReasonCodeAndDuration(String sharingId,
             VideoSharing.State state, VideoSharing.ReasonCode reasonCode, long duration) {
         if (logger.isActivated()) {
-            logger.debug(new StringBuilder("Update video sharing state of sharing ")
-                    .append(sharingId).append(" state=").append(state).append(", reasonCode=")
-                    .append(reasonCode).append(" duration=").append(duration).toString());
+            logger.debug("Update video sharing state of sharing " + sharingId + " state=" + state
+                    + ", reasonCode=" + reasonCode + " duration=" + duration);
         }
         ContentValues values = new ContentValues();
         values.put(VideoSharingData.KEY_STATE, state.toInt());
@@ -285,7 +300,7 @@ public class RichCallHistory {
 
     /**
      * Set the video sharing state, reason code
-     * 
+     *
      * @param sharingId sharing ID of the entry
      * @param state New state
      * @param reasonCode Reason Code
@@ -294,9 +309,8 @@ public class RichCallHistory {
     public boolean setVideoSharingStateReasonCode(String sharingId, VideoSharing.State state,
             VideoSharing.ReasonCode reasonCode) {
         if (logger.isActivated()) {
-            logger.debug(new StringBuilder("Update video sharing state of sharing ")
-                    .append(sharingId).append(" state=").append(state).append(", reasonCode=")
-                    .append(reasonCode).toString());
+            logger.debug("Update video sharing state of sharing " + sharingId + " state=" + state
+                    + ", reasonCode=" + reasonCode);
         }
         ContentValues values = new ContentValues();
         values.put(VideoSharingData.KEY_STATE, state.toInt());
@@ -309,7 +323,7 @@ public class RichCallHistory {
 
     /**
      * Add a new image sharing in the call history
-     * 
+     *
      * @param sharingId Session ID
      * @param contact Remote contact ID
      * @param direction Call event direction
@@ -344,8 +358,8 @@ public class RichCallHistory {
 
     /**
      * Set the image sharing state and reason code
-     * 
-     * @param sharingId
+     *
+     * @param sharingId the sharing ID
      * @param state New state
      * @param reasonCode Reason Code
      * @return true if updated
@@ -371,7 +385,7 @@ public class RichCallHistory {
 
     /**
      * Update the image sharing progress
-     * 
+     *
      * @param sharingId Session ID of the entry
      * @param currentSize Current size
      * @return true if updated
@@ -387,7 +401,7 @@ public class RichCallHistory {
 
     /**
      * Add an incoming geoloc sharing
-     * 
+     *
      * @param contact Remote contact ID
      * @param sharingId Sharing ID
      * @param state Geoloc sharing state
@@ -410,7 +424,7 @@ public class RichCallHistory {
 
     /**
      * Add an outgoing geoloc sharing
-     * 
+     *
      * @param contact Remote contact ID
      * @param sharingId Sharing ID
      * @param geoloc Geolocation
@@ -435,7 +449,7 @@ public class RichCallHistory {
 
     /**
      * Sets the data of a geoloc sharing and updates state to transferred
-     * 
+     *
      * @param sharingId Sharing ID
      * @param geoloc Geolococation
      * @return true if updated
@@ -451,7 +465,7 @@ public class RichCallHistory {
 
     /**
      * Update the geoloc sharing state and reason code
-     * 
+     *
      * @param sharingId Sharing ID
      * @param state Geoloc sharing state
      * @param reasonCode Reason code of the state
@@ -468,7 +482,7 @@ public class RichCallHistory {
 
     /**
      * Get the geoloc sharing state
-     * 
+     *
      * @param sharingId Sharing ID
      * @return state
      */
@@ -482,7 +496,7 @@ public class RichCallHistory {
 
     /**
      * Get the geoloc sharing reason code
-     * 
+     *
      * @param sharingId Sharing ID
      * @return reason code
      */
@@ -526,14 +540,11 @@ public class RichCallHistory {
 
     /**
      * Get Image sharing state from unique Id
-     * 
-     * @param sharingId
+     *
+     * @param sharingId the sharing ID
      * @return State
      */
     public ImageSharing.State getImageSharingState(String sharingId) {
-        if (logger.isActivated()) {
-            logger.debug("Get image transfer state for sharingId ".concat(sharingId));
-        }
         Cursor cursor = getImageTransferData(ImageSharingData.KEY_STATE, sharingId);
         if (cursor == null) {
             return null;
@@ -543,14 +554,11 @@ public class RichCallHistory {
 
     /**
      * Get Image sharing reason code from unique Id
-     * 
-     * @param sharingId
+     *
+     * @param sharingId the sharing ID
      * @return Reason code
      */
     public ImageSharing.ReasonCode getImageSharingReasonCode(String sharingId) {
-        if (logger.isActivated()) {
-            logger.debug("Get image transfer reason code for sharingId ".concat(sharingId));
-        }
         Cursor cursor = getImageTransferData(ImageSharingData.KEY_REASON_CODE, sharingId);
         if (cursor == null) {
             return null;
@@ -560,14 +568,11 @@ public class RichCallHistory {
 
     /**
      * Get Video sharing state from unique Id
-     * 
-     * @param sharingId
+     *
+     * @param sharingId the sharing ID
      * @return State
      */
     public VideoSharing.State getVideoSharingState(String sharingId) {
-        if (logger.isActivated()) {
-            logger.debug("Get video share state for sharingId ".concat(sharingId));
-        }
         Cursor cursor = getVideoSharingData(VideoSharingData.KEY_STATE, sharingId);
         if (cursor == null) {
             return null;
@@ -577,14 +582,11 @@ public class RichCallHistory {
 
     /**
      * Get Video sharing reason code from unique Id
-     * 
-     * @param sharingId
+     *
+     * @param sharingId the sharing ID
      * @return Reason code
      */
     public VideoSharing.ReasonCode getVideoSharingReasonCode(String sharingId) {
-        if (logger.isActivated()) {
-            logger.debug("Get video share reason code for sharingId ".concat(sharingId));
-        }
         Cursor cursor = getVideoSharingData(VideoSharingData.KEY_REASON_CODE, sharingId);
         if (cursor == null) {
             return null;
@@ -594,8 +596,8 @@ public class RichCallHistory {
 
     /**
      * Returns video sharing duration
-     * 
-     * @param sharingId
+     *
+     * @param sharingId the sharing ID
      * @return duration
      */
     public Long getVideoSharingDuration(String sharingId) {
@@ -608,8 +610,8 @@ public class RichCallHistory {
 
     /**
      * Get geolocation sharing info from its unique Id
-     * 
-     * @param sharingId
+     *
+     * @param sharingId the sharing ID
      * @return Cursor the caller of this method has to close the cursor if a cursor is returned
      */
     public Cursor getGeolocSharingData(String sharingId) {
@@ -621,8 +623,8 @@ public class RichCallHistory {
 
     /**
      * Get image transfer info from its unique Id
-     * 
-     * @param sharingId
+     *
+     * @param sharingId the sharing ID
      * @return Cursor the caller of this method has to close the cursor if a cursor is returned
      */
     public Cursor getImageTransferData(String sharingId) {
@@ -634,8 +636,8 @@ public class RichCallHistory {
 
     /**
      * Get video sharing info from its unique Id
-     * 
-     * @param sharingId
+     *
+     * @param sharingId the sharing ID
      * @return Cursor the caller of this method has to close the cursor if a cursor is returned
      */
     public Cursor getVideoSharingData(String sharingId) {
@@ -645,4 +647,27 @@ public class RichCallHistory {
         return cursor;
     }
 
+    /**
+     * @param sharingId the sharing ID
+     * @return Cursor direction (INCOMING, ...)
+     */
+    public Direction getImageSharingDirection(String sharingId) {
+        Cursor cursor = getImageTransferData(ImageSharingData.KEY_DIRECTION, sharingId);
+        if (cursor == null) {
+            return null;
+        }
+        return Direction.valueOf(getDataAsInteger(cursor));
+    }
+
+    /**
+     * @param sharingId the sharing ID
+     * @return uri of file
+     */
+    public Uri getFile(String sharingId) {
+        Cursor cursor = getImageTransferData(ImageSharingData.KEY_FILE, sharingId);
+        if (cursor == null) {
+            return null;
+        }
+        return Uri.parse(getDataAsString(cursor));
+    }
 }
