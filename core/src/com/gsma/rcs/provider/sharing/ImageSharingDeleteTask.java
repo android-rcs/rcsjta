@@ -42,7 +42,6 @@ public class ImageSharingDeleteTask extends DeleteTask.GroupedByContactId {
      * @param imageSharingService the image service impl
      * @param richcallService the rich call service
      * @param contentResolver the local content resolver
-     * @param imsLock the ims operation lock
      */
     public ImageSharingDeleteTask(ImageSharingServiceImpl imageSharingService,
             RichcallService richcallService, LocalContentResolver contentResolver) {
@@ -58,12 +57,10 @@ public class ImageSharingDeleteTask extends DeleteTask.GroupedByContactId {
      * @param imageSharingService the image service impl
      * @param richcallService the rich call service
      * @param contentResolver the local content resolver
-     * @param imsLock the ims operation lock
      * @param sharingId the sharing id
      */
     public ImageSharingDeleteTask(ImageSharingServiceImpl imageSharingService,
-            RichcallService richcallService, LocalContentResolver contentResolver,
-            String sharingId) {
+            RichcallService richcallService, LocalContentResolver contentResolver, String sharingId) {
         super(contentResolver, ImageSharingData.CONTENT_URI, ImageSharingData.KEY_SHARING_ID,
                 ImageSharingData.KEY_CONTACT, null, sharingId);
         mImageSharingService = imageSharingService;
@@ -76,14 +73,12 @@ public class ImageSharingDeleteTask extends DeleteTask.GroupedByContactId {
      * @param imageSharingService the image service impl
      * @param richcallService the rich call service
      * @param contentResolver the local content resolver
-     * @param imsLock the ims operation lock
      * @param contact the contact id
      */
     public ImageSharingDeleteTask(ImageSharingServiceImpl imageSharingService,
-            RichcallService richcallService, LocalContentResolver contentResolver,
-            ContactId contact) {
-        super(contentResolver, ImageSharingData.CONTENT_URI,
-                ImageSharingData.KEY_SHARING_ID, ImageSharingData.KEY_CONTACT, contact);
+            RichcallService richcallService, LocalContentResolver contentResolver, ContactId contact) {
+        super(contentResolver, ImageSharingData.CONTENT_URI, ImageSharingData.KEY_SHARING_ID,
+                ImageSharingData.KEY_CONTACT, contact);
         mImageSharingService = imageSharingService;
         mRichcallService = richcallService;
     }
@@ -92,6 +87,7 @@ public class ImageSharingDeleteTask extends DeleteTask.GroupedByContactId {
     protected void onRowDelete(ContactId contact, String sharingId) throws PayloadException {
         ImageTransferSession session = mRichcallService.getImageTransferSession(sharingId);
         if (session == null) {
+            mImageSharingService.ensureFileCopyIsDeletedIfExisting(sharingId);
             mImageSharingService.removeImageSharing(sharingId);
             return;
 
@@ -108,6 +104,7 @@ public class ImageSharingDeleteTask extends DeleteTask.GroupedByContactId {
                 sLogger.debug(e.getMessage());
             }
         }
+        mImageSharingService.ensureFileCopyIsDeletedIfExisting(sharingId);
         mImageSharingService.removeImageSharing(sharingId);
     }
 
