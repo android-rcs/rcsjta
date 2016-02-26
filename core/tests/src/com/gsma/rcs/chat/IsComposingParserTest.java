@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ package com.gsma.rcs.chat;
 import com.gsma.rcs.core.ParseFailureException;
 import com.gsma.rcs.core.ims.service.im.chat.iscomposing.IsComposingInfo;
 import com.gsma.rcs.core.ims.service.im.chat.iscomposing.IsComposingParser;
-import com.gsma.rcs.utils.logger.Logger;
+import com.gsma.rcs.utils.DateUtils;
 
 import android.test.AndroidTestCase;
 
@@ -29,50 +29,54 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+/**
+ * Created by yplo6403 on 24/02/2016.
+ */
 public class IsComposingParserTest extends AndroidTestCase {
 
-    // @formatter:off
-    /*
-     * IsComposing SAMPLE: <?xml version="1.0" encoding="UTF-8"?> <isComposing
-     * xmlns="urn:ietf:params:xml:ns:im-iscomposing"
-     * xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-     * xsi:schemaLocation="urn:ietf:params:xml:ns:im-composing iscomposing.xsd"> <state>idle</state>
-     * <lastactive>2003-01-27T10:43:00Z</lastactive> <contenttype>audio</contenttype> </isComposing>
-     */
-    // @formatter:on
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private static final String sXmlContentToParse1 = "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
+            + "        <isComposing xmlns=\"urn:ietf:params:xml:ns:im-iscomposing\""
+            + "        xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\""
+            + "        xsi:schemaLocation=\"urn:ietf:params:xml:ns:im-composing iscomposing.xsd\">"
+            + "            <state>active</state>"
+            + "            <contenttype>text/plain</contenttype>"
+            + "            <lastactive>2012-02-22T17:53:49.000Z</lastactive>"
+            + "            <refresh>60</refresh>" + "    </isComposing>";
 
-    protected void setUp() throws Exception {
-        super.setUp();
-    }
+    private static final String sXmlContentToParse2 = "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
+            + "        <isComposing xmlns=\"urn:ietf:params:xml:ns:im-iscomposing\""
+            + "        xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\""
+            + "        xsi:schemaLocation=\"urn:ietf:params:xml:ns:im-composing iscomposing.xsd\">"
+            + "            <state>idle</state>"
+            + "            <contenttype>text/plain</contenttype>"
+            + "            <lastactive>2012-02-22T17:53:49.000Z</lastactive>"
+            + "            <refresh>60</refresh>" + "    </isComposing>";
 
-    protected void tearDown() throws Exception {
-        super.tearDown();
-    }
-
-    public void testIsComposingParser() throws ParserConfigurationException, SAXException,
-            IOException, ParseFailureException {
-        StringBuffer sb = new StringBuffer("<?xml version=\"1.08\" encoding=\"UTF-8\"?>");
-        sb.append("<isComposing xmlns=\"urn:ietf:params:xml:ns:im-isComposing\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" ");
-        sb.append("xsi:schemaLocation=\"urn:ietf:params:xml:ns:im-composing iscomposing.xsd\">");
-        sb.append("<state>idle</state>");
-        sb.append("<lastactive>2008-12-13T13:40:00Z</lastactive>");
-        sb.append("<contenttype>audio</contenttype> </isComposing>");
-        String xml = sb.toString();
-
-        InputSource inputso = new InputSource(new ByteArrayInputStream(xml.getBytes()));
-        IsComposingParser parser = new IsComposingParser(inputso);
+    public void testIsComposingParserActive() throws ParseFailureException, SAXException,
+            ParserConfigurationException {
+        IsComposingParser parser = new IsComposingParser(new InputSource(new ByteArrayInputStream(
+                sXmlContentToParse1.getBytes())));
         parser.parse();
-        IsComposingInfo isInfo = parser.getIsComposingInfo();
-        assertEquals(isInfo.getContentType(), "audio");
-        assertEquals(isInfo.isStateActive(), false);
-        if (logger.isActivated()) {
-            logger.info("isComposing lastActiveDate = " + isInfo.getLastActiveDate());
-        }
-
+        IsComposingInfo info = parser.getIsComposingInfo();
+        assertEquals("text/plain", info.getContentType());
+        assertEquals(60000, info.getRefreshTime());
+        assertEquals(true, info.isStateActive());
+        assertEquals(DateUtils.decodeDate("2012-02-22T17:53:49.000Z"), info.getLastActiveDate());
     }
+
+    public void testIsComposingParserIdle() throws ParseFailureException, SAXException,
+            ParserConfigurationException {
+        IsComposingParser parser = new IsComposingParser(new InputSource(new ByteArrayInputStream(
+                sXmlContentToParse2.getBytes())));
+        parser.parse();
+        IsComposingInfo info = parser.getIsComposingInfo();
+        assertEquals("text/plain", info.getContentType());
+        assertEquals(60000, info.getRefreshTime());
+        assertEquals(false, info.isStateActive());
+        assertEquals(DateUtils.decodeDate("2012-02-22T17:53:49.000Z"), info.getLastActiveDate());
+    }
+
 }

@@ -41,13 +41,20 @@ import javax.xml.parsers.SAXParserFactory;
  * Is composing event parser (RFC3994)
  */
 public class IsComposingParser extends DefaultHandler {
-    /*
-     * IsComposing SAMPLE: <?xml version="1.0" encoding="UTF-8"?> <isComposing
-     * xmlns="urn:ietf:params:xml:ns:im-iscomposing"
-     * xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-     * xsi:schemaLocation="urn:ietf:params:xml:ns:im-composing iscomposing.xsd"> <state>idle</state>
-     * <lastactive>2003-01-27T10:43:00Z</lastactive> <contenttype>audio</contenttype> </isComposing>
-     */
+    // @formatter:off
+    /* Example of CPIM message having application/im-iscomposing+xml for content type:
+    <?xml version="1.0" encoding="utf-8"?>
+        <isComposing xmlns="urn:ietf:params:xml:ns:im-iscomposing"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="urn:ietf:params:xml:ns:im-composing iscomposing.xsd">
+            <state>active</state>
+            <contenttype>text/plain</contenttype>
+            <lastactive>2012-02-22T17:53:49.000Z</lastactive>
+            <refresh>60</refresh>
+    </isComposing>
+    */
+    // @formatter:on
+
     /**
      * Rate to convert from seconds to milliseconds
      */
@@ -55,7 +62,7 @@ public class IsComposingParser extends DefaultHandler {
 
     private StringBuilder mAccumulator;
 
-    private IsComposingInfo isComposingInfo;
+    private IsComposingInfo mComposingInfo;
 
     private static final Logger sLogger = Logger.getLogger(IsComposingParser.class.getSimpleName());
 
@@ -101,32 +108,32 @@ public class IsComposingParser extends DefaultHandler {
     public void startElement(String namespaceURL, String localName, String qname, Attributes attr) {
         mAccumulator.setLength(0);
         if ("isComposing".equals(localName)) {
-            isComposingInfo = new IsComposingInfo();
+            mComposingInfo = new IsComposingInfo();
         }
     }
 
     public void endElement(String namespaceURL, String localName, String qname) {
         switch (localName) {
             case "state":
-                if (isComposingInfo != null) {
-                    isComposingInfo.setState(mAccumulator.toString());
+                if (mComposingInfo != null) {
+                    mComposingInfo.setState(mAccumulator.toString());
                 }
                 break;
             case "lastactive":
-                if (isComposingInfo != null) {
-                    isComposingInfo.setLastActiveDate(mAccumulator.toString());
+                if (mComposingInfo != null) {
+                    mComposingInfo.setLastActiveDate(mAccumulator.toString());
                 }
                 break;
             case "contenttype":
-                if (isComposingInfo != null) {
-                    isComposingInfo.setContentType(mAccumulator.toString());
+                if (mComposingInfo != null) {
+                    mComposingInfo.setContentType(mAccumulator.toString());
                 }
                 break;
             case "refresh":
-                if (isComposingInfo != null) {
+                if (mComposingInfo != null) {
                     long time = Long.parseLong(mAccumulator.toString())
                             * SECONDS_TO_MILLISECONDS_CONVERSION_RATE;
-                    isComposingInfo.setRefreshTime(time);
+                    mComposingInfo.setRefreshTime(time);
                 }
                 break;
             case "isComposing":
@@ -163,6 +170,6 @@ public class IsComposingParser extends DefaultHandler {
     }
 
     public IsComposingInfo getIsComposingInfo() {
-        return isComposingInfo;
+        return mComposingInfo;
     }
 }

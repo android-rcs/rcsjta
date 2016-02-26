@@ -22,8 +22,6 @@
 
 package com.gsma.rcs.core.ims.service.im.filetransfer.http;
 
-import org.xml.sax.helpers.DefaultHandler;
-
 import android.net.Uri;
 
 /**
@@ -31,7 +29,7 @@ import android.net.Uri;
  * 
  * @author hhff3235
  */
-public class FileTransferHttpResumeInfo extends DefaultHandler {
+public class FileTransferHttpResumeInfo {
     /**
      * start-offset in bytes
      */
