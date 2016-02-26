@@ -55,6 +55,7 @@ import android.net.Uri;
 import android.os.RemoteException;
 import android.text.TextUtils;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -281,9 +282,10 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
         }
         ServerApiUtils.testIms();
         try {
-            FileDescription desc = FileFactory.getFactory().getFileDescription(file);
+            Uri localFile = FileUtils.createCopyOfSentFile(file, mRcsSettings);
+            FileDescription desc = FileFactory.getFactory().getFileDescription(localFile);
             String mime = FileUtils.getMimeTypeFromExtension(desc.getName());
-            MmContent content = ContentManager.createMmContent(file, mime, desc.getSize(),
+            MmContent content = ContentManager.createMmContent(localFile, mime, desc.getSize(),
                     desc.getName());
             long timestamp = System.currentTimeMillis();
             final ImageTransferSession session = mRichcallService.createImageSharingSession(
@@ -294,7 +296,7 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
                     timestamp);
 
             ImageSharingPersistedStorageAccessor persistedStorage = new ImageSharingPersistedStorageAccessor(
-                    sharingId, contact, Direction.OUTGOING, file, content.getName(),
+                    sharingId, contact, Direction.OUTGOING, localFile, content.getName(),
                     content.getEncoding(), content.getSize(), mRichCallLog, timestamp);
             final ImageSharingImpl imageSharing = new ImageSharingImpl(sharingId, mRichcallService,
                     mBroadcaster, persistedStorage, this);
@@ -503,5 +505,20 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 
     public void broadcastDeleted(ContactId contact, Set<String> sharingIds) {
         mBroadcaster.broadcastDeleted(contact, sharingIds);
+    }
+
+    /**
+     * Ensure copy of file if existing is deleted
+     *
+     * @param sharingId Unique Id of file transfer
+     */
+    public void ensureFileCopyIsDeletedIfExisting(String sharingId) {
+        if (Direction.INCOMING == mRichCallLog.getImageSharingDirection(sharingId)) {
+            return;
+        }
+        Uri file = mRichCallLog.getFile(sharingId);
+        if (file != null) {
+            new File(file.getPath()).delete();
+        }
     }
 }
