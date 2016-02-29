@@ -1825,6 +1825,15 @@ public class RcsSettings {
     }
 
     /**
+     * Is secure MSRP media over Mobile access
+     *
+     * @return Boolean
+     */
+    public boolean isSecureMsrpOverMobile() {
+        return readBoolean(RcsSettingsData.SECURE_MSRP_OVER_MOBILE);
+    }
+
+    /**
      * Is secure MSRP media over Wi-Fi
      *
      * @return Boolean
@@ -1856,6 +1865,24 @@ public class RcsSettings {
 
     public void setFirstMessageInInvite(boolean inInvite) {
         writeBoolean(RcsSettingsData.FIRST_MESSAGE_INVITE, inInvite);
+    }
+
+    /**
+     * Is secure RTP media over Mobile access
+     *
+     * @return Boolean
+     */
+    public boolean isSecureRtpOverMobile() {
+        return readBoolean(RcsSettingsData.SECURE_RTP_OVER_MOBILE);
+    }
+
+    /**
+     * Is secure RTP media over Wi-Fi
+     *
+     * @return Boolean
+     */
+    public boolean isSecureRtpOverWifi() {
+        return readBoolean(RcsSettingsData.SECURE_RTP_OVER_WIFI);
     }
 
     /**

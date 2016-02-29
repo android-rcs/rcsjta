@@ -1323,6 +1323,18 @@ public class RcsSettingsData {
             .getExternalStorageDirectory() + "/rcs/fileicons/";
 
     /**
+     * Secure MSRP over Mobile access
+     */
+    public static final String SECURE_MSRP_OVER_MOBILE = "SecureMsrpOverMobile";
+    /* package private */static final Boolean DEFAULT_SECURE_MSRP_OVER_MOBILE = false;
+
+    /**
+     * Secure RTP over Mobile access
+     */
+    public static final String SECURE_RTP_OVER_MOBILE = "SecureRtpOverMobile";
+    /* package private */static final Boolean DEFAULT_SECURE_RTP_OVER_MOBILE = false;
+
+    /**
      * Secure MSRP over Wi-Fi
      */
     public static final String SECURE_MSRP_OVER_WIFI = "SecureMsrpOverWifi";
@@ -1740,6 +1752,10 @@ public class RcsSettingsData {
                 RcsSettingsData.DEFAULT_DIRECTORY_PATH_FILES);
         sSettingsKeyDefaultValue.put(RcsSettingsData.DIRECTORY_PATH_FILEICONS,
                 RcsSettingsData.DEFAULT_DIRECTORY_PATH_FILEICONS);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.SECURE_MSRP_OVER_MOBILE,
+                RcsSettingsData.DEFAULT_SECURE_MSRP_OVER_MOBILE);
+        sSettingsKeyDefaultValue.put(RcsSettingsData.SECURE_RTP_OVER_MOBILE,
+                RcsSettingsData.DEFAULT_SECURE_RTP_OVER_MOBILE);
         sSettingsKeyDefaultValue.put(RcsSettingsData.SECURE_MSRP_OVER_WIFI,
                 RcsSettingsData.DEFAULT_SECURE_MSRP_OVER_WIFI);
         sSettingsKeyDefaultValue.put(RcsSettingsData.SECURE_RTP_OVER_WIFI,

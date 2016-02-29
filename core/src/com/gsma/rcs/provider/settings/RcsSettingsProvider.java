@@ -84,7 +84,7 @@ public class RcsSettingsProvider extends ContentProvider {
     }
 
     private static class DatabaseHelper extends SQLiteOpenHelper {
-        private static final int DATABASE_VERSION = 120;
+        private static final int DATABASE_VERSION = 121;
 
         /**
          * Add a parameter in the db

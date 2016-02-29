@@ -44,13 +44,13 @@ public class MobileNetworkInterface extends ImsNetworkInterface {
      * Constructor
      * 
      * @param imsModule IMS module
-     * @param rcsSettings
+     * @param rcsSettings the RCS settings accessor
      */
     public MobileNetworkInterface(ImsModule imsModule, RcsSettings rcsSettings) {
-        super(imsModule, ConnectivityManager.TYPE_MOBILE, new MobileNetworkAccess(), rcsSettings
-                .getImsProxyAddrForMobile(), rcsSettings.getImsProxyPortForMobile(), rcsSettings
-                .getSipDefaultProtocolForMobile(), rcsSettings
-                .getImsAuthenticationProcedureForMobile(), rcsSettings);
+        super(imsModule, ConnectivityManager.TYPE_MOBILE, new MobileNetworkAccess(rcsSettings),
+                rcsSettings.getImsProxyAddrForMobile(), rcsSettings.getImsProxyPortForMobile(),
+                rcsSettings.getSipDefaultProtocolForMobile(), rcsSettings
+                        .getImsAuthenticationProcedureForMobile(), rcsSettings);
 
         if (logger.isActivated()) {
             logger.info("Mobile network interface has been loaded");

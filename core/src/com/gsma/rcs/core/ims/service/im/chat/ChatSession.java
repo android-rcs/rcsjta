@@ -19,6 +19,7 @@
  * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
+
 package com.gsma.rcs.core.ims.service.im.chat;
 
 import static com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSession.isFileCapacityAcceptable;
@@ -158,9 +159,6 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
         String localIpAddress = mImService.getImsModule().getCurrentNetworkInterface()
                 .getNetworkAccess().getIpAddress();
         mMsrpMgr = new MsrpManager(localIpAddress, localMsrpPort, imService, rcsSettings);
-        if (imService.getImsModule().isConnectedToWifiAccess()) {
-            mMsrpMgr.setSecured(rcsSettings.isSecureMsrpOverWifi());
-        }
         mFirstMsg = firstMsg;
     }
 

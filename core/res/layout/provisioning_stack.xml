@@ -676,6 +676,23 @@
             android:text="@string/Secure_RTP_over_Wi_Fi_access"/>
 
         <android.support.v7.widget.AppCompatCheckBox
+            android:id="@+id/SecureMsrpOverMobile"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:text="@string/Secure_MSRP_over_Mobile_access" />
+
+        <android.support.v7.widget.AppCompatCheckBox
+            android:id="@+id/SecureRtpOverMobile"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:enabled="false"
+            android:text="@string/Secure_RTP_over_Mobile_access" />
+
+        <android.support.v7.widget.AppCompatCheckBox
             android:id="@+id/ImeiAsDeviceId"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
