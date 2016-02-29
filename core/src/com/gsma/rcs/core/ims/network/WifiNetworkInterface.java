@@ -47,10 +47,10 @@ public class WifiNetworkInterface extends ImsNetworkInterface {
      * @param rcsSettings
      */
     public WifiNetworkInterface(ImsModule imsModule, RcsSettings rcsSettings) {
-        super(imsModule, ConnectivityManager.TYPE_WIFI, new WifiNetworkAccess(), rcsSettings
-                .getImsProxyAddrForWifi(), rcsSettings.getImsProxyPortForWifi(), rcsSettings
-                .getSipDefaultProtocolForWifi(),
-                rcsSettings.getImsAuthenticationProcedureForWifi(), rcsSettings);
+        super(imsModule, ConnectivityManager.TYPE_WIFI, new WifiNetworkAccess(rcsSettings),
+                rcsSettings.getImsProxyAddrForWifi(), rcsSettings.getImsProxyPortForWifi(),
+                rcsSettings.getSipDefaultProtocolForWifi(), rcsSettings
+                        .getImsAuthenticationProcedureForWifi(), rcsSettings);
 
         if (logger.isActivated()) {
             logger.info("Wi-Fi network interface has been loaded");

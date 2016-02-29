@@ -168,6 +168,8 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
         mMsrpMgr = new MsrpManager(localIpAddress, localMsrpPort, imService, rcsSettings);
         if (imService.getImsModule().isConnectedToWifiAccess()) {
             mMsrpMgr.setSecured(rcsSettings.isSecureMsrpOverWifi());
+        } else if (imService.getImsModule().isConnectedToMobileAccess()) {
+            mMsrpMgr.setSecured(rcsSettings.isSecureMsrpOverMobile());
         }
         mFirstMsg = firstMsg;
     }

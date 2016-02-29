@@ -22,6 +22,8 @@
 
 package com.gsma.rcs.core.access;
 
+import com.gsma.rcs.provider.settings.RcsSettings;
+
 import java.io.IOException;
 import java.security.cert.CertificateException;
 
@@ -43,9 +45,15 @@ public abstract class NetworkAccess {
     protected String mType;
 
     /**
+     * rcs settings
+     */
+    protected RcsSettings mRcsSettings;
+
+    /**
      * Constructor
      */
-    public NetworkAccess() {
+    public NetworkAccess(RcsSettings rcsSettings) {
+        mRcsSettings = rcsSettings;
     }
 
     /**

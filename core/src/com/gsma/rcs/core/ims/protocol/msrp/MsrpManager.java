@@ -86,6 +86,8 @@ public class MsrpManager {
         this(localMsrpAddress, localMsrpPort, rcsSettings);
         if (service.getImsModule().isConnectedToWifiAccess()) {
             mSecured = rcsSettings.isSecureMsrpOverWifi();
+        } else if (service.getImsModule().isConnectedToMobileAccess()) {
+            mSecured = rcsSettings.isSecureMsrpOverMobile();
         }
     }
 

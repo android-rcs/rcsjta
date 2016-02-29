@@ -1291,13 +1291,15 @@ public class ProvisioningParser {
      * @param node Node
      */
     private void parseTransportProtocol(Node node) {
-        String psSignalling = null;
-        String wifiSignalling = null;
-        String wifiMedia = null;
-        String wifiRtMedia = null;
         if (node == null) {
             return;
         }
+        String psSignalling = null;
+        String psMedia = null;
+        String psRtMedia = null;
+        String wifiSignalling = null;
+        String wifiMedia = null;
+        String wifiRtMedia = null;
         Node childnode = node.getFirstChild();
 
         if (childnode != null) {
@@ -1359,8 +1361,30 @@ public class ProvisioningParser {
                     }
                 }
 
-                // Not supported: "psMedia"
-                // Not supported: "psRTMedia"
+                if (psMedia == null) {
+                    if ((psMedia = getValueByParamName("psMedia", childnode, TYPE_TXT)) != null) {
+                        if ("MSRP".equals(psMedia)) {
+                            mRcsSettings.writeBoolean(RcsSettingsData.SECURE_MSRP_OVER_MOBILE,
+                                    false);
+                        } else if ("MSRPoTLS".equals(psMedia)) {
+                            mRcsSettings
+                                    .writeBoolean(RcsSettingsData.SECURE_MSRP_OVER_MOBILE, true);
+                        }
+                        continue;
+                    }
+                }
+
+                if (psRtMedia == null) {
+                    if ((psRtMedia = getValueByParamName("psRTMedia", childnode, TYPE_TXT)) != null) {
+                        if ("RTP".equals(psRtMedia)) {
+                            mRcsSettings
+                                    .writeBoolean(RcsSettingsData.SECURE_RTP_OVER_MOBILE, false);
+                        } else if ("SRTP".equals(psRtMedia)) {
+                            mRcsSettings.writeBoolean(RcsSettingsData.SECURE_RTP_OVER_MOBILE, true);
+                        }
+                        continue;
+                    }
+                }
 
             } while ((childnode = childnode.getNextSibling()) != null);
         }

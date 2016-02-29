@@ -1237,6 +1237,18 @@ public class RcsSettingsData {
             .getExternalStorageDirectory() + "/rcs/fileicons/";
 
     /**
+     * Secure MSRP over Mobile access
+     */
+    public static final String SECURE_MSRP_OVER_MOBILE = "SecureMsrpOverMobile";
+    /* package private */static final Boolean DEFAULT_SECURE_MSRP_OVER_MOBILE = false;
+
+    /**
+     * Secure RTP over Mobile access
+     */
+    public static final String SECURE_RTP_OVER_MOBILE = "SecureRtpOverMobile";
+    /* package private */static final Boolean DEFAULT_SECURE_RTP_OVER_MOBILE = false;
+
+    /**
      * Secure MSRP over Wi-Fi
      */
     public static final String SECURE_MSRP_OVER_WIFI = "SecureMsrpOverWifi";
@@ -1353,7 +1365,7 @@ public class RcsSettingsData {
 
     public static final String MAX_ALLOWED_DISPLAY_NAME_CHARS = "MaxAllowedDisplayNameChars";
     /* package private */static final int DEFAULT_MAX_ALLOWED_DISPLAY_NAME_CHARS = 256;
-
+    
     /**
      * Provisioning optional user message content associated with the result of the configuration
      * server response
