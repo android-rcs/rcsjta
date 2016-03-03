@@ -287,7 +287,7 @@ public class ReceiveFileTransfer extends RcsActivity {
                         iconView.setImageResource(R.drawable.ri_contact_card_icon);
                     } else {
                         iconView.setImageResource(R.drawable.ri_notif_file_transfer_icon);
-                    }// TODO SL : AUDIO ICONE
+                    }
                 }
                 builder.setPositiveButton(R.string.label_accept, mAcceptBtnListener);
                 builder.setNegativeButton(R.string.label_decline, mDeclineBtnListener);

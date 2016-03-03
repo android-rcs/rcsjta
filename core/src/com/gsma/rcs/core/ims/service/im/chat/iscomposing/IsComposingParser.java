@@ -52,8 +52,7 @@ public class IsComposingParser extends DefaultHandler {
             <lastactive>2012-02-22T17:53:49.000Z</lastactive>
             <refresh>60</refresh>
     </isComposing>
-    */
-    // @formatter:on
+*/    // @formatter:on
 
     /**
      * Rate to convert from seconds to milliseconds

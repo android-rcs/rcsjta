@@ -45,7 +45,7 @@ import com.gsma.rcs.utils.logger.Logger;
  */
 public class GeolocInfoParser extends DefaultHandler {
 
-    /*
+        /*
      * Geoloc-Info SAMPLE: <?xml version="1.0" encoding="UTF-8"?> <rcsenvelope
      * xmlns="urn:gsma:params:xml:ns:rcs:rcs:geolocation"
      * xmlns:rpid="urn:ietf:params:xml:ns:pidf:rpid"
@@ -105,6 +105,9 @@ public class GeolocInfoParser extends DefaultHandler {
         return geoloc;
     }
 
+    /**
+     * StartDocument
+     */
     public void startDocument() {
         if (logger.isActivated()) {
             logger.debug("Start document");
@@ -116,12 +119,19 @@ public class GeolocInfoParser extends DefaultHandler {
         accumulator.append(buffer, start, length);
     }
 
+    /**
+     * StartElement
+     * @param namespaceURL
+     * @param localName
+     * @param qname
+     * @param attr
+     */
     public void startElement(String namespaceURL, String localName, String qname, Attributes attr) {
         accumulator.setLength(0);
-        if (localName.equals("rcsenvelope")) {
+        if ("rcsenvelope".equals(localName)) {
             String entity = attr.getValue("entity").trim();
             geoloc = new GeolocInfoDocument(entity);
-        } else if (localName.equals("rcspushlocation")) {
+        } else if ("rcspushlocation".equals(localName)) {
             if (logger.isActivated()) {
                 logger.debug("rcspushlocation");
             }
@@ -132,16 +142,22 @@ public class GeolocInfoParser extends DefaultHandler {
         }
     }
 
+    /**
+     * endElement
+     * @param namespaceURL
+     * @param localName
+     * @param qname
+     */
     public void endElement(String namespaceURL, String localName, String qname) {
-        if (localName.equals("radius")) {
+        if ("radius".equals(localName)) {
             if (geoloc != null) {
                 geoloc.setRadius(Float.parseFloat(accumulator.toString().trim()));
             }
-        } else if (localName.equals("retention-expiry")) {
+        } else if ("retention-expiry".equals(localName)) {
             if (geoloc != null) {
                 geoloc.setExpiration(DateUtils.decodeDate(accumulator.toString().trim()));
             }
-        } else if (localName.equals("pos")) {
+        } else if ("pos".equals(localName)) {
             if (geoloc != null) {
                 StringTokenizer st = new StringTokenizer(accumulator.toString().trim());
                 if (st.hasMoreTokens()) {
