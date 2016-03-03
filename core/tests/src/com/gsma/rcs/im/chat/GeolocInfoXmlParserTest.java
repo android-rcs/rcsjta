@@ -1,28 +1,39 @@
-package com.gsma.rcs.im.chat;
+/*******************************************************************************
+ * Software Name : RCS IMS Stack
+ *
+ * Copyright (C) 2010-2016 ORANGE.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ******************************************************************************/
 
-/**
- * Created by sandrine on 01/03/2016.
- */
+package com.gsma.rcs.im.chat;
 
 import com.gsma.rcs.core.ParseFailureException;
 import com.gsma.rcs.core.ims.service.im.chat.geoloc.GeolocInfoDocument;
 import com.gsma.rcs.core.ims.service.im.chat.geoloc.GeolocInfoParser;
-import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.DateUtils;
 
 import android.test.AndroidTestCase;
-import android.util.Log;
 
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import java.io.ByteArrayInputStream;
-import java.sql.Date;
 
 import javax.xml.parsers.ParserConfigurationException;
 
 /**
- * Created by Romain on 01/03/16.
+ * Created by Romain Caron & Sandrine Lacharme
  */
 public class GeolocInfoXmlParserTest extends AndroidTestCase {
 
@@ -44,8 +55,6 @@ public class GeolocInfoXmlParserTest extends AndroidTestCase {
             + "          <timestamp>2012-03-15T16:09:44-05:00</timestamp>\n"
             + "     </rcspushlocation>\n" + "</rcsenvelope>";
 
-
-
     public void testGeolocXmlParser() throws ParseFailureException, SAXException,
             ParserConfigurationException {
         GeolocInfoParser parser = new GeolocInfoParser(new InputSource(new ByteArrayInputStream(
@@ -54,8 +63,8 @@ public class GeolocInfoXmlParserTest extends AndroidTestCase {
         GeolocInfoDocument info = parser.getGeoLocInfo();
         assertEquals(48.731964, info.getLatitude());
         assertEquals(-3.45829, info.getLongitude());
-        assertEquals(10.0f,info.getRadius());
-        assertEquals("tel:+12345678901",info.getEntity());
+        assertEquals(10.0f, info.getRadius());
+        assertEquals("tel:+12345678901", info.getEntity());
         assertEquals(DateUtils.decodeDate("2012-03-15T21:00:00-05:00"), info.getExpiration());
     }
 }
