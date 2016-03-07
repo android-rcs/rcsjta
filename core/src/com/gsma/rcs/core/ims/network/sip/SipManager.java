@@ -317,41 +317,43 @@ public class SipManager {
                 mNetworkInterface.getRegistrationManager().restart();
             }
         }
-        if (!Request.INVITE.equals(method) && !Request.REGISTER.equals(method)) {
+        if (!Request.REGISTER.equals(method)) {
             return;
 
         }
 
-        KeepAliveManager keepAliveManager = mNetworkInterface.getSipManager().getSipStack()
-                .getKeepAliveManager();
+        KeepAliveManager keepAliveManager = sipstack.getKeepAliveManager();
         if (keepAliveManager == null) {
             return;
 
         }
 
-        /* Message is a response to INVITE or REGISTER: analyze "keep" flag of "Via" header */
+        /* Message is a response to REGISTER: analyze "keep" flag of "Via" header */
         ListIterator<ViaHeader> iterator = response.getViaHeaders();
         if (!iterator.hasNext()) {
-            keepAliveManager.setPeriod(mRcsSettings.getSipKeepAlivePeriod());
             return;
+
         }
         ViaHeader respViaHeader = iterator.next();
         String keepStr = respViaHeader.getParameter("keep");
         if (keepStr == null) {
-            keepAliveManager.setPeriod(mRcsSettings.getSipKeepAlivePeriod());
             return;
+
         }
         try {
             long viaKeep = Integer.parseInt(keepStr) * SECONDS_TO_MILLISECONDS_CONVERSION_RATE;
             if (viaKeep > 0) {
                 keepAliveManager.setPeriod(viaKeep);
-            } else {
-                /* Set Default Value fetched from provisioning settings */
+            } else if (viaKeep == 0) {
+                /*
+                 * If "keep" value is zero, set keep alive period to own discretion (i.e. default
+                 * value from provisioning)
+                 */
                 keepAliveManager.setPeriod(mRcsSettings.getSipKeepAlivePeriod());
             }
         } catch (NumberFormatException e) {
             /*
-             * If "keep" value is invalid or not present, Set Default Value fetched from
+             * If "keep" value is invalid , set Default Value fetched from
              * provisioning settings
              */
             keepAliveManager.setPeriod(mRcsSettings.getSipKeepAlivePeriod());

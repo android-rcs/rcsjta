@@ -91,11 +91,12 @@ public class SipMessageFactory {
      * @param featureTags Feature tags
      * @param expirePeriod Expiration period in milliseconds
      * @param instanceId UA SIP instance ID
+     * @param announceKeepAlive propagate support of keep alive
      * @return SIP request
      * @throws PayloadException
      */
     public static SipRequest createRegister(SipDialogPath dialog, String[] featureTags,
-            long expirePeriod, String instanceId) throws PayloadException {
+            long expirePeriod, String instanceId, boolean announceKeepAlive) throws PayloadException {
         try {
             // Set request line header
             URI requestURI = SipUtils.ADDR_FACTORY.createURI(dialog.getTarget());
@@ -119,7 +120,7 @@ public class SipMessageFactory {
 
             // Insert "keep" flag to Via header (RFC6223 "Indication of Support for Keep-Alive")
             List<ViaHeader> viaHeaders = dialog.getSipStack().getViaHeaders();
-            if (viaHeaders != null && !viaHeaders.isEmpty()) {
+            if (viaHeaders != null && !viaHeaders.isEmpty() && announceKeepAlive) {
                 ViaHeader viaHeader = viaHeaders.get(0);
                 viaHeader.setParameter(new NameValue("keep", null, true));
             }
