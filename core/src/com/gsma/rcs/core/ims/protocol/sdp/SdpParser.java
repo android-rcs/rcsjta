@@ -98,7 +98,8 @@ public class SdpParser extends Parser {
         }
 
         // Bandwidth information
-        if (getToken(bin, "b=")) {
+        while (getToken(bin, "b=")) {
+            //session bandwidth information is not used right now; just consumed for parsing
             sessionDescription.bandwidthInfo = getLine(bin);
         }
 
