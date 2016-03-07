@@ -218,6 +218,7 @@ import java.util.Set;
         columnMapping.put(HistoryLogData.KEY_STATUS, GeolocSharingLog.STATE);
         columnMapping.put(HistoryLogData.KEY_REASON_CODE, GeolocSharingLog.REASON_CODE);
         columnMapping.put(HistoryLogData.KEY_MIME_TYPE, GeolocSharingLog.MIME_TYPE);
+        columnMapping.put(HistoryLogData.KEY_CONTENT, GeolocSharingLog.CONTENT);
         return columnMapping;
     }
 
