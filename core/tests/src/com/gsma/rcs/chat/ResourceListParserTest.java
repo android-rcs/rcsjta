@@ -34,7 +34,14 @@ import java.io.IOException;
 import javax.xml.parsers.ParserConfigurationException;
 
 public class ResourceListParserTest extends AndroidTestCase {
-    private static final String CRLF = "\r\n";
+    private static final String sXmlContentToParse1 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+            + "<resource-lists xmlns=\"urn:ietf:params:xml:ns:resource-lists\" xmlns:cp=\"urn:ietf:params:xml:ns:copycontrol\">\n"
+            + "\t<list>\n"
+            + "\t\t<entry cp:copyControl=\"to\" uri=\"sip:bill@example.com\"/>\n"
+            + "\t\t<entry cp:copyControl=\"cc\" uri=\"sip:joe@example.org\"/>\n"
+            + "\t\t<entry cp:copyControl=\"bcc\" uri=\"sip:ted@example.net\"/>\n"
+            + "\t</list>\n"
+            + "</resource-lists>";
 
     private Logger logger = Logger.getLogger(this.getClass().getName());
 
@@ -48,35 +55,9 @@ public class ResourceListParserTest extends AndroidTestCase {
 
     public void testGetResourceListDocument() throws ParserConfigurationException, SAXException,
             IOException, ParseFailureException {
-        // @formatter:off
-        /*
-         * Resource-List SAMPLE: <?xml version="1.0" encoding="UTF-8"?> <resource-lists
-         * xmlns="urn:ietf:params:xml:ns:resource-lists"
-         * xmlns:cp="urn:ietf:params:xml:ns:copycontrol"> <list> <entry uri="sip:bill@example.com"
-         * cp:copyControl="to" /> <entry uri="sip:joe@example.org" cp:copyControl="cc" /> <entry
-         * uri="sip:ted@example.net" cp:copyControl="bcc" /> </list> </resource-lists>
-         */
-        // @formatter:on
-        StringBuffer sb = new StringBuffer("<?xml version=\"1.08\" encoding=\"UTF-8\"?>");
-        sb.append(CRLF);
-        sb.append("<resource-lists xmlns=\"urn:ietf:params:xml:ns:resource-lists\" xmlns:cp=\"urn:ietf:params:xml:ns:copycontrol\">");
-        sb.append(CRLF);
-        sb.append("<list>");
-        sb.append(CRLF);
-        sb.append("<entry uri=\"sip:bill@example.com\" cp:copyControl=\"to\"  />");
-        sb.append(CRLF);
-        sb.append("<entry uri=\"sip:joe@example.org\" cp:copyControl=\"cc\" />");
-        sb.append(CRLF);
-        sb.append("<entry uri=\"sip:ted@example.net\" cp:copyControl=\"bcc\" />");
-        sb.append(CRLF);
-        sb.append("</list>");
-        sb.append(CRLF);
-        sb.append("</resource-lists>");
-        sb.append(CRLF);
-        String xml = sb.toString();
 
-        InputSource inputso = new InputSource(new ByteArrayInputStream(xml.getBytes()));
-        ResourceListParser parser = new ResourceListParser(inputso);
+        ResourceListParser parser = new ResourceListParser(new InputSource(
+                new ByteArrayInputStream(sXmlContentToParse1.getBytes())));
         parser.parse();
         ResourceListDocument rlistDoc = parser.getResourceList();
         if (logger.isActivated()) {
