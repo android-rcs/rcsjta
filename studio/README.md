@@ -18,7 +18,7 @@ After installation plugin, select "*File -> Settings*" again and navigate to "*O
 
 In "Eclipse java Formatter config file" click browse and find path to "**eclipse/android-eclipse-formatting.xml**". After configuration press Apply.
 
-Finally edit the manual configuration for "*Import order*" to set "**com.gsma;com;dalvik;gov;junit;libcore;net;org;java;javax**" and click Enable.
+Finally edit the manual configuration for "*Import order*" to set "**com.gsma;com;android;dalvik;gov;junit;libcore;net;org;java;javax**" and click Enable.
 
 Now you can use formatter in file editor: CTRL+ALT+L.
 
