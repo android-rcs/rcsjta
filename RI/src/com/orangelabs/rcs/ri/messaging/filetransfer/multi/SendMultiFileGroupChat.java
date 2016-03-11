@@ -25,10 +25,10 @@ import com.gsma.services.rcs.filetransfer.FileTransferService;
 import com.gsma.services.rcs.filetransfer.GroupFileTransferListener;
 import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo;
 
-import android.util.Log;
-
 import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.utils.LogUtils;
+
+import android.util.Log;
 
 import java.util.List;
 import java.util.Set;

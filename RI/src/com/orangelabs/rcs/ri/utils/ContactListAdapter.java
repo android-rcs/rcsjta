@@ -18,19 +18,11 @@
 
 package com.orangelabs.rcs.ri.utils;
 
-import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.services.rcs.contact.ContactService;
-import com.gsma.services.rcs.contact.RcsContact;
-
-import com.orangelabs.rcs.api.connection.ConnectionManager;
-import com.orangelabs.rcs.api.connection.utils.ExceptionUtil;
-import com.orangelabs.rcs.ri.R;
-
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.MatrixCursor;
+import android.database.SQLException;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.provider.ContactsContract.Contacts;
 import android.util.Log;
@@ -40,6 +32,15 @@ import android.view.ViewGroup;
 import android.widget.CursorAdapter;
 import android.widget.TextView;
 
+import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.RcsServiceNotAvailableException;
+import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.contact.ContactService;
+import com.gsma.services.rcs.contact.RcsContact;
+import com.orangelabs.rcs.api.connection.ConnectionManager;
+import com.orangelabs.rcs.api.connection.utils.ExceptionUtil;
+import com.orangelabs.rcs.ri.R;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -48,17 +49,17 @@ import java.util.Set;
  */
 public class ContactListAdapter extends CursorAdapter {
 
-    private static String[] PROJECTION_PHONE = new String[] {
+    private static final String[] PROJECTION_PHONE = new String[] {
             Phone._ID, Phone.NUMBER, Phone.LABEL, Phone.TYPE, Phone.CONTACT_ID
     };
 
-    private static String[] PROJECTION_CONTACT = new String[] {
+    private static final String[] PROJECTION_CONTACT = new String[] {
         Contacts.DISPLAY_NAME
     };
 
-    private static String WHERE_CLAUSE_PHONE = Phone.NUMBER + "!='null'";
+    private static final String WHERE_CLAUSE_PHONE = Phone.NUMBER + "!='null'";
 
-    private static String WHERE_CLAUSE_CONTACT = Contacts._ID + "=?";
+    private static final String WHERE_CLAUSE_CONTACT = Contacts._ID + "=?";
 
     private static final String LOGTAG = LogUtils.getTag(ContactListAdapter.class.getSimpleName());
 
@@ -86,6 +87,9 @@ public class ContactListAdapter extends CursorAdapter {
         try {
             cursor = content.query(Phone.CONTENT_URI, PROJECTION_PHONE, WHERE_CLAUSE_PHONE, null,
                     null);
+            if (cursor == null) {
+                throw new SQLException("Query failed!");
+            }
             Set<ContactId> treatedNumbers = new HashSet<>();
             MatrixCursor matrix = new MatrixCursor(PROJECTION_PHONE);
             if (defaultValue != null) {
@@ -127,7 +131,7 @@ public class ContactListAdapter extends CursorAdapter {
      * Create a contact selector with RCS capable contacts
      * 
      * @param context the context
-     * @return List adapter
+     * @return List adapter or null if failure
      */
     public static ContactListAdapter createRcsContactListAdapter(Context context) {
         ContentResolver content = context.getContentResolver();
@@ -147,6 +151,9 @@ public class ContactListAdapter extends CursorAdapter {
                 // Query all phone numbers
                 cursor = content.query(Phone.CONTENT_URI, PROJECTION_PHONE, WHERE_CLAUSE_PHONE,
                         null, null);
+                if (cursor == null) {
+                    throw new SQLException("Query failed!");
+                }
                 Set<ContactId> treatedContactIDs = new HashSet<>();
                 int columnIdxId = cursor.getColumnIndexOrThrow(Phone._ID);
                 int columIdxLabel = cursor.getColumnIndexOrThrow(Phone.LABEL);
@@ -174,6 +181,9 @@ public class ContactListAdapter extends CursorAdapter {
                 }
             }
             return new ContactListAdapter(context, matrix);
+
+        } catch (RcsServiceNotAvailableException e) {
+            return null;
 
         } catch (RcsServiceException e) {
             Log.w(LOGTAG, ExceptionUtil.getFullStackTrace(e));
@@ -247,6 +257,9 @@ public class ContactListAdapter extends CursorAdapter {
         // Get contact name from contact id
         Cursor personCursor = context.getContentResolver().query(Contacts.CONTENT_URI,
                 PROJECTION_CONTACT, WHERE_CLAUSE_CONTACT, selectionArgs, null);
+        if (personCursor == null) {
+            throw new SQLException("Query failed!");
+        }
         if (personCursor.moveToFirst()) {
             name = personCursor.getString(holder.columnID);
         }

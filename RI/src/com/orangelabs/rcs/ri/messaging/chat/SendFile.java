@@ -22,6 +22,15 @@ import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
 import com.gsma.services.rcs.filetransfer.FileTransferService;
 
+import com.orangelabs.rcs.api.connection.ConnectionManager.RcsServiceName;
+import com.orangelabs.rcs.api.connection.utils.ExceptionUtil;
+import com.orangelabs.rcs.api.connection.utils.RcsActivity;
+import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.utils.FileUtils;
+import com.orangelabs.rcs.ri.utils.LogUtils;
+import com.orangelabs.rcs.ri.utils.RcsSessionUtil;
+import com.orangelabs.rcs.ri.utils.Utils;
+
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -40,15 +49,6 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-
-import com.orangelabs.rcs.api.connection.ConnectionManager.RcsServiceName;
-import com.orangelabs.rcs.api.connection.utils.ExceptionUtil;
-import com.orangelabs.rcs.api.connection.utils.RcsActivity;
-import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.utils.FileUtils;
-import com.orangelabs.rcs.ri.utils.LogUtils;
-import com.orangelabs.rcs.ri.utils.RcsSessionUtil;
-import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
  * Send file

@@ -39,6 +39,19 @@ import com.gsma.services.rcs.filetransfer.FileTransferService;
 import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo;
 import com.gsma.services.rcs.history.HistoryLog;
 
+import com.orangelabs.rcs.api.connection.utils.ExceptionUtil;
+import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.RiApplication;
+import com.orangelabs.rcs.ri.messaging.GroupDeliveryInfoList;
+import com.orangelabs.rcs.ri.messaging.chat.ChatView;
+import com.orangelabs.rcs.ri.messaging.chat.IsComposingManager;
+import com.orangelabs.rcs.ri.messaging.chat.IsComposingManager.INotifyComposing;
+import com.orangelabs.rcs.ri.messaging.geoloc.DisplayGeoloc;
+import com.orangelabs.rcs.ri.utils.LogUtils;
+import com.orangelabs.rcs.ri.utils.RcsContactUtil;
+import com.orangelabs.rcs.ri.utils.Smileys;
+import com.orangelabs.rcs.ri.utils.Utils;
+
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -57,19 +70,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView.AdapterContextMenuInfo;
-
-import com.orangelabs.rcs.api.connection.utils.ExceptionUtil;
-import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.RiApplication;
-import com.orangelabs.rcs.ri.messaging.GroupDeliveryInfoList;
-import com.orangelabs.rcs.ri.messaging.chat.ChatView;
-import com.orangelabs.rcs.ri.messaging.chat.IsComposingManager;
-import com.orangelabs.rcs.ri.messaging.chat.IsComposingManager.INotifyComposing;
-import com.orangelabs.rcs.ri.messaging.geoloc.DisplayGeoloc;
-import com.orangelabs.rcs.ri.utils.LogUtils;
-import com.orangelabs.rcs.ri.utils.RcsContactUtil;
-import com.orangelabs.rcs.ri.utils.Smileys;
-import com.orangelabs.rcs.ri.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;

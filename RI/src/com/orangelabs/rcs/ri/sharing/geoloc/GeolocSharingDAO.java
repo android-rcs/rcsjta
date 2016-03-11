@@ -30,10 +30,11 @@ import com.orangelabs.rcs.ri.utils.ContactUtil;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.net.Uri;
 
 /**
- * Geoloc sharing Data Object
+ * Geolocation sharing Data Object
  * 
  * @author Philippe LEMORDANT
  */
@@ -117,6 +118,9 @@ public class GeolocSharingDAO {
             cursor = sContentResolver.query(
                     Uri.withAppendedPath(GeolocSharingLog.CONTENT_URI, sharingId), null, null,
                     null, null);
+            if (cursor == null) {
+                throw new SQLException("Query failed!");
+            }
             if (!cursor.moveToFirst()) {
                 return null;
             }
@@ -126,7 +130,6 @@ public class GeolocSharingDAO {
             if (contact != null) {
                 contactId = ContactUtil.formatContact(contact);
             }
-
             String mimeType = cursor.getString(cursor
                     .getColumnIndexOrThrow(GeolocSharingLog.MIME_TYPE));
             String content = cursor.getString(cursor

@@ -26,6 +26,11 @@ import com.gsma.services.rcs.filetransfer.FileTransfer;
 import com.gsma.services.rcs.filetransfer.FileTransferService;
 import com.gsma.services.rcs.filetransfer.OneToOneFileTransferListener;
 
+import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.RiApplication;
+import com.orangelabs.rcs.ri.messaging.chat.SendFile;
+import com.orangelabs.rcs.ri.utils.LogUtils;
+
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -33,11 +38,6 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.Log;
 import android.widget.TextView;
-
-import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.RiApplication;
-import com.orangelabs.rcs.ri.messaging.chat.SendFile;
-import com.orangelabs.rcs.ri.utils.LogUtils;
 
 import java.util.Set;
 

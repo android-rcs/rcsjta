@@ -28,6 +28,18 @@ import com.gsma.services.rcs.filetransfer.FileTransferLog;
 import com.gsma.services.rcs.filetransfer.FileTransferService;
 import com.gsma.services.rcs.filetransfer.OneToOneFileTransferListener;
 
+import com.orangelabs.rcs.api.connection.ConnectionManager.RcsServiceName;
+import com.orangelabs.rcs.api.connection.utils.ExceptionUtil;
+import com.orangelabs.rcs.api.connection.utils.RcsActivity;
+import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.RiApplication;
+import com.orangelabs.rcs.ri.utils.ContactListAdapter;
+import com.orangelabs.rcs.ri.utils.ContactUtil;
+import com.orangelabs.rcs.ri.utils.FileUtils;
+import com.orangelabs.rcs.ri.utils.LogUtils;
+import com.orangelabs.rcs.ri.utils.RcsSessionUtil;
+import com.orangelabs.rcs.ri.utils.Utils;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -52,18 +64,6 @@ import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TableRow;
 import android.widget.TextView;
-
-import com.orangelabs.rcs.api.connection.ConnectionManager.RcsServiceName;
-import com.orangelabs.rcs.api.connection.utils.ExceptionUtil;
-import com.orangelabs.rcs.api.connection.utils.RcsActivity;
-import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.RiApplication;
-import com.orangelabs.rcs.ri.utils.ContactListAdapter;
-import com.orangelabs.rcs.ri.utils.ContactUtil;
-import com.orangelabs.rcs.ri.utils.FileUtils;
-import com.orangelabs.rcs.ri.utils.LogUtils;
-import com.orangelabs.rcs.ri.utils.RcsSessionUtil;
-import com.orangelabs.rcs.ri.utils.Utils;
 
 import java.util.Set;
 

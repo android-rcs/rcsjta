@@ -24,6 +24,9 @@ import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
 import com.gsma.services.rcs.filetransfer.FileTransferLog;
 
+import com.orangelabs.rcs.ri.utils.ContactUtil;
+import com.orangelabs.rcs.ri.utils.LogUtils;
+
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
@@ -32,9 +35,6 @@ import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
-
-import com.orangelabs.rcs.ri.utils.ContactUtil;
-import com.orangelabs.rcs.ri.utils.LogUtils;
 
 /**
  * File transfer Data Object

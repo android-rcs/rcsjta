@@ -22,6 +22,11 @@ import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.filetransfer.FileTransferServiceConfiguration;
 import com.gsma.services.rcs.filetransfer.FileTransferServiceConfiguration.ImageResizeOption;
 
+import com.orangelabs.rcs.api.connection.ConnectionManager.RcsServiceName;
+import com.orangelabs.rcs.api.connection.utils.RcsActivity;
+import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.utils.LogUtils;
+
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.util.Log;
@@ -34,11 +39,6 @@ import android.widget.CheckBox;
 import android.widget.Spinner;
 import android.widget.TableRow;
 import android.widget.TextView;
-
-import com.orangelabs.rcs.api.connection.ConnectionManager.RcsServiceName;
-import com.orangelabs.rcs.api.connection.utils.RcsActivity;
-import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.utils.LogUtils;
 
 /**
  * Display/update the chat service configuration

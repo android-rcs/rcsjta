@@ -29,6 +29,18 @@ import com.gsma.services.rcs.filetransfer.GroupFileTransferListener;
 import com.gsma.services.rcs.filetransfer.OneToOneFileTransferListener;
 import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo;
 
+import com.orangelabs.rcs.api.connection.ConnectionManager.RcsServiceName;
+import com.orangelabs.rcs.api.connection.utils.ExceptionUtil;
+import com.orangelabs.rcs.api.connection.utils.RcsActivity;
+import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.RiApplication;
+import com.orangelabs.rcs.ri.messaging.chat.group.GroupChatDAO;
+import com.orangelabs.rcs.ri.utils.FileUtils;
+import com.orangelabs.rcs.ri.utils.LogUtils;
+import com.orangelabs.rcs.ri.utils.RcsContactUtil;
+import com.orangelabs.rcs.ri.utils.RcsSessionUtil;
+import com.orangelabs.rcs.ri.utils.Utils;
+
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -52,18 +64,6 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-
-import com.orangelabs.rcs.api.connection.ConnectionManager.RcsServiceName;
-import com.orangelabs.rcs.api.connection.utils.ExceptionUtil;
-import com.orangelabs.rcs.api.connection.utils.RcsActivity;
-import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.RiApplication;
-import com.orangelabs.rcs.ri.messaging.chat.group.GroupChatDAO;
-import com.orangelabs.rcs.ri.utils.FileUtils;
-import com.orangelabs.rcs.ri.utils.LogUtils;
-import com.orangelabs.rcs.ri.utils.RcsContactUtil;
-import com.orangelabs.rcs.ri.utils.RcsSessionUtil;
-import com.orangelabs.rcs.ri.utils.Utils;
 
 import java.io.IOException;
 import java.util.Set;

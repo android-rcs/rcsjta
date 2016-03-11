@@ -21,6 +21,19 @@ package com.orangelabs.rcs.ri;
 import com.gsma.services.rcs.RcsPermissionDeniedException;
 import com.gsma.services.rcs.contact.ContactUtil;
 
+import com.orangelabs.rcs.api.connection.utils.ExceptionUtil;
+import com.orangelabs.rcs.api.connection.utils.RcsListActivity;
+import com.orangelabs.rcs.ri.capabilities.TestCapabilitiesApi;
+import com.orangelabs.rcs.ri.contacts.TestContactsApi;
+import com.orangelabs.rcs.ri.extension.TestMultimediaSessionApi;
+import com.orangelabs.rcs.ri.history.TestHistoryLogApi;
+import com.orangelabs.rcs.ri.intents.TestIntentApps;
+import com.orangelabs.rcs.ri.messaging.TestMessagingApi;
+import com.orangelabs.rcs.ri.service.TestServiceApi;
+import com.orangelabs.rcs.ri.sharing.TestSharingApi;
+import com.orangelabs.rcs.ri.upload.InitiateFileUpload;
+import com.orangelabs.rcs.ri.utils.LogUtils;
+
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -34,19 +47,6 @@ import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
-
-import com.orangelabs.rcs.api.connection.utils.ExceptionUtil;
-import com.orangelabs.rcs.api.connection.utils.RcsListActivity;
-import com.orangelabs.rcs.ri.capabilities.TestCapabilitiesApi;
-import com.orangelabs.rcs.ri.contacts.TestContactsApi;
-import com.orangelabs.rcs.ri.extension.TestMultimediaSessionApi;
-import com.orangelabs.rcs.ri.history.TestHistoryLogApi;
-import com.orangelabs.rcs.ri.intents.TestIntentApps;
-import com.orangelabs.rcs.ri.messaging.TestMessagingApi;
-import com.orangelabs.rcs.ri.service.TestServiceApi;
-import com.orangelabs.rcs.ri.sharing.TestSharingApi;
-import com.orangelabs.rcs.ri.upload.InitiateFileUpload;
-import com.orangelabs.rcs.ri.utils.LogUtils;
 
 import java.util.Arrays;
 import java.util.HashSet;

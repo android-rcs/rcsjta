@@ -119,14 +119,14 @@ public class IncomingVideoSharing extends RcsActivity implements VideoPlayerList
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // Set layout
+        setContentView(R.layout.video_sharing_incoming);
+
         initialize();
         // Always on window
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
-
-        // Set layout
-        setContentView(R.layout.video_sharing_incoming);
 
         // Saved datas
         if (savedInstanceState == null) {
@@ -143,7 +143,6 @@ public class IncomingVideoSharing extends RcsActivity implements VideoPlayerList
             }
             finish();
             return;
-
         }
         if (LogUtils.isActive) {
             Log.d(LOGTAG, "onCreate ".concat(mVshDao.toString()));
@@ -222,11 +221,10 @@ public class IncomingVideoSharing extends RcsActivity implements VideoPlayerList
             vshApi.addEventListener(mVshListener);
 
             ContactId remote = mVshDao.getContact();
-            String from = RcsContactUtil.getInstance(this).getDisplayName(remote);
-
             // Display sharing information
-            TextView fromTextView = (TextView) findViewById(R.id.from);
-            fromTextView.setText(getString(R.string.label_from_args, from));
+            String from = RcsContactUtil.getInstance(this).getDisplayName(remote);
+            TextView fromTextView = (TextView) findViewById(R.id.contact);
+            fromTextView.setText(from);
 
             if (mWaitForUseAcceptance) {
                 showReceiveNotification(from);
@@ -348,7 +346,7 @@ public class IncomingVideoSharing extends RcsActivity implements VideoPlayerList
                     + "x" + videoDescriptor.getHeight();
             TextView fmtView = (TextView) findViewById(R.id.video_format);
             fmtView.setVisibility(View.VISIBLE);
-            fmtView.setText(getString(R.string.label_video_format, format));
+            fmtView.setText( format);
 
         } catch (RcsServiceException e) {
             showExceptionThenExit(e);

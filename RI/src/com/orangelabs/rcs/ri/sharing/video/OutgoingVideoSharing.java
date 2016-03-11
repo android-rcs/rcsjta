@@ -1,14 +1,14 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
- *
+ * <p/>
  * Copyright (C) 2010 France Telecom S.A.
- *
+ * <p/>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p/>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p/>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,12 +18,31 @@
 
 package com.orangelabs.rcs.ri.sharing.video;
 
+import com.gsma.services.rcs.RcsGenericException;
+import com.gsma.services.rcs.RcsPersistentStorageException;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.sharing.video.VideoDescriptor;
 import com.gsma.services.rcs.sharing.video.VideoSharing;
 import com.gsma.services.rcs.sharing.video.VideoSharingListener;
 import com.gsma.services.rcs.sharing.video.VideoSharingService;
+
+import com.orangelabs.rcs.api.connection.ConnectionManager.RcsServiceName;
+import com.orangelabs.rcs.api.connection.utils.ExceptionUtil;
+import com.orangelabs.rcs.api.connection.utils.RcsActivity;
+import com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h264.H264Config;
+import com.orangelabs.rcs.core.ims.protocol.rtp.format.video.CameraOptions;
+import com.orangelabs.rcs.core.ims.protocol.rtp.format.video.Orientation;
+import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.RiApplication;
+import com.orangelabs.rcs.ri.sharing.video.media.OriginatingVideoPlayer;
+import com.orangelabs.rcs.ri.sharing.video.media.VideoPlayerListener;
+import com.orangelabs.rcs.ri.sharing.video.media.VideoSurfaceView;
+import com.orangelabs.rcs.ri.utils.ContactListAdapter;
+import com.orangelabs.rcs.ri.utils.ContactUtil;
+import com.orangelabs.rcs.ri.utils.LogUtils;
+import com.orangelabs.rcs.ri.utils.RcsContactUtil;
+import com.orangelabs.rcs.ri.utils.RcsSessionUtil;
 
 import android.Manifest;
 import android.app.AlertDialog;
@@ -54,23 +73,6 @@ import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.orangelabs.rcs.api.connection.ConnectionManager.RcsServiceName;
-import com.orangelabs.rcs.api.connection.utils.ExceptionUtil;
-import com.orangelabs.rcs.api.connection.utils.RcsActivity;
-import com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h264.H264Config;
-import com.orangelabs.rcs.core.ims.protocol.rtp.format.video.CameraOptions;
-import com.orangelabs.rcs.core.ims.protocol.rtp.format.video.Orientation;
-import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.RiApplication;
-import com.orangelabs.rcs.ri.sharing.video.media.OriginatingVideoPlayer;
-import com.orangelabs.rcs.ri.sharing.video.media.VideoPlayerListener;
-import com.orangelabs.rcs.ri.sharing.video.media.VideoSurfaceView;
-import com.orangelabs.rcs.ri.utils.ContactListAdapter;
-import com.orangelabs.rcs.ri.utils.ContactUtil;
-import com.orangelabs.rcs.ri.utils.LogUtils;
-import com.orangelabs.rcs.ri.utils.RcsContactUtil;
-import com.orangelabs.rcs.ri.utils.RcsSessionUtil;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -212,7 +214,8 @@ public class OutgoingVideoSharing extends RcsActivity implements VideoPlayerList
 
         // Set the contact selector
         mSpinner = (Spinner) findViewById(R.id.contact);
-        mSpinner.setAdapter(ContactListAdapter.createRcsContactListAdapter(this));
+        ContactListAdapter adapter = ContactListAdapter.createRcsContactListAdapter(this);
+        mSpinner.setAdapter(adapter);
 
         // Saved datas
         if (savedInstanceState == null) {
@@ -240,11 +243,10 @@ public class OutgoingVideoSharing extends RcsActivity implements VideoPlayerList
         mInviteBtn.setOnClickListener(btnInviteListener);
         mDialBtn = (Button) findViewById(R.id.dial_btn);
         mDialBtn.setOnClickListener(btnDialListener);
-
         mSwitchCamBtn = (Button) findViewById(R.id.switch_cam_btn);
 
         // Disable button if no contact available
-        if (mSpinner.getAdapter().getCount() == 0) {
+        if (adapter == null || adapter.getCount() == 0) {
             mDialBtn.setEnabled(false);
             mInviteBtn.setEnabled(false);
         }
@@ -306,7 +308,10 @@ public class OutgoingVideoSharing extends RcsActivity implements VideoPlayerList
             mInviteBtn.setVisibility(View.VISIBLE);
             mSwitchCamBtn.setEnabled(false);
 
-            boolean canInitiate = (mSpinner.getAdapter().getCount() != 0);
+            boolean canInitiate = true;
+            if (adapter == null || adapter.getCount() == 0) {
+                canInitiate = false;
+            }
             mDialBtn.setEnabled(canInitiate);
             mInviteBtn.setEnabled(canInitiate);
         }
@@ -340,7 +345,6 @@ public class OutgoingVideoSharing extends RcsActivity implements VideoPlayerList
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-
         outState.putString(SAVE_SHARING_ID, mSharingId);
         outState.putInt(SAVE_VIDEO_HEIGHT, mVideoHeight);
         outState.putInt(SAVE_VIDEO_WIDTH, mVideoWidth);
@@ -588,7 +592,7 @@ public class OutgoingVideoSharing extends RcsActivity implements VideoPlayerList
 
     /**
      * Check if good camera sizes are available for encoder. Must be used only before open camera.
-     * 
+     *
      * @param cameraId the camera ID
      * @return false if the camera don't have the good preview size for the encoder
      */
@@ -598,8 +602,8 @@ public class OutgoingVideoSharing extends RcsActivity implements VideoPlayerList
         Method method = getCameraOpenMethod();
         if (method != null) {
             try {
-                camera = (Camera) method.invoke(camera, new Object[] {
-                    cameraId.getValue()
+                camera = (Camera) method.invoke(camera, new Object[]{
+                        cameraId.getValue()
                 });
             } catch (Exception e) {
                 camera = Camera.open();
@@ -750,7 +754,7 @@ public class OutgoingVideoSharing extends RcsActivity implements VideoPlayerList
 
     /**
      * Get Camera "open" Method
-     * 
+     *
      * @return Method
      */
     private Method getCameraOpenMethod() {
@@ -758,8 +762,8 @@ public class OutgoingVideoSharing extends RcsActivity implements VideoPlayerList
         try {
             Class<?> cameraClass = classLoader.loadClass("android.hardware.Camera");
             try {
-                return cameraClass.getMethod("open", new Class[] {
-                    int.class
+                return cameraClass.getMethod("open", new Class[]{
+                        int.class
                 });
             } catch (NoSuchMethodException ignored) {
             }
@@ -770,7 +774,7 @@ public class OutgoingVideoSharing extends RcsActivity implements VideoPlayerList
 
     /**
      * Open the camera
-     * 
+     *
      * @param cameraId Camera ID
      */
     private void openCamera(CameraOptions cameraId) {
@@ -788,8 +792,8 @@ public class OutgoingVideoSharing extends RcsActivity implements VideoPlayerList
                         }
                     }
                 }
-                mCamera = (Camera) method.invoke(mCamera, new Object[] {
-                    hCamId
+                mCamera = (Camera) method.invoke(mCamera, new Object[]{
+                        hCamId
                 });
                 mOpenedCameraId = cameraId;
             } catch (Exception e) {
@@ -810,7 +814,7 @@ public class OutgoingVideoSharing extends RcsActivity implements VideoPlayerList
 
     /**
      * Get Camera "numberOfCameras" Method
-     * 
+     *
      * @return Method
      */
     private Method getCameraNumberOfCamerasMethod() {
@@ -828,7 +832,7 @@ public class OutgoingVideoSharing extends RcsActivity implements VideoPlayerList
 
     /**
      * Get number of cameras
-     * 
+     *
      * @return number of cameras
      */
     private int getNumberOfCameras() {
@@ -852,7 +856,7 @@ public class OutgoingVideoSharing extends RcsActivity implements VideoPlayerList
     private VideoSharingListener vshListener = new VideoSharingListener() {
         @Override
         public void onStateChanged(ContactId contact, String sharingId,
-                final VideoSharing.State state, VideoSharing.ReasonCode reasonCode) {
+                                   final VideoSharing.State state, VideoSharing.ReasonCode reasonCode) {
             // Discard event if not for current sharingId
             if (mSharingId == null || !mSharingId.equals(sharingId)) {
                 return;
@@ -994,7 +998,7 @@ public class OutgoingVideoSharing extends RcsActivity implements VideoPlayerList
 
     /**
      * Check if preview size is supported
-     * 
+     *
      * @param parameters Camera parameters
      * @param width width
      * @param height height
@@ -1060,12 +1064,10 @@ public class OutgoingVideoSharing extends RcsActivity implements VideoPlayerList
             String format = mVideoSharing.getVideoEncoding() + " " + videoDescriptor.getWidth()
                     + "x" + videoDescriptor.getHeight();
             TextView fmtView = (TextView) findViewById(R.id.video_format);
-            fmtView.setVisibility(View.VISIBLE);
-            fmtView.setText(getString(R.string.label_video_format, format));
-        } catch (Exception e) {
-            if (LogUtils.isActive) {
-                Log.e(LOGTAG, "Exception occurred", e);
-            }
+            fmtView.setText(format);
+
+        } catch (RcsPersistentStorageException | RcsGenericException e) {
+            Log.w(LOGTAG, ExceptionUtil.getFullStackTrace(e));
         }
     }
 
@@ -1073,9 +1075,8 @@ public class OutgoingVideoSharing extends RcsActivity implements VideoPlayerList
      * Display remote contact
      */
     private void displayRemoteContact() {
-        TextView fromTextView = (TextView) findViewById(R.id.with);
-        fromTextView.setVisibility(View.VISIBLE);
+        TextView fromTextView = (TextView) findViewById(R.id.remote);
         String displayName = RcsContactUtil.getInstance(this).getDisplayName(mContact);
-        fromTextView.setText(getString(R.string.label_with_args, displayName));
+        fromTextView.setText(displayName);
     }
 }

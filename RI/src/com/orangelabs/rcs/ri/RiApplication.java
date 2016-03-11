@@ -20,8 +20,8 @@ package com.orangelabs.rcs.ri;
 
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsServiceControl;
-
 import com.gsma.services.rcs.filetransfer.FileTransfer.Disposition;
+
 import com.orangelabs.rcs.api.connection.ConnectionManager;
 import com.orangelabs.rcs.api.connection.ConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.utils.LogUtils;

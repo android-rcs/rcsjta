@@ -44,9 +44,11 @@
     <string name="label_filename">File: %s</string>
     <string name="label_filesize">Size: %s bytes</string>
     <string name="label_progress_status">Status:</string>
+    <string name="label_position">Position:</string>
     <string name="label_progress_bar">Progress:</string>
     <string name="label_file">Selected file:</string>
     <string name="label_size">Size:</string>
+    <string name="label_contact">Contact:</string>
     <string name="label_duration">Duration (sec):</string>
     <string name="label_receive_image">Received image %s</string>
     <string name="label_remote">Remote contact:</string>
@@ -66,6 +68,14 @@
 	<string name="label_disposition">Disposition: %s</string>
     <string name="label_attach">Attachment</string>
     <string name="label_render">Render</string>
+    <string name="text_dummy">dummy text</string>
+    <string name="timestamp_dummy">2016/01/02 03:00:00</string>
+    <string name="contact_dummy">+33123456789</string>
+    <string name="direction_dummy">direction</string>
+    <string name="extension_dummy">ext.foo</string>
+    <string name="number_dummy">0</string>
+    <string name="error_item_not_found">No record found!</string>
+
     <!-- About menu -->
     <string name="label_about_title">Reference Implementation</string>
     <string name="label_about_app_version">App release %s</string>
@@ -106,7 +116,7 @@
     <string name="label_capabilities_extensions">Extensions:</string>
     <string name="label_request_in_background">Request has been sent in background for %s</string>
     <string name="label_capabilities_empty">No capabilities</string>
-    <string name="label_contact">Contact %s</string>
+    <string name="label_contact_arg">Contact %s</string>
     <string name="label_capabilities_geolocation_push">Geolocation push</string>
     <string name="label_automata">Automata:</string>
     <string name="label_capabilities_timestamp">Last refresh:</string>
@@ -116,6 +126,7 @@
     <string name="menu_messaging">Messaging</string>
     <string name="menu_file_transfer">File transfer</string>
     <string name="menu_chat">Chat</string>
+    <string name="menu_view_detail">View details</string>
 
     <!-- File transfer menu -->
     <string name="menu_transfer_file">Transfer a file</string>
@@ -216,6 +227,7 @@
     <string name="label_undelivered_message">%1$s did not receive your message(s)</string>
     <string name="title_undelivered_filetransfer">Undelivered file(s)!</string>
     <string name="label_undelivered_filetransfer">%1$s did not receive your file(s)</string>
+    <string name="menu_view_group_delivery">View delivery information</string>
 
     <!-- Sharing menu -->
     <string name="menu_sharing">Sharing</string>
@@ -235,7 +247,8 @@
     <string name="menu_initiate_image_sharing">Initiate image sharing</string>
     <string name="menu_image_sharing_log">Image sharing log</string>
     <string name="label_select_picture">Select picture</string>
-    <string name="label_selected_img">Selected picture:</string>
+    <string name="label_selected_img">Filename:</string>
+    <string name="label_selected_size">Size:</string>
     <string name="title_recv_image_sharing">Image sharing invitation</string>
     <string name="title_image_sharing">Image sharing</string>
     <string name="label_ish_state_changed">ISH state %1$s (%2$s)</string>
@@ -250,7 +263,7 @@
     <string name="label_vsh_state_changed">VSH state %1$s (%2$s)</string>
     <string name="label_switch_camera">Switch camera</string>
     <string name="label_vsh_uninitialized_duration">duration</string>
-    <string name="label_video_format">Format: %s</string>
+    <string name="label_video_format">Format:</string>
 
     <!-- Geoloc sharing menu -->
     <string name="title_recv_geoloc_sharing">Geoloc sharing invitation</string>
@@ -282,6 +295,7 @@
     <string name="title_recv_streaming_session">Multimedia streaming invitation</string>
     <string name="title_messaging_session">Messaging session</string>
     <string name="title_streaming_session">Streaming session</string>
+    <string name="title_instant_session">Instant session</string>
     <string name="label_session">Session %s</string>
     <string name="label_send_data">Send data</string>
     <string name="label_start">Start RTP streaming</string>
@@ -373,12 +387,38 @@
     <string name="menu_open_chat_session">Open</string>
 
     <!-- HistoryLog  menu -->
+    <string name="label_log_contact">Contact:</string>
+    <string name="label_log_content">Content:</string>
+    <string name="label_log_date">Date:</string>
+    <string name="label_log_dir">Direction:</string>
+    <string name="label_log_duration">Duration:</string>
+    <string name="label_log_encoding">Encoding:</string>
+    <string name="label_log_file_size">Size:</string>
+    <string name="label_log_filename">Filename:</string>
+    <string name="label_log_height">Height :</string>
+    <string name="label_log_mime">Mime type:</string>
+    <string name="label_log_reason">Reason:</string>
+    <string name="label_log_state">State:</string>
+    <string name="label_log_transferred">Transferred:</string>
+    <string name="label_log_uri">Uri:</string>
+    <string name="label_log_width">Width :</string>
+    <string name="title_sharing_log_item">History Log detail</string>
+    <string name="menu_log_sharing">Sharing log</string>
+    <string name="label_sharing_log_menu_gsh">Geoloc Share</string>
+    <string name="label_sharing_log_menu_ish">Image Share</string>
+    <string name="label_sharing_log_menu_vsh">Video Share</string>
+    <string name="label_sharing_log_contact_spinner_default_value">No contact filter</string>
+    <string name="label_sharing_log_menu_filter">Change filter</string>
+    <string name="value_log_duration">Duration: %1$s</string>
+    <string name="title_sharing_log_dialog_filter_logs">Filter</string>
+
     <string name="menu_history_log">History Log</string>
     <string name="menu_history_log_messaging">Messaging</string>
     <string name="menu_history_log_sharing">Sharings</string>
     <string name="title_history_log">History Log</string>
     <string name="title_history_log_sharing">Sharing Log</string>
     <string name="title_history_log_messaging">Messaging Log</string>
+    <string name="title_sharing_log">Sharing Log</string>
     <string name="title_history_log_item">History Log detail</string>
     <string name="label_history_log_menu_filter">Change filter</string>
     <string name="label_history_log_menu_chat">Chat</string>

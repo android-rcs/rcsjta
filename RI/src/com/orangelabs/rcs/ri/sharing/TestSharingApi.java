@@ -19,9 +19,9 @@
 package com.orangelabs.rcs.ri.sharing;
 
 import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.sharing.geoloc.TestGeolocSharingApi;
-import com.orangelabs.rcs.ri.sharing.image.TestImageSharingApi;
-import com.orangelabs.rcs.ri.sharing.video.TestVideoSharingApi;
+import com.orangelabs.rcs.ri.sharing.geoloc.InitiateGeolocSharing;
+import com.orangelabs.rcs.ri.sharing.image.InitiateImageSharing;
+import com.orangelabs.rcs.ri.sharing.video.OutgoingVideoSharing;
 
 import android.app.ListActivity;
 import android.content.Intent;
@@ -45,10 +45,15 @@ public class TestSharingApi extends ListActivity {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         // Set items
+        // @formatter:off
         String[] items = {
-                getString(R.string.menu_image_sharing), getString(R.string.menu_video_sharing),
-                getString(R.string.menu_geoloc_sharing)
+                getString(R.string.menu_initiate_image_sharing),
+                getString(R.string.menu_initiate_video_sharing),
+                getString(R.string.menu_initiate_geoloc_sharing),
+                getString(R.string.menu_log_sharing)
         };
+        // @formatter:on
+
         setListAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, items));
     }
 
@@ -56,15 +61,19 @@ public class TestSharingApi extends ListActivity {
     protected void onListItemClick(ListView l, View v, int position, long id) {
         switch (position) {
             case 0:
-                startActivity(new Intent(this, TestImageSharingApi.class));
+                startActivity(new Intent(this, InitiateImageSharing.class));
                 break;
 
             case 1:
-                startActivity(new Intent(this, TestVideoSharingApi.class));
+                startActivity(new Intent(this, OutgoingVideoSharing.class));
                 break;
 
             case 2:
-                startActivity(new Intent(this, TestGeolocSharingApi.class));
+                startActivity(new Intent(this, InitiateGeolocSharing.class));
+                break;
+
+            case 3:
+                startActivity(new Intent(this, SharingListView.class));
                 break;
         }
     }

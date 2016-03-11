@@ -3,16 +3,16 @@
     <item
         android:id="@+id/menu_delete_message"
         android:title="@string/menu_delete_message" />
-
     <item
         android:id="@+id/menu_resend_message"
         android:title="@string/menu_resend_message" />
-
     <item
         android:id="@+id/menu_display_content"
         android:title="@string/menu_display_content" />
-
     <item
         android:id="@+id/menu_listen_content"
         android:title="@string/menu_listen_content" />
+    <item
+        android:id="@+id/menu_view_detail"
+        android:title="@string/menu_view_detail" />
 </menu>

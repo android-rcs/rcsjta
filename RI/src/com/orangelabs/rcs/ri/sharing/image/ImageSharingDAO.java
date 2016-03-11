@@ -1,14 +1,14 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
- *
+ * <p/>
  * Copyright (C) 2010 France Telecom S.A.
- *
+ * <p/>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p/>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p/>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,7 +24,6 @@ import com.gsma.services.rcs.sharing.image.ImageSharing;
 import com.gsma.services.rcs.sharing.image.ImageSharingLog;
 
 import com.orangelabs.rcs.ri.utils.ContactUtil;
-import com.orangelabs.rcs.ri.utils.LogUtils;
 
 import android.content.ContentResolver;
 import android.content.Context;
@@ -33,11 +32,10 @@ import android.database.SQLException;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 
 /**
  * Image Sharing Data Object
- * 
+ *
  * @author YPLO6403
  */
 public class ImageSharingDAO implements Parcelable {
@@ -66,11 +64,25 @@ public class ImageSharingDAO implements Parcelable {
 
     private static ContentResolver sContentResolver;
 
-    private static final String LOGTAG = LogUtils.getTag(ImageSharingDAO.class.getSimpleName());
+    private ImageSharingDAO(String sharingId, ContactId contact, Uri file, String filename,
+            String mimeType, ImageSharing.State state, Direction direction, long timestamp,
+            long sizeTransferred, long size, ImageSharing.ReasonCode reasonCode) {
+        mSharingId = sharingId;
+        mContact = contact;
+        mFile = file;
+        mFilename = filename;
+        mMimeType = mimeType;
+        mState = state;
+        mDirection = direction;
+        mTimestamp = timestamp;
+        mSizeTransferred = sizeTransferred;
+        mSize = size;
+        mReasonCode = reasonCode;
+    }
 
     /**
      * Constructor
-     * 
+     *
      * @param source Parcelable source
      */
     public ImageSharingDAO(Parcel source) {
@@ -124,7 +136,7 @@ public class ImageSharingDAO implements Parcelable {
 
     /**
      * Gets state
-     * 
+     *
      * @return state
      */
     public ImageSharing.State getState() {
@@ -133,7 +145,7 @@ public class ImageSharingDAO implements Parcelable {
 
     /**
      * Gets transferred size
-     * 
+     *
      * @return size
      */
     public long getSizeTransferred() {
@@ -142,7 +154,7 @@ public class ImageSharingDAO implements Parcelable {
 
     /**
      * Gets sharing ID
-     * 
+     *
      * @return sharingId
      */
     public String getSharingId() {
@@ -151,7 +163,7 @@ public class ImageSharingDAO implements Parcelable {
 
     /**
      * Gets remote contact
-     * 
+     *
      * @return contact
      */
     public ContactId getContact() {
@@ -160,7 +172,7 @@ public class ImageSharingDAO implements Parcelable {
 
     /**
      * Gets file URI
-     * 
+     *
      * @return file URI
      */
     public Uri getFile() {
@@ -169,7 +181,7 @@ public class ImageSharingDAO implements Parcelable {
 
     /**
      * Gets file name
-     * 
+     *
      * @return file name
      */
     public String getFilename() {
@@ -178,7 +190,7 @@ public class ImageSharingDAO implements Parcelable {
 
     /**
      * Gets mime type
-     * 
+     *
      * @return mime type
      */
     public String getMimeType() {
@@ -191,7 +203,7 @@ public class ImageSharingDAO implements Parcelable {
 
     /**
      * Gets date of the sharing
-     * 
+     *
      * @return time stamp
      */
     public long getTimestamp() {
@@ -200,7 +212,7 @@ public class ImageSharingDAO implements Parcelable {
 
     /**
      * Gets size
-     * 
+     *
      * @return size
      */
     public long getSize() {
@@ -209,38 +221,57 @@ public class ImageSharingDAO implements Parcelable {
 
     /**
      * Gets reason code
-     * 
+     *
      * @return reason code
      */
     public ImageSharing.ReasonCode getReasonCode() {
         return mReasonCode;
     }
 
-    private ImageSharingDAO(ContentResolver resolver, String sharingId) {
+    /**
+     * Gets instance of Image sharing from RCS provider
+     *
+     * @param ctx the context
+     * @param sharingId the sharing ID
+     * @return instance or null if entry not found
+     */
+    public static ImageSharingDAO getImageSharingDAO(Context ctx, String sharingId) {
+        if (sContentResolver == null) {
+            sContentResolver = ctx.getContentResolver();
+        }
         Cursor cursor = null;
         try {
-            cursor = resolver.query(Uri.withAppendedPath(ImageSharingLog.CONTENT_URI, sharingId),
-                    null, null, null, null);
+            cursor = sContentResolver.query(
+                    Uri.withAppendedPath(ImageSharingLog.CONTENT_URI, sharingId), null, null, null,
+                    null);
+            if (cursor == null) {
+                throw new SQLException("Query failed!");
+            }
             if (!cursor.moveToFirst()) {
                 throw new SQLException("Failed to find Image Sharing with ID: ".concat(sharingId));
             }
-            mSharingId = sharingId;
-            String contact = cursor
-                    .getString(cursor.getColumnIndexOrThrow(ImageSharingLog.CONTACT));
-            mContact = ContactUtil.formatContact(contact);
-            mFile = Uri.parse(cursor.getString(cursor.getColumnIndexOrThrow(ImageSharingLog.FILE)));
-            mFilename = cursor.getString(cursor.getColumnIndexOrThrow(ImageSharingLog.FILENAME));
-            mMimeType = cursor.getString(cursor.getColumnIndexOrThrow(ImageSharingLog.MIME_TYPE));
-            mState = ImageSharing.State.valueOf(cursor.getInt(cursor
+            String number = cursor.getString(cursor.getColumnIndexOrThrow(ImageSharingLog.CONTACT));
+            ContactId contact = ContactUtil.formatContact(number);
+            Uri file = Uri.parse(cursor.getString(cursor
+                    .getColumnIndexOrThrow(ImageSharingLog.FILE)));
+            String filename = cursor.getString(cursor
+                    .getColumnIndexOrThrow(ImageSharingLog.FILENAME));
+            String mimeType = cursor.getString(cursor
+                    .getColumnIndexOrThrow(ImageSharingLog.MIME_TYPE));
+            ImageSharing.State state = ImageSharing.State.valueOf(cursor.getInt(cursor
                     .getColumnIndexOrThrow(ImageSharingLog.STATE)));
-            mDirection = Direction.valueOf(cursor.getInt(cursor
+            Direction dir = Direction.valueOf(cursor.getInt(cursor
                     .getColumnIndexOrThrow(ImageSharingLog.DIRECTION)));
-            mTimestamp = cursor.getLong(cursor.getColumnIndexOrThrow(ImageSharingLog.TIMESTAMP));
-            mSizeTransferred = cursor.getLong(cursor
+            long timestamp = cursor
+                    .getLong(cursor.getColumnIndexOrThrow(ImageSharingLog.TIMESTAMP));
+            long sizeTransferred = cursor.getLong(cursor
                     .getColumnIndexOrThrow(ImageSharingLog.TRANSFERRED));
-            mSize = cursor.getLong(cursor.getColumnIndexOrThrow(ImageSharingLog.FILESIZE));
-            mReasonCode = ImageSharing.ReasonCode.valueOf(cursor.getInt(cursor
+            long size = cursor.getLong(cursor.getColumnIndexOrThrow(ImageSharingLog.FILESIZE));
+            ImageSharing.ReasonCode reason = ImageSharing.ReasonCode.valueOf(cursor.getInt(cursor
                     .getColumnIndexOrThrow(ImageSharingLog.REASON_CODE)));
+            return new ImageSharingDAO(sharingId, contact, file, filename, mimeType, state, dir,
+                    timestamp, sizeTransferred, size, reason);
+
         } finally {
             if (cursor != null) {
                 cursor.close();
@@ -261,7 +292,7 @@ public class ImageSharingDAO implements Parcelable {
     }
 
     /**
-     * public CREATOR field that generates instances of Parcelable class from a VideoSharingDAO.
+     * public CREATOR field that generates instances of Parcelable class from a ImageSharingDAO.
      */
     public static final Parcelable.Creator<ImageSharingDAO> CREATOR = new Parcelable.Creator<ImageSharingDAO>() {
         @Override
@@ -275,24 +306,4 @@ public class ImageSharingDAO implements Parcelable {
         }
     };
 
-    /**
-     * Gets instance of Image sharing from RCS provider
-     * 
-     * @param context the context
-     * @param sharingId the sharing ID
-     * @return instance or null if entry not found
-     */
-    public static ImageSharingDAO getImageSharingDAO(Context context, String sharingId) {
-        if (sContentResolver == null) {
-            sContentResolver = context.getContentResolver();
-        }
-        try {
-            return new ImageSharingDAO(sContentResolver, sharingId);
-        } catch (SQLException e) {
-            if (LogUtils.isActive) {
-                Log.e(LOGTAG, e.getMessage());
-            }
-            return null;
-        }
-    }
 }

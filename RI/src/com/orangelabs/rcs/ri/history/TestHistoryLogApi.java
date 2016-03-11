@@ -20,7 +20,6 @@ package com.orangelabs.rcs.ri.history;
 
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.history.messaging.MessagingListView;
-import com.orangelabs.rcs.ri.history.sharing.SharingListView;
 
 import android.app.ListActivity;
 import android.content.Intent;
@@ -44,7 +43,6 @@ public class TestHistoryLogApi extends ListActivity {
         // Set items
         String[] items = {
                 getString(R.string.menu_history_log_messaging),
-                getString(R.string.menu_history_log_sharing)
         };
         setListAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, items));
     }
@@ -54,9 +52,6 @@ public class TestHistoryLogApi extends ListActivity {
         switch (position) {
             case 0:
                 startActivity(new Intent(this, MessagingListView.class));
-                break;
-            case 1:
-                startActivity(new Intent(this, SharingListView.class));
                 break;
         }
     }

@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent" >
+    android:layout_height="fill_parent">
 
     <TableLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:paddingTop="10dip"
-        android:stretchColumns="1" >
+        android:stretchColumns="1">
 
         <Spinner
             android:id="@+id/contact"
@@ -16,7 +16,7 @@
             android:layout_marginLeft="5dip"
             android:layout_marginRight="5dip" />
 
-        <TableRow android:paddingTop="5dip" >
+        <TableRow android:paddingTop="5dip">
 
             <CheckBox
                 android:id="@+id/ft_thumb"
@@ -24,7 +24,7 @@
                 android:text="@string/label_ft_thumb" />
         </TableRow>
 
-        <TableRow android:paddingTop="5dip" >
+        <TableRow android:paddingTop="5dip">
 
             <TextView
                 android:layout_marginLeft="5dip"
@@ -39,7 +39,7 @@
                 android:textStyle="bold" />
         </TableRow>
 
-        <TableRow android:paddingTop="5dip" >
+        <TableRow android:paddingTop="5dip">
 
             <TextView
                 android:layout_marginLeft="5dip"
@@ -54,7 +54,7 @@
                 android:textStyle="bold" />
         </TableRow>
 
-        <TableRow android:paddingTop="5dip" >
+        <TableRow android:paddingTop="5dip">
 
             <TextView
                 android:layout_marginLeft="5dip"
@@ -69,7 +69,7 @@
                 android:textStyle="bold" />
         </TableRow>
 
-        <TableRow android:paddingTop="5dip" >
+        <TableRow android:paddingTop="5dip">
 
             <TextView
                 android:layout_marginLeft="5dip"
@@ -86,7 +86,7 @@
 
         <TableRow
             android:id="@+id/expiration"
-            android:paddingTop="5dip" >
+            android:paddingTop="5dip">
 
             <TextView
                 android:layout_marginLeft="5dip"
@@ -100,14 +100,12 @@
                 android:singleLine="true"
                 android:textStyle="bold" />
         </TableRow>
+
         <CheckBox
-                android:id="@+id/send_audio_msg"
-                android:enabled="false"
-                android:text="@string/label_send_audio_msg" />
+            android:id="@+id/send_audio_msg"
+            android:enabled="false"
+            android:text="@string/label_send_audio_msg" />
 
-        <TableRow>
-
-        </TableRow>
         <Button
             android:id="@+id/select_btn"
             android:layout_marginLeft="5dip"

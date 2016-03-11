@@ -1,16 +1,17 @@
 package com.orangelabs.rcs.ri.extension;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.util.Log;
-
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.extension.InstantMultimediaMessageIntent;
+
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.RcsContactUtil;
 import com.orangelabs.rcs.ri.utils.Utils;
+
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.util.Log;
 
 /**
  * Messaging session invitation receiver

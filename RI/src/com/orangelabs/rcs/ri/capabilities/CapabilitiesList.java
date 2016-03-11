@@ -124,7 +124,7 @@ public class CapabilitiesList extends RcsActivity {
             // Set display name from number
             String number = cursor.getString(holder.columnContact);
             String displayName = rcsDisplayName.getDisplayName(number);
-            holder.numberText.setText(getString(R.string.label_contact, displayName));
+            holder.numberText.setText(getString(R.string.label_contact_arg, displayName));
 
             holder.imBox
                     .setChecked(cursor.getInt(holder.columnCapabilityIm) == CapabilitiesLog.SUPPORTED);

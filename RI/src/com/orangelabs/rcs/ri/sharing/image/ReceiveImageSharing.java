@@ -22,8 +22,20 @@ import com.gsma.services.rcs.RcsGenericException;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.sharing.image.ImageSharing;
+import com.gsma.services.rcs.sharing.image.ImageSharingIntent;
 import com.gsma.services.rcs.sharing.image.ImageSharingListener;
 import com.gsma.services.rcs.sharing.image.ImageSharingService;
+
+import com.orangelabs.rcs.api.connection.ConnectionManager.RcsServiceName;
+import com.orangelabs.rcs.api.connection.utils.ExceptionUtil;
+import com.orangelabs.rcs.api.connection.utils.RcsActivity;
+import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.RiApplication;
+import com.orangelabs.rcs.ri.utils.FileUtils;
+import com.orangelabs.rcs.ri.utils.LogUtils;
+import com.orangelabs.rcs.ri.utils.RcsContactUtil;
+import com.orangelabs.rcs.ri.utils.RcsSessionUtil;
+import com.orangelabs.rcs.ri.utils.Utils;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -40,22 +52,11 @@ import android.view.MenuItem;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.orangelabs.rcs.api.connection.ConnectionManager.RcsServiceName;
-import com.orangelabs.rcs.api.connection.utils.ExceptionUtil;
-import com.orangelabs.rcs.api.connection.utils.RcsActivity;
-import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.RiApplication;
-import com.orangelabs.rcs.ri.utils.FileUtils;
-import com.orangelabs.rcs.ri.utils.LogUtils;
-import com.orangelabs.rcs.ri.utils.RcsContactUtil;
-import com.orangelabs.rcs.ri.utils.RcsSessionUtil;
-import com.orangelabs.rcs.ri.utils.Utils;
-
 import java.util.Set;
 
 /**
  * Receive image sharing
- * 
+ *
  * @author Jean-Marc AUFFRET
  * @author Philippe LEMORDANT
  */
@@ -72,20 +73,25 @@ public class ReceiveImageSharing extends RcsActivity {
      */
     private ImageSharingDAO mIshDao;
 
-    private static final String LOGTAG = LogUtils.getTag(ReceiveImageSharing.class.getSimpleName());
+    private static final String LOGTAG = LogUtils.getTag(ReceiveImageSharing.class.getName());
 
     private ImageSharingListener mListener;
 
     private OnClickListener mAcceptBtnListener;
 
     private OnClickListener mDeclineBtnListener;
+    private ProgressBar mProgressBar;
+    private boolean mSessionListenerSet;
+    private TextView mStatusView;
+    private String mSharingId;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        intitialize();
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.image_sharing_receive);
+        intitialize();
+
         /* Register to API connection manager */
         if (!isServiceConnected(RcsServiceName.IMAGE_SHARING, RcsServiceName.CONTACT)) {
             showMessageThenExit(R.string.label_service_not_available);
@@ -98,7 +104,7 @@ public class ReceiveImageSharing extends RcsActivity {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (!isServiceConnected(RcsServiceName.IMAGE_SHARING)) {
+        if (!mSessionListenerSet || !isServiceConnected(RcsServiceName.IMAGE_SHARING)) {
             return;
         }
         try {
@@ -116,6 +122,7 @@ public class ReceiveImageSharing extends RcsActivity {
     }
 
     private void processIntent(Intent invitation) {
+        mSharingId = invitation.getStringExtra(ImageSharingIntent.EXTRA_SHARING_ID);
         mIshDao = invitation.getParcelableExtra(ImageSharingIntentService.BUNDLE_ISHDAO_ID);
         initiateImageSharing();
     }
@@ -123,35 +130,31 @@ public class ReceiveImageSharing extends RcsActivity {
     private void initiateImageSharing() {
         ImageSharingService ishApi = getImageSharingApi();
         try {
-            /* Add service listener */
-            ishApi.addEventListener(mListener);
-
             /* Get the image sharing */
-            mImageSharing = ishApi.getImageSharing(mIshDao.getSharingId());
+            mImageSharing = ishApi.getImageSharing(mSharingId);
             if (mImageSharing == null) {
                 // Session not found or expired
                 showMessageThenExit(R.string.label_session_not_found);
                 return;
             }
+            mSessionListenerSet = true;
+            ishApi.addEventListener(mListener);
 
-            String from = RcsContactUtil.getInstance(this).getDisplayName(mIshDao.getContact());
             /* Display sharing infos */
-            TextView fromTextView = (TextView) findViewById(R.id.from);
-            fromTextView.setText(getString(R.string.label_from_args, from));
+            String from = RcsContactUtil.getInstance(this).getDisplayName(mIshDao.getContact());
+            TextView fromTextView = (TextView) findViewById(R.id.contact);
+            fromTextView.setText(from);
 
-            long fileSize = mIshDao.getSize();
-            String size = getString(R.string.label_file_size,
-                    FileUtils.humanReadableByteCount(fileSize, true));
-            TextView sizeTxt = (TextView) findViewById(R.id.image_size);
+            String size = FileUtils.humanReadableByteCount(mIshDao.getSize(), true);
+            TextView sizeTxt = (TextView) findViewById(R.id.size);
             sizeTxt.setText(size);
 
-            updateProgressBar(0, fileSize);
+            updateProgressBar(0, mIshDao.getSize());
 
             /* Display accept/reject dialog */
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle(R.string.title_image_sharing);
-            builder.setMessage(getString(R.string.label_ft_from_size, from,
-                    FileUtils.humanReadableByteCount(fileSize, true)));
+            builder.setMessage(getString(R.string.label_ft_from_size, from, size));
             builder.setCancelable(false);
             builder.setIcon(R.drawable.ri_notif_csh_icon);
             builder.setPositiveButton(R.string.label_accept, mAcceptBtnListener);
@@ -180,11 +183,9 @@ public class ReceiveImageSharing extends RcsActivity {
     }
 
     private void updateProgressBar(long currentSize, long totalSize) {
-        TextView statusView = (TextView) findViewById(R.id.progress_status);
-        ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress_bar);
-        statusView.setText(Utils.getProgressLabel(currentSize, totalSize));
-        double position = ((double) currentSize / (double) totalSize) * 100.0;
-        progressBar.setProgress((int) position);
+        mStatusView.setText(Utils.getProgressLabel(currentSize, totalSize));
+        double position = ((double) currentSize / (double) totalSize) * 100.0d;
+        mProgressBar.setProgress((int) position);
     }
 
     private void quitSession() {
@@ -252,13 +253,15 @@ public class ReceiveImageSharing extends RcsActivity {
     }
 
     private void intitialize() {
+        mProgressBar = (ProgressBar) findViewById(R.id.progress_bar);
+        mStatusView = (TextView) findViewById(R.id.progress_status);
         mListener = new ImageSharingListener() {
 
             @Override
             public void onProgressUpdate(ContactId contact, String sharingId,
                     final long currentSize, final long totalSize) {
                 /* Discard event if not for current sharingId */
-                if (mIshDao == null || !mIshDao.getSharingId().equals(sharingId)) {
+                if (mSharingId == null || !mSharingId.equals(sharingId)) {
                     return;
                 }
                 handler.post(new Runnable() {
@@ -277,7 +280,7 @@ public class ReceiveImageSharing extends RcsActivity {
                             + sharingId + " state=" + state + " reason=" + reasonCode);
                 }
                 /* Discard event if not for current sharingId */
-                if (mIshDao == null || !mIshDao.getSharingId().equals(sharingId)) {
+                if (mSharingId == null || !mSharingId.equals(sharingId)) {
                     return;
                 }
                 final String _reasonCode = RiApplication.sImageSharingReasonCodes[reasonCode
@@ -286,29 +289,30 @@ public class ReceiveImageSharing extends RcsActivity {
                 handler.post(new Runnable() {
                     public void run() {
 
-                        TextView statusView = (TextView) findViewById(R.id.progress_status);
                         switch (state) {
                             case ABORTED:
-                                showMessageThenExit(getString(R.string.label_sharing_aborted,
-                                        _reasonCode));
+                                String msg = getString(R.string.label_sharing_aborted, _reasonCode);
+                                mStatusView.setText(msg);
+                                showMessageThenExit(msg);
                                 break;
 
                             case FAILED:
-                                showMessageThenExit(getString(R.string.label_sharing_failed,
-                                        _reasonCode));
+                                msg = getString(R.string.label_sharing_failed, _reasonCode);
+                                mStatusView.setText(msg);
+                                showMessageThenExit(msg);
                                 break;
 
                             case REJECTED:
-                                showMessageThenExit(getString(R.string.label_sharing_rejected,
-                                        _reasonCode));
+                                msg = getString(R.string.label_sharing_rejected, _reasonCode);
+                                mStatusView.setText(msg);
+                                showMessageThenExit(msg);
                                 break;
 
                             case TRANSFERRED:
                                 // Display transfer progress
-                                statusView.setText(_state);
+                                mStatusView.setText(_state);
                                 // Make sure progress bar is at the end
-                                ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress_bar);
-                                progressBar.setProgress(progressBar.getMax());
+                                mProgressBar.setProgress(mProgressBar.getMax());
 
                                 // Show the shared image
                                 Utils.showPicture(ReceiveImageSharing.this, mIshDao.getFile());
@@ -316,7 +320,7 @@ public class ReceiveImageSharing extends RcsActivity {
 
                             default:
                                 // Display session status
-                                statusView.setText(_state);
+                                mStatusView.setText(_state);
                                 if (LogUtils.isActive) {
                                     Log.d(LOGTAG, "onStateChanged ".concat(getString(
                                             R.string.label_ish_state_changed, _state, _reasonCode)));
@@ -343,7 +347,6 @@ public class ReceiveImageSharing extends RcsActivity {
         mDeclineBtnListener = new OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 rejectInvitation();
-                /* Exit activity */
                 finish();
             }
         };

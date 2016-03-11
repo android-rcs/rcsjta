@@ -25,10 +25,10 @@ import com.gsma.services.rcs.filetransfer.FileTransfer;
 import com.gsma.services.rcs.filetransfer.FileTransferService;
 import com.gsma.services.rcs.filetransfer.OneToOneFileTransferListener;
 
-import android.util.Log;
-
 import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.utils.LogUtils;
+
+import android.util.Log;
 
 import java.util.List;
 import java.util.Set;

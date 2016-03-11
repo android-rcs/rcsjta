@@ -20,10 +20,23 @@ package com.orangelabs.rcs.ri.sharing.geoloc;
 
 import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharing;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharingListener;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharingService;
+
+import com.orangelabs.rcs.api.connection.ConnectionManager.RcsServiceName;
+import com.orangelabs.rcs.api.connection.utils.ExceptionUtil;
+import com.orangelabs.rcs.api.connection.utils.RcsActivity;
+import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.RiApplication;
+import com.orangelabs.rcs.ri.messaging.geoloc.EditGeoloc;
+import com.orangelabs.rcs.ri.messaging.geoloc.ShowGeoloc;
+import com.orangelabs.rcs.ri.utils.ContactListAdapter;
+import com.orangelabs.rcs.ri.utils.ContactUtil;
+import com.orangelabs.rcs.ri.utils.LogUtils;
+import com.orangelabs.rcs.ri.utils.Utils;
 
 import android.Manifest;
 import android.content.Intent;
@@ -45,25 +58,13 @@ import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.orangelabs.rcs.api.connection.ConnectionManager.RcsServiceName;
-import com.orangelabs.rcs.api.connection.utils.ExceptionUtil;
-import com.orangelabs.rcs.api.connection.utils.RcsActivity;
-import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.RiApplication;
-import com.orangelabs.rcs.ri.messaging.geoloc.EditGeoloc;
-import com.orangelabs.rcs.ri.messaging.geoloc.ShowGeoloc;
-import com.orangelabs.rcs.ri.utils.ContactListAdapter;
-import com.orangelabs.rcs.ri.utils.ContactUtil;
-import com.orangelabs.rcs.ri.utils.LogUtils;
-import com.orangelabs.rcs.ri.utils.Utils;
-
 import java.util.Set;
 
 /**
  * Initiate geoloc sharing
  *
  * @author vfml3370
- * @author yplo6403
+ * @author Philippe LEMORDANT
  */
 public class InitiateGeolocSharing extends RcsActivity {
     /**
@@ -75,65 +76,37 @@ public class InitiateGeolocSharing extends RcsActivity {
      * UI handler
      */
     private final Handler mHandler = new Handler();
-
     private Geoloc mGeoloc;
-
     private GeolocSharing mGeolocSharing;
-
     private String mSharingId;
 
-    private static final String LOGTAG = LogUtils.getTag(InitiateGeolocSharing.class
-            .getSimpleName());
+    private static final String LOGTAG = LogUtils.getTag(InitiateGeolocSharing.class.getName());
 
     /**
      * Spinner for contact selection
      */
     private Spinner mSpinner;
-
     private GeolocSharingListener mListener;
-
-    private OnClickListener mBtnInviteListener;
-
-    private OnClickListener mBtnSelectListener;
-
-    private OnClickListener mBtnDialListener;
-
     private GeolocSharingService mGeolocSharingService;
+    private Button mInviteBtn;
+    private ProgressBar mProgressBar;
+    private Button mSelectBtn;
+    private TextView mStatusView;
+    private Button mDialBtn;
+    private TextView mPositionView;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        initialize();
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.geoloc_sharing_initiate);
-
-        /* Set contact selector */
-        mSpinner = (Spinner) findViewById(R.id.contact);
-        mSpinner.setAdapter(ContactListAdapter.createRcsContactListAdapter(this));
-
-        /* Set buttons callback */
-        Button inviteBtn = (Button) findViewById(R.id.invite_btn);
-        inviteBtn.setOnClickListener(mBtnInviteListener);
-        inviteBtn.setEnabled(false);
-        Button selectBtn = (Button) findViewById(R.id.select_btn);
-        selectBtn.setOnClickListener(mBtnSelectListener);
-        selectBtn.setEnabled(false);
-        Button dialBtn = (Button) findViewById(R.id.dial_btn);
-        dialBtn.setOnClickListener(mBtnDialListener);
-        dialBtn.setEnabled(false);
-
-        /* Disable button if no contact available */
-        if (mSpinner.getAdapter().getCount() != 0) {
-            dialBtn.setEnabled(true);
-            selectBtn.setEnabled(true);
-        }
+        initialize();
         if (!isServiceConnected(RcsServiceName.GEOLOC_SHARING)) {
             showMessageThenExit(R.string.label_service_not_available);
             return;
         }
         startMonitorServices(RcsServiceName.GEOLOC_SHARING);
         try {
-            mGeolocSharingService = getGeolocSharingApi();
             mGeolocSharingService.addEventListener(mListener);
 
         } catch (RcsServiceException e) {
@@ -162,19 +135,22 @@ public class InitiateGeolocSharing extends RcsActivity {
             case SELECT_GEOLOCATION:
                 /* Get selected geoloc */
                 mGeoloc = data.getParcelableExtra(EditGeoloc.EXTRA_GEOLOC);
+                mPositionView.setText(mGeoloc.toString());
                 /* Enable invite button */
-                Button inviteBtn = (Button) findViewById(R.id.invite_btn);
-                inviteBtn.setEnabled(true);
+                mInviteBtn.setEnabled(true);
                 break;
         }
     }
 
     private void updateProgressBar(long currentSize, long totalSize) {
-        TextView statusView = (TextView) findViewById(R.id.progress_status);
-        ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress_bar);
-        statusView.setText(Utils.getProgressLabel(currentSize, totalSize));
-        double position = ((double) currentSize / (double) totalSize) * 100.0;
-        progressBar.setProgress((int) position);
+        double position = 0.0d;
+        if (totalSize != 0) {
+            mStatusView.setText(Utils.getProgressLabel(currentSize, totalSize));
+            position = (((double) currentSize) / ((double) totalSize)) * 100.0d;
+        } else {
+            mStatusView.setText("");
+        }
+        mProgressBar.setProgress((int) position);
     }
 
     private void quitSession() {
@@ -219,6 +195,87 @@ public class InitiateGeolocSharing extends RcsActivity {
     }
 
     private void initialize() {
+        mGeolocSharingService = getGeolocSharingApi();
+
+        mSpinner = (Spinner) findViewById(R.id.contact);
+        ContactListAdapter adapter = ContactListAdapter.createRcsContactListAdapter(this);
+        mSpinner.setAdapter(adapter);
+
+        OnClickListener btnInviteListener = new OnClickListener() {
+            public void onClick(View v) {
+                // Check if the service is available
+                try {
+                    if (!mGeolocSharingService.isServiceRegistered()) {
+                        showMessage(R.string.error_not_registered);
+                        return;
+                    }
+                    // get selected phone number
+                    ContactListAdapter adapter = (ContactListAdapter) mSpinner.getAdapter();
+                    String phoneNumber = adapter.getSelectedNumber(mSpinner.getSelectedView());
+                    ContactId contact = ContactUtil.formatContact(phoneNumber);
+                    if (LogUtils.isActive) {
+                        Log.d(LOGTAG, "share geoloc=" + mGeoloc + " contact=" + contact);
+                    }
+                    mGeolocSharing = mGeolocSharingService.shareGeoloc(contact, mGeoloc);
+                    mSharingId = mGeolocSharing.getSharingId();
+                    mSpinner.setEnabled(false);
+                    mInviteBtn.setVisibility(View.INVISIBLE);
+                    mSelectBtn.setVisibility(View.INVISIBLE);
+                    mDialBtn.setVisibility(View.INVISIBLE);
+
+                } catch (RcsServiceNotAvailableException e) {
+                    showMessage(R.string.label_service_not_available);
+
+                } catch (RcsServiceException e) {
+                    showExceptionThenExit(e);
+                }
+            }
+        };
+        mInviteBtn = (Button) findViewById(R.id.invite_btn);
+        mInviteBtn.setOnClickListener(btnInviteListener);
+        mInviteBtn.setEnabled(false);
+
+        OnClickListener btnSelectListener = new OnClickListener() {
+            public void onClick(View v) {
+                // Start a new activity to send a geolocation
+                startActivityForResult(new Intent(InitiateGeolocSharing.this, EditGeoloc.class),
+                        SELECT_GEOLOCATION);
+            }
+        };
+        mSelectBtn = (Button) findViewById(R.id.select_btn);
+        mSelectBtn.setOnClickListener(btnSelectListener);
+        mSelectBtn.setEnabled(false);
+
+        OnClickListener btnDialListener = new OnClickListener() {
+            public void onClick(View v) {
+                // get selected phone number
+                ContactListAdapter adapter = (ContactListAdapter) mSpinner.getAdapter();
+                String phoneNumber = adapter.getSelectedNumber(mSpinner.getSelectedView());
+
+                // Initiate a GSM call before to be able to share content
+                Intent intent = new Intent(Intent.ACTION_CALL);
+                intent.setData(Uri.parse("tel:".concat(phoneNumber)));
+                if (ActivityCompat.checkSelfPermission(InitiateGeolocSharing.this,
+                        Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+                    return;
+                }
+                startActivity(intent);
+            }
+        };
+        mDialBtn = (Button) findViewById(R.id.dial_btn);
+        mDialBtn.setOnClickListener(btnDialListener);
+        mDialBtn.setEnabled(false);
+
+        mStatusView = (TextView) findViewById(R.id.progress_status);
+        mPositionView = (TextView) findViewById(R.id.position);
+        mProgressBar = (ProgressBar) findViewById(R.id.progress_bar);
+        updateProgressBar(0, 0);
+        mPositionView.setText("");
+
+        if (adapter == null || adapter.getCount() != 0) {
+            mDialBtn.setEnabled(true);
+            mSelectBtn.setEnabled(true);
+        }
         mListener = new GeolocSharingListener() {
 
             @Override
@@ -300,72 +357,6 @@ public class InitiateGeolocSharing extends RcsActivity {
                 }
             }
 
-        };
-
-        mBtnInviteListener = new OnClickListener() {
-            public void onClick(View v) {
-                // Check if the service is available
-                try {
-                    if (!mGeolocSharingService.isServiceRegistered()) {
-                        showMessage(R.string.error_not_registered);
-                        return;
-                    }
-                } catch (RcsServiceException e) {
-                    showExceptionThenExit(e);
-                    return;
-                }
-
-                // get selected phone number
-                ContactListAdapter adapter = (ContactListAdapter) mSpinner.getAdapter();
-                String phoneNumber = adapter.getSelectedNumber(mSpinner.getSelectedView());
-
-                ContactId contact = ContactUtil.formatContact(phoneNumber);
-
-                try {
-                    // Initiate location share
-                    mGeolocSharing = mGeolocSharingService.shareGeoloc(contact, mGeoloc);
-                    mSharingId = mGeolocSharing.getSharingId();
-
-                    // Disable UI
-                    mSpinner.setEnabled(false);
-
-                    // Hide buttons
-                    Button inviteBtn = (Button) findViewById(R.id.invite_btn);
-                    inviteBtn.setVisibility(View.INVISIBLE);
-                    Button selectBtn = (Button) findViewById(R.id.select_btn);
-                    selectBtn.setVisibility(View.INVISIBLE);
-                    Button dialBtn = (Button) findViewById(R.id.dial_btn);
-                    dialBtn.setVisibility(View.INVISIBLE);
-
-                } catch (RcsServiceException e) {
-                    showExceptionThenExit(e);
-                }
-            }
-        };
-
-        mBtnSelectListener = new OnClickListener() {
-            public void onClick(View v) {
-                // Start a new activity to send a geolocation
-                startActivityForResult(new Intent(InitiateGeolocSharing.this, EditGeoloc.class),
-                        SELECT_GEOLOCATION);
-            }
-        };
-
-        mBtnDialListener = new OnClickListener() {
-            public void onClick(View v) {
-                // get selected phone number
-                ContactListAdapter adapter = (ContactListAdapter) mSpinner.getAdapter();
-                String phoneNumber = adapter.getSelectedNumber(mSpinner.getSelectedView());
-
-                // Initiate a GSM call before to be able to share content
-                Intent intent = new Intent(Intent.ACTION_CALL);
-                intent.setData(Uri.parse("tel:".concat(phoneNumber)));
-                if (ActivityCompat.checkSelfPermission(InitiateGeolocSharing.this,
-                        Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
-                    return;
-                }
-                startActivity(intent);
-            }
         };
     }
 }

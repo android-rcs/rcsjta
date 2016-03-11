@@ -1,12 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.orangelabs.rcs.ri"
-    android:versionCode="1"
-    android:versionName="2.0" >
-
-    <uses-sdk
-        android:minSdkVersion="12"
-        android:targetSdkVersion="23" />
+    package="com.orangelabs.rcs.ri">
 
     <permission
         android:name="com.orangelabs.rcs.ri.permission.MAPS_RECEIVE"
@@ -38,7 +32,7 @@
         android:name=".RiApplication"
         android:allowBackup="false"
         android:icon="@drawable/app_icon"
-        android:label="@string/app_name" >
+        android:label="@string/app_name">
         <meta-data
             android:name="com.gsma.services.rcs.capability.EXTENSION"
             android:value="ext.messaging;ext.streaming" />
@@ -48,17 +42,15 @@
         <!-- Insert here your own key for accessing the Google Maps Android API -->
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
-            android:value="AIzaSyDRP6SUIberh_AIVOA-4A2flFhG8KjxcLc" >
-        </meta-data>
+            android:value="AIzaSyDRP6SUIberh_AIVOA-4A2flFhG8KjxcLc" />
         <meta-data
             android:name="com.google.android.gms.version"
-            android:value="@integer/google_play_services_version" >
-        </meta-data>
+            android:value="@integer/google_play_services_version" />
 
         <!-- Main -->
         <activity
             android:name=".RI"
-            android:label="@string/app_name" >
+            android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -69,7 +61,7 @@
             android:name=".AboutRI"
             android:label="@string/menu_about" />
 
-        <receiver android:name="com.orangelabs.rcs.ri.DeviceBoot" >
+        <receiver android:name="com.orangelabs.rcs.ri.DeviceBoot">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
@@ -77,8 +69,7 @@
 
         <service
             android:name="com.orangelabs.rcs.ri.RcsServiceNotifManager"
-            android:exported="false">
-        </service>
+            android:exported="false" />
 
         <!-- Intents API -->
 
@@ -134,7 +125,7 @@
 
         <!-- File transfer API -->
 
-        <activity android:name="com.orangelabs.rcs.ri.messaging.filetransfer.TestFileTransferApi" >
+        <activity android:name="com.orangelabs.rcs.ri.messaging.filetransfer.TestFileTransferApi">
             <intent-filter>
                 <category android:name="android.intent.category.LAUNCHER" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -145,7 +136,7 @@
         <activity
             android:name="com.orangelabs.rcs.ri.messaging.filetransfer.InitiateFileTransfer"
             android:icon="@drawable/ri_quick_ft_icon"
-            android:label="@string/menu_transfer_file" >
+            android:label="@string/menu_transfer_file">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -163,14 +154,14 @@
 
         <receiver
             android:name="com.orangelabs.rcs.ri.messaging.filetransfer.FileTransferInvitationReceiver"
-            android:exported="true" >
+            android:exported="true">
             <intent-filter>
                 <action android:name="com.gsma.services.rcs.filetransfer.action.NEW_FILE_TRANSFER" />
             </intent-filter>
         </receiver>
         <receiver
             android:name="com.orangelabs.rcs.ri.messaging.filetransfer.FileTransferResumeReceiver"
-            android:exported="true" >
+            android:exported="true">
             <intent-filter>
                 <action android:name="com.gsma.services.rcs.filetransfer.action.RESUME_FILE_TRANSFER" />
             </intent-filter>
@@ -181,12 +172,10 @@
             android:label="@string/title_file_transfer"
             android:launchMode="singleTop" />
         <activity
-            android:name="com.orangelabs.rcs.ri.messaging.filetransfer.FileTransferList"
-            android:label="@string/menu_file_transfer_log" />
-        <activity
             android:name="com.orangelabs.rcs.ri.messaging.filetransfer.FileTransferServiceConfigActivity"
             android:icon="@drawable/ri_quick_ft_icon"
             android:label="@string/menu_ft_config" />
+
         <service
             android:name="com.orangelabs.rcs.ri.messaging.filetransfer.FileTransferIntentService"
             android:exported="false" />
@@ -203,7 +192,7 @@
 
         <activity
             android:name=".messaging.chat.TestChatApi"
-            android:icon="@drawable/ri_quick_chat_icon" >
+            android:icon="@drawable/ri_quick_chat_icon">
             <intent-filter>
                 <category android:name="android.intent.category.LAUNCHER" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -220,7 +209,7 @@
         <activity
             android:name="com.orangelabs.rcs.ri.messaging.chat.single.InitiateSingleChat"
             android:icon="@drawable/ri_quick_chat_icon"
-            android:label="@string/menu_initiate_chat" >
+            android:label="@string/menu_initiate_chat">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -237,7 +226,7 @@
 
         <receiver
             android:name="com.orangelabs.rcs.ri.messaging.chat.single.SingleChatInvitationReceiver"
-            android:exported="true" >
+            android:exported="true">
             <intent-filter>
                 <action android:name="com.gsma.services.rcs.chat.action.NEW_ONE_TO_ONE_CHAT_MESSAGE" />
             </intent-filter>
@@ -247,8 +236,7 @@
             android:name="com.orangelabs.rcs.ri.messaging.chat.single.SingleChatView"
             android:icon="@drawable/ri_quick_chat_icon"
             android:label="@string/label_quick_chat"
-            android:launchMode="singleTop" >
-        </activity>
+            android:launchMode="singleTop" />
         <activity
             android:name="com.orangelabs.rcs.ri.messaging.chat.single.SingleChatList"
             android:icon="@drawable/ri_quick_chat_icon"
@@ -260,7 +248,7 @@
         <activity
             android:name=".messaging.chat.group.InitiateGroupChat"
             android:icon="@drawable/ri_quick_chat_icon"
-            android:label="@string/menu_initiate_group_chat" >
+            android:label="@string/menu_initiate_group_chat">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -275,14 +263,14 @@
 
         <receiver
             android:name="com.orangelabs.rcs.ri.messaging.chat.group.GroupChatMessageReceiver"
-            android:exported="true" >
+            android:exported="true">
             <intent-filter>
                 <action android:name="com.gsma.services.rcs.chat.action.NEW_GROUP_CHAT_MESSAGE" />
             </intent-filter>
         </receiver>
         <receiver
             android:name="com.orangelabs.rcs.ri.messaging.chat.group.GroupChatInvitationReceiver"
-            android:exported="true" >
+            android:exported="true">
             <intent-filter>
                 <action android:name="com.gsma.services.rcs.chat.action.NEW_GROUP_CHAT" />
             </intent-filter>
@@ -335,13 +323,9 @@
         <activity android:name=".sharing.TestSharingApi" />
 
         <!-- Image sharing API -->
-
-        <activity
-            android:name=".sharing.image.TestImageSharingApi"
-            android:label="@string/title_image_sharing" />
         <activity
             android:name=".sharing.image.InitiateImageSharing"
-            android:label="@string/menu_initiate_image_sharing" >
+            android:label="@string/menu_initiate_image_sharing">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -353,7 +337,7 @@
 
         <receiver
             android:name=".sharing.image.ImageSharingInvitationReceiver"
-            android:exported="true" >
+            android:exported="true">
             <intent-filter>
                 <action android:name="com.gsma.services.rcs.sharing.image.action.NEW_IMAGE_SHARING" />
             </intent-filter>
@@ -362,28 +346,20 @@
         <activity
             android:name=".sharing.image.ReceiveImageSharing"
             android:label="@string/title_image_sharing"
-            android:launchMode="singleTop" >
-        </activity>
-        <activity
-            android:name=".sharing.image.ImageSharingList"
-            android:label="@string/menu_image_sharing_log" />
+            android:launchMode="singleTop" />
 
         <service
             android:name=".sharing.image.ImageSharingIntentService"
             android:exported="false" />
 
         <!-- Geoloc sharing API -->
-
-        <activity
-            android:name=".sharing.geoloc.TestGeolocSharingApi"
-            android:label="@string/title_geoloc_sharing" />
         <activity
             android:name=".sharing.geoloc.InitiateGeolocSharing"
             android:label="@string/menu_initiate_geoloc_sharing" />
 
         <receiver
             android:name=".sharing.geoloc.GeolocSharingInvitationReceiver"
-            android:exported="true" >
+            android:exported="true">
             <intent-filter>
                 <action android:name="com.gsma.services.rcs.sharing.geoloc.action.NEW_GEOLOC_SHARING" />
             </intent-filter>
@@ -391,22 +367,17 @@
 
         <activity
             android:name=".sharing.geoloc.ReceiveGeolocSharing"
-            android:launchMode="singleTop"
-            android:label="@string/title_geoloc_sharing" >
-        </activity>
+            android:label="@string/title_geoloc_sharing"
+            android:launchMode="singleTop" />
 
         <service
             android:name=".sharing.geoloc.GeolocSharingIntentService"
             android:exported="false" />
 
         <!-- Video sharing API -->
-
-        <activity
-            android:name=".sharing.video.TestVideoSharingApi"
-            android:label="@string/title_video_sharing" />
         <activity
             android:name=".sharing.video.OutgoingVideoSharing"
-            android:label="@string/menu_video_sharing" >
+            android:label="@string/menu_video_sharing">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -418,7 +389,7 @@
 
         <receiver
             android:name=".sharing.video.VideoSharingInvitationReceiver"
-            android:exported="true" >
+            android:exported="true">
             <intent-filter>
                 <action android:name="com.gsma.services.rcs.sharing.video.action.NEW_VIDEO_SHARING" />
             </intent-filter>
@@ -428,9 +399,6 @@
             android:name=".sharing.video.IncomingVideoSharing"
             android:exported="true"
             android:label="@string/menu_video_sharing" />
-        <activity
-            android:name=".sharing.video.VideoSharingList"
-            android:label="@string/menu_video_sharing_log" />
 
         <service
             android:name=".sharing.video.VideoSharingIntentService"
@@ -441,7 +409,7 @@
         <activity android:name=".extension.TestMultimediaSessionApi" />
         <activity
             android:name="com.orangelabs.rcs.ri.extension.messaging.InitiateMessagingSession"
-            android:label="@string/menu_initiate_messaging_session" >
+            android:label="@string/menu_initiate_messaging_session">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -463,12 +431,15 @@
             android:name="com.orangelabs.rcs.ri.extension.streaming.StreamingSessionView"
             android:label="@string/title_streaming_session" />
         <activity
+            android:name="com.orangelabs.rcs.ri.extension.SendInstantMessage"
+            android:label="@string/title_instant_session" />
+        <activity
             android:name="com.orangelabs.rcs.ri.extension.streaming.StreamingSessionList"
             android:label="@string/menu_streaming_sessions_list" />
 
         <receiver
             android:name="com.orangelabs.rcs.ri.extension.SessionInvitationReceiver"
-            android:exported="true" >
+            android:exported="true">
             <intent-filter>
                 <action android:name="com.gsma.services.rcs.extension.action.NEW_MESSAGING_SESSION" />
 
@@ -503,7 +474,7 @@
             android:label="@string/title_history_log" />
         <activity
             android:name="com.orangelabs.rcs.ri.history.messaging.MessagingListView"
-            android:label="@string/title_history_log_messaging" >
+            android:label="@string/title_history_log_messaging">
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
                 <action android:name="android.intent.action.SEND_MULTIPLE" />
@@ -520,25 +491,32 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.orangelabs.rcs.ri.history.sharing.SharingListView"
-            android:label="@string/title_history_log_sharing" />
+            android:name="com.orangelabs.rcs.ri.sharing.geoloc.GeolocSharingLogView"
+            android:label="@string/title_sharing_log_item" />
         <activity
-            android:name="com.orangelabs.rcs.ri.history.sharing.SharingDetailView"
-            android:label="@string/title_history_log_item" />
+            android:name="com.orangelabs.rcs.ri.sharing.image.ImageSharingLogView"
+            android:label="@string/title_sharing_log_item" />
+        <activity
+            android:name="com.orangelabs.rcs.ri.sharing.video.VideoSharingLogView"
+            android:label="@string/title_sharing_log_item" />
+
         <activity
             android:name=".messaging.filetransfer.AudioMessageRecordActivity"
             android:label="@string/menu_transfer_file" />
+        <activity
+            android:name="com.orangelabs.rcs.ri.sharing.SharingListView"
+            android:label="@string/title_sharing_log" />
 
         <receiver
             android:name="com.orangelabs.rcs.ri.messaging.chat.single.UndeliveredMessageReceiver"
-            android:exported="true" >
+            android:exported="true">
             <intent-filter>
                 <action android:name="com.gsma.services.rcs.chat.action.MESSAGE_DELIVERY_EXPIRED" />
             </intent-filter>
         </receiver>
         <receiver
             android:name="com.orangelabs.rcs.ri.messaging.filetransfer.UndeliveredFileReceiver"
-            android:exported="true" >
+            android:exported="true">
             <intent-filter>
                 <action android:name="com.gsma.services.rcs.filetransfer.action.FILE_TRANSFER_DELIVERY_EXPIRED" />
             </intent-filter>

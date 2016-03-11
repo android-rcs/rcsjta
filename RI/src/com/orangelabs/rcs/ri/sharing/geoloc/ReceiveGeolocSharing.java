@@ -65,35 +65,32 @@ public class ReceiveGeolocSharing extends RcsActivity {
      * UI handler
      */
     private final Handler mHandler = new Handler();
-
     private String mSharingId;
-
     private ContactId mRemoteContact;
 
     /**
      * Geoloc sharing session
      */
     private GeolocSharing mGeolocSharing;
-
     private Geoloc mGeoloc;
 
-    private static final String LOGTAG = LogUtils
-            .getTag(ReceiveGeolocSharing.class.getSimpleName());
+    private static final String LOGTAG = LogUtils.getTag(ReceiveGeolocSharing.class.getName());
 
     private GeolocSharingListener mListener;
-
     private OnClickListener mAcceptBtnListener;
-
     private OnClickListener mDeclineBtnListener;
-
     private ProgressBar mProgressBar;
+    private boolean mSessionListenerSet;
+    private TextView mStatusView;
+    private TextView mPositionView;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        initialize();
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.geoloc_sharing_receive);
+
+        initialize();
 
         /* Register to API connection manager */
         if (!isServiceConnected(RcsServiceName.GEOLOC_SHARING, RcsServiceName.CONTACT)) {
@@ -107,7 +104,7 @@ public class ReceiveGeolocSharing extends RcsActivity {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (!isServiceConnected(RcsServiceName.GEOLOC_SHARING)) {
+        if (!mSessionListenerSet || !isServiceConnected(RcsServiceName.GEOLOC_SHARING)) {
             return;
         }
         try {
@@ -133,8 +130,6 @@ public class ReceiveGeolocSharing extends RcsActivity {
     private void initiateGeolocSharing() {
         GeolocSharingService gshApi = getGeolocSharingApi();
         try {
-            gshApi.addEventListener(mListener);
-
             // Get the geoloc sharing
             mGeolocSharing = gshApi.getGeolocSharing(mSharingId);
             if (mGeolocSharing == null) {
@@ -142,19 +137,21 @@ public class ReceiveGeolocSharing extends RcsActivity {
                 showMessageThenExit(R.string.label_session_not_found);
                 return;
             }
+            mSessionListenerSet = true;
+            gshApi.addEventListener(mListener);
 
             /* Display sharing infos */
-            TextView fromTextView = (TextView) findViewById(R.id.from);
             String from = RcsContactUtil.getInstance(this).getDisplayName(mRemoteContact);
-            String fromText = getString(R.string.label_from_args, from);
-            fromTextView.setText(fromText);
-
+            TextView fromTextView = (TextView) findViewById(R.id.contact);
+            fromTextView.setText(from);
+            mPositionView = (TextView) findViewById(R.id.position);
             mProgressBar.setProgress(0);
+            mPositionView.setText("");
 
             /* Display accept/reject dialog */
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle(R.string.title_geoloc_sharing);
-            builder.setMessage(fromText);
+            builder.setMessage(getString(R.string.label_from_args, from));
             builder.setCancelable(false);
             builder.setIcon(R.drawable.ri_notif_gsh_icon);
             builder.setPositiveButton(R.string.label_accept, mAcceptBtnListener);
@@ -183,9 +180,8 @@ public class ReceiveGeolocSharing extends RcsActivity {
     }
 
     private void updateProgressBar(long currentSize, long totalSize) {
-        TextView statusView = (TextView) findViewById(R.id.progress_status);
-        statusView.setText(Utils.getProgressLabel(currentSize, totalSize));
-        double position = ((double) currentSize / (double) totalSize) * 100.0;
+        mStatusView.setText(Utils.getProgressLabel(currentSize, totalSize));
+        double position = ((double) currentSize / (double) totalSize) * 100.0d;
         mProgressBar.setProgress((int) position);
     }
 
@@ -230,6 +226,7 @@ public class ReceiveGeolocSharing extends RcsActivity {
     }
 
     private void initialize() {
+        mStatusView = (TextView) findViewById(R.id.progress_status);
         mListener = new GeolocSharingListener() {
 
             @Override
@@ -261,27 +258,29 @@ public class ReceiveGeolocSharing extends RcsActivity {
                 final String _state = RiApplication.sGeolocSharingStates[state.toInt()];
                 mHandler.post(new Runnable() {
                     public void run() {
-                        TextView statusView = (TextView) findViewById(R.id.progress_status);
                         switch (state) {
                             case ABORTED:
-                                showMessageThenExit(getString(R.string.label_sharing_aborted,
-                                        _reasonCode));
+                                String msg = getString(R.string.label_sharing_aborted, _reasonCode);
+                                mStatusView.setText(msg);
+                                showMessageThenExit(msg);
                                 break;
 
                             case FAILED:
-                                showMessageThenExit(getString(R.string.label_sharing_failed,
-                                        _reasonCode));
+                                msg = getString(R.string.label_sharing_failed, _reasonCode);
+                                mStatusView.setText(msg);
+                                showMessageThenExit(msg);
                                 break;
 
                             case TRANSFERRED:
                                 /* Display transfer progress */
-                                statusView.setText(_state);
+                                mStatusView.setText(_state);
                                 /* Make sure progress bar is at the end */
                                 mProgressBar.setProgress(mProgressBar.getMax());
 
                                 /* Show the shared geoloc */
                                 try {
                                     mGeoloc = mGeolocSharing.getGeoloc();
+                                    mPositionView.setText(mGeoloc.toString());
                                     ShowGeoloc.ShowGeolocForContact(ReceiveGeolocSharing.this,
                                             contact, mGeoloc);
                                 } catch (RcsServiceException e) {
@@ -293,7 +292,7 @@ public class ReceiveGeolocSharing extends RcsActivity {
                                 break;
 
                             default:
-                                statusView.setText(_state);
+                                mStatusView.setText(_state);
                                 if (LogUtils.isActive) {
                                     Log.d(LOGTAG, "onStateChanged ".concat(getString(
                                             R.string.label_gsh_state_changed, _state, _reasonCode)));
@@ -311,21 +310,17 @@ public class ReceiveGeolocSharing extends RcsActivity {
             }
 
         };
-
         mAcceptBtnListener = new OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 acceptInvitation();
             }
         };
-
         mDeclineBtnListener = new OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 rejectInvitation();
-                /* Exit activity */
                 finish();
             }
         };
-
         mProgressBar = (ProgressBar) findViewById(R.id.progress_bar);
     }
 }

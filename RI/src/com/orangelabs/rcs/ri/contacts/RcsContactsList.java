@@ -116,7 +116,7 @@ public class RcsContactsList extends RcsListActivity {
             RcsContact item = getItem(position);
             if (item != null) {
                 String displayName = mRcsContactUtil.getDisplayName(item.getContactId());
-                holder.numberText.setText(getString(R.string.label_contact, displayName));
+                holder.numberText.setText(getString(R.string.label_contact_arg, displayName));
                 Capabilities capa = item.getCapabilities();
                 holder.imBox.setChecked(capa.hasCapabilities(Capabilities.CAPABILITY_IM));
                 holder.ftBox.setChecked(capa

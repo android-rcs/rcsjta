@@ -25,6 +25,15 @@ import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
 import com.gsma.services.rcs.history.HistoryLog;
 
+import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.RiApplication;
+import com.orangelabs.rcs.ri.utils.ContactUtil;
+import com.orangelabs.rcs.ri.utils.FileUtils;
+import com.orangelabs.rcs.ri.utils.RcsContactUtil;
+import com.orangelabs.rcs.ri.utils.SmileyParser;
+import com.orangelabs.rcs.ri.utils.Smileys;
+import com.orangelabs.rcs.ri.utils.Utils;
+
 import android.content.Context;
 import android.database.Cursor;
 import android.support.v4.widget.CursorAdapter;
@@ -36,15 +45,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-
-import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.RiApplication;
-import com.orangelabs.rcs.ri.utils.ContactUtil;
-import com.orangelabs.rcs.ri.utils.FileUtils;
-import com.orangelabs.rcs.ri.utils.RcsContactUtil;
-import com.orangelabs.rcs.ri.utils.SmileyParser;
-import com.orangelabs.rcs.ri.utils.Smileys;
-import com.orangelabs.rcs.ri.utils.Utils;
 
 import java.text.SimpleDateFormat;
 import java.util.HashMap;

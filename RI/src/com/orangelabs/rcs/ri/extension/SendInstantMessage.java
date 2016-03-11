@@ -1,6 +1,5 @@
 package com.orangelabs.rcs.ri.extension;
 
-import android.app.Activity;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.view.View;
@@ -23,8 +22,6 @@ import com.orangelabs.rcs.ri.utils.Utils;
  * @author Jean-Marc AUFFRET
  */
 public class SendInstantMessage extends RcsActivity {
-
-    private String mServiceId = MessagingSessionUtils.SERVICE_ID;
 
     /**
      * Spinner for contact selection
@@ -84,8 +81,8 @@ public class SendInstantMessage extends RcsActivity {
     public void sendMessage(ContactId contact) {
         try {
             String content = "Hello world";
-            String contentType = MessagingSessionUtils.SERVICE_CONTENT_TYPE;
-            getMultimediaSessionApi().sendInstantMultimediaMessage(mServiceId, contact, content.getBytes(), contentType);
+            getMultimediaSessionApi().sendInstantMultimediaMessage(MessagingSessionUtils.SERVICE_ID,
+                    contact, content.getBytes(), MessagingSessionUtils.SERVICE_CONTENT_TYPE);
             Utils.displayToast(this, getString(R.string.label_instant_message_sent));
         } catch (RcsServiceException e) {
             showExceptionThenExit(e);
