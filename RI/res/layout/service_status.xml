@@ -1,73 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent" >
+    android:layout_height="wrap_content"
+    android:padding="10dip"
+    android:stretchColumns="1">
 
-    <TableLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:paddingTop="10dip"
-        android:stretchColumns="1" >
+    <TableRow android:padding="2dip">
 
-        <TableRow android:paddingTop="5dip" >
-            <TextView
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="5dip"
-                android:layout_marginRight="5dip"
-                android:gravity="right"
-                android:text="@string/label_service_bound" />
-            <TextView
-                android:id="@+id/service_bound"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="5dip"
-                android:layout_marginRight="5dip"
-                android:gravity="left" />
-        </TableRow>
-
-        <TableRow>
-            <TextView
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="5dip"
-                android:layout_marginRight="5dip"
-                android:gravity="right"
-                android:text="@string/label_service_activated" />
-            <TextView
-                android:id="@+id/service_activated"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="5dip"
-                android:layout_marginRight="5dip"
-                android:gravity="left" />
-        </TableRow>
-
-        <TableRow>
-            <TextView
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="5dip"
-                android:layout_marginRight="5dip"
-                android:gravity="right"
-                android:text="@string/label_service_started" />
-            <TextView
-                android:id="@+id/service_started"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="5dip"
-                android:layout_marginRight="5dip"
-                android:gravity="left"/>
-        </TableRow>
-
-        <Button
-            android:id="@+id/service_refresh_all"
-            android:paddingTop="10dip"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
+        <TextView
             android:layout_marginLeft="5dip"
             android:layout_marginRight="5dip"
-            android:text="@string/label_refresh" />
-    </TableLayout>
+            android:text="@string/label_service_bound" />
 
-</ScrollView>
+        <TextView android:id="@+id/service_bound" />
+    </TableRow>
+
+    <TableRow>
+
+        <TextView
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:text="@string/label_service_activated" />
+
+        <TextView android:id="@+id/service_activated" />
+    </TableRow>
+
+    <TableRow>
+
+        <TextView
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:text="@string/label_service_started" />
+
+        <TextView android:id="@+id/service_started" />
+    </TableRow>
+
+    <Button
+        android:id="@+id/service_refresh_all"
+        android:text="@string/label_refresh" />
+</TableLayout>

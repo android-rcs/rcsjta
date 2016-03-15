@@ -21,9 +21,12 @@ package com.orangelabs.rcs.ri.messaging.chat.group;
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.GroupChat;
 import com.gsma.services.rcs.chat.GroupChatIntent;
+import com.gsma.services.rcs.chat.OneToOneChatIntent;
 import com.gsma.services.rcs.contact.ContactId;
 
 import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.messaging.GroupTalkView;
+import com.orangelabs.rcs.ri.messaging.TalkList;
 import com.orangelabs.rcs.ri.messaging.chat.ChatMessageDAO;
 import com.orangelabs.rcs.ri.messaging.chat.ChatPendingIntentManager;
 import com.orangelabs.rcs.ri.utils.LogUtils;
@@ -144,7 +147,7 @@ public class GroupChatIntentService extends IntentService {
 
     private void forwardGCMessage2UI(Intent newGroupChatMessage, ChatMessageDAO message) {
         String chatId = message.getChatId();
-        Intent intent = GroupChatView.forgeIntentNewMessage(this, newGroupChatMessage, chatId);
+        Intent intent = GroupTalkView.forgeIntentNewMessage(this, newGroupChatMessage, chatId);
         String content = message.getContent();
         Integer uniqueId = mChatPendingIntentManager.tryContinueChatConversation(intent, chatId);
         if (uniqueId != null) {
@@ -173,12 +176,13 @@ public class GroupChatIntentService extends IntentService {
             Notification notif = buildNotification(contentIntent, title, msg);
             /* Send notification */
             mChatPendingIntentManager.postNotification(uniqueId, notif);
+            TalkList.notifyNewConversationEvent(this, GroupChatIntent.ACTION_NEW_GROUP_CHAT_MESSAGE);
         }
     }
 
     private void forwardGCInvitation2UI(Intent invitation, String chatId, GroupChatDAO groupChat) {
         /* Create pending intent */
-        Intent intent = GroupChatView.forgeIntentInvitation(this, invitation);
+        Intent intent = GroupTalkView.forgeIntentInvitation(this, invitation);
         /*
          * If the PendingIntent has the same operation, action, data, categories, components, and
          * flags it will be replaced. Invitation should be notified individually so we use a random
@@ -204,6 +208,7 @@ public class GroupChatIntentService extends IntentService {
             Notification notif = buildNotification(contentIntent, title, msg);
             /* Send notification */
             mChatPendingIntentManager.postNotification(uniqueId, notif);
+            TalkList.notifyNewConversationEvent(this, GroupChatIntent.ACTION_NEW_INVITATION);
         } else {
             if (LogUtils.isActive) {
                 Log.w(LOGTAG, "Received invitation for an existing group chat conversation chatId="

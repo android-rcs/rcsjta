@@ -20,6 +20,12 @@ android {
     //Required to support builds although lint errors exist
     lintOptions {
         abortOnError false
+		disable 'IconLocation'
+        disable 'IconDuplicates'
+		disable 'IconDuplicatesConfig'
+		disable 'IconColors'
+		disable 'IconMissingDensityFolder'
+		disable 'IconDensities'
     }
 
     //Google maps

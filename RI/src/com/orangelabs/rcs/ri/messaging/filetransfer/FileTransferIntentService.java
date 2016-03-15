@@ -22,10 +22,12 @@ import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
 import com.gsma.services.rcs.filetransfer.FileTransferIntent;
+import com.gsma.services.rcs.filetransfer.FileTransferLog;
 
 import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.messaging.OneToOneTalkView;
+import com.orangelabs.rcs.ri.messaging.TalkList;
 import com.orangelabs.rcs.ri.messaging.chat.ChatPendingIntentManager;
-import com.orangelabs.rcs.ri.messaging.chat.single.SingleChatView;
 import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.RcsContactUtil;
 import com.orangelabs.rcs.ri.utils.Utils;
@@ -36,9 +38,14 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.SQLException;
 import android.media.RingtoneManager;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * File transfer intent service
@@ -47,8 +54,13 @@ import android.util.Log;
  */
 public class FileTransferIntentService extends IntentService {
 
-    private static final String LOGTAG = LogUtils.getTag(FileTransferIntentService.class
-            .getSimpleName());
+    private static final String LOGTAG = LogUtils.getTag(FileTransferIntentService.class.getName());
+    private final static String[] PROJ_UNDELIVERED_FT = new String[] {
+        FileTransferLog.FT_ID
+    };
+
+    private static final String SEL_UNDELIVERED_FTS = FileTransferLog.CHAT_ID + "=? AND "
+            + FileTransferLog.EXPIRED_DELIVERY + "='1'";
 
     /**
      * Constructor
@@ -72,15 +84,6 @@ public class FileTransferIntentService extends IntentService {
         if ((action = intent.getAction()) == null) {
             return;
         }
-        /* Check action from incoming intent */
-        if (!FileTransferIntent.ACTION_NEW_INVITATION.equals(action)
-                && !FileTransferIntent.ACTION_RESUME.equals(action)
-                && !FileTransferIntent.ACTION_FILE_TRANSFER_DELIVERY_EXPIRED.equals(action)) {
-            if (LogUtils.isActive) {
-                Log.e(LOGTAG, "Unknown action ".concat(action));
-            }
-            return;
-        }
         String transferId = intent.getStringExtra(FileTransferIntent.EXTRA_TRANSFER_ID);
         if (transferId == null) {
             if (LogUtils.isActive) {
@@ -91,52 +94,61 @@ public class FileTransferIntentService extends IntentService {
         if (LogUtils.isActive) {
             Log.d(LOGTAG, "onHandleIntent file transfer with ID ".concat(transferId));
         }
-        if (FileTransferIntent.ACTION_FILE_TRANSFER_DELIVERY_EXPIRED.equals(action)) {
-            handleUndeliveredFileTransfer(intent, transferId);
-            return;
+        switch (action) {
+            case FileTransferIntent.ACTION_FILE_TRANSFER_DELIVERY_EXPIRED:
+                handleUndeliveredFileTransfer(intent, transferId);
+                break;
+            case FileTransferIntent.ACTION_NEW_INVITATION:
+                handleFileTransferInvitation(intent, transferId);
+                break;
+            case FileTransferIntent.ACTION_RESUME:
+                handleFileTransferResume(intent, transferId);
+                break;
+            default:
+                Log.e(LOGTAG, "Unknown action ".concat(action));
         }
-        /* Get File Transfer from provider */
+    }
+
+    private void handleFileTransferResume(Intent intent, String transferId) {
         FileTransferDAO ftDao = FileTransferDAO.getFileTransferDAO(this, transferId);
-        if (ftDao == null) {
-            return;
-        }
-        /* Check if file transfer is already rejected */
-        if (FileTransfer.State.REJECTED == ftDao.getState()) {
+        if (ftDao != null) {
             if (LogUtils.isActive) {
-                Log.e(LOGTAG, "File transfer already rejected. Id=".concat(transferId));
+                Log.d(LOGTAG, "onHandleIntent file transfer resume with ID ".concat(transferId));
             }
-            return;
+            if (Direction.INCOMING == ftDao.getDirection()) {
+                startActivity(ReceiveFileTransfer.forgeResumeIntent(this, ftDao, intent));
+            } else {
+                startActivity(InitiateFileTransfer.forgeResumeIntent(this, ftDao, intent));
+            }
         }
-        if (FileTransferIntent.ACTION_NEW_INVITATION.equals(action)) {
+    }
+
+    private void handleFileTransferInvitation(Intent intent, String transferId) {
+        FileTransferDAO ftDao = FileTransferDAO.getFileTransferDAO(this, transferId);
+        if (ftDao != null) {
+            if (FileTransfer.State.REJECTED == ftDao.getState()) {
+                Log.e(LOGTAG, "File transfer already rejected. Id=".concat(transferId));
+                return;
+            }
             if (LogUtils.isActive) {
                 Log.d(LOGTAG, "File Transfer invitation filename=" + ftDao.getFilename() + " size="
                         + ftDao.getSize());
             }
-            addFileTransferInvitationNotification(intent, ftDao);
-            return;
-        }
-        /* File transfer is resuming */
-        if (LogUtils.isActive) {
-            Log.d(LOGTAG, "onHandleIntent file transfer resume with ID ".concat(transferId));
-        }
-        if (Direction.INCOMING == ftDao.getDirection()) {
-            startActivity(ReceiveFileTransfer.forgeResumeIntent(this, ftDao, intent));
-        } else {
-            startActivity(InitiateFileTransfer.forgeResumeIntent(this, ftDao, intent));
+            forwardFileTransferInvitationToUi(intent, ftDao);
         }
     }
 
     /**
-     * Add file transfer notification
+     * Forward file transfer invitation to UI
      * 
      * @param invitation Intent invitation
      * @param ftDao the file transfer data object
      */
-    private void addFileTransferInvitationNotification(Intent invitation, FileTransferDAO ftDao) {
+    private void forwardFileTransferInvitationToUi(Intent invitation, FileTransferDAO ftDao) {
         ContactId contact = ftDao.getContact();
         if (ftDao.getContact() == null) {
             if (LogUtils.isActive) {
-                Log.e(LOGTAG, "addFileTransferInvitationNotification failed: cannot parse contact");
+                Log.e(LOGTAG, "forwardFileTransferInvitationToUi failed: cannot parse contact");
             }
             return;
         }
@@ -158,6 +170,7 @@ public class FileTransferIntentService extends IntentService {
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         Notification notif = buildNotification(pi, title, message);
         notificationManager.notify(uniqueId, notif);
+        TalkList.notifyNewConversationEvent(this, FileTransferIntent.ACTION_NEW_INVITATION);
     }
 
     private void handleUndeliveredFileTransfer(Intent intent, String transferId) {
@@ -171,12 +184,11 @@ public class FileTransferIntentService extends IntentService {
         if (LogUtils.isActive) {
             Log.d(LOGTAG, "Undelivered file transfer ID=" + transferId + " for contact " + contact);
         }
-        forwardUndeliveredFileTransferToUi(intent, contact, transferId);
+        forwardUndeliveredFileTransferToUi(intent, contact);
     }
 
-    private void forwardUndeliveredFileTransferToUi(Intent undeliveredIntent, ContactId contact,
-            String transferId) {
-        Intent intent = SingleChatView.forgeIntentOnStackEvent(this, contact, undeliveredIntent);
+    private void forwardUndeliveredFileTransferToUi(Intent undeliveredIntent, ContactId contact) {
+        Intent intent = OneToOneTalkView.forgeIntentOnStackEvent(this, contact, undeliveredIntent);
         ChatPendingIntentManager pendingIntentmanager = ChatPendingIntentManager
                 .getChatPendingIntentManager(this);
         Integer uniqueId = pendingIntentmanager.tryContinueChatConversation(intent,
@@ -214,4 +226,38 @@ public class FileTransferIntentService extends IntentService {
         return notif.build();
     }
 
+    /**
+     * Get set of undelivered file transfers
+     *
+     * @param ctx The context
+     * @param contact The contact
+     * @return set of undelivered file transfers
+     */
+    public static Set<String> getUndelivered(Context ctx, ContactId contact) {
+        Set<String> ids = new HashSet<>();
+        Cursor cursor = null;
+        try {
+            cursor = ctx.getContentResolver().query(FileTransferLog.CONTENT_URI,
+                    PROJ_UNDELIVERED_FT, SEL_UNDELIVERED_FTS, new String[] {
+                        contact.toString()
+                    }, null);
+            if (cursor == null) {
+                throw new SQLException("Cannot query undelivered file transfers for contact="
+                        + contact);
+            }
+            if (!cursor.moveToFirst()) {
+                return ids;
+            }
+            int idColumnIdx = cursor.getColumnIndexOrThrow(FileTransferLog.FT_ID);
+            do {
+                ids.add(cursor.getString(idColumnIdx));
+            } while (cursor.moveToNext());
+            return ids;
+
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+    }
 }

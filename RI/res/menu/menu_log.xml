@@ -6,7 +6,4 @@
         android:icon="@drawable/ri_menu_clear_log"
         android:title="@string/menu_clear_log" />
 
-    <item
-        android:id="@+id/menu_sharing_display"
-        android:title="@string/menu_sharing_display" />
 </menu>

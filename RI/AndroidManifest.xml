@@ -122,33 +122,30 @@
         <!-- Messaging API -->
 
         <activity android:name=".messaging.TestMessagingApi" />
+        <activity
+            android:name="com.orangelabs.rcs.ri.messaging.OneToOneTalkView"
+            android:label="@string/title_talk_1to1_view"
+            android:launchMode="singleTop" />
 
         <!-- File transfer API -->
 
         <activity android:name="com.orangelabs.rcs.ri.messaging.filetransfer.TestFileTransferApi">
-            <intent-filter>
-                <category android:name="android.intent.category.LAUNCHER" />
-                <category android:name="android.intent.category.DEFAULT" />
 
-                <action android:name="com.gsma.services.rcs.action.VIEW_FILE_TRANSFER" />
-            </intent-filter>
         </activity>
         <activity
             android:name="com.orangelabs.rcs.ri.messaging.filetransfer.InitiateFileTransfer"
             android:icon="@drawable/ri_quick_ft_icon"
             android:label="@string/menu_transfer_file">
             <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-
-                <data android:mimeType="vnd.android.cursor.item/com.gsma.services.rcs.file-transfer" />
-            </intent-filter>
-            <intent-filter>
                 <category android:name="android.intent.category.LAUNCHER" />
                 <category android:name="android.intent.category.DEFAULT" />
 
                 <action android:name="com.gsma.services.rcs.action.INITIATE_ONE_TO_ONE_FILE_TRANSFER" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="vnd.android.cursor.item/com.gsma.services.rcs.file-transfer" />
             </intent-filter>
         </activity>
 
@@ -192,20 +189,7 @@
 
         <activity
             android:name=".messaging.chat.TestChatApi"
-            android:icon="@drawable/ri_quick_chat_icon">
-            <intent-filter>
-                <category android:name="android.intent.category.LAUNCHER" />
-                <category android:name="android.intent.category.DEFAULT" />
-
-                <action android:name="com.gsma.services.rcs.action.VIEW_ONE_TO_ONE_CHAT" />
-            </intent-filter>
-            <intent-filter>
-                <category android:name="android.intent.category.LAUNCHER" />
-                <category android:name="android.intent.category.DEFAULT" />
-
-                <action android:name="com.gsma.services.rcs.action.VIEW_GROUP_CHAT" />
-            </intent-filter>
-        </activity>
+            android:icon="@drawable/ri_quick_chat_icon" />
         <activity
             android:name="com.orangelabs.rcs.ri.messaging.chat.single.InitiateSingleChat"
             android:icon="@drawable/ri_quick_chat_icon"
@@ -232,15 +216,6 @@
             </intent-filter>
         </receiver>
 
-        <activity
-            android:name="com.orangelabs.rcs.ri.messaging.chat.single.SingleChatView"
-            android:icon="@drawable/ri_quick_chat_icon"
-            android:label="@string/label_quick_chat"
-            android:launchMode="singleTop" />
-        <activity
-            android:name="com.orangelabs.rcs.ri.messaging.chat.single.SingleChatList"
-            android:icon="@drawable/ri_quick_chat_icon"
-            android:label="@string/menu_chat_log" />
         <activity
             android:name="com.orangelabs.rcs.ri.messaging.chat.ChatServiceConfigActivity"
             android:icon="@drawable/ri_quick_chat_icon"
@@ -277,7 +252,7 @@
         </receiver>
 
         <activity
-            android:name="com.orangelabs.rcs.ri.messaging.chat.group.GroupChatView"
+            android:name=".messaging.GroupTalkView"
             android:icon="@drawable/ri_quick_chat_icon"
             android:label="@string/title_group_chat"
             android:launchMode="singleTop" />
@@ -285,10 +260,6 @@
             android:name="com.orangelabs.rcs.ri.messaging.GroupDeliveryInfoList"
             android:label="@string/title_group_delivery_info" />
 
-        <activity
-            android:name="com.orangelabs.rcs.ri.messaging.chat.group.GroupChatList"
-            android:icon="@drawable/ri_quick_chat_icon"
-            android:label="@string/menu_group_chat_log" />
         <activity
             android:name=".messaging.geoloc.EditGeoloc"
             android:label="@string/menu_send_geoloc"
@@ -468,13 +439,11 @@
             android:name=".upload.InitiateFileUpload"
             android:label="@string/title_initiate_upload" />
 
-        <!-- History API -->
+        <!-- Log API -->
         <activity
-            android:name="com.orangelabs.rcs.ri.history.TestHistoryLogApi"
-            android:label="@string/title_history_log" />
-        <activity
-            android:name="com.orangelabs.rcs.ri.history.messaging.MessagingListView"
-            android:label="@string/title_history_log_messaging">
+            android:name="com.orangelabs.rcs.ri.messaging.TalkList"
+            android:label="@string/title_history_log_messaging"
+            android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
                 <action android:name="android.intent.action.SEND_MULTIPLE" />
@@ -489,6 +458,30 @@
                 <data android:mimeType="text/*" />
                 <data android:mimeType="video/*" />
             </intent-filter>
+            <intent-filter>
+                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <action android:name="com.gsma.services.rcs.action.VIEW_ONE_TO_ONE_CHAT" />
+            </intent-filter>
+            <intent-filter>
+                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <action android:name="com.gsma.services.rcs.action.VIEW_GROUP_CHAT" />
+            </intent-filter>
+            <intent-filter>
+                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <action android:name="com.gsma.services.rcs.action.VIEW_FILE_TRANSFER" />
+            </intent-filter>
+            <intent-filter>
+                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <action android:name="com.gsma.services.rcs.action.VIEW_GROUP_CHAT" />
+            </intent-filter>
         </activity>
         <activity
             android:name="com.orangelabs.rcs.ri.sharing.geoloc.GeolocSharingLogView"
@@ -499,12 +492,17 @@
         <activity
             android:name="com.orangelabs.rcs.ri.sharing.video.VideoSharingLogView"
             android:label="@string/title_sharing_log_item" />
-
+        <activity
+            android:name="com.orangelabs.rcs.ri.messaging.filetransfer.FileTransferLogView"
+            android:label="@string/title_sharing_log_item" />
+        <activity
+            android:name="com.orangelabs.rcs.ri.messaging.chat.ChatMessageLogView"
+            android:label="@string/title_sharing_log_item" />
         <activity
             android:name=".messaging.filetransfer.AudioMessageRecordActivity"
             android:label="@string/menu_transfer_file" />
         <activity
-            android:name="com.orangelabs.rcs.ri.sharing.SharingListView"
+            android:name=".sharing.SharingListView"
             android:label="@string/title_sharing_log" />
 
         <receiver

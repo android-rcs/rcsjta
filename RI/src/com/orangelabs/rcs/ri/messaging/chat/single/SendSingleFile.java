@@ -155,13 +155,12 @@ public class SendSingleFile extends SendFile {
                                 showExceptionThenExit(e);
                             }
                         }
-                        TextView statusView = (TextView) findViewById(R.id.progress_status);
                         switch (state) {
                             case STARTED:
                                 //$FALL-THROUGH$
                             case TRANSFERRED:
                                 /* Display transfer state started */
-                                statusView.setText(_state);
+                                mStatusView.setText(_state);
                                 break;
 
                             case ABORTED:
@@ -180,7 +179,7 @@ public class SendSingleFile extends SendFile {
                                 break;
 
                             default:
-                                statusView.setText(_state);
+                                mStatusView.setText(_state);
                         }
                     }
                 });

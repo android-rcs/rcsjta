@@ -23,6 +23,8 @@ import com.gsma.services.rcs.chat.OneToOneChatIntent;
 import com.gsma.services.rcs.contact.ContactId;
 
 import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.messaging.OneToOneTalkView;
+import com.orangelabs.rcs.ri.messaging.TalkList;
 import com.orangelabs.rcs.ri.messaging.chat.ChatMessageDAO;
 import com.orangelabs.rcs.ri.messaging.chat.ChatPendingIntentManager;
 import com.orangelabs.rcs.ri.utils.LogUtils;
@@ -31,10 +33,16 @@ import com.orangelabs.rcs.ri.utils.RcsContactUtil;
 import android.app.IntentService;
 import android.app.Notification;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.SQLException;
 import android.media.RingtoneManager;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Single chat intent service
@@ -42,6 +50,12 @@ import android.util.Log;
  * @author Philippe LEMORDANT
  */
 public class SingleChatIntentService extends IntentService {
+
+    private static final String[] PROJ_UNDELIVERED_MSG = new String[] {
+        ChatLog.Message.MESSAGE_ID
+    };
+    private static final String SEL_UNDELIVERED_MESSAGES = ChatLog.Message.CHAT_ID + "=? AND "
+            + ChatLog.Message.EXPIRED_DELIVERY + "='1'";
 
     private ChatPendingIntentManager mChatPendingIntentManager;
 
@@ -91,9 +105,7 @@ public class SingleChatIntentService extends IntentService {
                 break;
 
             default:
-                if (LogUtils.isActive) {
-                    Log.e(LOGTAG, "Unknown action ".concat(action));
-                }
+                Log.e(LOGTAG, "Unknown action ".concat(action));
                 break;
         }
     }
@@ -146,7 +158,7 @@ public class SingleChatIntentService extends IntentService {
     private void forwardSingleChatMessage2UI(Intent messageIntent, ChatMessageDAO message) {
         ContactId contact = message.getContact();
         String content = message.getContent();
-        Intent intent = SingleChatView.forgeIntentOnStackEvent(this, contact, messageIntent);
+        Intent intent = OneToOneTalkView.forgeIntentOnStackEvent(this, contact, messageIntent);
         Integer uniqueId = mChatPendingIntentManager.tryContinueChatConversation(intent,
                 message.getChatId());
         if (uniqueId != null) {
@@ -173,11 +185,12 @@ public class SingleChatIntentService extends IntentService {
             }
             Notification notif = buildNotification(contentIntent, title, msg);
             mChatPendingIntentManager.postNotification(uniqueId, notif);
+            TalkList.notifyNewConversationEvent(this, OneToOneChatIntent.ACTION_NEW_ONE_TO_ONE_CHAT_MESSAGE);
         }
     }
 
     private void forwardUndeliveredMessage2UI(Intent undeliveredMessageIntent, ContactId contact) {
-        Intent intent = SingleChatView.forgeIntentOnStackEvent(this, contact,
+        Intent intent = OneToOneTalkView.forgeIntentOnStackEvent(this, contact,
                 undeliveredMessageIntent);
         Integer uniqueId = mChatPendingIntentManager.tryContinueChatConversation(intent,
                 contact.toString());
@@ -212,5 +225,39 @@ public class SingleChatIntentService extends IntentService {
         notif.setContentTitle(title);
         notif.setContentText(message);
         return notif.build();
+    }
+
+    /**
+     * Get set of undelivered messages
+     *
+     * @param ctx The context
+     * @param contact The contact
+     * @return set of undelivered messages
+     */
+    public static Set<String> getUndelivered(Context ctx, ContactId contact) {
+        Set<String> messageIds = new HashSet<>();
+        Cursor cursor = null;
+        try {
+            cursor = ctx.getContentResolver().query(ChatLog.Message.CONTENT_URI,
+                    PROJ_UNDELIVERED_MSG, SEL_UNDELIVERED_MESSAGES, new String[] {
+                        contact.toString()
+                    }, null);
+            if (cursor == null) {
+                throw new SQLException("Cannot query undelivered message for contact=" + contact);
+            }
+            if (!cursor.moveToFirst()) {
+                return messageIds;
+            }
+            int messageIdColumnIdx = cursor.getColumnIndexOrThrow(ChatLog.Message.MESSAGE_ID);
+            do {
+                messageIds.add(cursor.getString(messageIdColumnIdx));
+            } while (cursor.moveToNext());
+            return messageIds;
+
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
     }
 }

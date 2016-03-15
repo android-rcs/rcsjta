@@ -18,38 +18,6 @@
 
 package com.orangelabs.rcs.ri.sharing;
 
-import android.app.AlertDialog;
-import android.app.AlertDialog.Builder;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnClickListener;
-import android.content.pm.ActivityInfo;
-import android.content.res.Resources;
-import android.database.Cursor;
-import android.database.MatrixCursor;
-import android.graphics.drawable.Drawable;
-import android.net.Uri;
-import android.os.Bundle;
-import android.os.Handler;
-import android.text.TextUtils;
-import android.text.format.DateUtils;
-import android.util.Log;
-import android.view.ContextMenu;
-import android.view.ContextMenu.ContextMenuInfo;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.AdapterView.AdapterContextMenuInfo;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.AdapterView.OnItemSelectedListener;
-import android.widget.ImageView;
-import android.widget.ListView;
-import android.widget.ResourceCursorAdapter;
-import android.widget.Spinner;
-import android.widget.TextView;
-
 import com.gsma.services.rcs.RcsGenericException;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsServiceException;
@@ -70,9 +38,10 @@ import com.gsma.services.rcs.sharing.video.VideoSharing;
 import com.gsma.services.rcs.sharing.video.VideoSharingListener;
 import com.gsma.services.rcs.sharing.video.VideoSharingLog;
 import com.gsma.services.rcs.sharing.video.VideoSharingService;
+
 import com.orangelabs.rcs.api.connection.ConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.api.connection.utils.ExceptionUtil;
-import com.orangelabs.rcs.api.connection.utils.RcsActivity;
+import com.orangelabs.rcs.api.connection.utils.RcsFragmentActivity;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.sharing.geoloc.GeolocSharingLogView;
 import com.orangelabs.rcs.ri.sharing.image.ImageSharingLogView;
@@ -82,6 +51,44 @@ import com.orangelabs.rcs.ri.utils.ContactUtil;
 import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.Utils;
 
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
+import android.content.pm.ActivityInfo;
+import android.content.res.Resources;
+import android.database.Cursor;
+import android.database.MatrixCursor;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
+import android.os.Bundle;
+import android.os.Handler;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
+import android.support.v4.widget.CursorAdapter;
+import android.text.TextUtils;
+import android.text.format.DateUtils;
+import android.util.Log;
+import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.AdapterContextMenuInfo;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.Spinner;
+import android.widget.TextView;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -89,11 +96,34 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 
-public class SharingListView extends RcsActivity {
+/**
+ * A class to view the sharing logs
+ */
+public class SharingListView extends RcsFragmentActivity implements
+        LoaderManager.LoaderCallbacks<Cursor> {
+    /**
+     * The loader's unique ID. Loader IDs are specific to the Activity in which they reside.
+     */
+    private static final int LOADER_ID = 1;
+
+    // @formatter:off
+    private static final String[] PROJECTION = {
+            HistoryLog.BASECOLUMN_ID,
+            HistoryLog.ID,
+            HistoryLog.PROVIDER_ID,
+            HistoryLog.CONTACT,
+            HistoryLog.TIMESTAMP,
+            HistoryLog.DIRECTION,
+            HistoryLog.STATUS,
+            HistoryLog.FILENAME,
+            HistoryLog.DURATION,
+            HistoryLog.CONTENT
+    };
+    // @formatter:on
 
     private static final String LOGTAG = LogUtils.getTag(SharingListView.class.getName());
 
-    private static final int MAX_LENGTH_DESCRIPTION = 20;
+    private static final int MAX_LENGTH_DESCRIPTION = 30;
     private static final String SORT_BY = "timestamp DESC";
     private static final String WHERE_CLAUSE_WITH_CONTACT = "contact=?";
     /**
@@ -112,61 +142,158 @@ public class SharingListView extends RcsActivity {
     private boolean mImageSharingListenerSet;
     private ImageSharingService mImageSharingService;
     private List<Integer> mProviderIds;
-    private ResourceCursorAdapter mResourceCursorAdapter;
+    private SharingLogAdapter mAdapter;
     private Spinner mSpinner;
     private VideoSharingListener mVideoSharingListener;
     private boolean mVideoSharingListenerSet;
     private VideoSharingService mVideoSharingService;
 
-    private class SharingLogAdapter extends ResourceCursorAdapter {
+    private class ViewHolder {
+
+        private final int mColumnContactIdx;
+        private final int mColumnTimestampIdx;
+        private final int mColumnStatusIdx;
+        private final int mColumnDirectionIdx;
+        private final TextView mTypeView;
+        private final TextView mContactView;
+        private final TextView mDescriptionView;
+        private final TextView mDateView;
+        private final ImageView mDirectionIconImageView;
+        private final int mColumnProviderIdIdx;
+        private final int mColumnFilenameIdx;
+        private final int mColumnDurationIdx;
+        private final int mColumnContentIdx;
+
+        public ViewHolder(View view, Cursor cursor) {
+            mColumnProviderIdIdx = cursor.getColumnIndexOrThrow(HistoryLog.PROVIDER_ID);
+            mColumnContactIdx = cursor.getColumnIndexOrThrow(HistoryLog.CONTACT);
+            mColumnTimestampIdx = cursor.getColumnIndexOrThrow(HistoryLog.TIMESTAMP);
+            mColumnDirectionIdx = cursor.getColumnIndexOrThrow(HistoryLog.DIRECTION);
+            mColumnStatusIdx = cursor.getColumnIndexOrThrow(HistoryLog.STATUS);
+            mColumnFilenameIdx = cursor.getColumnIndexOrThrow(HistoryLog.FILENAME);
+            mColumnDurationIdx = cursor.getColumnIndexOrThrow(HistoryLog.DURATION);
+            mColumnContentIdx = cursor.getColumnIndexOrThrow(HistoryLog.CONTENT);
+
+            mTypeView = (TextView) view.findViewById(R.id.conversation_type);
+            mContactView = (TextView) view.findViewById(R.id.contact_label);
+            mDescriptionView = (TextView) view.findViewById(R.id.description);
+            mDateView = (TextView) view.findViewById(R.id.date);
+            mDirectionIconImageView = (ImageView) view.findViewById(R.id.call_type_icon);
+        }
+
+        public int getColumnProviderIdIdx() {
+            return mColumnProviderIdIdx;
+        }
+
+        public int getColumnContactIdx() {
+            return mColumnContactIdx;
+        }
+
+        public int getColumnTimestampIdx() {
+            return mColumnTimestampIdx;
+        }
+
+        public int getColumnStatusIdx() {
+            return mColumnStatusIdx;
+        }
+
+        public int getColumnDirectionIdx() {
+            return mColumnDirectionIdx;
+        }
+
+        public TextView getTypeView() {
+            return mTypeView;
+        }
+
+        public TextView getContactView() {
+            return mContactView;
+        }
+
+        public TextView getDescriptionView() {
+            return mDescriptionView;
+        }
+
+        public TextView getDateView() {
+            return mDateView;
+        }
+
+        public ImageView getDirectionIconImageView() {
+            return mDirectionIconImageView;
+        }
+
+        public int getColumnFilenameIdx() {
+            return mColumnFilenameIdx;
+        }
+
+        public int getColumnDurationIdx() {
+            return mColumnDurationIdx;
+        }
+
+        public int getColumnContentIdx() {
+            return mColumnContentIdx;
+        }
+    }
+
+    private class SharingLogAdapter extends CursorAdapter {
+        private final LayoutInflater mInflater;
         private Drawable mDrawableIncoming;
         private Drawable mDrawableIncomingFailed;
         private Drawable mDrawableOutgoing;
         private Drawable mDrawableOutgoingFailed;
-        private Drawable mDrawableRichCall;
 
-        public SharingLogAdapter(Context context) {
-            super(context, R.layout.history_log_list, null);
-            Resources resources = context.getResources();
+        public SharingLogAdapter(Activity activity) {
+            super(activity, null, 0);
+            mInflater = LayoutInflater.from(SharingListView.this);
+            Resources resources = activity.getResources();
             mDrawableIncomingFailed = resources.getDrawable(R.drawable.ri_incoming_call_failed);
             mDrawableOutgoingFailed = resources.getDrawable(R.drawable.ri_outgoing_call_failed);
             mDrawableIncoming = resources.getDrawable(R.drawable.ri_incoming_call);
             mDrawableOutgoing = resources.getDrawable(R.drawable.ri_outgoing_call);
-            mDrawableRichCall = resources.getDrawable(R.drawable.ri_historylog_csh);
         }
 
+        @Override
+        public int getItemViewType(int position) {
+            return 1;
+        }
+
+        @Override
+        public int getViewTypeCount() {
+            return 1;
+        }
+
+        @Override
+        public View newView(Context context, Cursor cursor, ViewGroup parent) {
+            View view = mInflater.inflate(R.layout.sharing_log_list, parent, false);
+            view.setTag(new ViewHolder(view, cursor));
+            return view;
+        }
+
+        @Override
         public void bindView(View view, Context context, Cursor cursor) {
-            int providerId = cursor.getInt(cursor.getColumnIndexOrThrow(HistoryLog.PROVIDER_ID));
-
-            TextView sharingTypeView = (TextView) view.findViewById(R.id.conversation_type);
-            TextView sharingLabelView = (TextView) view.findViewById(R.id.conversation_label);
-            TextView descriptionView = (TextView) view.findViewById(R.id.description);
-            TextView dateView = (TextView) view.findViewById(R.id.date);
-
-            ImageView eventDirectionIconView = (ImageView) view.findViewById(R.id.call_type_icon);
-            ImageView eventIconView = (ImageView) view.findViewById(R.id.call_icon);
+            ViewHolder holder = (ViewHolder) view.getTag();
 
             // Set contact number
-            String phone = cursor.getString(cursor.getColumnIndexOrThrow(HistoryLog.CONTACT));
-            sharingLabelView.setText(phone);
+            String phone = cursor.getString(holder.getColumnContactIdx());
+            holder.getContactView().setText(phone);
 
             // Set the date/time field by mixing relative and absolute times
-            long date = cursor.getLong(cursor.getColumnIndex(HistoryLog.TIMESTAMP));
-            dateView.setText(DateUtils.getRelativeTimeSpanString(date, System.currentTimeMillis(),
-                    DateUtils.MINUTE_IN_MILLIS, DateUtils.FORMAT_ABBREV_RELATIVE));
+            long date = cursor.getLong(holder.getColumnTimestampIdx());
+            holder.getDateView().setText(
+                    DateUtils.getRelativeTimeSpanString(date, System.currentTimeMillis(),
+                            DateUtils.MINUTE_IN_MILLIS, DateUtils.FORMAT_ABBREV_RELATIVE));
 
             // Set the status text and destination icon
-            int status = cursor.getInt(cursor.getColumnIndexOrThrow(HistoryLog.STATUS));
-            Direction dir = Direction.valueOf(cursor.getInt(cursor
-                    .getColumnIndexOrThrow(HistoryLog.DIRECTION)));
+            int status = cursor.getInt(holder.getColumnStatusIdx());
+            Direction dir = Direction.valueOf(cursor.getInt(holder.getColumnDirectionIdx()));
             switch (dir) {
                 case INCOMING:
                     if (status != State.FAILED.toInt()
                             && status != VideoSharing.State.FAILED.toInt()
                             && status != GeolocSharing.State.FAILED.toInt()) {
-                        eventDirectionIconView.setImageDrawable(mDrawableIncoming);
+                        holder.getDirectionIconImageView().setImageDrawable(mDrawableIncoming);
                     } else {
-                        eventDirectionIconView.setImageDrawable(mDrawableIncomingFailed);
+                        holder.getDirectionIconImageView()
+                                .setImageDrawable(mDrawableIncomingFailed);
                     }
                     break;
 
@@ -174,36 +301,37 @@ public class SharingListView extends RcsActivity {
                     if (status != State.FAILED.toInt()
                             && status != VideoSharing.State.FAILED.toInt()
                             && status != GeolocSharing.State.FAILED.toInt()) {
-                        eventDirectionIconView.setImageDrawable(mDrawableOutgoing);
+                        holder.getDirectionIconImageView().setImageDrawable(mDrawableOutgoing);
                     } else {
-                        eventDirectionIconView.setImageDrawable(mDrawableOutgoingFailed);
+                        holder.getDirectionIconImageView()
+                                .setImageDrawable(mDrawableOutgoingFailed);
                     }
                     break;
             }
-            eventIconView.setImageDrawable(mDrawableRichCall);
+            int providerId = cursor.getInt(holder.getColumnProviderIdIdx());
             switch (providerId) {
                 case ImageSharingLog.HISTORYLOG_MEMBER_ID:
-                    sharingTypeView.setText(R.string.label_sharing_log_menu_ish);
-                    String filename = cursor.getString(cursor
-                            .getColumnIndexOrThrow(HistoryLog.FILENAME));
-                    descriptionView.setText(TextUtils.isEmpty(filename) ? "" : truncateString(
-                            filename, MAX_LENGTH_DESCRIPTION));
+                    holder.getTypeView().setText(R.string.label_sharing_log_menu_ish);
+                    String filename = cursor.getString(holder.getColumnFilenameIdx());
+                    holder.getDescriptionView().setText(
+                            TextUtils.isEmpty(filename) ? "" : truncateString(filename,
+                                    MAX_LENGTH_DESCRIPTION));
                     break;
 
                 case VideoSharingLog.HISTORYLOG_MEMBER_ID:
-                    sharingTypeView.setText(R.string.label_sharing_log_menu_vsh);
-                    long duration = cursor.getLong(cursor
-                            .getColumnIndexOrThrow(HistoryLog.DURATION));
-                    descriptionView.setText(getString(R.string.value_log_duration,
-                            DateUtils.formatElapsedTime(duration / 1000L)));
+                    holder.getTypeView().setText(R.string.label_sharing_log_menu_vsh);
+                    long duration = cursor.getLong(holder.getColumnDurationIdx());
+                    holder.getDescriptionView().setText(
+                            getString(R.string.value_log_duration,
+                                    DateUtils.formatElapsedTime(duration / 1000L)));
                     break;
 
                 case GeolocSharingLog.HISTORYLOG_MEMBER_ID:
-                    sharingTypeView.setText(R.string.label_sharing_log_menu_gsh);
-                    String content = cursor.getString(cursor
-                            .getColumnIndexOrThrow(HistoryLog.CONTENT));
-                    descriptionView.setText(TextUtils.isEmpty(content) ? "" : truncateString(
-                            content, MAX_LENGTH_DESCRIPTION));
+                    holder.getTypeView().setText(R.string.label_sharing_log_menu_gsh);
+                    String content = cursor.getString(holder.getColumnContentIdx());
+                    holder.getDescriptionView().setText(
+                            TextUtils.isEmpty(content) ? "" : truncateString(content,
+                                    MAX_LENGTH_DESCRIPTION));
                 default:
             }
         }
@@ -282,10 +410,10 @@ public class SharingListView extends RcsActivity {
                 mHandler.post(updateUi);
             }
         };
-        mResourceCursorAdapter = new SharingLogAdapter(this);
+        mAdapter = new SharingLogAdapter(this);
         ListView listView = (ListView) findViewById(android.R.id.list);
         listView.setEmptyView(findViewById(android.R.id.empty));
-        listView.setAdapter(mResourceCursorAdapter);
+        listView.setAdapter(mAdapter);
         registerForContextMenu(listView);
 
         mSpinner = (Spinner) findViewById(R.id.contact);
@@ -311,6 +439,8 @@ public class SharingListView extends RcsActivity {
         sProviders.put(GeolocSharingLog.HISTORYLOG_MEMBER_ID,
                 getString(R.string.label_sharing_log_menu_gsh));
         setProviders(sProviders);
+
+        setCursorLoader(true);
     }
 
     @Override
@@ -366,7 +496,7 @@ public class SharingListView extends RcsActivity {
                 registerDialog(mFilterAlertDialog);
                 break;
 
-            case R.id.menu_delete :
+            case R.id.menu_delete:
                 if (!isServiceConnected(RcsServiceName.IMAGE_SHARING, RcsServiceName.VIDEO_SHARING,
                         RcsServiceName.GEOLOC_SHARING)) {
                     showMessage(R.string.label_service_not_available);
@@ -405,7 +535,7 @@ public class SharingListView extends RcsActivity {
         menu.findItem(R.id.menu_sharing_display).setVisible(false);
         // Get the list item position
         AdapterContextMenuInfo info = (AdapterContextMenuInfo) menuInfo;
-        Cursor cursor = (Cursor) mResourceCursorAdapter.getItem(info.position);
+        Cursor cursor = (Cursor) mAdapter.getItem(info.position);
         Direction dir = Direction.valueOf(cursor.getInt(cursor
                 .getColumnIndexOrThrow(HistoryLog.DIRECTION)));
         String mimeType = cursor.getString(cursor.getColumnIndexOrThrow(HistoryLog.MIME_TYPE));
@@ -427,7 +557,7 @@ public class SharingListView extends RcsActivity {
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
-        Cursor cursor = (Cursor) mResourceCursorAdapter.getItem(info.position);
+        Cursor cursor = (Cursor) mAdapter.getItem(info.position);
         int providerId = cursor.getInt(cursor.getColumnIndexOrThrow(HistoryLog.PROVIDER_ID));
         String sharingId = cursor.getString(cursor.getColumnIndexOrThrow(HistoryLog.ID));
         if (LogUtils.isActive) {
@@ -486,7 +616,7 @@ public class SharingListView extends RcsActivity {
 
             @Override
             public void onItemClick(AdapterView<?> parent, View v, int pos, long id) {
-                Cursor cursor = (Cursor) mResourceCursorAdapter.getItem(pos);
+                Cursor cursor = (Cursor) mAdapter.getItem(pos);
                 int providerId = cursor
                         .getInt(cursor.getColumnIndexOrThrow(HistoryLog.PROVIDER_ID));
                 String sharingId = cursor.getString(cursor.getColumnIndexOrThrow(HistoryLog.ID));
@@ -527,17 +657,17 @@ public class SharingListView extends RcsActivity {
                 /*
                  * No contact is selected
                  */
-                Uri uri = createHistoryUri(selectedProviderIds);
-                cursor = getContentResolver().query(uri, null, null, null, SORT_BY);
+                Uri uri = createSharingLogUri(selectedProviderIds);
+                cursor = getContentResolver().query(uri, PROJECTION, null, null, SORT_BY);
             } else {
-                Uri uri = createHistoryUri(selectedProviderIds);
-                cursor = getContentResolver().query(uri, null, WHERE_CLAUSE_WITH_CONTACT,
+                Uri uri = createSharingLogUri(selectedProviderIds);
+                cursor = getContentResolver().query(uri, PROJECTION, WHERE_CLAUSE_WITH_CONTACT,
                         new String[] {
                             contact
                         }, SORT_BY);
             }
         }
-        mResourceCursorAdapter.changeCursor(cursor);
+        mAdapter.changeCursor(cursor);
     }
 
     /**
@@ -594,11 +724,71 @@ public class SharingListView extends RcsActivity {
      * @param providerIds list of provider IDs
      * @return Uri
      */
-    private Uri createHistoryUri(List<Integer> providerIds) {
+    private Uri createSharingLogUri(List<Integer> providerIds) {
         HistoryUriBuilder uriBuilder = new HistoryUriBuilder(HistoryLog.CONTENT_URI);
         for (Integer providerId : providerIds) {
             uriBuilder.appendProvider(providerId);
         }
         return uriBuilder.build();
     }
+
+    private void setCursorLoader(boolean firstLoad) {
+        if (firstLoad) {
+            // Initialize the Loader with id '1' and callbacks 'mCallbacks'.
+            getSupportLoaderManager().initLoader(LOADER_ID, null, this);
+        } else {
+            // We switched from one contact to another: reload history since.
+            getSupportLoaderManager().restartLoader(LOADER_ID, null, this);
+        }
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        if (LogUtils.isActive) {
+            Log.d(LOGTAG, "onCreateLoader " + id);
+        }
+        List<Integer> selectedProviderIds = getSelectedProviderIds();
+        String contact = getSelectedContact();
+        if (!selectedProviderIds.isEmpty()) {
+            Uri uri = createSharingLogUri(selectedProviderIds);
+            // Create a new CursorLoader with the following query parameters.
+            if (getString(R.string.label_sharing_log_contact_spinner_default_value).equals(contact)) {
+                // No contact is selected
+                return new CursorLoader(this, uri, PROJECTION, null, null, SORT_BY);
+            }
+            return new CursorLoader(this, uri, PROJECTION, WHERE_CLAUSE_WITH_CONTACT, new String[] {
+                contact
+            }, SORT_BY);
+        }
+        return null;
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+        if (LogUtils.isActive) {
+            Log.d(LOGTAG, "onLoadFinished " + loader.getId());
+        }
+        // A switch-case is useful when dealing with multiple Loaders/IDs
+        switch (loader.getId()) {
+            case LOADER_ID:
+                // The asynchronous load is complete and the data
+                // is now available for use. Only now can we associate
+                // the queried Cursor with the CursorAdapter.
+                mAdapter.swapCursor(cursor);
+                break;
+        }
+        // The listview now displays the queried data.
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        if (LogUtils.isActive) {
+            Log.d(LOGTAG, "onLoaderReset " + loader.getId());
+        }
+        // For whatever reason, the Loader's data is now unavailable.
+        // Remove any references to the old data by replacing it with a null
+        // Cursor.
+        mAdapter.swapCursor(null);
+    }
+
 }

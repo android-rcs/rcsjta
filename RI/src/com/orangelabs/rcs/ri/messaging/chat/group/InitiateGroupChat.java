@@ -26,6 +26,7 @@ import com.gsma.services.rcs.contact.RcsContact;
 
 import com.orangelabs.rcs.api.connection.utils.RcsActivity;
 import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.messaging.GroupTalkView;
 
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
@@ -123,7 +124,7 @@ public class InitiateGroupChat extends RcsActivity implements OnItemClickListene
             // Get subject
             EditText subjectTxt = (EditText) findViewById(R.id.subject);
             String subject = subjectTxt.getText().toString();
-            GroupChatView.initiateGroupChat(InitiateGroupChat.this, subject, mParticipants);
+            GroupTalkView.initiateGroupChat(InitiateGroupChat.this, subject, mParticipants);
             // Exit activity
             finish();
         }

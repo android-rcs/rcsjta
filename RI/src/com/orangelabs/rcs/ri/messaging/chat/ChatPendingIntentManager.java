@@ -18,6 +18,7 @@
 
 package com.orangelabs.rcs.ri.messaging.chat;
 
+import com.orangelabs.rcs.ri.RI;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 import android.app.Notification;
@@ -111,6 +112,14 @@ public class ChatPendingIntentManager {
         mNotifManager.notify(id, notification);
     }
 
+    public void clearNotification(String chatId) {
+        Integer pendingIntentId = mPendingNotificationIdCache.get(chatId);
+        if (pendingIntentId != null) {
+            mPendingNotificationIdCache.remove(chatId);
+            mNotifManager.cancel(pendingIntentId);
+        }
+    }
+
     /**
      * Gets Chat pending intent manager
      * 
@@ -130,8 +139,8 @@ public class ChatPendingIntentManager {
 
                             @Override
                             public boolean isConversationOnForeground(String chatId) {
-                                return ChatView.sChatIdOnForeground != null
-                                        && chatId.equals(ChatView.sChatIdOnForeground.toString());
+                                return RI.sChatIdOnForeground != null
+                                        && chatId.equals(RI.sChatIdOnForeground);
                             }
                         });
             }

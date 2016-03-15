@@ -1,40 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent" >
+    android:layout_height="wrap_content"
+    android:paddingTop="10dip"
+    android:stretchColumns="1">
 
-    <TableLayout
+    <Spinner
+        android:id="@+id/contact"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="10dip"
-        android:stretchColumns="1" >
+        android:layout_marginLeft="5dip"
+        android:layout_marginRight="5dip" />
 
-        <Spinner
-            android:id="@+id/contact"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
+    <TableRow android:paddingTop="5dip">
+
+        <TextView
             android:layout_marginLeft="5dip"
-            android:layout_marginRight="5dip" />
+            android:layout_marginStart="5dip"
+            android:text="@string/label_vcard" />
 
-        <TableRow android:paddingTop="5dip" >
+        <TextView
+            android:id="@+id/vcard"
+            android:textStyle="bold" />
+    </TableRow>
 
-            <TextView
-                android:layout_marginLeft="5dip"
-                android:gravity="right"
-                android:text="@string/label_vcard" />
-
-            <TextView
-                android:id="@+id/vcard"
-                android:layout_marginLeft="5dip"
-                android:layout_marginRight="5dip"
-                android:textStyle="bold" />
-        </TableRow>
-
-        <Button
-            android:id="@+id/show_btn"
-            android:layout_marginLeft="5dip"
-            android:layout_marginRight="5dip"
-            android:text="@string/label_show_vcard" />
-    </TableLayout>
-
-</ScrollView>
+    <Button
+        android:id="@+id/show_btn"
+        android:text="@string/label_show_vcard" />
+</TableLayout>

@@ -44,9 +44,13 @@ public class TestMessagingApi extends ListActivity {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         // Set items
+        // @formatter:off
         String[] items = {
-                getString(R.string.menu_file_transfer), getString(R.string.menu_chat)
+                getString(R.string.menu_file_transfer),
+                getString(R.string.menu_chat),
+                getString(R.string.menu_messaging_log)
         };
+        // @formatter:on
         setListAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, items));
     }
 
@@ -59,6 +63,10 @@ public class TestMessagingApi extends ListActivity {
 
             case 1:
                 startActivity(new Intent(this, TestChatApi.class));
+                break;
+
+            case 2:
+                startActivity(new Intent(this, TalkList.class));
                 break;
         }
     }

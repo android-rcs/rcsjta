@@ -21,6 +21,7 @@ package com.orangelabs.rcs.ri.messaging;
 import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfoLog;
 
 import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.messaging.adapter.GroupDeliveryInfoCursorAdapter;
 import com.orangelabs.rcs.ri.utils.LogUtils;
 
 import android.content.Context;

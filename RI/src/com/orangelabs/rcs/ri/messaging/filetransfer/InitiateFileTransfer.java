@@ -120,6 +120,8 @@ public class InitiateFileTransfer extends RcsActivity {
     private TextView mSizeTextView;
     private CheckBox mIconCheckBox;
     private CheckBox mAudioMessageCheckBox;
+    private TextView mStatusView;
+    private ProgressBar mProgressBar;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -316,11 +318,9 @@ public class InitiateFileTransfer extends RcsActivity {
     }
 
     private void updateProgressBar(long currentSize, long totalSize) {
-        TextView statusView = (TextView) findViewById(R.id.progress_status);
-        ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress_bar);
-        statusView.setText(Utils.getProgressLabel(currentSize, totalSize));
+        mStatusView.setText(Utils.getProgressLabel(currentSize, totalSize));
         double position = ((double) currentSize / (double) totalSize) * 100.0;
-        progressBar.setProgress((int) position);
+        mProgressBar.setProgress((int) position);
     }
 
     private void quitSession() {
@@ -503,7 +503,13 @@ public class InitiateFileTransfer extends RcsActivity {
         mResumeBtn.setEnabled(false);
 
         mUriTextView = (TextView) findViewById(R.id.uri);
+        mUriTextView.setText("");
         mSizeTextView = (TextView) findViewById(R.id.size);
+        mSizeTextView.setText("");
+
+        mStatusView = (TextView) findViewById(R.id.progress_status);
+        mStatusView.setText("");
+        mProgressBar = (ProgressBar) findViewById(R.id.progress_bar);
 
         mIconCheckBox = (CheckBox) findViewById(R.id.ft_thumb);
 
@@ -563,11 +569,10 @@ public class InitiateFileTransfer extends RcsActivity {
                                 showException(e);
                             }
                         }
-                        TextView statusView = (TextView) findViewById(R.id.progress_status);
                         switch (state) {
                             case STARTED:
                                 /* Display session status */
-                                statusView.setText(_state);
+                                mStatusView.setText(_state);
                                 break;
 
                             case ABORTED:
@@ -587,7 +592,7 @@ public class InitiateFileTransfer extends RcsActivity {
 
                             case TRANSFERRED:
                                 /* Display transfer progress */
-                                statusView.setText(_state);
+                                mStatusView.setText(_state);
 
                                 try {
                                     displayFileExpiration(mFileTransfer.getFileExpiration());
@@ -603,7 +608,7 @@ public class InitiateFileTransfer extends RcsActivity {
                                 break;
 
                             default:
-                                statusView.setText(_state);
+                                mStatusView.setText(_state);
                                 if (LogUtils.isActive) {
                                     Log.d(LOGTAG, "onStateChanged ".concat(getString(
                                             R.string.label_ft_state_changed, _state, _reasonCode)));

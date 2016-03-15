@@ -58,7 +58,6 @@ public class CapabilitiesList extends RcsActivity {
         CapabilitiesLog.AUTOMATA,
         CapabilitiesLog.TIMESTAMP
     };
-
     // @formatter:on
 
     private static final String SORT_ORDER = CapabilitiesLog.CONTACT + " DESC";
@@ -83,7 +82,7 @@ public class CapabilitiesList extends RcsActivity {
         Cursor cursor = getContentResolver().query(CapabilitiesLog.CONTENT_URI, PROJECTION, null,
                 null, SORT_ORDER);
         if (cursor == null) {
-            showMessageThenExit(R.string.label_load_log_failed);
+            showMessageThenExit(R.string.label_db_failed);
             return null;
         }
         return new CapabilitiesListAdapter(this, cursor);

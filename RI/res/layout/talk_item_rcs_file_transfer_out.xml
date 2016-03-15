@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="5dp"
+    android:paddingEnd="0dp"
+    android:paddingLeft="12dp"
+    android:paddingRight="0dp"
+    android:paddingStart="12dp"
+    android:paddingTop="5dp">
+
+    <LinearLayout
+        android:id="@+id/conv_item_file_transfer_out"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:background="@drawable/talk_item_rcs_out"
+        android:orientation="vertical"
+        android:padding="5dp">
+
+        <ImageView
+            android:id="@+id/file_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ri_filetransfer_off" />
+
+        <TextView
+            android:id="@+id/progress_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/text_dummy"
+            android:textColor="@android:color/black" />
+
+        <TextView
+            android:id="@+id/timestamp_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/timestamp_dummy"
+            android:textColor="@android:color/darker_gray" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/status_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@id/conv_item_file_transfer_out"
+        android:layout_marginLeft="12dp"
+        android:layout_marginStart="12dp"
+        android:drawablePadding="5dp"
+        android:text="@string/label_state_unknown"
+        android:textColor="@android:color/darker_gray" />
+</RelativeLayout>

@@ -78,6 +78,10 @@ public abstract class SendFile extends RcsActivity implements ISendFile {
     private CheckBox mCheckAudio;
 
     private static final String LOGTAG = LogUtils.getTag(SendFile.class.getSimpleName());
+    protected TextView mStatusView;
+    protected ProgressBar mProgressBar;
+    private TextView mUriEdit;
+    private TextView mSizeEdit;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -173,12 +177,10 @@ public abstract class SendFile extends RcsActivity implements ISendFile {
     private void displayFileInfo(Intent data) {
         mFile = data.getData();
         /* Display the selected filename attribute */
-        TextView uriEdit = (TextView) findViewById(R.id.uri);
-        TextView sizeEdit = (TextView) findViewById(R.id.size);
         mFilename = FileUtils.getFileName(this, mFile);
         mFilesize = FileUtils.getFileSize(this, mFile);
-        sizeEdit.setText(FileUtils.humanReadableByteCount(mFilesize, true));
-        uriEdit.setText(mFilename);
+        mSizeEdit.setText(FileUtils.humanReadableByteCount(mFilesize, true));
+        mUriEdit.setText(mFilename);
         mInviteBtn.setEnabled(true);
     }
 
@@ -189,11 +191,9 @@ public abstract class SendFile extends RcsActivity implements ISendFile {
      * @param totalSize Total size to be transferred
      */
     protected void updateProgressBar(long currentSize, long totalSize) {
-        TextView statusView = (TextView) findViewById(R.id.progress_status);
-        ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress_bar);
-        statusView.setText(Utils.getProgressLabel(currentSize, totalSize));
+        mStatusView.setText(Utils.getProgressLabel(currentSize, totalSize));
         double position = ((double) currentSize / (double) totalSize) * 100.0;
-        progressBar.setProgress((int) position);
+        mProgressBar.setProgress((int) position);
     }
 
     private void quitSession() {
@@ -264,6 +264,13 @@ public abstract class SendFile extends RcsActivity implements ISendFile {
 
     @Override
     public void initialize() {
+        mUriEdit = (TextView) findViewById(R.id.uri);
+        mUriEdit.setText("");
+        mSizeEdit = (TextView) findViewById(R.id.size);
+        mSizeEdit.setText("");
+        mStatusView = (TextView) findViewById(R.id.progress_status);
+        mStatusView.setText("");
+        mProgressBar = (ProgressBar) findViewById(R.id.progress_bar);
         OnClickListener btnInviteListener = new OnClickListener() {
             public void onClick(View v) {
                 long warnSize = 0;

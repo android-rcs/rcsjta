@@ -1,91 +1,80 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent" >
+    android:layout_height="wrap_content"
+    android:padding="10dip"
+    android:stretchColumns="1">
 
-    <TableLayout
+    <Button
+        android:id="@+id/select_geoloc_btn"
+        android:padding="2dip"
+        android:text="@string/label_select_geoloc" />
+
+    <TextView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="10dip"
-        android:stretchColumns="1" >
+        android:padding="2dip"
+        android:text="@string/label_location" />
 
-        <Button
-            android:id="@+id/select_geoloc_btn"
-            android:layout_marginLeft="5dip"
-            android:layout_marginRight="5dip"
-            android:text="@string/label_select_geoloc" />
+    <EditText
+        android:id="@+id/location"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:inputType="text"
+        android:lines="1"
+        android:padding="2dip"
+        android:text="@string/label_gsh_default_label" />
 
-        <TextView
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:paddingTop="5dip"
-            android:text="@string/label_location" />
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:padding="2dip"
+        android:text="@string/label_latitude" />
 
-        <EditText
-            android:id="@+id/location"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="5dip"
-            android:layout_marginRight="5dip"
-            android:lines="1"
-            android:text="@string/label_gsh_default_label" />
+    <EditText
+        android:id="@+id/latitude"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:inputType="numberDecimal|numberSigned"
+        android:lines="1"
+        android:maxLength="8"
+        android:padding="2dip"
+        android:text="@string/label_gsh_default_latitude" />
 
-        <TextView
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:paddingTop="5dip"
-            android:text="@string/label_latitude" />
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="5dip"
+        android:text="@string/label_longitude" />
 
-        <EditText
-            android:id="@+id/latitude"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="5dip"
-            android:layout_marginRight="5dip"
-            android:inputType="numberDecimal|numberSigned"
-            android:lines="1"
-            android:maxLength="8"
-            android:text="@string/label_gsh_default_latitude" />
+    <EditText
+        android:id="@+id/longitude"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:inputType="numberDecimal|numberSigned"
+        android:lines="1"
+        android:maxLength="8"
+        android:padding="2dip"
+        android:text="@string/label_gsh_default_longitude" />
 
-        <TextView
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:paddingTop="5dip"
-            android:text="@string/label_longitude" />
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:padding="2dip"
+        android:text="@string/label_accuracy" />
 
-        <EditText
-            android:id="@+id/longitude"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="5dip"
-            android:layout_marginRight="5dip"
-            android:inputType="numberDecimal|numberSigned"
-            android:lines="1"
-            android:maxLength="8"
-            android:text="@string/label_gsh_default_longitude" />
+    <EditText
+        android:id="@+id/accuracy"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:inputType="number"
+        android:lines="1"
+        android:maxLength="8"
+        android:padding="2dip"
+        android:text="@string/label_gsh_default_accuracy" />
 
-        <TextView
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:paddingTop="5dip"
-            android:text="@string/label_accuracy" />
-
-        <EditText
-            android:id="@+id/accuracy"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="5dip"
-            android:layout_marginRight="5dip"
-            android:inputType="number"
-            android:lines="1"
-            android:maxLength="8"
-            android:text="@string/label_gsh_default_accuracy" />
-
-        <Button
-            android:id="@+id/validate_btn"
-            android:layout_marginLeft="5dip"
-            android:layout_marginRight="5dip"
-            android:text="@string/label_ok" />
-    </TableLayout>
-
-</ScrollView>
+    <Button
+        android:id="@+id/validate_btn"
+        android:padding="2dip"
+        android:text="@string/label_ok" />
+</TableLayout>

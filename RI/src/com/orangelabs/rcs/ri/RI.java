@@ -18,22 +18,6 @@
 
 package com.orangelabs.rcs.ri;
 
-import com.gsma.services.rcs.RcsPermissionDeniedException;
-import com.gsma.services.rcs.contact.ContactUtil;
-
-import com.orangelabs.rcs.api.connection.utils.ExceptionUtil;
-import com.orangelabs.rcs.api.connection.utils.RcsListActivity;
-import com.orangelabs.rcs.ri.capabilities.TestCapabilitiesApi;
-import com.orangelabs.rcs.ri.contacts.TestContactsApi;
-import com.orangelabs.rcs.ri.extension.TestMultimediaSessionApi;
-import com.orangelabs.rcs.ri.history.TestHistoryLogApi;
-import com.orangelabs.rcs.ri.intents.TestIntentApps;
-import com.orangelabs.rcs.ri.messaging.TestMessagingApi;
-import com.orangelabs.rcs.ri.service.TestServiceApi;
-import com.orangelabs.rcs.ri.sharing.TestSharingApi;
-import com.orangelabs.rcs.ri.upload.InitiateFileUpload;
-import com.orangelabs.rcs.ri.utils.LogUtils;
-
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -47,6 +31,20 @@ import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+
+import com.gsma.services.rcs.RcsPermissionDeniedException;
+import com.gsma.services.rcs.contact.ContactUtil;
+import com.orangelabs.rcs.api.connection.utils.ExceptionUtil;
+import com.orangelabs.rcs.api.connection.utils.RcsListActivity;
+import com.orangelabs.rcs.ri.capabilities.TestCapabilitiesApi;
+import com.orangelabs.rcs.ri.contacts.TestContactsApi;
+import com.orangelabs.rcs.ri.extension.TestMultimediaSessionApi;
+import com.orangelabs.rcs.ri.intents.TestIntentApps;
+import com.orangelabs.rcs.ri.messaging.TestMessagingApi;
+import com.orangelabs.rcs.ri.service.TestServiceApi;
+import com.orangelabs.rcs.ri.sharing.TestSharingApi;
+import com.orangelabs.rcs.ri.upload.InitiateFileUpload;
+import com.orangelabs.rcs.ri.utils.LogUtils;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -62,6 +60,8 @@ public class RI extends RcsListActivity {
     private static final int PROGRESS_INIT_INCREMENT = 100;
 
     private static final String LOGTAG = LogUtils.getTag(RI.class.getSimpleName());
+
+    public static String sChatIdOnForeground;
 
     private ListView mListView;
 
@@ -99,13 +99,19 @@ public class RI extends RcsListActivity {
         mInitLayout = (LinearLayout) findViewById(R.id.wait_cnx_start);
 
         /* Set items */
+        // @formatter:off
         String[] items = {
-                getString(R.string.menu_contacts), getString(R.string.menu_capabilities),
-                getString(R.string.menu_messaging), getString(R.string.menu_sharing),
-                getString(R.string.menu_mm_session), getString(R.string.menu_intents),
-                getString(R.string.menu_service), getString(R.string.menu_upload),
-                getString(R.string.menu_history_log), getString(R.string.menu_about)
+                getString(R.string.menu_contacts),
+                getString(R.string.menu_capabilities),
+                getString(R.string.menu_messaging),
+                getString(R.string.menu_sharing),
+                getString(R.string.menu_mm_session),
+                getString(R.string.menu_intents),
+                getString(R.string.menu_service),
+                getString(R.string.menu_upload),
+                getString(R.string.menu_about)
         };
+        // @formatter:on
         setListAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, items));
 
         ContactUtil contactUtil = ContactUtil.getInstance(this);
@@ -182,10 +188,6 @@ public class RI extends RcsListActivity {
                 break;
 
             case 8:
-                startActivity(new Intent(this, TestHistoryLogApi.class));
-                break;
-
-            case 9:
                 startActivity(new Intent(this, AboutRI.class));
                 break;
         }

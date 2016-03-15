@@ -30,6 +30,7 @@ import com.orangelabs.rcs.ri.utils.ContactUtil;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.net.Uri;
 
 /**
@@ -123,6 +124,9 @@ public class GroupChatDAO {
             cursor = sContentResolver.query(
                     Uri.withAppendedPath(ChatLog.GroupChat.CONTENT_URI, chatId), null, null, null,
                     null);
+            if (cursor == null) {
+                throw new SQLException("Cannot query group chat ID" + chatId);
+            }
             if (!cursor.moveToFirst()) {
                 return null;
             }

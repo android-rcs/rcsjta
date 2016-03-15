@@ -37,7 +37,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.TextView;
 
 import java.util.Set;
 
@@ -170,13 +169,12 @@ public class SendGroupFile extends SendFile {
                                 showException(e);
                             }
                         }
-                        TextView statusView = (TextView) findViewById(R.id.progress_status);
                         switch (state) {
                             case STARTED:
                                 //$FALL-THROUGH$
                             case TRANSFERRED:
                                 /* Display transfer state started */
-                                statusView.setText(_state);
+                                mStatusView.setText(_state);
                                 break;
 
                             case ABORTED:
@@ -195,7 +193,7 @@ public class SendGroupFile extends SendFile {
                                 break;
 
                             default:
-                                statusView.setText(_state);
+                                mStatusView.setText(_state);
                         }
                     }
                 });

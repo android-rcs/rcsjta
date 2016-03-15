@@ -32,6 +32,7 @@ import com.orangelabs.rcs.ri.utils.ContactUtil;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.net.Uri;
 
 /**
@@ -170,6 +171,9 @@ public class ChatMessageDAO {
             cursor = sContentResolver.query(
                     Uri.withAppendedPath(ChatLog.Message.CONTENT_URI, msgId), null, null, null,
                     null);
+            if (cursor == null) {
+                throw new SQLException("Cannot query chat message ID=" + msgId);
+            }
             if (!cursor.moveToFirst()) {
                 return null;
             }
@@ -183,16 +187,19 @@ public class ChatMessageDAO {
 
             String mimeType = cursor.getString(cursor
                     .getColumnIndexOrThrow(ChatLog.Message.MIME_TYPE));
-            String content = cursor
-                    .getString(cursor.getColumnIndexOrThrow(ChatLog.Message.CONTENT));
+            String content = null;
             int status = cursor.getInt(cursor.getColumnIndexOrThrow(ChatLog.Message.STATUS));
             GroupChatEvent.Status chatEvent = null;
+            ReasonCode reasonCode = null;
             Message.Content.Status contentStatus;
             if (Message.MimeType.GROUPCHAT_EVENT.equals(mimeType)) {
                 chatEvent = GroupChatEvent.Status.valueOf(status);
                 contentStatus = null;
             } else {
+                content = cursor.getString(cursor.getColumnIndexOrThrow(ChatLog.Message.CONTENT));
                 contentStatus = Message.Content.Status.valueOf(status);
+                reasonCode = Message.Content.ReasonCode.valueOf(cursor.getInt(cursor
+                        .getColumnIndexOrThrow(ChatLog.Message.REASON_CODE)));
             }
             ReadStatus readStatus = ReadStatus.valueOf(cursor.getInt(cursor
                     .getColumnIndexOrThrow(ChatLog.Message.READ_STATUS)));
@@ -206,8 +213,6 @@ public class ChatMessageDAO {
                     .getColumnIndexOrThrow(ChatLog.Message.TIMESTAMP_DELIVERED));
             long timestampDisplayed = cursor.getLong(cursor
                     .getColumnIndexOrThrow(ChatLog.Message.TIMESTAMP_DISPLAYED));
-            ReasonCode reasonCode = Message.Content.ReasonCode.valueOf(cursor.getInt(cursor
-                    .getColumnIndexOrThrow(ChatLog.Message.REASON_CODE)));
             return new ChatMessageDAO(msgId, contactId, chatId, contentStatus, chatEvent,
                     reasonCode, readStatus, dir, mimeType, content, timestamp, timestampSent,
                     timestampDelivered, timestampDisplayed);

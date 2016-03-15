@@ -18,6 +18,8 @@
 
 package com.orangelabs.rcs.ri.utils;
 
+import com.orangelabs.rcs.ri.R;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -25,8 +27,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.widget.Toast;
 
-import com.orangelabs.rcs.ri.R;
-
+import java.util.Locale;
 import java.util.Random;
 import java.util.Set;
 
@@ -89,7 +90,7 @@ public class Utils {
      * @return True if mime type is an image type
      */
     public static boolean isImageType(String mime) {
-        return mime.toLowerCase().startsWith("image/");
+        return mime.toLowerCase(Locale.getDefault()).startsWith("image/");
     }
 
     /**
@@ -99,7 +100,7 @@ public class Utils {
      * @return True if mime type is an audio type
      */
     public static boolean isAudioType(String mime) {
-        return mime.toLowerCase().startsWith("audio/");
+        return mime.toLowerCase(Locale.getDefault()).startsWith("audio/");
     }
 
     /**
@@ -109,7 +110,7 @@ public class Utils {
      * @return True if mime type is an video type
      */
     public static boolean isVideoType(String mime) {
-        return mime.toLowerCase().startsWith("video/");
+        return mime.toLowerCase(Locale.getDefault()).startsWith("video/");
     }
 
     /**

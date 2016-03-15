@@ -24,7 +24,6 @@ import com.orangelabs.rcs.ri.RiApplication;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.widget.TextView;
 
@@ -50,7 +49,6 @@ public class GeolocSharingLogView extends RcsActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.sharing_log_geoloc_item);
         mSharingId = getIntent().getStringExtra(EXTRA_SHARING_ID);
         initialize();

@@ -25,7 +25,6 @@ import com.gsma.services.rcs.filetransfer.FileTransfer;
 import com.gsma.services.rcs.filetransfer.FileTransferLog;
 
 import com.orangelabs.rcs.ri.utils.ContactUtil;
-import com.orangelabs.rcs.ri.utils.LogUtils;
 
 import android.content.ContentResolver;
 import android.content.Context;
@@ -34,7 +33,6 @@ import android.database.SQLException;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 
 /**
  * File transfer Data Object
@@ -84,8 +82,6 @@ public class FileTransferDAO implements Parcelable {
     private static ContentResolver sContentResolver;
 
     private FileTransfer.Disposition mDisposition;
-
-    private static final String LOGTAG = LogUtils.getTag(FileTransferDAO.class.getSimpleName());
 
     public FileTransfer.State getState() {
         return mState;
@@ -177,6 +173,34 @@ public class FileTransferDAO implements Parcelable {
         return mReasonCode;
     }
 
+    private FileTransferDAO(FileTransfer.Disposition disposition, String transferId,
+            ContactId contact, Uri file, String filename, String chatId, String mimeType,
+            FileTransfer.State state, ReadStatus readStatus, Direction direction, long timestamp,
+            long timestampSent, long timestampDelivered, long timestampDisplayed,
+            long sizeTransferred, long size, Uri thumbnail, long fileExpiration,
+            long fileIconExpiration, FileTransfer.ReasonCode reasonCode) {
+        mDisposition = disposition;
+        mTransferId = transferId;
+        mContact = contact;
+        mFile = file;
+        mFilename = filename;
+        mChatId = chatId;
+        mMimeType = mimeType;
+        mState = state;
+        mReadStatus = readStatus;
+        mDirection = direction;
+        mTimestamp = timestamp;
+        mTimestampSent = timestampSent;
+        mTimestampDelivered = timestampDelivered;
+        mTimestampDisplayed = timestampDisplayed;
+        mSizeTransferred = sizeTransferred;
+        mSize = size;
+        mThumbnail = thumbnail;
+        mFileExpiration = fileExpiration;
+        mFileIconExpiration = fileIconExpiration;
+        mReasonCode = reasonCode;
+    }
+
     /**
      * Constructor
      * 
@@ -218,67 +242,6 @@ public class FileTransferDAO implements Parcelable {
         mFileExpiration = source.readLong();
         mFileIconExpiration = source.readLong();
         mDisposition = FileTransfer.Disposition.valueOf(source.readInt());
-    }
-
-    private FileTransferDAO(ContentResolver resolver, String fileTransferId) {
-        Cursor cursor = null;
-        try {
-            cursor = resolver.query(
-                    Uri.withAppendedPath(FileTransferLog.CONTENT_URI, fileTransferId), null, null,
-                    null, null);
-            if (cursor == null || !cursor.moveToFirst()) {
-                throw new SQLException(
-                        "Failed to find Filetransfer with ID: ".concat(fileTransferId));
-            }
-            mTransferId = fileTransferId;
-            mChatId = cursor.getString(cursor.getColumnIndexOrThrow(FileTransferLog.CHAT_ID));
-            String contact = cursor
-                    .getString(cursor.getColumnIndexOrThrow(FileTransferLog.CONTACT));
-            if (contact != null) {
-                mContact = ContactUtil.formatContact(contact);
-            } else {
-                mContact = null;
-            }
-            mFile = Uri.parse(cursor.getString(cursor.getColumnIndexOrThrow(FileTransferLog.FILE)));
-            mFilename = cursor.getString(cursor.getColumnIndexOrThrow(FileTransferLog.FILENAME));
-            mMimeType = cursor.getString(cursor.getColumnIndexOrThrow(FileTransferLog.MIME_TYPE));
-            mState = FileTransfer.State.valueOf(cursor.getInt(cursor
-                    .getColumnIndexOrThrow(FileTransferLog.STATE)));
-            mReadStatus = ReadStatus.valueOf(cursor.getInt(cursor
-                    .getColumnIndexOrThrow(FileTransferLog.READ_STATUS)));
-            mDirection = Direction.valueOf(cursor.getInt(cursor
-                    .getColumnIndexOrThrow(FileTransferLog.DIRECTION)));
-            mTimestamp = cursor.getLong(cursor.getColumnIndexOrThrow(FileTransferLog.TIMESTAMP));
-            mTimestampSent = cursor.getLong(cursor
-                    .getColumnIndexOrThrow(FileTransferLog.TIMESTAMP_SENT));
-            mTimestampDelivered = cursor.getLong(cursor
-                    .getColumnIndexOrThrow(FileTransferLog.TIMESTAMP_DELIVERED));
-            mTimestampDisplayed = cursor.getLong(cursor
-                    .getColumnIndexOrThrow(FileTransferLog.TIMESTAMP_DISPLAYED));
-            mSizeTransferred = cursor.getLong(cursor
-                    .getColumnIndexOrThrow(FileTransferLog.TRANSFERRED));
-            mSize = cursor.getLong(cursor.getColumnIndexOrThrow(FileTransferLog.FILESIZE));
-            mDisposition = FileTransfer.Disposition.valueOf(cursor.getInt(cursor
-                    .getColumnIndexOrThrow(FileTransferLog.DISPOSITION)));
-
-            String fileicon = cursor.getString(cursor
-                    .getColumnIndexOrThrow(FileTransferLog.FILEICON));
-            if (fileicon != null) {
-                mThumbnail = Uri.parse(fileicon);
-            } else {
-                mThumbnail = null;
-            }
-            mReasonCode = FileTransfer.ReasonCode.valueOf(cursor.getInt(cursor
-                    .getColumnIndexOrThrow(FileTransferLog.REASON_CODE)));
-            mFileExpiration = cursor.getLong(cursor
-                    .getColumnIndexOrThrow(FileTransferLog.FILE_EXPIRATION));
-            mFileIconExpiration = cursor.getLong(cursor
-                    .getColumnIndexOrThrow(FileTransferLog.FILEICON_EXPIRATION));
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
-        }
     }
 
     @Override
@@ -357,13 +320,71 @@ public class FileTransferDAO implements Parcelable {
         if (sContentResolver == null) {
             sContentResolver = context.getContentResolver();
         }
+        Cursor cursor = null;
         try {
-            return new FileTransferDAO(sContentResolver, fileTransferId);
-        } catch (SQLException e) {
-            if (LogUtils.isActive) {
-                Log.e(LOGTAG, e.getMessage());
+            cursor = sContentResolver.query(
+                    Uri.withAppendedPath(FileTransferLog.CONTENT_URI, fileTransferId), null, null,
+                    null, null);
+            if (cursor == null) {
+                throw new SQLException(
+                        "Failed to find Filetransfer with ID: ".concat(fileTransferId));
             }
-            return null;
+            if (!cursor.moveToFirst()) {
+                return null;
+            }
+            String chatId = cursor.getString(cursor.getColumnIndexOrThrow(FileTransferLog.CHAT_ID));
+            String number = cursor.getString(cursor.getColumnIndexOrThrow(FileTransferLog.CONTACT));
+            ContactId contact = null;
+            if (number != null) {
+                contact = ContactUtil.formatContact(number);
+            }
+            Uri file = Uri.parse(cursor.getString(cursor
+                    .getColumnIndexOrThrow(FileTransferLog.FILE)));
+            String filename = cursor.getString(cursor
+                    .getColumnIndexOrThrow(FileTransferLog.FILENAME));
+            String mimeType = cursor.getString(cursor
+                    .getColumnIndexOrThrow(FileTransferLog.MIME_TYPE));
+            FileTransfer.State state = FileTransfer.State.valueOf(cursor.getInt(cursor
+                    .getColumnIndexOrThrow(FileTransferLog.STATE)));
+            ReadStatus readStatus = ReadStatus.valueOf(cursor.getInt(cursor
+                    .getColumnIndexOrThrow(FileTransferLog.READ_STATUS)));
+            Direction direction = Direction.valueOf(cursor.getInt(cursor
+                    .getColumnIndexOrThrow(FileTransferLog.DIRECTION)));
+            long timestamp = cursor
+                    .getLong(cursor.getColumnIndexOrThrow(FileTransferLog.TIMESTAMP));
+            long timestampSent = cursor.getLong(cursor
+                    .getColumnIndexOrThrow(FileTransferLog.TIMESTAMP_SENT));
+            long timestampDelivered = cursor.getLong(cursor
+                    .getColumnIndexOrThrow(FileTransferLog.TIMESTAMP_DELIVERED));
+            long timestampDisplayed = cursor.getLong(cursor
+                    .getColumnIndexOrThrow(FileTransferLog.TIMESTAMP_DISPLAYED));
+            long sizeTransferred = cursor.getLong(cursor
+                    .getColumnIndexOrThrow(FileTransferLog.TRANSFERRED));
+            long size = cursor.getLong(cursor.getColumnIndexOrThrow(FileTransferLog.FILESIZE));
+            FileTransfer.Disposition disposition = FileTransfer.Disposition.valueOf(cursor
+                    .getInt(cursor.getColumnIndexOrThrow(FileTransferLog.DISPOSITION)));
+
+            String fileicon = cursor.getString(cursor
+                    .getColumnIndexOrThrow(FileTransferLog.FILEICON));
+            Uri thumbnail = null;
+            if (fileicon != null) {
+                thumbnail = Uri.parse(fileicon);
+            }
+            FileTransfer.ReasonCode reasonCode = FileTransfer.ReasonCode.valueOf(cursor
+                    .getInt(cursor.getColumnIndexOrThrow(FileTransferLog.REASON_CODE)));
+            long fileExpiration = cursor.getLong(cursor
+                    .getColumnIndexOrThrow(FileTransferLog.FILE_EXPIRATION));
+            long fileIconExpiration = cursor.getLong(cursor
+                    .getColumnIndexOrThrow(FileTransferLog.FILEICON_EXPIRATION));
+            return new FileTransferDAO(disposition, fileTransferId, contact, file, filename,
+                    chatId, mimeType, state, readStatus, direction, timestamp, timestampSent,
+                    timestampDelivered, timestampDisplayed, sizeTransferred, size, thumbnail,
+                    fileExpiration, fileIconExpiration, reasonCode);
+
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
         }
     }
 }
