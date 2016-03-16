@@ -1,4 +1,3 @@
-
 package com.gsma.rcs.utils;
 
 import android.test.AndroidTestCase;
@@ -25,10 +24,6 @@ public class NetworkRessourceMangerTest extends AndroidTestCase {
         mRcsSettings = RcsSettings.getInstance(localContentResolver);
         NetworkFactory.loadFactory("com.gsma.rcs.platform.network.AndroidNetworkFactory",
                 mRcsSettings);
-    }
-
-    protected void tearDown() throws Exception {
-        super.tearDown();
     }
 
     public void testPortSelection() {

@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  * <p/>
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  * <p/>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,12 +100,12 @@ public class ConnectionManager {
     /**
      * Constructor
      *
-     * @param context           The context
-     * @param managedServices   Set of managed services
+     * @param context The context
+     * @param managedServices Set of managed services
      * @param rcsServiceControl instance of RcsServiceControl
      */
     private ConnectionManager(Context context, Set<RcsServiceName> managedServices,
-                              RcsServiceControl rcsServiceControl) {
+            RcsServiceControl rcsServiceControl) {
         mCtx = context;
         mCnxIntent = PendingIntent.getBroadcast(context, 0, new Intent(ACTION_CONNECT), 0);
         mAlarmManager = (AlarmManager) mCtx.getSystemService(Context.ALARM_SERVICE);
@@ -196,7 +196,7 @@ public class ConnectionManager {
      * Notify API disconnection to client
      *
      * @param service the disconnected service
-     * @param error   the error
+     * @param error the error
      */
     private void notifyDisconnection(RcsServiceName service, ReasonCode error) {
         if (LogUtils.isActive) {
@@ -222,13 +222,13 @@ public class ConnectionManager {
     /**
      * Get an instance of ConnectionManager.
      *
-     * @param context           the context
+     * @param context the context
      * @param rcsServiceControl instance of RcsServiceControl
-     * @param services          list of managed services
+     * @param services list of managed services
      * @return the singleton instance.
      */
     public static ConnectionManager createInstance(Context context,
-                                                   RcsServiceControl rcsServiceControl, RcsServiceName... services) {
+            RcsServiceControl rcsServiceControl, RcsServiceName... services) {
         Set<RcsServiceName> managedServices = new HashSet<>();
         Collections.addAll(managedServices, services);
         return createInstance(context, rcsServiceControl, managedServices);
@@ -237,13 +237,13 @@ public class ConnectionManager {
     /**
      * Get an instance of ConnectionManager.
      *
-     * @param ctx               the context
+     * @param ctx the context
      * @param rcsServiceControl instance of RcsServiceControl
-     * @param managedServices   Set of managed services
+     * @param managedServices Set of managed services
      * @return the singleton instance.
      */
     public static ConnectionManager createInstance(Context ctx,
-                                                   RcsServiceControl rcsServiceControl, Set<RcsServiceName> managedServices) {
+            RcsServiceControl rcsServiceControl, Set<RcsServiceName> managedServices) {
         if (sInstance != null) {
             return sInstance;
         }
@@ -275,8 +275,7 @@ public class ConnectionManager {
         mCtx.registerReceiver(new RcsServiceReceiver(), new IntentFilter(
                 RcsService.ACTION_SERVICE_UP));
         /* Register the broadcast receiver to pool periodically the API connections */
-        mCtx.registerReceiver(new ReceiveTimerToReConnectApi(), new IntentFilter(
-                ACTION_CONNECT));
+        mCtx.registerReceiver(new ReceiveTimerToReConnectApi(), new IntentFilter(ACTION_CONNECT));
         mRetryCount = 0;
         connectApis();
     }
@@ -287,9 +286,9 @@ public class ConnectionManager {
     private void connectApis() {
         try {
             if (mRcsServiceControl.isServiceStarted()) {
-            /* Connect all APIs */
+                /* Connect all APIs */
                 for (RcsServiceName service : mApis.keySet()) {
-                /* Check if not already connected */
+                    /* Check if not already connected */
                     if (!isServiceConnected(service)) {
                         if (LogUtils.isActive) {
                             Log.d(LOGTAG, "Connect service ".concat(service.name()));
@@ -341,19 +340,19 @@ public class ConnectionManager {
      * @param services services to monitor
      */
     public void startMonitorApiCnx(Activity activity, RcsServiceListener listener,
-                                   RcsServiceName... services) {
+            RcsServiceName... services) {
         mClientsToNotify.put(activity, new ClientConnectionNotifier(listener, services));
     }
 
     /**
      * Start monitoring the services and finish activities if service is disconnected
      *
-     * @param activity    the activity requesting to start monitoring the services
+     * @param activity the activity requesting to start monitoring the services
      * @param iFinishable the interface to finish activity
-     * @param services    the list of services to monitor
+     * @param services the list of services to monitor
      */
     public void startMonitorServices(Activity activity, IRcsActivityFinishable iFinishable,
-                                     RcsServiceName... services) {
+            RcsServiceName... services) {
         mClientsToNotify.put(activity, new ClientConnectionNotifier(iFinishable, services));
     }
 
@@ -481,10 +480,10 @@ public class ConnectionManager {
          * Constructor
          *
          * @param iFinishable Callback called when exception is thrown
-         * @param services    the list of services to monitor
+         * @param services the list of services to monitor
          */
         public ClientConnectionNotifier(IRcsActivityFinishable iFinishable,
-                                        RcsServiceName... services) {
+                RcsServiceName... services) {
             mIFinishable = iFinishable;
             mMonitoredServices = new HashSet<>();
             Collections.addAll(mMonitoredServices, services);

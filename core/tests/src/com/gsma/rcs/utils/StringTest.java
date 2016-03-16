@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,14 +21,6 @@ package com.gsma.rcs.utils;
 import android.test.AndroidTestCase;
 
 public class StringTest extends AndroidTestCase {
-
-    protected void setUp() throws Exception {
-        super.setUp();
-    }
-
-    protected void tearDown() throws Exception {
-        super.tearDown();
-    }
 
     public void testSplitVersion() {
         String version = "2.3.1";

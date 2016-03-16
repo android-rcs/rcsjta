@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ public class FifoBuffer {
     /**
      * Buffer of objects
      */
-    private Vector<Object> fifo = new Vector<Object>();
+    private Vector<Object> fifo = new Vector<>();
 
     /**
      * Add an object in the buffer
@@ -114,8 +114,6 @@ public class FifoBuffer {
 
     /**
      * clean FIFO
-     * 
-     * @return size of the FIFO
      */
     public void clean(int size) {
         if (fifo.size() > size) {
