@@ -26,22 +26,38 @@ import android.content.ContentProviderClient;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.RemoteException;
 import android.test.InstrumentationTestCase;
 
 public class FileTransferLogTest extends InstrumentationTestCase {
 
+    // @formatter:off
     private final String[] FILE_TRANSFER_LOG_PROJECTION = new String[] {
-            FileTransferLog.BASECOLUMN_ID, FileTransferLog.FT_ID, FileTransferLog.CHAT_ID,
-            FileTransferLog.CONTACT, FileTransferLog.FILE, FileTransferLog.FILENAME,
-            FileTransferLog.MIME_TYPE, FileTransferLog.FILEICON,
-            FileTransferLog.FILEICON_MIME_TYPE, FileTransferLog.DIRECTION,
-            FileTransferLog.FILESIZE, FileTransferLog.TRANSFERRED, FileTransferLog.TIMESTAMP,
-            FileTransferLog.TIMESTAMP_SENT, FileTransferLog.TIMESTAMP_DELIVERED,
-            FileTransferLog.TIMESTAMP_DISPLAYED, FileTransferLog.STATE,
-            FileTransferLog.REASON_CODE, FileTransferLog.READ_STATUS,
-            FileTransferLog.FILE_EXPIRATION, FileTransferLog.FILEICON_EXPIRATION,
-            FileTransferLog.EXPIRED_DELIVERY
+            FileTransferLog.BASECOLUMN_ID, 
+            FileTransferLog.FT_ID, 
+            FileTransferLog.CHAT_ID,
+            FileTransferLog.CONTACT, 
+            FileTransferLog.FILE, 
+            FileTransferLog.FILENAME,
+            FileTransferLog.MIME_TYPE, 
+            FileTransferLog.FILEICON,
+            FileTransferLog.FILEICON_MIME_TYPE, 
+            FileTransferLog.DIRECTION,
+            FileTransferLog.FILESIZE,
+            FileTransferLog.TRANSFERRED, 
+            FileTransferLog.TIMESTAMP,
+            FileTransferLog.TIMESTAMP_SENT, 
+            FileTransferLog.TIMESTAMP_DELIVERED,
+            FileTransferLog.TIMESTAMP_DISPLAYED, 
+            FileTransferLog.STATE,
+            FileTransferLog.REASON_CODE, 
+            FileTransferLog.READ_STATUS,
+            FileTransferLog.FILE_EXPIRATION, 
+            FileTransferLog.FILEICON_EXPIRATION,
+            FileTransferLog.EXPIRED_DELIVERY,
+            FileTransferLog.DISPOSITION
     };
+    // @formatter:on
 
     private ContentProviderClient mProvider;
 
@@ -62,7 +78,7 @@ public class FileTransferLogTest extends InstrumentationTestCase {
      * <li>delete
      * <li>update
      */
-    public void testFileTransferLogQuery() {
+    public void testFileTransferLogQuery() throws RemoteException {
         // Check that provider handles columns names and query operation
         Cursor cursor = null;
         try {
@@ -73,8 +89,7 @@ public class FileTransferLogTest extends InstrumentationTestCase {
             cursor = mProvider.query(FileTransferLog.CONTENT_URI, FILE_TRANSFER_LOG_PROJECTION,
                     where, whereArgs, null);
             assertNotNull(cursor);
-        } catch (Exception e) {
-            fail("query of FileTransferLog failed " + e.getMessage());
+
         } finally {
             if (cursor != null) {
                 cursor.close();
@@ -82,7 +97,7 @@ public class FileTransferLogTest extends InstrumentationTestCase {
         }
     }
 
-    public void testFileTransferLogQueryById() {
+    public void testFileTransferLogQueryById() throws RemoteException {
         // Check that provider handles columns names and query operation by ID
         Uri uri = Uri.withAppendedPath(FileTransferLog.CONTENT_URI, "0123456789");
         // Check that provider handles columns names and query operation
@@ -90,8 +105,7 @@ public class FileTransferLogTest extends InstrumentationTestCase {
         try {
             cursor = mProvider.query(uri, FILE_TRANSFER_LOG_PROJECTION, null, null, null);
             assertNotNull(cursor);
-        } catch (Exception e) {
-            fail("By Id query of FileTransferLog failed " + e.getMessage());
+
         } finally {
             if (cursor != null) {
                 cursor.close();
@@ -99,16 +113,13 @@ public class FileTransferLogTest extends InstrumentationTestCase {
         }
     }
 
-    public void testFileTransferLogQueryWithoutWhereClause() {
+    public void testFileTransferLogQueryWithoutWhereClause() throws RemoteException {
         Cursor cursor = null;
         try {
             cursor = mProvider.query(FileTransferLog.CONTENT_URI, null, null, null, null);
             assertNotNull(cursor);
-            if (cursor.moveToFirst()) {
-                Utils.checkProjection(FILE_TRANSFER_LOG_PROJECTION, cursor.getColumnNames());
-            }
-        } catch (Exception e) {
-            fail("Without where clause query of ChatLog.Message failed " + e.getMessage());
+            Utils.checkProjection(FILE_TRANSFER_LOG_PROJECTION, cursor.getColumnNames());
+
         } finally {
             if (cursor != null) {
                 cursor.close();
@@ -138,6 +149,7 @@ public class FileTransferLogTest extends InstrumentationTestCase {
         try {
             mProvider.insert(FileTransferLog.CONTENT_URI, values);
             fail("FileTransferLog is read only");
+
         } catch (Exception ex) {
             assertTrue("insert into FileTransferLog should be forbidden",
                     ex instanceof RuntimeException);
@@ -174,6 +186,7 @@ public class FileTransferLogTest extends InstrumentationTestCase {
             };
             mProvider.update(FileTransferLog.CONTENT_URI, values, where, whereArgs);
             fail("FileTransferLog is read only");
+
         } catch (Exception ex) {
             assertTrue("update of FileTransferLog should be forbidden",
                     ex instanceof RuntimeException);

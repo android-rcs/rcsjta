@@ -25,17 +25,25 @@ import android.content.ContentProviderClient;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.RemoteException;
 import android.test.InstrumentationTestCase;
 
 public class CapabilitiesLogTest extends InstrumentationTestCase {
 
+    // @formatter:off
     private static final String[] CAPABILITIES_LOG_PROJECTION = new String[] {
-            CapabilitiesLog.BASECOLUMN_ID, CapabilitiesLog.CONTACT,
-            CapabilitiesLog.CAPABILITY_IMAGE_SHARE, CapabilitiesLog.CAPABILITY_VIDEO_SHARE,
-            CapabilitiesLog.CAPABILITY_IM_SESSION, CapabilitiesLog.CAPABILITY_FILE_TRANSFER,
-            CapabilitiesLog.CAPABILITY_GEOLOC_PUSH, CapabilitiesLog.CAPABILITY_EXTENSIONS,
-            CapabilitiesLog.AUTOMATA, CapabilitiesLog.TIMESTAMP
+            CapabilitiesLog.BASECOLUMN_ID,
+            CapabilitiesLog.CONTACT,
+            CapabilitiesLog.CAPABILITY_IMAGE_SHARE,
+            CapabilitiesLog.CAPABILITY_VIDEO_SHARE,
+            CapabilitiesLog.CAPABILITY_IM_SESSION,
+            CapabilitiesLog.CAPABILITY_FILE_TRANSFER,
+            CapabilitiesLog.CAPABILITY_GEOLOC_PUSH,
+            CapabilitiesLog.CAPABILITY_EXTENSIONS,
+            CapabilitiesLog.AUTOMATA,
+            CapabilitiesLog.TIMESTAMP
     };
+    // @formatter:on
 
     private ContentProviderClient mProvider;
 
@@ -51,7 +59,7 @@ public class CapabilitiesLogTest extends InstrumentationTestCase {
      * Test the CapabilityLog according to GSMA API specifications.<br>
      * Check the query operations
      */
-    public void testCapabilitiesLogQuery() {
+    public void testCapabilitiesLogQuery() throws RemoteException {
         // Check that provider handles columns names and query operation
         Cursor cursor = null;
         try {
@@ -62,8 +70,6 @@ public class CapabilitiesLogTest extends InstrumentationTestCase {
             cursor = mProvider.query(CapabilitiesLog.CONTENT_URI, CAPABILITIES_LOG_PROJECTION,
                     where, whereArgs, null);
             assertNotNull(cursor);
-        } catch (Exception e) {
-            fail("query of CapabilitiesLog failed " + e.getMessage());
         } finally {
             if (cursor != null) {
                 cursor.close();
@@ -71,7 +77,7 @@ public class CapabilitiesLogTest extends InstrumentationTestCase {
         }
     }
 
-    public void testCapabilitiesLogQueryById() {
+    public void testCapabilitiesLogQueryById() throws RemoteException {
         // Check that provider handles columns names and query operation by ID
         Uri uri = Uri.withAppendedPath(CapabilitiesLog.CONTENT_URI, "+33612345678");
         // Check that provider handles columns names and query operation
@@ -79,8 +85,6 @@ public class CapabilitiesLogTest extends InstrumentationTestCase {
         try {
             cursor = mProvider.query(uri, CAPABILITIES_LOG_PROJECTION, null, null, null);
             assertNotNull(cursor);
-        } catch (Exception e) {
-            fail("query By Id of CapabilityLog failed " + e.getMessage());
         } finally {
             if (cursor != null) {
                 cursor.close();
@@ -88,16 +92,12 @@ public class CapabilitiesLogTest extends InstrumentationTestCase {
         }
     }
 
-    public void testCapabilitiesLogQueryWithoutWhereClause() {
+    public void testCapabilitiesLogQueryWithoutWhereClause() throws RemoteException {
         Cursor cursor = null;
         try {
             cursor = mProvider.query(CapabilitiesLog.CONTENT_URI, null, null, null, null);
             assertNotNull(cursor);
-            if (cursor.moveToFirst()) {
-                Utils.checkProjection(CAPABILITIES_LOG_PROJECTION, cursor.getColumnNames());
-            }
-        } catch (Exception e) {
-            fail("query without where clause of CapabilitiesLog failed " + e.getMessage());
+            Utils.checkProjection(CAPABILITIES_LOG_PROJECTION, cursor.getColumnNames());
         } finally {
             if (cursor != null) {
                 cursor.close();
@@ -120,6 +120,7 @@ public class CapabilitiesLogTest extends InstrumentationTestCase {
         try {
             mProvider.insert(CapabilitiesLog.CONTENT_URI, values);
             fail("CapabilitiesLog is read only");
+
         } catch (Exception ex) {
             assertTrue("insert into CapabilitiesLog should be forbidden",
                     ex instanceof RuntimeException);
@@ -131,6 +132,7 @@ public class CapabilitiesLogTest extends InstrumentationTestCase {
         try {
             mProvider.delete(CapabilitiesLog.CONTENT_URI, null, null);
             fail("CapabilitiesLog is read only");
+
         } catch (Exception ex) {
             assertTrue("delete from CapabilitiesLog should be forbidden",
                     ex instanceof RuntimeException);
@@ -148,6 +150,7 @@ public class CapabilitiesLogTest extends InstrumentationTestCase {
             };
             mProvider.update(CapabilitiesLog.CONTENT_URI, values, where, whereArgs);
             fail("CapabilitiesLog is read only");
+
         } catch (Exception ex) {
             assertTrue("update of CapabilitiesLog should be forbidden",
                     ex instanceof RuntimeException);

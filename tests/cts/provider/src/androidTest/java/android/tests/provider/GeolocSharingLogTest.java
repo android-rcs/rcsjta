@@ -27,15 +27,24 @@ import android.content.ContentProviderClient;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.RemoteException;
 import android.test.InstrumentationTestCase;
 
 public class GeolocSharingLogTest extends InstrumentationTestCase {
 
+    // @formatter:off
     private final String[] GEOLOC_SHARING_LOG_PROJECTION = new String[] {
-            GeolocSharingLog.BASECOLUMN_ID, GeolocSharingLog.CONTACT, GeolocSharingLog.DIRECTION,
-            GeolocSharingLog.CONTENT, GeolocSharingLog.SHARING_ID, GeolocSharingLog.MIME_TYPE,
-            GeolocSharingLog.STATE, GeolocSharingLog.REASON_CODE, GeolocSharingLog.TIMESTAMP
+            GeolocSharingLog.BASECOLUMN_ID, 
+            GeolocSharingLog.CONTACT, 
+            GeolocSharingLog.DIRECTION,
+            GeolocSharingLog.CONTENT, 
+            GeolocSharingLog.SHARING_ID, 
+            GeolocSharingLog.MIME_TYPE,
+            GeolocSharingLog.STATE, 
+            GeolocSharingLog.REASON_CODE, 
+            GeolocSharingLog.TIMESTAMP
     };
+    // @formatter:on
 
     private ContentProviderClient mProvider;
 
@@ -56,7 +65,7 @@ public class GeolocSharingLogTest extends InstrumentationTestCase {
      * <li>delete
      * <li>update
      */
-    public void testGeolocSharingLogQuery() {
+    public void testGeolocSharingLogQuery() throws RemoteException {
         /* Check that provider handles columns names and query operation */
         Cursor cursor = null;
         try {
@@ -67,8 +76,7 @@ public class GeolocSharingLogTest extends InstrumentationTestCase {
             cursor = mProvider.query(GeolocSharingLog.CONTENT_URI, GEOLOC_SHARING_LOG_PROJECTION,
                     where, whereArgs, null);
             assertNotNull(cursor);
-        } catch (Exception e) {
-            fail("query of GeolocSharingLog failed " + e.getMessage());
+
         } finally {
             if (cursor != null) {
                 cursor.close();
@@ -76,15 +84,14 @@ public class GeolocSharingLogTest extends InstrumentationTestCase {
         }
     }
 
-    public void testGeolocSharingLogQueryById() {
+    public void testGeolocSharingLogQueryById() throws RemoteException {
         /* Check that provider handles columns names and query operation */
         Uri uri = Uri.withAppendedPath(GeolocSharingLog.CONTENT_URI, "123456789");
         Cursor cursor = null;
         try {
             cursor = mProvider.query(uri, GEOLOC_SHARING_LOG_PROJECTION, null, null, null);
             assertNotNull(cursor);
-        } catch (Exception e) {
-            fail("By Id query of GeolocSharingLog failed " + e.getMessage());
+
         } finally {
             if (cursor != null) {
                 cursor.close();
@@ -92,17 +99,14 @@ public class GeolocSharingLogTest extends InstrumentationTestCase {
         }
     }
 
-    public void testGeolocSharingLogQueryWithoutWhereClause() {
+    public void testGeolocSharingLogQueryWithoutWhereClause() throws RemoteException {
         /* Check that provider handles columns names and query operation */
         Cursor cursor = null;
         try {
             cursor = mProvider.query(GeolocSharingLog.CONTENT_URI, null, null, null, null);
             assertNotNull(cursor);
-            if (cursor.moveToFirst()) {
-                Utils.checkProjection(GEOLOC_SHARING_LOG_PROJECTION, cursor.getColumnNames());
-            }
-        } catch (Exception e) {
-            fail("Without where clause query of GeolocSharingLog failed " + e.getMessage());
+            Utils.checkProjection(GEOLOC_SHARING_LOG_PROJECTION, cursor.getColumnNames());
+
         } finally {
             if (cursor != null) {
                 cursor.close();
@@ -124,11 +128,11 @@ public class GeolocSharingLogTest extends InstrumentationTestCase {
         try {
             mProvider.insert(GeolocSharingLog.CONTENT_URI, values);
             fail("GeolocSharingLog is read only");
+
         } catch (Exception ex) {
             assertTrue("insert into GeolocSharingLog should be forbidden",
                     ex instanceof RuntimeException);
         }
-
     }
 
     public void testGeolocSharingLogDelete() {
@@ -136,6 +140,7 @@ public class GeolocSharingLogTest extends InstrumentationTestCase {
         try {
             mProvider.delete(GeolocSharingLog.CONTENT_URI, null, null);
             fail("GeolocSharingLog is read only");
+
         } catch (Exception e) {
             assertTrue("delete of GeolocSharingLog should be forbidden",
                     e instanceof RuntimeException);
@@ -159,6 +164,7 @@ public class GeolocSharingLogTest extends InstrumentationTestCase {
             };
             mProvider.update(GeolocSharingLog.CONTENT_URI, values, where, whereArgs);
             fail("GeolocSharingLog is read only");
+
         } catch (Exception ex) {
             assertTrue("update of GeolocSharingLog should be forbidden",
                     ex instanceof RuntimeException);

@@ -25,6 +25,7 @@ import android.content.ContentProviderClient;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.RemoteException;
 import android.test.InstrumentationTestCase;
 
 /**
@@ -33,12 +34,19 @@ import android.test.InstrumentationTestCase;
 public class GroupDeliveryInfoLogTest extends InstrumentationTestCase {
 
     private ContentProviderClient mProvider;
+
+    // @formatter:off
     private static final String[] GROUPDELIVERYINFO_LOG_PROJECTION = new String[] {
-            GroupDeliveryInfoLog.BASECOLUMN_ID, GroupDeliveryInfoLog.ID,
-            GroupDeliveryInfoLog.CONTACT, GroupDeliveryInfoLog.CHAT_ID,
-            GroupDeliveryInfoLog.REASON_CODE, GroupDeliveryInfoLog.STATUS,
-            GroupDeliveryInfoLog.TIMESTAMP_DELIVERED, GroupDeliveryInfoLog.TIMESTAMP_DISPLAYED
+            GroupDeliveryInfoLog.BASECOLUMN_ID, 
+            GroupDeliveryInfoLog.ID,
+            GroupDeliveryInfoLog.CONTACT, 
+            GroupDeliveryInfoLog.CHAT_ID,
+            GroupDeliveryInfoLog.REASON_CODE, 
+            GroupDeliveryInfoLog.STATUS,
+            GroupDeliveryInfoLog.TIMESTAMP_DELIVERED, 
+            GroupDeliveryInfoLog.TIMESTAMP_DISPLAYED
     };
+    // @formatter:on
 
     @Override
     protected void setUp() throws Exception {
@@ -52,7 +60,7 @@ public class GroupDeliveryInfoLogTest extends InstrumentationTestCase {
      * Test the GroupDeliveryInfoLog according to GSMA API specifications.<br>
      * Check the query operations
      */
-    public void testGroupDeliveryInfoLogQuery() {
+    public void testGroupDeliveryInfoLogQuery() throws RemoteException {
         // Check that provider handles columns names and query operation
         Cursor cursor = null;
         try {
@@ -63,8 +71,7 @@ public class GroupDeliveryInfoLogTest extends InstrumentationTestCase {
             cursor = mProvider.query(GroupDeliveryInfoLog.CONTENT_URI,
                     GROUPDELIVERYINFO_LOG_PROJECTION, where, whereArgs, null);
             assertNotNull(cursor);
-        } catch (Exception e) {
-            fail("query of GroupDeliveryInfoLog failed " + e.getMessage());
+
         } finally {
             if (cursor != null) {
                 cursor.close();
@@ -72,7 +79,7 @@ public class GroupDeliveryInfoLogTest extends InstrumentationTestCase {
         }
     }
 
-    public void testGroupDeliveryInfoLogQueryById() {
+    public void testGroupDeliveryInfoLogQueryById() throws RemoteException {
         // Check that provider handles columns names and query operation by ID
         Uri uri = Uri.withAppendedPath(GroupDeliveryInfoLog.CONTENT_URI, "123456789");
         Cursor cursor = null;
@@ -80,8 +87,7 @@ public class GroupDeliveryInfoLogTest extends InstrumentationTestCase {
             assertNotNull(mProvider);
             cursor = mProvider.query(uri, GROUPDELIVERYINFO_LOG_PROJECTION, null, null, null);
             assertNotNull(cursor);
-        } catch (Exception e) {
-            fail("query of GroupDeliveryInfoLog failed " + e.getMessage());
+
         } finally {
             if (cursor != null) {
                 cursor.close();
@@ -89,17 +95,14 @@ public class GroupDeliveryInfoLogTest extends InstrumentationTestCase {
         }
     }
 
-    public void testGroupDeliveryInfoLogWithoutWhereClaused() {
+    public void testGroupDeliveryInfoLogWithoutWhereClaused() throws RemoteException {
         // Check that provider handles columns names and query operation where clause is null
         Cursor cursor = null;
         try {
             cursor = mProvider.query(GroupDeliveryInfoLog.CONTENT_URI, null, null, null, null);
             assertNotNull(cursor);
-            if (cursor.moveToFirst()) {
-                Utils.checkProjection(GROUPDELIVERYINFO_LOG_PROJECTION, cursor.getColumnNames());
-            }
-        } catch (Exception e) {
-            fail("Without where clause query of GroupDeliveryInfoLog failed " + e.getMessage());
+            Utils.checkProjection(GROUPDELIVERYINFO_LOG_PROJECTION, cursor.getColumnNames());
+
         } finally {
             if (cursor != null) {
                 cursor.close();
@@ -121,6 +124,7 @@ public class GroupDeliveryInfoLogTest extends InstrumentationTestCase {
         try {
             mProvider.insert(GroupDeliveryInfoLog.CONTENT_URI, values);
             fail("GroupDeliveryInfoLog is read only");
+
         } catch (Exception ex) {
             assertTrue("insert into GroupDeliveryInfoLog should be forbidden",
                     ex instanceof RuntimeException);
@@ -133,13 +137,14 @@ public class GroupDeliveryInfoLogTest extends InstrumentationTestCase {
         try {
             mProvider.delete(GroupDeliveryInfoLog.CONTENT_URI, null, null);
             fail("GroupDeliveryInfoLog is read only");
+
         } catch (Exception e) {
             assertTrue("delete of GroupDeliveryInfoLog should be forbidden",
                     e instanceof RuntimeException);
         }
     }
 
-    public void GroupDeliveryInfoLogUpdate() {
+    public void testGroupDeliveryInfoLogUpdate() {
         ContentValues values = new ContentValues();
         values.put(GroupDeliveryInfoLog.TIMESTAMP_DELIVERED, 0);
         // Check that provider does not support update operation
@@ -150,6 +155,7 @@ public class GroupDeliveryInfoLogTest extends InstrumentationTestCase {
             };
             mProvider.update(GroupDeliveryInfoLog.CONTENT_URI, values, where, whereArgs);
             fail("ChatLog is read only");
+
         } catch (Exception ex) {
             assertTrue("Updating a GroupDeliveryInfoLog should be forbidden",
                     ex instanceof RuntimeException);

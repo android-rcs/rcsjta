@@ -26,16 +26,19 @@ import android.content.ContentProviderClient;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.RemoteException;
 import android.test.InstrumentationTestCase;
 
 public class ChatLogGroupChatTest extends InstrumentationTestCase {
 
+    // @formatter:off
     private final String[] CHAT_LOG_GROUPCHAT_PROJECTION = new String[] {
             ChatLog.GroupChat.BASECOLUMN_ID, ChatLog.GroupChat.CHAT_ID, ChatLog.GroupChat.CONTACT,
             ChatLog.GroupChat.DIRECTION, ChatLog.GroupChat.PARTICIPANTS,
             ChatLog.GroupChat.REASON_CODE, ChatLog.GroupChat.STATE, ChatLog.GroupChat.SUBJECT,
             ChatLog.GroupChat.TIMESTAMP
     };
+    // @formatter:on
 
     private ContentProviderClient mProvider;
 
@@ -56,7 +59,7 @@ public class ChatLogGroupChatTest extends InstrumentationTestCase {
      * <li>delete
      * <li>update
      */
-    public void testChatLogGroupQuery() {
+    public void testChatLogGroupQuery() throws RemoteException {
         // Check that provider handles columns names and query operation
         Cursor cursor = null;
         try {
@@ -67,8 +70,7 @@ public class ChatLogGroupChatTest extends InstrumentationTestCase {
             cursor = mProvider.query(ChatLog.GroupChat.CONTENT_URI, CHAT_LOG_GROUPCHAT_PROJECTION,
                     where, whereArgs, null);
             assertNotNull(cursor);
-        } catch (Exception e) {
-            fail("query of ChatLog.GroupChat failed " + e.getMessage());
+
         } finally {
             if (cursor != null) {
                 cursor.close();
@@ -76,14 +78,13 @@ public class ChatLogGroupChatTest extends InstrumentationTestCase {
         }
     }
 
-    public void testChatLogGroupQueryById() {
+    public void testChatLogGroupQueryById() throws RemoteException {
         Uri uri = Uri.withAppendedPath(ChatLog.GroupChat.CONTENT_URI, "123456789");
         Cursor cursor = null;
         try {
             cursor = mProvider.query(uri, CHAT_LOG_GROUPCHAT_PROJECTION, null, null, null);
             assertNotNull(cursor);
-        } catch (Exception e) {
-            fail("By Id query of ChatLog.GroupChat failed " + e.getMessage());
+
         } finally {
             if (cursor != null) {
                 cursor.close();
@@ -91,16 +92,13 @@ public class ChatLogGroupChatTest extends InstrumentationTestCase {
         }
     }
 
-    public void testChatLogGroupQueryWithoutWhereClause() {
+    public void testChatLogGroupQueryWithoutWhereClause() throws RemoteException {
         Cursor cursor = null;
         try {
             cursor = mProvider.query(ChatLog.GroupChat.CONTENT_URI, null, null, null, null);
             assertNotNull(cursor);
-            if (cursor.moveToFirst()) {
-                Utils.checkProjection(CHAT_LOG_GROUPCHAT_PROJECTION, cursor.getColumnNames());
-            }
-        } catch (Exception e) {
-            fail("Without where clause query of ChatLog.GroupChat failed " + e.getMessage());
+            Utils.checkProjection(CHAT_LOG_GROUPCHAT_PROJECTION, cursor.getColumnNames());
+
         } finally {
             if (cursor != null) {
                 cursor.close();
@@ -122,6 +120,7 @@ public class ChatLogGroupChatTest extends InstrumentationTestCase {
         try {
             mProvider.insert(ChatLog.GroupChat.CONTENT_URI, values);
             fail("ChatLog is read only");
+
         } catch (Exception ex) {
             assertTrue("insert into ChatLog.GroupChat should be forbidden",
                     ex instanceof RuntimeException);
@@ -133,6 +132,7 @@ public class ChatLogGroupChatTest extends InstrumentationTestCase {
         try {
             mProvider.delete(ChatLog.GroupChat.CONTENT_URI, null, null);
             fail("ChatLog is read only");
+
         } catch (Exception ex) {
             assertTrue("delete of ChatLog.GroupChat should be forbidden",
                     ex instanceof RuntimeException);
@@ -150,6 +150,7 @@ public class ChatLogGroupChatTest extends InstrumentationTestCase {
             };
             mProvider.update(ChatLog.GroupChat.CONTENT_URI, values, where, whereArgs);
             fail("ChatLog is read only");
+
         } catch (Exception ex) {
             assertTrue("update of ChatLog.GroupChat should be forbidden",
                     ex instanceof RuntimeException);

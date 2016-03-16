@@ -26,16 +26,27 @@ import android.content.ContentProviderClient;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.RemoteException;
 import android.test.InstrumentationTestCase;
 
 public class ImageSharingLogTest extends InstrumentationTestCase {
 
+    // @formatter:off
     private final String[] IMAGE_SHARING_LOG_PROJECTION = new String[] {
-            ImageSharingLog.BASECOLUMN_ID, ImageSharingLog.CONTACT, ImageSharingLog.DIRECTION,
-            ImageSharingLog.FILE, ImageSharingLog.FILENAME, ImageSharingLog.FILESIZE,
-            ImageSharingLog.SHARING_ID, ImageSharingLog.MIME_TYPE, ImageSharingLog.STATE,
-            ImageSharingLog.REASON_CODE, ImageSharingLog.TIMESTAMP, ImageSharingLog.TRANSFERRED
+            ImageSharingLog.BASECOLUMN_ID, 
+            ImageSharingLog.CONTACT, 
+            ImageSharingLog.DIRECTION,
+            ImageSharingLog.FILE, 
+            ImageSharingLog.FILENAME, 
+            ImageSharingLog.FILESIZE,
+            ImageSharingLog.SHARING_ID, 
+            ImageSharingLog.MIME_TYPE, 
+            ImageSharingLog.STATE,
+            ImageSharingLog.REASON_CODE, 
+            ImageSharingLog.TIMESTAMP, 
+            ImageSharingLog.TRANSFERRED
     };
+    // @formatter:on
 
     private ContentProviderClient mProvider;
 
@@ -56,7 +67,7 @@ public class ImageSharingLogTest extends InstrumentationTestCase {
      * <li>delete
      * <li>update
      */
-    public void testImageSharingLogQuery() {
+    public void testImageSharingLogQuery() throws RemoteException {
         // Check that provider handles columns names and query operation
         Cursor cursor = null;
         try {
@@ -67,8 +78,7 @@ public class ImageSharingLogTest extends InstrumentationTestCase {
             cursor = mProvider.query(ImageSharingLog.CONTENT_URI, IMAGE_SHARING_LOG_PROJECTION,
                     where, whereArgs, null);
             assertNotNull(cursor);
-        } catch (Exception e) {
-            fail("query of ImageSharingLog failed " + e.getMessage());
+
         } finally {
             if (cursor != null) {
                 cursor.close();
@@ -76,15 +86,14 @@ public class ImageSharingLogTest extends InstrumentationTestCase {
         }
     }
 
-    public void testImageSharingLogQueryById() {
+    public void testImageSharingLogQueryById() throws RemoteException {
         // Check that provider handles columns names and query operation
         Uri uri = Uri.withAppendedPath(ImageSharingLog.CONTENT_URI, "123456789");
         Cursor cursor = null;
         try {
             cursor = mProvider.query(uri, IMAGE_SHARING_LOG_PROJECTION, null, null, null);
             assertNotNull(cursor);
-        } catch (Exception e) {
-            fail("By Id query of ImageSharingLog failed " + e.getMessage());
+
         } finally {
             if (cursor != null) {
                 cursor.close();
@@ -92,17 +101,14 @@ public class ImageSharingLogTest extends InstrumentationTestCase {
         }
     }
 
-    public void testImageSharingLogQueryWithoutWhereClause() {
+    public void testImageSharingLogQueryWithoutWhereClause() throws RemoteException {
         // Check that provider handles columns names and query operation
         Cursor cursor = null;
         try {
             cursor = mProvider.query(ImageSharingLog.CONTENT_URI, null, null, null, null);
             assertNotNull(cursor);
-            if (cursor.moveToFirst()) {
-                Utils.checkProjection(IMAGE_SHARING_LOG_PROJECTION, cursor.getColumnNames());
-            }
-        } catch (Exception e) {
-            fail("Without where clause query of ImageSharingLog failed " + e.getMessage());
+            Utils.checkProjection(IMAGE_SHARING_LOG_PROJECTION, cursor.getColumnNames());
+
         } finally {
             if (cursor != null) {
                 cursor.close();
@@ -126,11 +132,11 @@ public class ImageSharingLogTest extends InstrumentationTestCase {
         try {
             mProvider.insert(ImageSharingLog.CONTENT_URI, values);
             fail("ImageSharingLog is read only");
+
         } catch (Exception ex) {
             assertTrue("insert into ImageSharingLog should be forbidden",
                     ex instanceof RuntimeException);
         }
-
     }
 
     public void testImageSharingLogDelete() {
@@ -138,6 +144,7 @@ public class ImageSharingLogTest extends InstrumentationTestCase {
         try {
             mProvider.delete(ImageSharingLog.CONTENT_URI, null, null);
             fail("ImageSharingLog is read only");
+
         } catch (Exception e) {
             assertTrue("delete of ImageSharingLog should be forbidden",
                     e instanceof RuntimeException);
@@ -162,6 +169,7 @@ public class ImageSharingLogTest extends InstrumentationTestCase {
             };
             mProvider.update(ImageSharingLog.CONTENT_URI, values, where, whereArgs);
             fail("ImageSharingLog is read only");
+
         } catch (Exception ex) {
             assertTrue("update of ImageSharingLog should be forbidden",
                     ex instanceof RuntimeException);

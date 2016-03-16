@@ -26,16 +26,26 @@ import android.content.ContentProviderClient;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.RemoteException;
 import android.test.InstrumentationTestCase;
 
 public class VideoSharingLogTest extends InstrumentationTestCase {
 
+    // @formatter:off
     private final String[] VIDEO_SHARING_LOG_PROJECTION = new String[] {
-            VideoSharingLog.BASECOLUMN_ID, VideoSharingLog.CONTACT, VideoSharingLog.DIRECTION,
-            VideoSharingLog.DURATION, VideoSharingLog.HEIGHT, VideoSharingLog.REASON_CODE,
-            VideoSharingLog.SHARING_ID, VideoSharingLog.STATE, VideoSharingLog.TIMESTAMP,
-            VideoSharingLog.VIDEO_ENCODING, VideoSharingLog.WIDTH
+            VideoSharingLog.BASECOLUMN_ID, 
+            VideoSharingLog.CONTACT, 
+            VideoSharingLog.DIRECTION,
+            VideoSharingLog.DURATION, 
+            VideoSharingLog.HEIGHT, 
+            VideoSharingLog.REASON_CODE,
+            VideoSharingLog.SHARING_ID, 
+            VideoSharingLog.STATE, 
+            VideoSharingLog.TIMESTAMP,
+            VideoSharingLog.VIDEO_ENCODING, 
+            VideoSharingLog.WIDTH
     };
+    // @formatter:on
 
     private ContentProviderClient mProvider;
 
@@ -56,7 +66,7 @@ public class VideoSharingLogTest extends InstrumentationTestCase {
      * <li>delete
      * <li>update
      */
-    public void testVideoSharingLogQuery() {
+    public void testVideoSharingLogQuery() throws RemoteException {
         // Check that provider handles columns names and query operation
         Cursor cursor = null;
         try {
@@ -67,8 +77,7 @@ public class VideoSharingLogTest extends InstrumentationTestCase {
             cursor = mProvider.query(VideoSharingLog.CONTENT_URI, VIDEO_SHARING_LOG_PROJECTION,
                     where, whereArgs, null);
             assertNotNull(cursor);
-        } catch (Exception e) {
-            fail("query of VideoSharingLog failed " + e.getMessage());
+
         } finally {
             if (cursor != null) {
                 cursor.close();
@@ -76,15 +85,14 @@ public class VideoSharingLogTest extends InstrumentationTestCase {
         }
     }
 
-    public void testVideoSharingLogQueryById() {
+    public void testVideoSharingLogQueryById() throws RemoteException {
         // Check that provider handles columns names and query operation
         Uri uri = Uri.withAppendedPath(VideoSharingLog.CONTENT_URI, "123456789");
         Cursor cursor = null;
         try {
             cursor = mProvider.query(uri, VIDEO_SHARING_LOG_PROJECTION, null, null, null);
             assertNotNull(cursor);
-        } catch (Exception e) {
-            fail("By Id query of VideoSharingLog failed " + e.getMessage());
+
         } finally {
             if (cursor != null) {
                 cursor.close();
@@ -92,16 +100,13 @@ public class VideoSharingLogTest extends InstrumentationTestCase {
         }
     }
 
-    public void testVideoSharingLogQueryWithoutWhereClause() {
+    public void testVideoSharingLogQueryWithoutWhereClause() throws RemoteException {
         Cursor cursor = null;
         try {
             cursor = mProvider.query(VideoSharingLog.CONTENT_URI, null, null, null, null);
             assertNotNull(cursor);
-            if (cursor.moveToFirst()) {
-                Utils.checkProjection(VIDEO_SHARING_LOG_PROJECTION, cursor.getColumnNames());
-            }
-        } catch (Exception e) {
-            fail("Without where clause query of VideoSharingLog failed " + e.getMessage());
+            Utils.checkProjection(VIDEO_SHARING_LOG_PROJECTION, cursor.getColumnNames());
+
         } finally {
             if (cursor != null) {
                 cursor.close();
@@ -125,6 +130,7 @@ public class VideoSharingLogTest extends InstrumentationTestCase {
         try {
             mProvider.insert(VideoSharingLog.CONTENT_URI, values);
             fail("VideoSharingLog is read only");
+
         } catch (Exception ex) {
             assertTrue("insert into VideoSharingLog should be forbidden",
                     ex instanceof RuntimeException);
@@ -136,6 +142,7 @@ public class VideoSharingLogTest extends InstrumentationTestCase {
         try {
             mProvider.delete(VideoSharingLog.CONTENT_URI, null, null);
             fail("VideoSharingLog is read only");
+
         } catch (Exception e) {
             assertTrue("delete of VideoSharingLog should be forbidden",
                     e instanceof RuntimeException);
@@ -153,6 +160,7 @@ public class VideoSharingLogTest extends InstrumentationTestCase {
             };
             mProvider.update(VideoSharingLog.CONTENT_URI, values, where, whereArgs);
             fail("VideoSharingLog is read only");
+
         } catch (Exception ex) {
             assertTrue("update of VideoSharingLog should be forbidden",
                     ex instanceof RuntimeException);
