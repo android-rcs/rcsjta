@@ -60,7 +60,7 @@
         android:layout_height="wrap_content"
         android:text="@string/label_switch_camera" />
 
-    <com.orangelabs.rcs.ri.sharing.video.media.VideoSurfaceView
+    <com.gsma.rcs.ri.sharing.video.media.VideoSurfaceView
         android:id="@+id/video_preview"
         android:layout_width="176dp"
         android:layout_height="144dp"

@@ -20,8 +20,8 @@
         android:title="@string/rcs_settings_title_userprofile_settings" >
         <intent
             android:action="android.intent.action.MAIN"
-            android:targetClass="com.orangelabs.rcs.core.control.settings.UserprofileSettingsDisplay"
-            android:targetPackage="com.orangelabs.rcs.core.control" />
+            android:targetClass="com.gsma.rcs.core.control.settings.UserprofileSettingsDisplay"
+            android:targetPackage="com.gsma.rcs.core.control" />
     </PreferenceScreen>
     <PreferenceScreen
         android:key="messaging_settings"
@@ -29,8 +29,8 @@
         android:title="@string/rcs_settings_title_messaging_settings" >
         <intent
             android:action="android.intent.action.MAIN"
-            android:targetClass="com.orangelabs.rcs.core.control.settings.MessagingSettingsDisplay"
-            android:targetPackage="com.orangelabs.rcs.core.control" />
+            android:targetClass="com.gsma.rcs.core.control.settings.MessagingSettingsDisplay"
+            android:targetPackage="com.gsma.rcs.core.control" />
     </PreferenceScreen>
     <PreferenceScreen
         android:key="about_settings"
@@ -38,8 +38,8 @@
         android:title="@string/menu_about" >
         <intent
             android:action="android.intent.action.MAIN"
-            android:targetClass="com.orangelabs.rcs.core.control.settings.AboutSettings"
-            android:targetPackage="com.orangelabs.rcs.core.control" />
+            android:targetClass="com.gsma.rcs.core.control.settings.AboutSettings"
+            android:targetPackage="com.gsma.rcs.core.control" />
     </PreferenceScreen>
 
 </PreferenceScreen>
