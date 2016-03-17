@@ -117,7 +117,8 @@ public class SharingListView extends RcsFragmentActivity implements
             HistoryLog.STATUS,
             HistoryLog.FILENAME,
             HistoryLog.DURATION,
-            HistoryLog.CONTENT
+            HistoryLog.CONTENT,
+            HistoryLog.MIME_TYPE
     };
     // @formatter:on
 
