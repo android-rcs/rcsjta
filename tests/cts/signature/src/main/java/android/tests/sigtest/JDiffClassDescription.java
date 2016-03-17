@@ -50,7 +50,7 @@ public class JDiffClassDescription {
         INTERFACE, CLASS
     }
 
-    @SuppressWarnings("unchecked")
+    // @SuppressWarnings("unchecked")
     private Class<?> mClass;
 
     private String mPackageName;
@@ -64,10 +64,10 @@ public class JDiffClassDescription {
     private int mModifier;
 
     private String mExtendedClass;
-    private List<String> implInterfaces = new ArrayList<String>();
-    private List<JDiffField> jDiffFields = new ArrayList<JDiffField>();
-    private List<JDiffMethod> jDiffMethods = new ArrayList<JDiffMethod>();
-    private List<JDiffConstructor> jDiffConstructors = new ArrayList<JDiffConstructor>();
+    private List<String> implInterfaces = new ArrayList<>();
+    private List<JDiffField> jDiffFields = new ArrayList<>();
+    private List<JDiffMethod> jDiffMethods = new ArrayList<>();
+    private List<JDiffConstructor> jDiffConstructors = new ArrayList<>();
 
     private ResultObserver mResultObserver;
     private JDiffType mClassType;
@@ -80,8 +80,7 @@ public class JDiffClassDescription {
      */
     public JDiffClassDescription(String pkg, String className) {
         this(pkg, className, new ResultObserver() {
-            public void notifyFailure(SignatureTestActivity.FAILURE_TYPE type,
-                    String name,
+            public void notifyFailure(SignatureTestActivity.FAILURE_TYPE type, String name,
                     String errorMessage) {
                 // This is a null result observer that doesn't do anything.
             }
@@ -95,9 +94,7 @@ public class JDiffClassDescription {
      * @param className the name of the class.
      * @param resultObserver the resultObserver to get results with.
      */
-    public JDiffClassDescription(String pkg,
-            String className,
-            ResultObserver resultObserver) {
+    public JDiffClassDescription(String pkg, String className, ResultObserver resultObserver) {
         mPackageName = pkg;
         mShortClassName = className;
         mResultObserver = resultObserver;
@@ -140,7 +137,6 @@ public class JDiffClassDescription {
     }
 
     static String convertModifiersToAccessLevel(int modifiers) {
-        String accessLevel = "";
         if ((modifiers & Modifier.PUBLIC) != 0) {
             return "public";
         } else if ((modifiers & Modifier.PRIVATE) != 0) {
@@ -154,16 +150,12 @@ public class JDiffClassDescription {
     }
 
     static String convertModifersToModifierString(int modifiers) {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         boolean isFirst = true;
 
         // order taken from Java Language Spec, sections 8.1.1, 8.3.1, and 8.4.3
         if ((modifiers & Modifier.ABSTRACT) != 0) {
-            if (isFirst) {
-                isFirst = false;
-            } else {
-                sb.append(" ");
-            }
+            isFirst = false;
             sb.append("abstract");
         }
         if ((modifiers & Modifier.STATIC) != 0) {
@@ -215,9 +207,7 @@ public class JDiffClassDescription {
             sb.append("native");
         }
         if ((modifiers & Modifier.STRICT) != 0) {
-            if (isFirst) {
-                isFirst = false;
-            } else {
+            if (!isFirst) {
                 sb.append(" ");
             }
             sb.append("strictfp");
@@ -259,7 +249,7 @@ public class JDiffClassDescription {
         }
 
         public String toSignatureString() {
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
 
             // access level
             String accesLevel = convertModifiersToAccessLevel(mModifier);
@@ -297,8 +287,8 @@ public class JDiffClassDescription {
                 mReturnType = scrubJdiffParamType(returnType);
             }
 
-            mParamList = new ArrayList<String>();
-            mExceptionList = new ArrayList<String>();
+            mParamList = new ArrayList<>();
+            mExceptionList = new ArrayList<>();
         }
 
         /**
@@ -336,12 +326,11 @@ public class JDiffClassDescription {
          * @return converted parameter string
          */
         private static String convertParamList(final ArrayList<String> params) {
-
-            StringBuffer paramList = new StringBuffer();
+            StringBuilder paramList = new StringBuilder();
 
             if (params != null) {
                 for (String str : params) {
-                    paramList.append(str + ", ");
+                    paramList.append(str).append(", ");
                 }
                 if (params.size() > 0) {
                     paramList.delete(paramList.length() - 2, paramList.length());
@@ -352,7 +341,7 @@ public class JDiffClassDescription {
         }
 
         public String toSignatureString() {
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
 
             // access level
             String accesLevel = convertModifiersToAccessLevel(mModifier);
@@ -414,9 +403,8 @@ public class JDiffClassDescription {
 
         public JDiffConstructor(String name, String[] param, int modifier) {
             super(name, modifier, null);
-
-            for (int i = 0; i < param.length; i++) {
-                addParam(param[i]);
+            for (String aParam : param) {
+                addParam(aParam);
             }
         }
 
@@ -452,12 +440,11 @@ public class JDiffClassDescription {
      * @param apiMethod the method read from the api file.
      * @param reflectedMethod the method found via reflections.
      */
-    private boolean areMethodModifiedCompatibile(JDiffMethod apiMethod,
-            Method reflectedMethod) {
+    private boolean areMethodModifiedCompatibile(JDiffMethod apiMethod, Method reflectedMethod) {
 
         // If the apiMethod isn't synchronized
         if (((apiMethod.mModifier & Modifier.SYNCHRONIZED) == 0) &&
-                // but the reflected method is
+        // but the reflected method is
                 ((reflectedMethod.getModifiers() & Modifier.SYNCHRONIZED) != 0)) {
             // that is a problem
             return false;
@@ -494,8 +481,7 @@ public class JDiffClassDescription {
                     mResultObserver.notifyFailure(
                             SignatureTestActivity.FAILURE_TYPE.MISSING_METHOD,
                             method.toReadableString(mAbsoluteClassName),
-                            "No method with correct signature found:" +
-                                    method.toSignatureString());
+                            "No method with correct signature found:" + method.toSignatureString());
                 } else {
                     if (m.isVarArgs()) {
                         method.mModifier |= METHOD_MODIFIER_VAR_ARGS;
@@ -516,15 +502,14 @@ public class JDiffClassDescription {
                         mResultObserver.notifyFailure(
                                 SignatureTestActivity.FAILURE_TYPE.MISMATCH_METHOD,
                                 method.toReadableString(mAbsoluteClassName),
-                                "Non-compatible method found when looking for " +
-                                        method.toSignatureString());
+                                "Non-compatible method found when looking for "
+                                        + method.toSignatureString());
                     }
                 }
             } catch (Exception e) {
                 SignatureTestLog.e("Got exception when checking method compliance", e);
                 mResultObserver.notifyFailure(SignatureTestActivity.FAILURE_TYPE.CAUGHT_EXCEPTION,
-                        method.toReadableString(mAbsoluteClassName),
-                        "Exception!");
+                        method.toReadableString(mAbsoluteClassName), "Exception!");
             }
         }
     }
@@ -576,14 +561,11 @@ public class JDiffClassDescription {
     @SuppressWarnings("unchecked")
     private Method findMatchingMethod(JDiffMethod method) {
         Method[] methods = mClass.getDeclaredMethods();
-        boolean found = false;
-
         for (Method m : methods) {
             if (matches(method, m)) {
                 return m;
             }
         }
-
         return null;
     }
 
@@ -598,14 +580,12 @@ public class JDiffClassDescription {
         if (jdiffParam == null) {
             return false;
         }
-
         String reflectionParam = typeToString(reflectionParamType);
         // Most things aren't varargs, so just do a simple compare
         // first.
         if (jdiffParam.equals(reflectionParam)) {
             return true;
         }
-
         // Check for varargs. jdiff reports varargs as ..., while
         // reflection reports them as []
         int jdiffParamEndOffset = jdiffParam.indexOf("...");
@@ -615,7 +595,6 @@ public class JDiffClassDescription {
             reflectionParam = reflectionParam.substring(0, reflectionParamEndOffset);
             return jdiffParam.equals(reflectionParam);
         }
-
         return false;
     }
 
@@ -631,8 +610,7 @@ public class JDiffClassDescription {
                     mResultObserver.notifyFailure(
                             SignatureTestActivity.FAILURE_TYPE.MISSING_METHOD,
                             con.toReadableString(mAbsoluteClassName),
-                            "No method with correct signature found:" +
-                                    con.toSignatureString());
+                            "No method with correct signature found:" + con.toSignatureString());
                 } else {
                     if (c.isVarArgs()) {// some method's parameter are variable args
                         con.mModifier |= METHOD_MODIFIER_VAR_ARGS;
@@ -641,15 +619,14 @@ public class JDiffClassDescription {
                         mResultObserver.notifyFailure(
                                 SignatureTestActivity.FAILURE_TYPE.MISMATCH_METHOD,
                                 con.toReadableString(mAbsoluteClassName),
-                                "Non-compatible method found when looking for " +
-                                        con.toSignatureString());
+                                "Non-compatible method found when looking for "
+                                        + con.toSignatureString());
                     }
                 }
             } catch (Exception e) {
                 SignatureTestLog.e("Got exception when checking constructor compliance", e);
                 mResultObserver.notifyFailure(SignatureTestActivity.FAILURE_TYPE.CAUGHT_EXCEPTION,
-                        con.toReadableString(mAbsoluteClassName),
-                        "Exception!");
+                        con.toReadableString(mAbsoluteClassName), "Exception!");
             }
         }
     }
@@ -709,36 +686,34 @@ public class JDiffClassDescription {
                 if (f == null) {
                     mResultObserver.notifyFailure(SignatureTestActivity.FAILURE_TYPE.MISSING_FIELD,
                             field.toReadableString(mAbsoluteClassName),
-                            "No field with correct signature found:" +
-                                    field.toSignatureString());
+                            "No field with correct signature found:" + field.toSignatureString());
                 } else if (f.getModifiers() != field.mModifier) {
                     mResultObserver.notifyFailure(
                             SignatureTestActivity.FAILURE_TYPE.MISMATCH_FIELD,
                             field.toReadableString(mAbsoluteClassName),
-                            "Non-compatible field modifiers found when looking for " +
-                                    field.toSignatureString());
+                            "Non-compatible field modifiers found when looking for "
+                                    + field.toSignatureString());
                 } else if (!f.getType().getCanonicalName().equals(field.mFieldType)) {
                     // type name does not match, but this might be a generic
                     String genericTypeName = null;
                     Type type = f.getGenericType();
                     if (type != null) {
-                        genericTypeName = type instanceof Class ? ((Class) type).getName() :
-                                type.toString();
+                        genericTypeName = type instanceof Class ? ((Class) type).getName() : type
+                                .toString();
                     }
                     if (genericTypeName == null || !genericTypeName.equals(field.mFieldType)) {
                         mResultObserver.notifyFailure(
                                 SignatureTestActivity.FAILURE_TYPE.MISMATCH_FIELD,
                                 field.toReadableString(mAbsoluteClassName),
-                                "Non-compatible field type found when looking for " +
-                                        field.toSignatureString());
+                                "Non-compatible field type found when looking for "
+                                        + field.toSignatureString());
                     }
                 }
 
             } catch (Exception e) {
                 SignatureTestLog.e("Got exception when checking field compliance", e);
                 mResultObserver.notifyFailure(SignatureTestActivity.FAILURE_TYPE.CAUGHT_EXCEPTION,
-                        field.toReadableString(mAbsoluteClassName),
-                        "Exception!");
+                        field.toReadableString(mAbsoluteClassName), "Exception!");
             }
         }
     }
@@ -770,7 +745,7 @@ public class JDiffClassDescription {
 
         // If the api class isn't abstract
         if (((apiModifier & Modifier.ABSTRACT) == 0) &&
-                // but the reflected class is
+        // but the reflected class is
                 ((reflectionModifier & Modifier.ABSTRACT) != 0) &&
                 // and it isn't an enum
                 !isEnumType()) {
@@ -822,20 +797,10 @@ public class JDiffClassDescription {
         // Nothing to check if it doesn't extend anything.
         if (mExtendedClass != null) {
             Class<?> superClass = mClass.getSuperclass();
-            if (superClass == null) {
-                // API indicates superclass, reflection doesn't.
-                return false;
-            }
-
-            if (superClass.getCanonicalName().equals(mExtendedClass)) {
-                return true;
-            }
-
-            if (mAbsoluteClassName.equals("android.hardware.SensorManager")) {
-                // FIXME: Please see Issue 1496822 for more information
-                return true;
-            }
-            return false;
+            // API indicates superclass, reflection doesn't.
+            return superClass != null
+                    && (superClass.getCanonicalName().equals(mExtendedClass) || mAbsoluteClassName
+                            .equals("android.hardware.SensorManager"));
         }
         return true;
     }
@@ -847,12 +812,10 @@ public class JDiffClassDescription {
      */
     private boolean checkClassImplementsCompliance() {
         Class<?>[] interfaces = mClass.getInterfaces();
-        Set<String> interFaceSet = new HashSet<String>();
-
+        Set<String> interFaceSet = new HashSet<>();
         for (Class<?> c : interfaces) {
             interFaceSet.add(c.getCanonicalName());
         }
-
         for (String inter : implInterfaces) {
             if (!interFaceSet.contains(inter)) {
                 return false;
@@ -876,49 +839,43 @@ public class JDiffClassDescription {
                 if (JDiffType.INTERFACE.equals(mClassType)) {
                     mResultObserver.notifyFailure(
                             SignatureTestActivity.FAILURE_TYPE.MISSING_INTERFACE,
-                            mAbsoluteClassName,
-                            "Classloader is unable to find " + mAbsoluteClassName);
+                            mAbsoluteClassName, "Classloader is unable to find "
+                                    + mAbsoluteClassName);
                 } else {
                     mResultObserver.notifyFailure(SignatureTestActivity.FAILURE_TYPE.MISSING_CLASS,
-                            mAbsoluteClassName,
-                            "Classloader is unable to find " + mAbsoluteClassName);
+                            mAbsoluteClassName, "Classloader is unable to find "
+                                    + mAbsoluteClassName);
                 }
 
                 return;
             }
             if (!checkClassModifiersCompliance()) {
                 logMismatchInterfaceSignature(mAbsoluteClassName,
-                        "Non-compatible class found when looking for " +
-                                toSignatureString());
+                        "Non-compatible class found when looking for " + toSignatureString());
                 return;
             }
 
             if (!checkClassAnnotationCompliace()) {
-                logMismatchInterfaceSignature(mAbsoluteClassName,
-                        "Annotation mismatch");
+                logMismatchInterfaceSignature(mAbsoluteClassName, "Annotation mismatch");
                 return;
             }
 
             if (!mClass.isAnnotation()) {
                 // check father class
                 if (!checkClassExtendsCompliance()) {
-                    logMismatchInterfaceSignature(mAbsoluteClassName,
-                            "Extends mismatch");
+                    logMismatchInterfaceSignature(mAbsoluteClassName, "Extends mismatch");
                     return;
                 }
 
                 // check implements interface
                 if (!checkClassImplementsCompliance()) {
-                    logMismatchInterfaceSignature(mAbsoluteClassName,
-                            "Implements mismatch");
-                    return;
+                    logMismatchInterfaceSignature(mAbsoluteClassName, "Implements mismatch");
                 }
             }
         } catch (Exception e) {
             SignatureTestLog.e("Got exception when checking field compliance", e);
             mResultObserver.notifyFailure(SignatureTestActivity.FAILURE_TYPE.CAUGHT_EXCEPTION,
-                    mAbsoluteClassName,
-                    "Exception!");
+                    mAbsoluteClassName, "Exception!");
         }
     }
 
@@ -928,8 +885,7 @@ public class JDiffClassDescription {
      * @return the signature string
      */
     public String toSignatureString() {
-        StringBuffer sb = new StringBuffer();
-
+        StringBuilder sb = new StringBuilder();
         String accessLevel = convertModifiersToAccessLevel(mModifier);
         if (!"".equals(accessLevel)) {
             sb.append(accessLevel).append(" ");
@@ -969,12 +925,10 @@ public class JDiffClassDescription {
     private void logMismatchInterfaceSignature(String classFullName, String errorMessage) {
         if (JDiffType.INTERFACE.equals(mClassType)) {
             mResultObserver.notifyFailure(SignatureTestActivity.FAILURE_TYPE.MISMATCH_INTERFACE,
-                    classFullName,
-                    errorMessage);
+                    classFullName, errorMessage);
         } else {
             mResultObserver.notifyFailure(SignatureTestActivity.FAILURE_TYPE.MISMATCH_CLASS,
-                    classFullName,
-                    errorMessage);
+                    classFullName, errorMessage);
         }
     }
 
@@ -1002,9 +956,7 @@ public class JDiffClassDescription {
         try {
             // Check to see if the class we're looking for is the top
             // level class.
-            Class<?> clz = Class.forName(currentName,
-                    false,
-                    this.getClass().getClassLoader());
+            Class<?> clz = Class.forName(currentName, false, this.getClass().getClassLoader());
             if (clz.getCanonicalName().equals(mAbsoluteClassName)) {
                 return clz;
             }
@@ -1020,8 +972,8 @@ public class JDiffClassDescription {
                 }
             }
         } catch (ClassNotFoundException e) {
-            SignatureTestLog.e(
-                    "ClassNotFoundException for " + mPackageName + "." + mShortClassName, e);
+//            SignatureTestLog.e(
+//                    "ClassNotFoundException for " + mPackageName + "." + mShortClassName, e);
             return null;
         }
         return null;
@@ -1049,10 +1001,7 @@ public class JDiffClassDescription {
      * @return true if this class is Annotation.
      */
     private boolean isAnnotation() {
-        if (implInterfaces.contains("java.lang.annotation.Annotation")) {
-            return true;
-        }
-        return false;
+        return implInterfaces.contains("java.lang.annotation.Annotation");
     }
 
     /**
@@ -1109,7 +1058,7 @@ public class JDiffClassDescription {
      * @return the jdiff formatted string.
      */
     private static String concatWildcardTypes(Type[] types) {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         int elementNum = 0;
         for (Type t : types) {
             sb.append(typeToString(t));
@@ -1130,8 +1079,7 @@ public class JDiffClassDescription {
     private static String typeToString(Type type) {
         if (type instanceof ParameterizedType) {
             ParameterizedType pt = (ParameterizedType) type;
-
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             sb.append(typeToString(pt.getRawType()));
             sb.append("<");
 
@@ -1166,9 +1114,8 @@ public class JDiffClassDescription {
                     return name;
                 }
             } else {
-                String name = concatWildcardTypes(wt.getUpperBounds()) +
-                        " super " +
-                        concatWildcardTypes(wt.getLowerBounds());
+                String name = concatWildcardTypes(wt.getUpperBounds()) + " super "
+                        + concatWildcardTypes(wt.getLowerBounds());
                 // Another special case for ?
                 name = name.replace("java.lang.Object", "?");
                 return name;

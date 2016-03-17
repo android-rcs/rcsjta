@@ -63,7 +63,7 @@ public final class FileUploadService extends RcsService {
      */
     private IFileUploadService mApi;
 
-    private final Map<FileUploadListener, WeakReference<IFileUploadListener>> mFileUploadListeners = new WeakHashMap<FileUploadListener, WeakReference<IFileUploadListener>>();
+    private final Map<FileUploadListener, WeakReference<IFileUploadListener>> mFileUploadListeners = new WeakHashMap<>();
 
     private static boolean sApiCompatible = false;
 
@@ -231,7 +231,6 @@ public final class FileUploadService extends RcsService {
             IFileUpload uploadIntf = mApi.uploadFile(file, attachFileIcon);
             if (uploadIntf != null) {
                 return new FileUpload(uploadIntf);
-
             }
             return null;
 
@@ -255,7 +254,7 @@ public final class FileUploadService extends RcsService {
             throw new RcsServiceNotAvailableException();
         }
         try {
-            Set<FileUpload> result = new HashSet<FileUpload>();
+            Set<FileUpload> result = new HashSet<>();
             List<IBinder> ishList = mApi.getFileUploads();
             for (IBinder binder : ishList) {
                 FileUpload upload = new FileUpload(IFileUpload.Stub.asInterface(binder));
@@ -285,7 +284,6 @@ public final class FileUploadService extends RcsService {
             IFileUpload uploadIntf = mApi.getFileUpload(uploadId);
             if (uploadIntf != null) {
                 return new FileUpload(uploadIntf);
-
             }
             return null;
 
@@ -312,9 +310,9 @@ public final class FileUploadService extends RcsService {
         }
         try {
             IFileUploadListener fileUploadListener = new FileUploadListenerImpl(listener);
-            mFileUploadListeners.put(listener, new WeakReference<IFileUploadListener>(
-                    fileUploadListener));
+            mFileUploadListeners.put(listener, new WeakReference<>(fileUploadListener));
             mApi.addEventListener(fileUploadListener);
+
         } catch (Exception e) {
             RcsIllegalArgumentException.assertException(e);
             throw new RcsGenericException(e);

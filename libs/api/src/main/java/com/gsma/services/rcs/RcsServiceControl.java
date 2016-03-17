@@ -36,6 +36,8 @@ import android.util.Log;
 
 /**
  * A utility class to control the activation of the RCS service.
+ * 
+ * @author Philippe LEMORDANT
  */
 public class RcsServiceControl {
 
@@ -196,7 +198,7 @@ public class RcsServiceControl {
     /**
      * Update flags of the broadcast intent to increase performance
      *
-     * @param intent
+     * @param intent the intent
      */
     private void trySetIntentForActivePackageAndReceiverInForeground(Intent intent) {
         IntentUtils.tryToSetExcludeStoppedPackagesFlag(intent);

@@ -29,7 +29,7 @@ package com.gsma.services.rcs.sharing.video;
  * 
  * @author Jean-Marc AUFFRET
  */
-public abstract class VideoPlayer extends IVideoPlayer.Stub {
+public abstract class VideoPlayer {
     /**
      * Constructor
      */

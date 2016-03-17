@@ -1,7 +1,5 @@
-/*******************************************************************************
- * Software Name : RCS IMS Stack
- *
- * Copyright (C) 2010-2016 Orange.
+/*
+ * Copyright (C) 2008 The Android Open Source Project.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +12,21 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- ******************************************************************************/
+ */
 
 package android.tests.sigtest;
 
 /**
- * RCS version to be tested
- * 
- * @author Jean-Marc AUFFRET
+ * Interface for saving signature test result.
  */
-public class ToTest {
-    public static int VERSION = R.xml.blackbird_1_5_1;
+public interface ResultObserver {
+    /**
+     * Notify failure.
+     * 
+     * @param type Failure type.
+     * @param name Name of the failed element (interface/class/method/field)
+     * @param errorMessage a descriptive message indicating why it failed.
+     */
+    void notifyFailure(SignatureTestActivity.FAILURE_TYPE type, String name, String errorMessage);
+
 }

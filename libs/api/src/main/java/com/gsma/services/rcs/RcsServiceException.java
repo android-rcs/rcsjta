@@ -85,8 +85,7 @@ public class RcsServiceException extends Exception {
 
     /**
      * Extracts server side exception message thrown over the AIDL layer after parsing it based on
-     * {@link DELIMITER_PIPE}
-     * 
+     *
      * @param e Exception
      * @return Server exception message
      */

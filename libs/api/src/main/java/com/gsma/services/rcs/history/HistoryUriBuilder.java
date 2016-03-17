@@ -32,7 +32,7 @@ public class HistoryUriBuilder {
     /**
      * Add the provider ids that will be part of the query.
      * 
-     * @param providerId
+     * @param providerId the provider ID
      * @return the builder
      */
     public HistoryUriBuilder appendProvider(int providerId) {

@@ -65,11 +65,8 @@ public class GeolocSharingListenerImpl extends IGeolocSharingListener.Stub {
         mListener.onProgressUpdate(contact, sharingId, currentSize, totalSize);
     }
 
-    /**
-     * This feature to be implemented in CR005
-     */
     @Override
     public void onDeleted(ContactId contact, List<String> sharingIds) throws RemoteException {
-        mListener.onDeleted(contact, new HashSet<String>(sharingIds));
+        mListener.onDeleted(contact, new HashSet<>(sharingIds));
     }
 }

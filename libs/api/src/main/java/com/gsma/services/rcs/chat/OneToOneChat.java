@@ -165,7 +165,7 @@ public class OneToOneChat {
     /**
      * Resend a message which previously failed.
      * 
-     * @param msgId
+     * @param msgId the message ID
      * @throws RcsPersistentStorageException
      * @throws RcsGenericException
      */

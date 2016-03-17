@@ -33,7 +33,7 @@ import com.gsma.services.rcs.contact.ContactId;
  * Chat message
  * 
  * @author Jean-Marc AUFFRET
- * @author YPLO6403
+ * @author Philippe LEMORDANT
  */
 public class ChatMessage {
 

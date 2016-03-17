@@ -82,16 +82,7 @@ public class FileUploadInfo implements Parcelable {
 
     /**
      * Constructor for outgoing message
-     * 
-     * @param file
-     * @param validity
-     * @param filename
-     * @param size
-     * @param type
-     * @param fileIcon
-     * @param fileIconValidity
-     * @param fileIconSize
-     * @param fileIconType
+     *
      * @hide
      */
     public FileUploadInfo(Uri file, long validity, String filename, long size, String type,
@@ -109,12 +100,7 @@ public class FileUploadInfo implements Parcelable {
 
     /**
      * Constructor for outgoing message
-     * 
-     * @param file
-     * @param validity
-     * @param filename
-     * @param size
-     * @param type
+     *
      * @hide
      */
     public FileUploadInfo(Uri file, long validity, String filename, long size, String type) {

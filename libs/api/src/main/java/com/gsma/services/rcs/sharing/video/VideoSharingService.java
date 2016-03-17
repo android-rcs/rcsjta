@@ -52,6 +52,7 @@ import java.util.WeakHashMap;
  * formats: MSISDN in national or international format, SIP address, SIP-URI or Tel-URI.
  * 
  * @author Jean-Marc AUFFRET
+ * @author Philippe LEMORDANT
  */
 public final class VideoSharingService extends RcsService {
     /**
@@ -59,7 +60,7 @@ public final class VideoSharingService extends RcsService {
      */
     private IVideoSharingService mApi;
 
-    private final Map<VideoSharingListener, WeakReference<IVideoSharingListener>> mVideoSharingListeners = new WeakHashMap<VideoSharingListener, WeakReference<IVideoSharingListener>>();
+    private final Map<VideoSharingListener, WeakReference<IVideoSharingListener>> mVideoSharingListeners = new WeakHashMap<>();
 
     private static boolean sApiCompatible = false;
 
@@ -188,10 +189,10 @@ public final class VideoSharingService extends RcsService {
             throw new RcsServiceNotAvailableException();
         }
         try {
-            IVideoSharing sharingIntf = mApi.shareVideo(contact, player);
+            VideoPlayerImpl videoPlayer = new VideoPlayerImpl(player);
+            IVideoSharing sharingIntf = mApi.shareVideo(contact, videoPlayer);
             if (sharingIntf != null) {
                 return new VideoSharing(sharingIntf);
-
             }
             return null;
 
@@ -242,9 +243,9 @@ public final class VideoSharingService extends RcsService {
         }
         try {
             IVideoSharingListener rcsListener = new VideoSharingListenerImpl(listener);
-            mVideoSharingListeners.put(listener, new WeakReference<IVideoSharingListener>(
-                    rcsListener));
+            mVideoSharingListeners.put(listener, new WeakReference<>(rcsListener));
             mApi.addEventListener2(rcsListener);
+
         } catch (Exception e) {
             RcsIllegalArgumentException.assertException(e);
             throw new RcsGenericException(e);
@@ -291,6 +292,7 @@ public final class VideoSharingService extends RcsService {
         }
         try {
             mApi.deleteVideoSharings();
+
         } catch (Exception e) {
             throw new RcsGenericException(e);
         }
@@ -300,7 +302,7 @@ public final class VideoSharingService extends RcsService {
      * Delete video sharing associated with a given contact from history and abort/reject any
      * associated ongoing session if such exists.
      * 
-     * @param contact
+     * @param contact the remote contact
      * @throws RcsServiceNotAvailableException
      * @throws RcsGenericException
      */
@@ -311,6 +313,7 @@ public final class VideoSharingService extends RcsService {
         }
         try {
             mApi.deleteVideoSharings2(contact);
+
         } catch (Exception e) {
             RcsIllegalArgumentException.assertException(e);
             throw new RcsGenericException(e);
@@ -321,7 +324,7 @@ public final class VideoSharingService extends RcsService {
      * Deletes a video sharing by its sharing ID from history and abort/reject any associated
      * ongoing session if such exists.
      * 
-     * @param sharingId
+     * @param sharingId the sharing ID
      * @throws RcsServiceNotAvailableException
      * @throws RcsGenericException
      */
@@ -332,6 +335,7 @@ public final class VideoSharingService extends RcsService {
         }
         try {
             mApi.deleteVideoSharing(sharingId);
+
         } catch (Exception e) {
             RcsIllegalArgumentException.assertException(e);
             throw new RcsGenericException(e);

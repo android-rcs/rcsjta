@@ -71,6 +71,6 @@ public class OneToOneChatListenerImpl extends IOneToOneChatListener.Stub {
      */
     @Override
     public void onMessagesDeleted(ContactId contact, List<String> msgIds) throws RemoteException {
-        mListener.onMessagesDeleted(contact, new HashSet<String>(msgIds));
+        mListener.onMessagesDeleted(contact, new HashSet<>(msgIds));
     }
 }

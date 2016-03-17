@@ -37,7 +37,7 @@ public class VideoSharingServiceConfiguration {
     /**
      * Constructor
      * 
-     * @param configuration
+     * @param configuration the configuration
      * @hide
      */
     public VideoSharingServiceConfiguration(IVideoSharingServiceConfiguration configuration) {

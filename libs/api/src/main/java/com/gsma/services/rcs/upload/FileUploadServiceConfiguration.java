@@ -37,7 +37,7 @@ public class FileUploadServiceConfiguration {
     /**
      * Constructor
      * 
-     * @param configuration
+     * @param configuration the configuration
      * @hide
      */
     public FileUploadServiceConfiguration(IFileUploadServiceConfiguration configuration) {

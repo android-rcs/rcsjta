@@ -129,7 +129,7 @@ public class GroupChatListenerImpl extends IGroupChatListener.Stub {
      */
     @Override
     public void onDeleted(List<String> chatIds) throws RemoteException {
-        mListener.onDeleted(new HashSet<String>(chatIds));
+        mListener.onDeleted(new HashSet<>(chatIds));
     }
 
     /**
@@ -137,6 +137,6 @@ public class GroupChatListenerImpl extends IGroupChatListener.Stub {
      */
     @Override
     public void onMessagesDeleted(String chatId, List<String> msgIds) throws RemoteException {
-        mListener.onMessagesDeleted(chatId, new HashSet<String>(msgIds));
+        mListener.onMessagesDeleted(chatId, new HashSet<>(msgIds));
     }
 }

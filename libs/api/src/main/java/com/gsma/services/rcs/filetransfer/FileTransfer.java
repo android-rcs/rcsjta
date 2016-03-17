@@ -55,14 +55,14 @@ public class FileTransfer {
 
         private final int mValue;
 
-        private static SparseArray<Disposition> mValueToEnum = new SparseArray<Disposition>();
+        private static SparseArray<Disposition> mValueToEnum = new SparseArray<>();
         static {
             for (Disposition entry : Disposition.values()) {
                 mValueToEnum.put(entry.toInt(), entry);
             }
         }
 
-        private Disposition(int value) {
+        Disposition(int value) {
             mValue = value;
         }
 
@@ -81,13 +81,13 @@ public class FileTransfer {
          * @param value the integer value
          * @return State instance
          */
-        public final static Disposition valueOf(int value) {
+        public static Disposition valueOf(int value) {
             Disposition entry = mValueToEnum.get(value);
             if (entry != null) {
                 return entry;
             }
-            throw new IllegalArgumentException(new StringBuilder("No enum const class ")
-                    .append(State.class.getName()).append("").append(value).append("!").toString());
+            throw new IllegalArgumentException("No enum const class " + State.class.getName() + ""
+                    + value + "!");
         }
     }
 
@@ -157,14 +157,14 @@ public class FileTransfer {
 
         private final int mValue;
 
-        private static SparseArray<State> mValueToEnum = new SparseArray<State>();
+        private static SparseArray<State> mValueToEnum = new SparseArray<>();
         static {
             for (State entry : State.values()) {
                 mValueToEnum.put(entry.toInt(), entry);
             }
         }
 
-        private State(int value) {
+        State(int value) {
             mValue = value;
         }
 
@@ -183,13 +183,13 @@ public class FileTransfer {
          * @param value the integer value
          * @return State instance
          */
-        public final static State valueOf(int value) {
+        public static State valueOf(int value) {
             State entry = mValueToEnum.get(value);
             if (entry != null) {
                 return entry;
             }
-            throw new IllegalArgumentException(new StringBuilder("No enum const class ")
-                    .append(State.class.getName()).append("").append(value).append("!").toString());
+            throw new IllegalArgumentException("No enum const class " + State.class.getName() + ""
+                    + value + "!");
         }
 
     }
@@ -311,14 +311,14 @@ public class FileTransfer {
 
         private final int mValue;
 
-        private static SparseArray<ReasonCode> mValueToEnum = new SparseArray<ReasonCode>();
+        private static SparseArray<ReasonCode> mValueToEnum = new SparseArray<>();
         static {
             for (ReasonCode entry : ReasonCode.values()) {
                 mValueToEnum.put(entry.toInt(), entry);
             }
         }
 
-        private ReasonCode(int value) {
+        ReasonCode(int value) {
             mValue = value;
         }
 
@@ -337,14 +337,13 @@ public class FileTransfer {
          * @param value the integer value
          * @return ReasonCode instance
          */
-        public final static ReasonCode valueOf(int value) {
+        public static ReasonCode valueOf(int value) {
             ReasonCode entry = mValueToEnum.get(value);
             if (entry != null) {
                 return entry;
             }
-            throw new IllegalArgumentException(new StringBuilder("No enum const class ")
-                    .append(ReasonCode.class.getName()).append("").append(value).append("!")
-                    .toString());
+            throw new IllegalArgumentException("No enum const class " + ReasonCode.class.getName()
+                    + "" + value + "!");
         }
     }
 

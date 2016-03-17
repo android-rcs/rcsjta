@@ -16,15 +16,6 @@
 
 package android.tests.sigtest;
 
-import java.io.IOException;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-
 import android.content.res.Resources;
 import android.test.AndroidTestCase;
 import android.tests.sigtest.JDiffClassDescription.JDiffConstructor;
@@ -32,13 +23,21 @@ import android.tests.sigtest.JDiffClassDescription.JDiffField;
 import android.tests.sigtest.JDiffClassDescription.JDiffMethod;
 import android.tests.sigtest.SignatureTestActivity.FAILURE_TYPE;
 
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.IOException;
+import java.lang.reflect.Modifier;
+import java.util.Arrays;
+import java.util.HashSet;
+
 /**
  * A simpler version of {@link SignatureTest} that performs the signature check via a JUnit test.
  * <p/>
- * Eventually the existing {@link SignatureTest} and {@link SignatureActivity} will be deleted once
- * the move to a tradefederation based CTS harness is complete.
+ * Eventually the existing {@link SignatureTest} and {@link SignatureTestActivity} will be deleted
+ * once the move to a tradefederation based CTS harness is complete.
  */
-public class SimpleSignatureTest extends AndroidTestCase {
+public class RcsApiSignatureTest extends AndroidTestCase {
 
     private static final String TAG_ROOT = "api";
     private static final String TAG_PACKAGE = "package";
@@ -68,8 +67,6 @@ public class SimpleSignatureTest extends AndroidTestCase {
     private static final String ATTRIBUTE_TYPE = "type";
     private static final String ATTRIBUTE_RETURN = "return";
 
-    private static ArrayList<String> mDebugArray = new ArrayList<String>();
-
     private HashSet<String> mKeyTagSet;
     private TestResultObserver mResultObserver;
 
@@ -89,11 +86,9 @@ public class SimpleSignatureTest extends AndroidTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        mKeyTagSet = new HashSet<String>();
-        mKeyTagSet.addAll(Arrays.asList(new String[] {
-                TAG_PACKAGE, TAG_CLASS, TAG_INTERFACE, TAG_IMPLEMENTS, TAG_CONSTRUCTOR,
-                TAG_METHOD, TAG_PARAM, TAG_EXCEPTION, TAG_FIELD
-        }));
+        mKeyTagSet = new HashSet<>();
+        mKeyTagSet.addAll(Arrays.asList(TAG_PACKAGE, TAG_CLASS, TAG_INTERFACE, TAG_IMPLEMENTS,
+                TAG_CONSTRUCTOR, TAG_METHOD, TAG_PARAM, TAG_EXCEPTION, TAG_FIELD));
         mResultObserver = new TestResultObserver();
     }
 
@@ -127,8 +122,8 @@ public class SimpleSignatureTest extends AndroidTestCase {
         }
 
         if (!parser.getName().equals(firstElementName)) {
-            throw new XmlPullParserException("Unexpected start tag: found " + parser.getName() +
-                    ", expected " + firstElementName);
+            throw new XmlPullParserException("Unexpected start tag: found " + parser.getName()
+                    + ", expected " + firstElementName);
         }
     }
 
@@ -143,16 +138,13 @@ public class SimpleSignatureTest extends AndroidTestCase {
         beginDocument(parser, TAG_ROOT);
         int type;
         while (true) {
-            type = XmlPullParser.START_DOCUMENT;
             while ((type = parser.next()) != XmlPullParser.START_TAG
-                    && type != XmlPullParser.END_DOCUMENT
-                    && type != XmlPullParser.END_TAG) {
+                    && type != XmlPullParser.END_DOCUMENT && type != XmlPullParser.END_TAG) {
 
             }
 
             if (type == XmlPullParser.END_TAG) {
-                if (TAG_CLASS.equals(parser.getName())
-                        || TAG_INTERFACE.equals(parser.getName())) {
+                if (TAG_CLASS.equals(parser.getName()) || TAG_INTERFACE.equals(parser.getName())) {
                     currentClass.checkSignatureCompliance();
                 } else if (TAG_PACKAGE.equals(parser.getName())) {
                     currentPackage = "";
@@ -169,31 +161,40 @@ public class SimpleSignatureTest extends AndroidTestCase {
                 continue;
             }
 
-            if (type == XmlPullParser.START_TAG && tagname.equals(TAG_PACKAGE)) {
-                currentPackage = parser.getAttributeValue(null, ATTRIBUTE_NAME);
-            } else if (tagname.equals(TAG_CLASS)) {
-                currentClass = loadClassInfo(parser, false, currentPackage);
-            } else if (tagname.equals(TAG_INTERFACE)) {
-                currentClass = loadClassInfo(parser, true, currentPackage);
-            } else if (tagname.equals(TAG_IMPLEMENTS)) {
-                currentClass.addImplInterface(parser.getAttributeValue(null, ATTRIBUTE_NAME));
-            } else if (tagname.equals(TAG_CONSTRUCTOR)) {
-                JDiffConstructor constructor = loadConstructorInfo(parser, currentClass);
-                currentClass.addConstructor(constructor);
-                currentMethod = constructor;
-            } else if (tagname.equals(TAG_METHOD)) {
-                currentMethod = loadMethodInfo(currentClass.getClassName(), parser);
-                currentClass.addMethod(currentMethod);
-            } else if (tagname.equals(TAG_PARAM)) {
-                currentMethod.addParam(parser.getAttributeValue(null, ATTRIBUTE_TYPE));
-            } else if (tagname.equals(TAG_EXCEPTION)) {
-                currentMethod.addException(parser.getAttributeValue(null, ATTRIBUTE_TYPE));
-            } else if (tagname.equals(TAG_FIELD)) {
-                JDiffField field = loadFieldInfo(currentClass.getClassName(), parser);
-                currentClass.addField(field);
-            } else {
-                throw new RuntimeException(
-                        "unknow tag exception:" + tagname);
+            switch (tagname) {
+                case TAG_PACKAGE:
+                    currentPackage = parser.getAttributeValue(null, ATTRIBUTE_NAME);
+                    break;
+                case TAG_CLASS:
+                    currentClass = loadClassInfo(parser, false, currentPackage);
+                    break;
+                case TAG_INTERFACE:
+                    currentClass = loadClassInfo(parser, true, currentPackage);
+                    break;
+                case TAG_IMPLEMENTS:
+                    currentClass.addImplInterface(parser.getAttributeValue(null, ATTRIBUTE_NAME));
+                    break;
+                case TAG_CONSTRUCTOR:
+                    JDiffConstructor constructor = loadConstructorInfo(parser, currentClass);
+                    currentClass.addConstructor(constructor);
+                    currentMethod = constructor;
+                    break;
+                case TAG_METHOD:
+                    currentMethod = loadMethodInfo(currentClass.getClassName(), parser);
+                    currentClass.addMethod(currentMethod);
+                    break;
+                case TAG_PARAM:
+                    currentMethod.addParam(parser.getAttributeValue(null, ATTRIBUTE_TYPE));
+                    break;
+                case TAG_EXCEPTION:
+                    currentMethod.addException(parser.getAttributeValue(null, ATTRIBUTE_TYPE));
+                    break;
+                case TAG_FIELD:
+                    JDiffField field = loadFieldInfo(currentClass.getClassName(), parser);
+                    currentClass.addField(field);
+                    break;
+                default:
+                    throw new RuntimeException("unknow tag exception:" + tagname);
             }
         }
     }
@@ -248,16 +249,14 @@ public class SimpleSignatureTest extends AndroidTestCase {
      * @param pkg the name of the java package this class can be found in.
      * @return the new class description.
      */
-    private JDiffClassDescription loadClassInfo(XmlPullParser parser,
-            boolean isInterface,
+    private JDiffClassDescription loadClassInfo(XmlPullParser parser, boolean isInterface,
             String pkg) {
         String className = parser.getAttributeValue(null, ATTRIBUTE_NAME);
-        JDiffClassDescription currentClass = new JDiffClassDescription(pkg,
-                className,
+        JDiffClassDescription currentClass = new JDiffClassDescription(pkg, className,
                 mResultObserver);
         currentClass.setModifier(jdiffModifierToReflectionFormat(className, parser));
-        currentClass.setType(isInterface ? JDiffClassDescription.JDiffType.INTERFACE :
-                JDiffClassDescription.JDiffType.CLASS);
+        currentClass.setType(isInterface ? JDiffClassDescription.JDiffType.INTERFACE
+                : JDiffClassDescription.JDiffType.CLASS);
         currentClass.setExtendsClass(parser.getAttributeValue(null, ATTRIBUTE_EXTENDS));
         return currentClass;
     }
@@ -271,34 +270,36 @@ public class SimpleSignatureTest extends AndroidTestCase {
      * @return converted modifier value
      */
     private static int modifierDescriptionToReflectedType(String name, String key, String value) {
-        if (key.equals(MODIFIER_ABSTRACT)) {
-            return value.equals("true") ? Modifier.ABSTRACT : 0;
-        } else if (key.equals(MODIFIER_FINAL)) {
-            return value.equals("true") ? Modifier.FINAL : 0;
-        } else if (key.equals(MODIFIER_NATIVE)) {
-            return value.equals("true") ? Modifier.NATIVE : 0;
-        } else if (key.equals(MODIFIER_STATIC)) {
-            return value.equals("true") ? Modifier.STATIC : 0;
-        } else if (key.equals(MODIFIER_SYNCHRONIZED)) {
-            return value.equals("true") ? Modifier.SYNCHRONIZED : 0;
-        } else if (key.equals(MODIFIER_TRANSIENT)) {
-            return value.equals("true") ? Modifier.TRANSIENT : 0;
-        } else if (key.equals(MODIFIER_VOLATILE)) {
-            return value.equals("true") ? Modifier.VOLATILE : 0;
-        } else if (key.equals(MODIFIER_VISIBILITY)) {
-            if (value.equals(MODIFIER_PRIVATE)) {
-                throw new RuntimeException("Private visibility found in API spec: " + name);
-            } else if (value.equals(MODIFIER_PROTECTED)) {
-                return Modifier.PROTECTED;
-            } else if (value.equals(MODIFIER_PUBLIC)) {
-                return Modifier.PUBLIC;
-            } else if ("".equals(value)) {
-                // If the visibility is "", it means it has no modifier.
-                // which is package private. We should return 0 for this modifier.
-                return 0;
-            } else {
-                throw new RuntimeException("Unknown modifier found in API spec: " + value);
-            }
+        switch (key) {
+            case MODIFIER_ABSTRACT:
+                return value.equals("true") ? Modifier.ABSTRACT : 0;
+            case MODIFIER_FINAL:
+                return value.equals("true") ? Modifier.FINAL : 0;
+            case MODIFIER_NATIVE:
+                return value.equals("true") ? Modifier.NATIVE : 0;
+            case MODIFIER_STATIC:
+                return value.equals("true") ? Modifier.STATIC : 0;
+            case MODIFIER_SYNCHRONIZED:
+                return value.equals("true") ? Modifier.SYNCHRONIZED : 0;
+            case MODIFIER_TRANSIENT:
+                return value.equals("true") ? Modifier.TRANSIENT : 0;
+            case MODIFIER_VOLATILE:
+                return value.equals("true") ? Modifier.VOLATILE : 0;
+            case MODIFIER_VISIBILITY:
+                switch (value) {
+                    case MODIFIER_PRIVATE:
+                        throw new RuntimeException("Private visibility found in API spec: " + name);
+                    case MODIFIER_PROTECTED:
+                        return Modifier.PROTECTED;
+                    case MODIFIER_PUBLIC:
+                        return Modifier.PUBLIC;
+                    case "":
+                        // If the visibility is "", it means it has no modifier.
+                        // which is package private. We should return 0 for this modifier.
+                        return 0;
+                    default:
+                        throw new RuntimeException("Unknown modifier found in API spec: " + value);
+                }
         }
         return 0;
     }

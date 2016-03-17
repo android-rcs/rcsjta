@@ -28,7 +28,7 @@ import com.gsma.services.rcs.RcsGenericException;
  * Image sharing service configuration
  * 
  * @author Jean-Marc AUFFRET
- * @author yplo6403
+ * @author Philippe LEMORDANT
  */
 public class ImageSharingServiceConfiguration {
 
@@ -37,7 +37,7 @@ public class ImageSharingServiceConfiguration {
     /**
      * Constructor
      * 
-     * @param configuration
+     * @param configuration the Image sharing configuration
      * @hide
      */
     public ImageSharingServiceConfiguration(IImageSharingServiceConfiguration configuration) {

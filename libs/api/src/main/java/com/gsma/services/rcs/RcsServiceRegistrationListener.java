@@ -33,7 +33,7 @@ public abstract class RcsServiceRegistrationListener {
     /**
      * Callback called when service is unregistered from the network platform
      * 
-     * @param reasonCode
+     * @param reasonCode the reason code
      */
     public abstract void onServiceUnregistered(RcsServiceRegistration.ReasonCode reasonCode);
 }

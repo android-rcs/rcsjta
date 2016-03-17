@@ -50,8 +50,8 @@ public abstract class GroupChatListener {
      * Callback called when an Is-composing event has been received. If the remote is typing a
      * message the status is set to true, else it is false.
      *
-     * @param chatId
-     * @param contact Contact ID
+     * @param chatId the chat ID
+     * @param contact the contact ID
      * @param status Is-composing status
      */
     public abstract void onComposingEvent(String chatId, ContactId contact, boolean status);

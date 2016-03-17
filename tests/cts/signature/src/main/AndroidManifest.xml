@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
  * Copyright (C) 2008 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,29 +16,22 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="android.tests.sigtest">
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
-    <application>
-        <uses-library android:name="android.test.runner" />
-
-        <activity android:name=".SignatureTestActivity"
-                android:stateNotNeeded="true">
+    <application
+        android:allowBackup="false"
+        android:icon="@drawable/app_icon"
+        android:label="@string/app_name">
+        <activity
+            android:name="SignatureTestActivity"
+            android:label="@string/title_sig_test_activity"
+            android:icon="@drawable/app_icon"
+            android:stateNotNeeded="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-        <uses-library android:name="android.test.runner" />
     </application>
-
-    <instrumentation android:name=".InstrumentationRunner"
-                     android:targetPackage="android.tests.sigtest"
-                     android:label="RCS API Signature Test"/>
-
-    <instrumentation android:name="android.test.InstrumentationTestRunner"
-        android:targetPackage="android.tests.sigtest"
-        android:label="RCS API Signature Test">
-    </instrumentation>
 
 </manifest>

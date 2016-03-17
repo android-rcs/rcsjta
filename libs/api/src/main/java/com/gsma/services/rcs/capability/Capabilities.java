@@ -18,22 +18,20 @@
 
 package com.gsma.services.rcs.capability;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import android.os.Parcel;
-import android.os.Parcelable;
-
-import com.gsma.services.rcs.contact.ContactId;
 
 /**
  * Capabilities of a contact. This class encapsulates the different capabilities which may be
  * supported by the local user or a remote contact.
  * 
  * @author Jean-Marc AUFFRET
- * @author YPLO6403
+ * @author Philippe LEMORDANT
  */
 public class Capabilities implements Parcelable {
     /**
@@ -205,8 +203,7 @@ public class Capabilities implements Parcelable {
     /**
      * Is image sharing supported
      *
-     * @deprecated Use {@link #hasCapabilities(int  capabilities)} instead.
-     *
+     * @deprecated Use {@link #hasCapabilities(int capabilities)} instead.
      * @return true if supported else returns false
      */
     @Deprecated
@@ -217,8 +214,7 @@ public class Capabilities implements Parcelable {
     /**
      * Is video sharing supported
      *
-     * @deprecated Use {@link #hasCapabilities(int  capabilities)} instead.
-     *
+     * @deprecated Use {@link #hasCapabilities(int capabilities)} instead.
      * @return true if supported else returns false
      */
     @Deprecated
@@ -229,8 +225,7 @@ public class Capabilities implements Parcelable {
     /**
      * Is IM session supported
      *
-     * @deprecated Use {@link #hasCapabilities(int  capabilities)} instead.
-     *
+     * @deprecated Use {@link #hasCapabilities(int capabilities)} instead.
      * @return true if supported else returns false
      */
     @Deprecated
@@ -241,8 +236,7 @@ public class Capabilities implements Parcelable {
     /**
      * Is file transfer supported
      *
-     * @deprecated Use {@link #hasCapabilities(int  capabilities)} instead.
-     *
+     * @deprecated Use {@link #hasCapabilities(int capabilities)} instead.
      * @return true if supported else returns false
      */
     @Deprecated
@@ -253,8 +247,7 @@ public class Capabilities implements Parcelable {
     /**
      * Is geolocation push supported
      *
-     * @deprecated Use {@link #hasCapabilities(int  capabilities)} instead.
-     *
+     * @deprecated Use {@link #hasCapabilities(int capabilities)} instead.
      * @return true if supported else returns false
      */
     @Deprecated
@@ -305,6 +298,7 @@ public class Capabilities implements Parcelable {
 
     /**
      * Gets the combination of supported capabilities.
+     * 
      * @return the combination of supported capabilities
      */
     private int getSupportedCapabilities() {
@@ -318,9 +312,10 @@ public class Capabilities implements Parcelable {
 
     /**
      * Tests for the support of capabilities on this instance.
+     * 
      * @return True if the capabilities are supported.
      */
-    public boolean hasCapabilities(int  capabilities) {
+    public boolean hasCapabilities(int capabilities) {
         return (getSupportedCapabilities() & capabilities) == capabilities;
     }
 }

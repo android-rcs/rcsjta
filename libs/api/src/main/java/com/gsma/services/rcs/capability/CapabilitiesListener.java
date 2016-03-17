@@ -25,7 +25,7 @@ import com.gsma.services.rcs.contact.ContactId;
  * 
  * @author Jean-Marc AUFFRET
  */
-public abstract class CapabilitiesListener extends ICapabilitiesListener.Stub {
+public abstract class CapabilitiesListener {
     /**
      * Callback called when new capabilities are received for a given contact
      * 

@@ -88,6 +88,6 @@ public class GroupFileTransferListenerImpl extends IGroupFileTransferListener.St
      */
     @Override
     public void onDeleted(String chatId, List<String> transferIds) throws RemoteException {
-        mListener.onDeleted(chatId, new HashSet<String>(transferIds));
+        mListener.onDeleted(chatId, new HashSet<>(transferIds));
     }
 }
