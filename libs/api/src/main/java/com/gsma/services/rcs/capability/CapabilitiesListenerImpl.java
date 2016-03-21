@@ -20,17 +20,30 @@ package com.gsma.services.rcs.capability;
 
 import com.gsma.services.rcs.contact.ContactId;
 
+import android.os.RemoteException;
+
 /**
- * New capabilities event listener
+ * Capabilities event listener implementation
  * 
- * @author Jean-Marc AUFFRET
+ * @author Philippe LEMORDANT
+ * @hide
  */
-public abstract class CapabilitiesListener {
+public class CapabilitiesListenerImpl extends ICapabilitiesListener.Stub {
+
+    private final CapabilitiesListener mListener;
+
     /**
-     * Callback called when new capabilities are received for a given contact
+     * Constructor
      * 
-     * @param contact Contact Identifier
-     * @param capabilities Received capabilities
+     * @param listener Capabilities listener
      */
-    public abstract void onCapabilitiesReceived(ContactId contact, Capabilities capabilities);
+    public CapabilitiesListenerImpl(CapabilitiesListener listener) {
+        mListener = listener;
+    }
+
+    @Override
+    public void onCapabilitiesReceived(ContactId contact, Capabilities capabilities)
+            throws RemoteException {
+        mListener.onCapabilitiesReceived(contact, capabilities);
+    }
 }
