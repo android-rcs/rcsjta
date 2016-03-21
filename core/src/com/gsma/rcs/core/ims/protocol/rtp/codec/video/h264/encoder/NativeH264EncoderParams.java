@@ -330,7 +330,7 @@ public class NativeH264EncoderParams {
             H264ConstraintSetFlagType constraintSet3Flag = ((constraintSet3FlagValue == 1) ? H264ConstraintSetFlagType.TRUE
                     : H264ConstraintSetFlagType.FALSE);
 
-            setProfileIOP(profile_iop < 0 ? 0 : profile_iop);
+            setProfileIOP(profile_iop);
             setProfile(H264TypeProfile.getH264ProfileType(profile_idc));
             setLevel(H264TypeLevel.getH264LevelType(level_idc, constraintSet3Flag));
         }
