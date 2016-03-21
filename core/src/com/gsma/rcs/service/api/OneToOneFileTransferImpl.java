@@ -313,8 +313,8 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
             if (session == null) {
                 return mPersistentStorage.getFileIconMimeType();
             }
-            MmContent fileIconMimeType = session.getContent();
-            return fileIconMimeType != null ? fileIconMimeType.getEncoding() : null;
+            MmContent fileIconContent = session.getFileicon();
+            return fileIconContent != null ? fileIconContent.getEncoding() : null;
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
@@ -640,17 +640,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
                     if (sLogger.isActivated()) {
                         sLogger.debug(e.getMessage());
                     }
-                } catch (PayloadException | RemoteException e) {
-                    sLogger.error("Failed to terminate session with fileTransferId : "
-                            + mFileTransferId, e);
-                } catch (RuntimeException e) {
-                    /*
-                     * Normally we are not allowed to catch runtime exceptions as these are genuine
-                     * bugs which should be handled/fixed within the code. However the cases when we
-                     * are executing operations on a thread unhandling such exceptions will
-                     * eventually lead to exit the system and thus can bring the whole system down,
-                     * which is not intended.
-                     */
+                } catch (PayloadException | RemoteException | RuntimeException e) {
                     sLogger.error("Failed to terminate session with fileTransferId : "
                             + mFileTransferId, e);
                 }
@@ -764,7 +754,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
             }
             return false;
         }
-        return ((HttpFileTransferSession) session).isFileTransferPaused();
+        return session.isFileTransferPaused();
     }
 
     @Override
@@ -1127,28 +1117,6 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
                     throw new IllegalArgumentException(
                             "Unknown reason in OneToOneFileTransferImpl.handleSessionAborted; terminationReason="
                                     + reason + "!");
-            }
-        }
-        mImService.tryToDequeueFileTransfers();
-    }
-
-    /**
-     * Session has been terminated by remote
-     * 
-     * @param contact The remote contact
-     */
-    public void onSessionTerminatedByRemote(ContactId contact) {
-        if (sLogger.isActivated()) {
-            sLogger.info("Session terminated by remote");
-        }
-        synchronized (mLock) {
-            mFileTransferService.removeOneToOneFileTransfer(mFileTransferId);
-            /*
-             * TODO : Fix sending of SIP BYE by sender once transfer is completed and media session
-             * is closed. Then this check of state can be removed.
-             */
-            if (State.TRANSFERRED != mPersistentStorage.getState()) {
-                setStateAndReasonCode(contact, State.ABORTED, ReasonCode.ABORTED_BY_REMOTE);
             }
         }
         mImService.tryToDequeueFileTransfers();
