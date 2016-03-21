@@ -58,13 +58,6 @@ The RCS core stack is under [Apache 2 license](https://rawgit.com/android-rcs/rc
 
 - see [Wiki](https://github.com/android-rcs/rcsjta/wiki).
 
-##Standardisation:
-
-TAPI 1.6
-- to review [CR Audio Message](https://github.com/android-rcs/rcsjta/raw/master/docs/tapi/CR_1.6/RCSJTA_T-API1.6_CR001_AudioMessage-R2.doc).
-- to review [CR Enrich Calling](https://github.com/android-rcs/rcsjta/raw/master/docs/tapi/CR_1.6/RCSJTA_TT_BB_CR001_EnrichCalling_R6.doc).
-- to review [CR Capability](https://github.com/android-rcs/rcsjta/raw/master/docs/tapi/CR_1.6/RCSJTA_T-API1.6_CR003_Capability_Discovery-R1.doc).
-- to review [CR Crane priority release](https://github.com/android-rcs/rcsjta/raw/master/docs/tapi/CR_1.6/RCSJTA_T-API1.6_CR002_ReferenceToCranePriorityRelease-R2.doc).
 
 
 
