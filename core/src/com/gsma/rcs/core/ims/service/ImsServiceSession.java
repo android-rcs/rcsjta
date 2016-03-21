@@ -56,20 +56,25 @@ import javax2.sip.message.Response;
  * @author jexa7410
  */
 public abstract class ImsServiceSession extends Thread {
+    // @formatter:off
     /**
      * Session invitation status
      */
     public enum InvitationStatus {
 
-        INVITATION_NOT_ANSWERED, INVITATION_ACCEPTED, INVITATION_REJECTED, INVITATION_CANCELED, INVITATION_TIMEOUT, INVITATION_REJECTED_BY_SYSTEM, INVITATION_DELETED, INVITATION_REJECTED_DECLINE, INVITATION_REJECTED_BUSY_HERE, INVITATION_REJECTED_FORBIDDEN;
+        INVITATION_NOT_ANSWERED, INVITATION_ACCEPTED, INVITATION_REJECTED, INVITATION_CANCELED, 
+        INVITATION_TIMEOUT, INVITATION_REJECTED_BY_SYSTEM, INVITATION_DELETED, 
+        INVITATION_REJECTED_DECLINE, INVITATION_REJECTED_BUSY_HERE, INVITATION_REJECTED_FORBIDDEN
     }
 
     /**
      * Session termination reason
      */
     public enum TerminationReason {
-        TERMINATION_BY_SYSTEM, TERMINATION_BY_USER, TERMINATION_BY_TIMEOUT, TERMINATION_BY_INACTIVITY, TERMINATION_BY_CONNECTION_LOST, TERMINATION_BY_LOW_BATTERY, TERMINATION_BY_REMOTE;
+        TERMINATION_BY_SYSTEM, TERMINATION_BY_USER, TERMINATION_BY_TIMEOUT, TERMINATION_BY_INACTIVITY, 
+        TERMINATION_BY_CONNECTION_LOST, TERMINATION_BY_LOW_BATTERY, TERMINATION_BY_REMOTE
     }
+    // @formatter:on
 
     private final static int SESSION_INTERVAL_TOO_SMALL = 422;
 
@@ -104,9 +109,9 @@ public abstract class ImsServiceSession extends Thread {
     /**
      * Wait user answer for session invitation
      */
-    protected Object mWaitUserAnswer = new Object();
+    protected final Object mWaitUserAnswer = new Object();
 
-    private List<ImsSessionListener> mListeners = new ArrayList<ImsSessionListener>();
+    private List<ImsSessionListener> mListeners = new ArrayList<>();
 
     /**
      * Session timer manager
@@ -541,8 +546,7 @@ public abstract class ImsServiceSession extends Thread {
      */
     public void closeSession(TerminationReason reason) throws PayloadException, NetworkException {
         if (sLogger.isActivated()) {
-            sLogger.debug(new StringBuilder("Close the session (reason ").append(reason)
-                    .append(")").toString());
+            sLogger.debug("Close the session (reason " + reason + ")");
         }
         if ((mDialogPath == null) || mDialogPath.isSessionTerminated()) {
             return;
@@ -727,8 +731,7 @@ public abstract class ImsServiceSession extends Thread {
     public void sendErrorResponse(SipRequest request, String localTag, InvitationStatus status)
             throws PayloadException, NetworkException {
         if (sLogger.isActivated()) {
-            sLogger.info(new StringBuilder("Send ").append(status).append(" error response")
-                    .toString());
+            sLogger.info("Send " + status + " error response");
         }
         SipResponse resp;
         switch (status) {
@@ -742,8 +745,7 @@ public abstract class ImsServiceSession extends Thread {
                 resp = SipMessageFactory.createResponse(request, localTag, Response.FORBIDDEN);
                 break;
             default:
-                throw new IllegalArgumentException(new StringBuilder("Unknown InvitationStatus ")
-                        .append(status).toString());
+                throw new IllegalArgumentException("Unknown InvitationStatus " + status);
         }
         getImsService().getImsModule().getSipManager().sendSipResponse(resp);
     }
@@ -841,18 +843,19 @@ public abstract class ImsServiceSession extends Thread {
      * @return Setup answer ("active" or "passive")
      */
     public String createSetupAnswer(String offer) {
-        if (offer.equals("actpass")) {
-            // Active mode by default if there is a NAT or AS IM
-            return "active";
-        } else if (offer.equals("active")) {
-            // Passive mode
-            return "passive";
-        } else if (offer.equals("passive")) {
-            // Active mode
-            return "active";
-        } else {
-            // Passive mode by default
-            return "passive";
+        switch (offer) {
+            case "actpass":
+                // Active mode by default if there is a NAT or AS IM
+                return "active";
+            case "active":
+                // Passive mode
+                return "passive";
+            case "passive":
+                // Active mode
+                return "active";
+            default:
+                // Passive mode by default
+                return "passive";
         }
     }
 
@@ -1082,7 +1085,6 @@ public abstract class ImsServiceSession extends Thread {
             if (sLogger.isActivated()) {
                 sLogger.info("407 response received");
             }
-
             // Set the remote tag
             getDialogPath().setRemoteTag(resp.getToTag());
 
@@ -1103,10 +1105,8 @@ public abstract class ImsServiceSession extends Thread {
 
             // Send INVITE request
             sendInvite(invite);
-        } catch (InvalidArgumentException e) {
-            throw new PayloadException("Failed to handle 407 authentication response!", e);
 
-        } catch (ParseException e) {
+        } catch (InvalidArgumentException | ParseException e) {
             throw new PayloadException("Failed to handle 407 authentication response!", e);
         }
 
@@ -1127,7 +1127,6 @@ public abstract class ImsServiceSession extends Thread {
             if (sLogger.isActivated()) {
                 sLogger.info("422 response received");
             }
-
             // Extract the Min-SE value
             long minExpire = SipUtils.getMinSessionExpirePeriod(resp);
             if (minExpire == -1) {
@@ -1138,7 +1137,6 @@ public abstract class ImsServiceSession extends Thread {
                         ImsSessionBasedServiceError.UNEXPECTED_EXCEPTION, "No Min-SE value found"));
                 return;
             }
-
             // Set the min expire value
             SipDialogPath sipDialogPath = getDialogPath();
             sipDialogPath.setMinSessionExpireTime(minExpire);
@@ -1163,10 +1161,8 @@ public abstract class ImsServiceSession extends Thread {
 
             // Send INVITE request
             sendInvite(invite);
-        } catch (InvalidArgumentException e) {
-            throw new PayloadException("Unable to handle session too small response!", e);
 
-        } catch (ParseException e) {
+        } catch (InvalidArgumentException | ParseException e) {
             throw new PayloadException("Unable to handle session too small response!", e);
         }
     }
@@ -1223,7 +1219,7 @@ public abstract class ImsServiceSession extends Thread {
      * 
      * @param response Sip response to reInvite
      * @param code InvitationStatus
-     * @param requestType
+     * @param requestType the request type
      */
     public void handleReInviteResponse(InvitationStatus code, SipResponse response, int requestType) {
     }
@@ -1259,8 +1255,8 @@ public abstract class ImsServiceSession extends Thread {
     }
 
     /**
-     * @param ReInvite
-     * @param serviceContext
+     * @param ReInvite the re-invite request
+     * @param serviceContext the service context
      * @return SDP built
      * @throws PayloadException
      * @throws NetworkException
@@ -1280,7 +1276,7 @@ public abstract class ImsServiceSession extends Thread {
     /**
      * Handle 180 Ringing
      * 
-     * @param response
+     * @param response the response
      */
     public void handle180Ringing(SipResponse response) {
     }
