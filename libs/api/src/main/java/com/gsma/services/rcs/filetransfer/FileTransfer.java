@@ -36,6 +36,7 @@ import android.util.SparseArray;
  * File transfer
  *
  * @author Jean-Marc AUFFRET
+ * @author Philippe LEMORDANT
  */
 public class FileTransfer {
 
@@ -865,6 +866,24 @@ public class FileTransfer {
     public boolean isExpiredDelivery() throws RcsPersistentStorageException, RcsGenericException {
         try {
             return mTransferInf.isExpiredDelivery();
+
+        } catch (Exception e) {
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
+        }
+    }
+
+    /**
+     * Returns the file disposition
+     * {@link com.gsma.services.rcs.filetransfer.FileTransfer.Disposition}.
+     *
+     * @return disposition
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
+     */
+    public Disposition getDisposition() throws RcsPersistentStorageException, RcsGenericException {
+        try {
+            return Disposition.valueOf(mTransferInf.getDisposition());
 
         } catch (Exception e) {
             RcsPersistentStorageException.assertException(e);
