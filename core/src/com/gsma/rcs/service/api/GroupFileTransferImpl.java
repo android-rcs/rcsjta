@@ -273,7 +273,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
             if (session == null) {
                 return mPersistedStorage.getFileIcon();
             }
-            MmContent fileIcon = session.getContent();
+            MmContent fileIcon = session.getFileicon();
             return fileIcon != null ? fileIcon.getUri() : null;
 
         } catch (ServerApiBaseException e) {
@@ -295,8 +295,8 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
             if (session == null) {
                 return mPersistedStorage.getFileIconMimeType();
             }
-            MmContent fileIconMimeType = session.getContent();
-            return fileIconMimeType != null ? fileIconMimeType.getEncoding() : null;
+            MmContent fileIcon = session.getFileicon();
+            return fileIcon != null ? fileIcon.getEncoding() : null;
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
@@ -629,16 +629,6 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
                 }
             }
         });
-    }
-
-    /**
-     * Is HTTP transfer
-     * 
-     * @return Boolean
-     */
-    public boolean isHttpTransfer() {
-        /* Group file transfer is always a HTTP file transfer */
-        return true;
     }
 
     @Override
@@ -1001,29 +991,6 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
                             new StringBuilder(
                                     "Unknown reason in GroupFileTransferImpl.handleSessionAborted; terminationReason=")
                                     .append(reason).append("!").toString());
-            }
-        }
-        mImService.tryToDequeueFileTransfers();
-    }
-
-    /**
-     * Session has been terminated by remote
-     * 
-     * @param contact The contact
-     */
-    public void onSessionTerminatedByRemote(ContactId contact) {
-        if (sLogger.isActivated()) {
-            sLogger.info("Session terminated by remote");
-        }
-        synchronized (mLock) {
-            mFileTransferService.removeGroupFileTransfer(mFileTransferId);
-            /*
-             * TODO : Fix sending of SIP BYE by sender once transfer is completed and media session
-             * is closed. Then this check of state can be removed. Also need to check if it is
-             * storing and broadcasting right state and reasoncode.
-             */
-            if (State.TRANSFERRED != mPersistedStorage.getState()) {
-                setStateAndReasonCode(State.ABORTED, ReasonCode.ABORTED_BY_REMOTE);
             }
         }
         mImService.tryToDequeueFileTransfers();
