@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -34,6 +34,7 @@ import android.util.SparseArray;
  * Video sharing
  * 
  * @author Jean-Marc AUFFRET
+ * @author Philippe LEMORDANT
  */
 public class VideoSharing {
 
@@ -84,14 +85,14 @@ public class VideoSharing {
 
         private final int mValue;
 
-        private static SparseArray<State> mValueToEnum = new SparseArray<State>();
+        private static SparseArray<State> mValueToEnum = new SparseArray<>();
         static {
             for (State entry : State.values()) {
                 mValueToEnum.put(entry.toInt(), entry);
             }
         }
 
-        private State(int value) {
+        State(int value) {
             mValue = value;
         }
 
@@ -99,13 +100,13 @@ public class VideoSharing {
             return mValue;
         }
 
-        public final static State valueOf(int value) {
+        public static State valueOf(int value) {
             State entry = mValueToEnum.get(value);
             if (entry != null) {
                 return entry;
             }
-            throw new IllegalArgumentException(new StringBuilder("No enum const class ")
-                    .append(State.class.getName()).append("").append(value).append("!").toString());
+            throw new IllegalArgumentException("No enum const class " + State.class.getName() + ""
+                    + value + "!");
         }
     }
 
@@ -182,14 +183,14 @@ public class VideoSharing {
 
         private final int mValue;
 
-        private static SparseArray<ReasonCode> mValueToEnum = new SparseArray<ReasonCode>();
+        private static SparseArray<ReasonCode> mValueToEnum = new SparseArray<>();
         static {
             for (ReasonCode entry : ReasonCode.values()) {
                 mValueToEnum.put(entry.toInt(), entry);
             }
         }
 
-        private ReasonCode(int value) {
+        ReasonCode(int value) {
             mValue = value;
         }
 
@@ -197,14 +198,13 @@ public class VideoSharing {
             return mValue;
         }
 
-        public final static ReasonCode valueOf(int value) {
+        public static ReasonCode valueOf(int value) {
             ReasonCode entry = mValueToEnum.get(value);
             if (entry != null) {
                 return entry;
             }
-            throw new IllegalArgumentException(new StringBuilder("No enum const class ")
-                    .append(ReasonCode.class.getName()).append("").append(value).append("!")
-                    .toString());
+            throw new IllegalArgumentException("No enum const class " + ReasonCode.class.getName()
+                    + "" + value + "!");
         }
     }
 
@@ -326,7 +326,9 @@ public class VideoSharing {
      */
     public void acceptInvitation(VideoPlayer player) throws RcsGenericException {
         try {
-            mSharingInf.acceptInvitation(player);
+            VideoPlayerImpl videoPlayer = new VideoPlayerImpl(player);
+            mSharingInf.acceptInvitation(videoPlayer);
+
         } catch (Exception e) {
             RcsIllegalArgumentException.assertException(e);
             throw new RcsGenericException(e);
