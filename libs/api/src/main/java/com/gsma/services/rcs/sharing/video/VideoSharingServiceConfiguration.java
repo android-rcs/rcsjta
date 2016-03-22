@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -37,10 +37,10 @@ public class VideoSharingServiceConfiguration {
     /**
      * Constructor
      * 
-     * @param configuration
-     * @hide
+     * @param configuration the configuration
      */
-    public VideoSharingServiceConfiguration(IVideoSharingServiceConfiguration configuration) {
+    /* package private */VideoSharingServiceConfiguration(
+            IVideoSharingServiceConfiguration configuration) {
         mConfiguration = configuration;
     }
 

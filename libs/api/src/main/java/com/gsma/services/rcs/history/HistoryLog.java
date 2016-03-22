@@ -210,4 +210,7 @@ public class HistoryLog {
      * </P>
      */
     public static final String DURATION = "duration";
+
+    private HistoryLog() {
+    }
 }

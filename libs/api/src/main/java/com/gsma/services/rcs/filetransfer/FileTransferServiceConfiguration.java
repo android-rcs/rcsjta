@@ -57,14 +57,14 @@ public class FileTransferServiceConfiguration {
 
         private int mValue;
 
-        private static SparseArray<ImageResizeOption> mValueToEnum = new SparseArray<ImageResizeOption>();
+        private static SparseArray<ImageResizeOption> mValueToEnum = new SparseArray<>();
         static {
             for (ImageResizeOption entry : ImageResizeOption.values()) {
                 mValueToEnum.put(entry.toInt(), entry);
             }
         }
 
-        private ImageResizeOption(int value) {
+        ImageResizeOption(int value) {
             mValue = value;
         }
 
@@ -103,7 +103,6 @@ public class FileTransferServiceConfiguration {
      * Constructor
      * 
      * @param iFtServiceConfig
-     * @hide
      */
     /* package private */FileTransferServiceConfiguration(
             IFileTransferServiceConfiguration iFtServiceConfig) {

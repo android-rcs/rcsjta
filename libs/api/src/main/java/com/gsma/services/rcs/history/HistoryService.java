@@ -95,6 +95,7 @@ public final class HistoryService extends RcsService {
      * Set service interface
      * 
      * @param service Service interface
+     * @hide
      */
     protected void setApi(IInterface service) {
         super.setApi(service);

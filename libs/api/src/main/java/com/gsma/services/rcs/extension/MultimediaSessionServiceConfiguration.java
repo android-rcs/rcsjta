@@ -38,9 +38,9 @@ public class MultimediaSessionServiceConfiguration {
      * Constructor
      * 
      * @param iConfig IMultimediaSessionServiceConfiguration instance
-     * @hide
      */
-    public MultimediaSessionServiceConfiguration(IMultimediaSessionServiceConfiguration iConfig) {
+    /* package private */MultimediaSessionServiceConfiguration(
+            IMultimediaSessionServiceConfiguration iConfig) {
         mIConfig = iConfig;
     }
 

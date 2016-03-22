@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -141,4 +141,6 @@ public class VideoSharingLog {
      */
     public static final String HEIGHT = "height";
 
+    private VideoSharingLog() {
+    }
 }

@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -102,7 +102,8 @@ public class Intents {
         public static final String ACTION_GET_SERVICE_STARTING_STATE = "com.gsma.services.rcs.action.GET_SERVICE_STARTING_STATE";
 
         /**
-         * Used as a boolean extra field in ACTION_GET_SERVICE_STARTING_STATE intent to convey the response.
+         * Used as a boolean extra field in ACTION_GET_SERVICE_STARTING_STATE intent to convey the
+         * response.
          */
         public static final String EXTRA_GET_SERVICE_STARTING_STATE = "get_service_starting_state";
 
@@ -176,4 +177,6 @@ public class Intents {
         }
     }
 
+    private Intents() {
+    }
 }

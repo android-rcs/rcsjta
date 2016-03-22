@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,7 +28,7 @@ import com.gsma.services.rcs.RcsGenericException;
  * Image sharing service configuration
  * 
  * @author Jean-Marc AUFFRET
- * @author yplo6403
+ * @author Philippe LEMORDANT
  */
 public class ImageSharingServiceConfiguration {
 
@@ -37,10 +37,10 @@ public class ImageSharingServiceConfiguration {
     /**
      * Constructor
      * 
-     * @param configuration
-     * @hide
+     * @param configuration the Image sharing configuration
      */
-    public ImageSharingServiceConfiguration(IImageSharingServiceConfiguration configuration) {
+    /* package private */ImageSharingServiceConfiguration(
+            IImageSharingServiceConfiguration configuration) {
         mConfiguration = configuration;
     }
 

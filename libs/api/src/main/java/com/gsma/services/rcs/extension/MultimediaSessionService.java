@@ -60,9 +60,9 @@ public final class MultimediaSessionService extends RcsService {
      */
     private IMultimediaSessionService mApi;
 
-    private final Map<MultimediaMessagingSessionListener, WeakReference<IMultimediaMessagingSessionListener>> mMultimediaMessagingSessionListeners = new WeakHashMap<MultimediaMessagingSessionListener, WeakReference<IMultimediaMessagingSessionListener>>();
+    private final Map<MultimediaMessagingSessionListener, WeakReference<IMultimediaMessagingSessionListener>> mMultimediaMessagingSessionListeners = new WeakHashMap<>();
 
-    private final Map<MultimediaStreamingSessionListener, WeakReference<IMultimediaStreamingSessionListener>> mMultimediaStreamingSessionListeners = new WeakHashMap<MultimediaStreamingSessionListener, WeakReference<IMultimediaStreamingSessionListener>>();
+    private final Map<MultimediaStreamingSessionListener, WeakReference<IMultimediaStreamingSessionListener>> mMultimediaStreamingSessionListeners = new WeakHashMap<>();
 
     private static boolean sApiCompatible = false;
 
@@ -115,6 +115,7 @@ public final class MultimediaSessionService extends RcsService {
      * Set API interface
      * 
      * @param api API interface
+     * @hide
      */
     protected void setApi(IInterface api) {
         super.setApi(api);

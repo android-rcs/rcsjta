@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -113,6 +113,7 @@ public final class GeolocSharingService extends RcsService {
      * Set API interface
      * 
      * @param api API interface
+     * @hide
      */
     protected void setApi(IInterface api) {
         super.setApi(api);
@@ -228,7 +229,7 @@ public final class GeolocSharingService extends RcsService {
      * Deletes geoloc sharing with a given contact from history and abort/reject any associated
      * ongoing session if such exists.
      * 
-     * @param contact
+     * @param contact the remote contact
      * @throws RcsServiceNotAvailableException
      * @throws RcsGenericException
      */
@@ -249,7 +250,7 @@ public final class GeolocSharingService extends RcsService {
      * Deletes a geoloc sharing by its sharing id from history and abort/reject any associated
      * ongoing session if such exists.
      * 
-     * @param sharingId
+     * @param sharingId the sharing ID
      * @throws RcsServiceNotAvailableException
      * @throws RcsGenericException
      */
@@ -283,8 +284,7 @@ public final class GeolocSharingService extends RcsService {
         }
         try {
             IGeolocSharingListener rcsListener = new GeolocSharingListenerImpl(listener);
-            mGeolocSharingListeners.put(listener, new WeakReference<IGeolocSharingListener>(
-                    rcsListener));
+            mGeolocSharingListeners.put(listener, new WeakReference<>(rcsListener));
             mApi.addEventListener2(rcsListener);
         } catch (Exception e) {
             RcsIllegalArgumentException.assertException(e);

@@ -233,4 +233,6 @@ public class FileTransferLog {
      */
     public static final long UNKNOWN_EXPIRATION = 0L;
 
+    private FileTransferLog() {
+    }
 }
