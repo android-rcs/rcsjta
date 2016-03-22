@@ -771,12 +771,14 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
      * @param contact Remote contact
      * @param content Message content
      * @param contentType Message content type
+     * @param serviceId Service ID
      */
     public void receiveSipInstantMessage(Intent intent, ContactId contact, byte[] content,
-            String contentType) {
+            String contentType, String serviceId) {
         intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
         IntentUtils.tryToSetReceiverForegroundFlag(intent);
         intent.putExtra(InstantMultimediaMessageIntent.EXTRA_CONTACT, (Parcelable) contact);
+        intent.putExtra(InstantMultimediaMessageIntent.EXTRA_SERVICE_ID, serviceId);
         intent.putExtra(InstantMultimediaMessageIntent.EXTRA_CONTENT, content);
         intent.putExtra(InstantMultimediaMessageIntent.EXTRA_CONTENT_TYPE, contentType);
         AndroidFactory.getApplicationContext().sendBroadcast(intent);

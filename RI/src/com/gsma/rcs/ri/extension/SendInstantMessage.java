@@ -88,8 +88,6 @@ public class SendInstantMessage extends RcsActivity {
             ContactId contact = ContactUtil.formatContact(phoneNumber);
             // Initiate session
             sendMessage(contact);
-            // Exit activity
-            finish();
         }
     };
 

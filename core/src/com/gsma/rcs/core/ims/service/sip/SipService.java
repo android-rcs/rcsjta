@@ -30,6 +30,7 @@ import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsServiceSession;
+import com.gsma.rcs.core.ims.service.capability.CapabilityUtils;
 import com.gsma.rcs.core.ims.service.sip.messaging.GenericSipMsrpSession;
 import com.gsma.rcs.core.ims.service.sip.messaging.OriginatingSipMsrpSession;
 import com.gsma.rcs.core.ims.service.sip.messaging.TerminatingSipMsrpSession;
@@ -51,6 +52,7 @@ import android.os.HandlerThread;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import javax2.sip.message.Response;
 
@@ -449,13 +451,24 @@ public class SipService extends ImsService {
                     SipMessageFactory.createResponse(message, IdGenerator.getIdentifier(),
                             Response.OK));
 
+            Set<String> featureTags = message.getFeatureTags();
+            String iariFeatureTag = GenericSipSession.getIariFeatureTag(featureTags);
+            if (iariFeatureTag == null) {
+                if (sLogger.isActivated()) {
+                    sLogger.warn("Cannot process instant message: no service ID");
+                }
+                sendErrorResponse(message, Response.SESSION_NOT_ACCEPTABLE);
+                return;
+            }
+            final String serviceId = CapabilityUtils.extractServiceId(iariFeatureTag);
+
             mMultimediaMessageOperationHandler.post(new Runnable() {
 
                 @Override
                 public void run() {
                     try {
                         mMmSessionService.receiveSipInstantMessage(intent, remote,
-                                message.getRawContent(), message.getContentType());
+                                message.getRawContent(), message.getContentType(), serviceId);
                     } catch (RuntimeException e) {
                         /*
                          * Normally we are not allowed to catch runtime exceptions as these are

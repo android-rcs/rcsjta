@@ -1,14 +1,14 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
- *
+ * <p/>
  * Copyright (C) 2010-2016 Orange.
- *
+ * <p/>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p/>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p/>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,6 +18,18 @@
 
 package com.gsma.rcs.ri.sharing;
 
+import com.gsma.rcs.api.connection.ConnectionManager.RcsServiceName;
+import com.gsma.rcs.api.connection.utils.ExceptionUtil;
+import com.gsma.rcs.api.connection.utils.RcsFragmentActivity;
+import com.gsma.rcs.ri.R;
+import com.gsma.rcs.ri.sharing.geoloc.GeolocSharingLogView;
+import com.gsma.rcs.ri.sharing.image.ImageSharingLogView;
+import com.gsma.rcs.ri.sharing.video.VideoSharingLogView;
+import com.gsma.rcs.ri.utils.ContactListAdapter;
+import com.gsma.rcs.ri.utils.ContactUtil;
+import com.gsma.rcs.ri.utils.LogUtils;
+import com.gsma.rcs.ri.utils.RcsContactUtil;
+import com.gsma.rcs.ri.utils.Utils;
 import com.gsma.services.rcs.RcsGenericException;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsServiceException;
@@ -38,18 +50,6 @@ import com.gsma.services.rcs.sharing.video.VideoSharing;
 import com.gsma.services.rcs.sharing.video.VideoSharingListener;
 import com.gsma.services.rcs.sharing.video.VideoSharingLog;
 import com.gsma.services.rcs.sharing.video.VideoSharingService;
-
-import com.gsma.rcs.api.connection.ConnectionManager.RcsServiceName;
-import com.gsma.rcs.api.connection.utils.ExceptionUtil;
-import com.gsma.rcs.api.connection.utils.RcsFragmentActivity;
-import com.gsma.rcs.ri.R;
-import com.gsma.rcs.ri.sharing.geoloc.GeolocSharingLogView;
-import com.gsma.rcs.ri.sharing.image.ImageSharingLogView;
-import com.gsma.rcs.ri.sharing.video.VideoSharingLogView;
-import com.gsma.rcs.ri.utils.ContactListAdapter;
-import com.gsma.rcs.ri.utils.ContactUtil;
-import com.gsma.rcs.ri.utils.LogUtils;
-import com.gsma.rcs.ri.utils.Utils;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -118,7 +118,9 @@ public class SharingListView extends RcsFragmentActivity implements
             HistoryLog.FILENAME,
             HistoryLog.DURATION,
             HistoryLog.CONTENT,
-            HistoryLog.MIME_TYPE
+            HistoryLog.MIME_TYPE,
+            HistoryLog.TRANSFERRED,
+            HistoryLog.FILESIZE
     };
     // @formatter:on
 
@@ -237,6 +239,7 @@ public class SharingListView extends RcsFragmentActivity implements
 
     private class SharingLogAdapter extends CursorAdapter {
         private final LayoutInflater mInflater;
+        private final RcsContactUtil mRcsContactUtil;
         private Drawable mDrawableIncoming;
         private Drawable mDrawableIncomingFailed;
         private Drawable mDrawableOutgoing;
@@ -244,6 +247,7 @@ public class SharingListView extends RcsFragmentActivity implements
 
         public SharingLogAdapter(Activity activity) {
             super(activity, null, 0);
+            mRcsContactUtil = RcsContactUtil.getInstance(activity);
             mInflater = LayoutInflater.from(SharingListView.this);
             Resources resources = activity.getResources();
             mDrawableIncomingFailed = resources.getDrawable(R.drawable.ri_incoming_call_failed);
@@ -275,7 +279,8 @@ public class SharingListView extends RcsFragmentActivity implements
 
             // Set contact number
             String phone = cursor.getString(holder.getColumnContactIdx());
-            holder.getContactView().setText(phone);
+            ContactId contact = ContactUtil.formatContact(phone);
+            holder.getContactView().setText(mRcsContactUtil.getDisplayName(contact));
 
             // Set the date/time field by mixing relative and absolute times
             long date = cursor.getLong(holder.getColumnTimestampIdx());
@@ -532,7 +537,7 @@ public class SharingListView extends RcsFragmentActivity implements
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
-        getMenuInflater().inflate(R.menu.menu_log_ish_item, menu);
+        getMenuInflater().inflate(R.menu.menu_log_sharing_item, menu);
         menu.findItem(R.id.menu_sharing_display).setVisible(false);
         // Get the list item position
         AdapterContextMenuInfo info = (AdapterContextMenuInfo) menuInfo;
