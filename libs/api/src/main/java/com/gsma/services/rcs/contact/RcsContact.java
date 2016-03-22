@@ -212,6 +212,9 @@ public class RcsContact implements Parcelable {
         return mBlockingTimestamp;
     }
 
+    /**
+     @hide
+     */
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -220,6 +223,9 @@ public class RcsContact implements Parcelable {
         return result;
     }
 
+    /**
+        @hide
+     */
     @Override
     public boolean equals(Object obj) {
         if (this == obj)

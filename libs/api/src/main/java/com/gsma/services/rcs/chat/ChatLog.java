@@ -164,6 +164,9 @@ public class ChatLog {
             }
             return participantResult;
         }
+
+        private GroupChat() {
+        }
     }
 
     /**
@@ -326,6 +329,9 @@ public class ChatLog {
              * MIME-type of group chat events
              */
             public static final String GROUPCHAT_EVENT = "rcs/groupchat-event";
+
+            private MimeType() {
+            }
         }
 
         public static class Content {
@@ -462,6 +468,9 @@ public class ChatLog {
                             + ReasonCode.class.getName() + "" + value + "!");
                 }
             }
+
+            private Content() {
+            }
         }
 
         public static class GroupChatEvent {
@@ -506,6 +515,15 @@ public class ChatLog {
                             + Status.class.getName() + "" + value + "!");
                 }
             }
+
+            private GroupChatEvent() {
+            }
         }
+
+        private Message() {
+        }
+    }
+
+    private ChatLog() {
     }
 }

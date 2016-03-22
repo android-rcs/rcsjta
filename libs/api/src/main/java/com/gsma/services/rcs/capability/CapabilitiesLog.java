@@ -125,4 +125,7 @@ public class CapabilitiesLog {
      * </P>
      */
     public static final String TIMESTAMP = "timestamp";
+
+    private CapabilitiesLog() {
+    }
 }

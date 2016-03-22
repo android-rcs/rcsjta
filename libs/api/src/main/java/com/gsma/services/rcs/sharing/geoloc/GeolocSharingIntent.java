@@ -42,4 +42,7 @@ public class GeolocSharingIntent {
      * Unique ID of the geoloc sharing
      */
     public final static String EXTRA_SHARING_ID = "sharingId";
+
+    private GeolocSharingIntent() {
+    }
 }

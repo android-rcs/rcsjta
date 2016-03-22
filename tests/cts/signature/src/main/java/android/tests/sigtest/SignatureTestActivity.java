@@ -43,7 +43,6 @@ import java.util.Map;
  * back the test result via IBinder.
  */
 public class SignatureTestActivity extends Activity {
-    static final String BUNDLE_KEY_RESULT = "result";
     static final String BUNDLE_KEY_MISSING_CLASS = "missing_class";
     static final String BUNDLE_KEY_MISSING_INTERFACE = "missing_interface";
     static final String BUNDLE_KEY_MISSING_METHOD = "missing_method";
@@ -112,6 +111,8 @@ public class SignatureTestActivity extends Activity {
                 Integer resourceId = sRcsApiReleases.get(selectedVersion);
                 if (resourceId != null) {
                     mSelectedResource = resourceId;
+                    mFailedItems.clear();
+                    mListView.setAdapter(null);
                     CheckRcsApiSignatureTask mCheckRcsApiSignatureTask = new CheckRcsApiSignatureTask();
                     mCheckRcsApiSignatureTask.execute();
                 }
@@ -251,11 +252,9 @@ public class SignatureTestActivity extends Activity {
             if (failedClassesNumber == 0) {
                 SignatureTestLog.d("PASS");
                 result.setText(R.string.test_passed);
-                mBundle.putBoolean(BUNDLE_KEY_RESULT, true);
             } else {
                 SignatureTestLog.d("FAIL: " + failedClassesNumber);
                 result.setText(getString(R.string.test_failed, failedClassesNumber));
-                mBundle.putBoolean(BUNDLE_KEY_RESULT, false);
             }
             TestSigResultArrayAdapter adpater = new TestSigResultArrayAdapter(
                     SignatureTestActivity.this, R.layout.rcs_api_signature_item, mFailedItems);

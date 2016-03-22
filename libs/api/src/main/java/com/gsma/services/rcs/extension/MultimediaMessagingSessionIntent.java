@@ -44,4 +44,7 @@ public class MultimediaMessagingSessionIntent {
      * Unique ID of the multimedia session
      */
     public final static String EXTRA_SESSION_ID = "sessionId";
+
+    private MultimediaMessagingSessionIntent() {
+    }
 }

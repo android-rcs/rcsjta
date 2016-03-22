@@ -61,7 +61,7 @@ public abstract class OneToOneChatListener {
      * one chat messages was deleted specified by the msgIds parameter corresponding to a specific
      * contact.
      *
-     * @param chatId chat id of those deleted messages
+     * @param contact contact id of those deleted messages
      * @param msgIds message ids of those deleted messages
      */
     public abstract void onMessagesDeleted(ContactId contact, Set<String> msgIds);

@@ -116,6 +116,7 @@ public final class FileUploadService extends RcsService {
      * Set API interface
      * 
      * @param api API interface
+     * @hide
      */
     protected void setApi(IInterface api) {
         super.setApi(api);

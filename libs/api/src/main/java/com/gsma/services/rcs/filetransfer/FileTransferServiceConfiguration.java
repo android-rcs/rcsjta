@@ -103,7 +103,6 @@ public class FileTransferServiceConfiguration {
      * Constructor
      * 
      * @param iFtServiceConfig the file transfer service configuration interface
-     * @hide
      */
     /* package private */FileTransferServiceConfiguration(
             IFileTransferServiceConfiguration iFtServiceConfig) {

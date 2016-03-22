@@ -121,6 +121,7 @@ public final class FileTransferService extends RcsService {
      * Set API interface
      * 
      * @param api API interface
+     * @hide
      */
     protected void setApi(IInterface api) {
         super.setApi(api);
@@ -223,9 +224,10 @@ public final class FileTransferService extends RcsService {
      * transferred (for a local or a remote file). The parameter contact supports the following
      * formats: MSISDN in national or international format, SIP address, SIP-URI or Tel-URI. If the
      * format of the contact is not supported an exception is thrown.
-     * @deprecated Use {@link #transferFile(ContactId contact, Uri file, Disposition disposition,
-     * boolean attachFileIcon)} instead.
-     *
+     * 
+     * @deprecated Use
+     *             {@link #transferFile(ContactId contact, Uri file, Disposition disposition, boolean attachFileIcon)}
+     *             instead.
      * @param contact the remote contact Identifier
      * @param file Uri of file to transfer
      * @param attachFileIcon File icon option. If true, the stack tries to attach fileicon. Fileicon
@@ -260,19 +262,16 @@ public final class FileTransferService extends RcsService {
      * @throws RcsServiceNotAvailableException
      * @throws RcsGenericException
      */
-    public FileTransfer transferFile(ContactId contact, Uri file,
-                                     Disposition disposition,
-                                     boolean attachFileIcon)
-            throws RcsPersistentStorageException, RcsServiceNotAvailableException,
-            RcsGenericException {
+    public FileTransfer transferFile(ContactId contact, Uri file, Disposition disposition,
+            boolean attachFileIcon) throws RcsPersistentStorageException,
+            RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
         try {
             /* Only grant permission for content Uris */
             tryToGrantUriPermissionToStackServices(file);
-            IFileTransfer ftIntf = mApi.transferFile2(contact, file,
-                    disposition.toInt(),
+            IFileTransfer ftIntf = mApi.transferFile2(contact, file, disposition.toInt(),
                     attachFileIcon);
             if (ftIntf != null) {
                 return new FileTransfer(ftIntf);
@@ -314,9 +313,10 @@ public final class FileTransferService extends RcsService {
 
     /**
      * Transfers a file to a group chat with an optional file icon.
-     * @deprecated Use {@link #transferFileToGroupChat(String chatId, Uri file,
-     * Disposition disposition, boolean attachFileIcon)} instead.
-     *
+     * 
+     * @deprecated Use
+     *             {@link #transferFileToGroupChat(String chatId, Uri file, Disposition disposition, boolean attachFileIcon)}
+     *             instead.
      * @param chatId the chat ID
      * @param file Uri of file to transfer
      * @param attachFileIcon Attach file icon option. If true, the stack tries to attach fileIcon.
@@ -349,19 +349,16 @@ public final class FileTransferService extends RcsService {
      * @throws RcsServiceNotAvailableException
      * @throws RcsGenericException
      */
-    public FileTransfer transferFileToGroupChat(String chatId, Uri file,
-                                                Disposition disposition,
-                                                boolean attachFileIcon)
-            throws RcsPermissionDeniedException, RcsPersistentStorageException,
-            RcsServiceNotAvailableException, RcsGenericException {
+    public FileTransfer transferFileToGroupChat(String chatId, Uri file, Disposition disposition,
+            boolean attachFileIcon) throws RcsPermissionDeniedException,
+            RcsPersistentStorageException, RcsServiceNotAvailableException, RcsGenericException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
         try {
             /* Only grant permission for content Uris */
             tryToGrantUriPermissionToStackServices(file);
-            IFileTransfer ftIntf = mApi.transferFileToGroupChat2(chatId, file,
-                    disposition.toInt(),
+            IFileTransfer ftIntf = mApi.transferFileToGroupChat2(chatId, file, disposition.toInt(),
                     attachFileIcon);
             if (ftIntf != null) {
                 return new FileTransfer(ftIntf);
@@ -447,8 +444,7 @@ public final class FileTransferService extends RcsService {
         try {
             IOneToOneFileTransferListener rcsListener = new OneToOneFileTransferListenerImpl(
                     listener);
-            mOneToOneFileTransferListeners.put(listener,
-                    new WeakReference<>(rcsListener));
+            mOneToOneFileTransferListeners.put(listener, new WeakReference<>(rcsListener));
             mApi.addEventListener2(rcsListener);
         } catch (Exception e) {
             RcsIllegalArgumentException.assertException(e);
@@ -501,8 +497,7 @@ public final class FileTransferService extends RcsService {
         }
         try {
             IGroupFileTransferListener rcsListener = new GroupFileTransferListenerImpl(listener);
-            mGroupFileTransferListeners.put(listener,
-                    new WeakReference<>(rcsListener));
+            mGroupFileTransferListeners.put(listener, new WeakReference<>(rcsListener));
             mApi.addEventListener3(rcsListener);
         } catch (Exception e) {
             RcsIllegalArgumentException.assertException(e);

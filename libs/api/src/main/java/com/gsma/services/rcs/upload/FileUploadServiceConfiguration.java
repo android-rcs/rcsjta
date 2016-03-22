@@ -38,9 +38,9 @@ public class FileUploadServiceConfiguration {
      * Constructor
      * 
      * @param configuration the configuration
-     * @hide
      */
-    public FileUploadServiceConfiguration(IFileUploadServiceConfiguration configuration) {
+    /* package private */FileUploadServiceConfiguration(
+            IFileUploadServiceConfiguration configuration) {
         mConfiguration = configuration;
     }
 

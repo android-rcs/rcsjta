@@ -38,9 +38,9 @@ public class VideoSharingServiceConfiguration {
      * Constructor
      * 
      * @param configuration the configuration
-     * @hide
      */
-    public VideoSharingServiceConfiguration(IVideoSharingServiceConfiguration configuration) {
+    /* package private */VideoSharingServiceConfiguration(
+            IVideoSharingServiceConfiguration configuration) {
         mConfiguration = configuration;
     }
 

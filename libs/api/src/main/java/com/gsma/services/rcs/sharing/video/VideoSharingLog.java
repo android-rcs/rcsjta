@@ -141,4 +141,6 @@ public class VideoSharingLog {
      */
     public static final String HEIGHT = "height";
 
+    private VideoSharingLog() {
+    }
 }

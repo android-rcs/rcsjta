@@ -42,4 +42,7 @@ public class ImageSharingIntent {
      * Unique ID of the image sharing
      */
     public final static String EXTRA_SHARING_ID = "sharingId";
+
+    private ImageSharingIntent() {
+    }
 }

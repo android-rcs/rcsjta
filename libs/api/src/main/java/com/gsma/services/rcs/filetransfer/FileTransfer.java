@@ -357,7 +357,6 @@ public class FileTransfer {
      * Constructor
      *
      * @param transferIntf File transfer interface
-     * @hide
      */
     /* package private */FileTransfer(IFileTransfer transferIntf) {
         mTransferInf = transferIntf;

@@ -44,4 +44,7 @@ public class MultimediaStreamingSessionIntent {
      * Unique ID of the multimedia session
      */
     public final static String EXTRA_SESSION_ID = "sessionId";
+
+    private MultimediaStreamingSessionIntent() {
+    }
 }

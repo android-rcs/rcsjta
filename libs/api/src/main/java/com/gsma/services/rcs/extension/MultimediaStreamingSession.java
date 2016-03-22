@@ -45,7 +45,7 @@ public class MultimediaStreamingSession extends MultimediaSession {
      * 
      * @param sessionIntf Multimedia session interface
      */
-    MultimediaStreamingSession(IMultimediaStreamingSession sessionIntf) {
+    /* package private */MultimediaStreamingSession(IMultimediaStreamingSession sessionIntf) {
         super();
         mSessionIntf = sessionIntf;
     }

@@ -42,4 +42,7 @@ public class VideoSharingIntent {
      * Unique ID of the video sharing
      */
     public final static String EXTRA_SHARING_ID = "sharingId";
+
+    private VideoSharingIntent() {
+    }
 }

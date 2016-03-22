@@ -95,4 +95,7 @@ public class GroupDeliveryInfoLog {
      * </P>
      */
     public static final String TIMESTAMP_DISPLAYED = "timestamp_displayed";
+
+    private GroupDeliveryInfoLog() {
+    }
 }

@@ -145,4 +145,7 @@ public class ImageSharingLog {
      * @see ImageSharing.ReasonCode
      */
     public static final String REASON_CODE = "reason_code";
+
+    private ImageSharingLog() {
+    }
 }

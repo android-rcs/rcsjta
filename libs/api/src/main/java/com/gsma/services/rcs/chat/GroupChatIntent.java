@@ -62,4 +62,7 @@ public class GroupChatIntent {
      * Message ID of received message
      */
     public final static String EXTRA_MESSAGE_ID = "messageId";
+
+    private GroupChatIntent() {
+    }
 }

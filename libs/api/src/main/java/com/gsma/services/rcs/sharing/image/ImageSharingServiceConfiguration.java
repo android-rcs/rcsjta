@@ -38,9 +38,9 @@ public class ImageSharingServiceConfiguration {
      * Constructor
      * 
      * @param configuration the Image sharing configuration
-     * @hide
      */
-    public ImageSharingServiceConfiguration(IImageSharingServiceConfiguration configuration) {
+    /* package private */ImageSharingServiceConfiguration(
+            IImageSharingServiceConfiguration configuration) {
         mConfiguration = configuration;
     }
 

@@ -68,7 +68,7 @@ public class ContactProvider {
      * Mime type for the time stamp when the blocking was activated
      */
     public final static String MIME_TYPE_BLOCKING_TIMESTAMP = "vnd.android.cursor.item/com.gsma.services.rcs.blocking-timestamp";
-    
+
     /**
      * IP voice call capability support
      */
@@ -85,4 +85,7 @@ public class ContactProvider {
      * RCS extensions supported
      */
     public final static String MIME_TYPE_EXTENSIONS = "vnd.android.cursor.item/com.gsma.services.rcs.extensions";
+
+    private ContactProvider() {
+    }
 }

@@ -47,6 +47,9 @@ public abstract class RcsService {
      */
     public static final String ACTION_SERVICE_PROVISIONING_DATA_CHANGED = "com.gsma.services.rcs.action.SERVICE_PROVISIONING_DATA_CHANGED";
 
+    /**
+     * @hide
+     */
     protected final RcsServiceControl mRcsServiceControl;
 
     private final Map<RcsServiceRegistrationListener, WeakReference<IRcsServiceRegistrationListener>> mRegistrationListeners = new WeakHashMap<>();
@@ -73,6 +76,9 @@ public abstract class RcsService {
              * Crane Priority Release version of RCS API
              */
             public final static int CPR = 2;
+
+            private VERSION_CODES() {
+            }
         }
 
         /**
@@ -208,11 +214,13 @@ public abstract class RcsService {
 
     /**
      * Application context
+     * @hide
      */
     protected Context mCtx;
 
     /**
      * Service listener
+     * @hide
      */
     protected RcsServiceListener mListener;
 
@@ -231,6 +239,7 @@ public abstract class RcsService {
      * 
      * @param ctx Application context
      * @param listener Service listener
+     * @hide
      */
     public RcsService(Context ctx, RcsServiceListener listener) {
         mCtx = ctx;
@@ -272,6 +281,7 @@ public abstract class RcsService {
      * Set API interface
      * 
      * @param api API interface
+     * @hide
      */
     protected void setApi(IInterface api) {
         mApi = api;

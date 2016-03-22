@@ -66,4 +66,7 @@ public class OneToOneChatIntent {
      * ContactId of remote contact
      */
     public final static String EXTRA_CONTACT = "contact";
+
+    private OneToOneChatIntent() {
+    }
 }

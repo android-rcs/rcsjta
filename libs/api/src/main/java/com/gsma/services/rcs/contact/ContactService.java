@@ -107,6 +107,7 @@ public final class ContactService extends RcsService {
      * Set API interface
      * 
      * @param api API interface
+     * @hide
      */
     protected void setApi(IInterface api) {
         super.setApi(api);
@@ -167,7 +168,7 @@ public final class ContactService extends RcsService {
     }
 
     /**
-     * Returns the list of rcs contacts
+     * Returns the list of RCS contacts
      * 
      * @return Set&lt;RcsContact&gt; List of contacts
      * @throws RcsPersistentStorageException

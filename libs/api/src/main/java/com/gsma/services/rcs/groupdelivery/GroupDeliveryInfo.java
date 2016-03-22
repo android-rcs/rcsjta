@@ -128,4 +128,7 @@ public class GroupDeliveryInfo {
                     + "" + value);
         }
     }
+
+    private GroupDeliveryInfo() {
+    }
 }

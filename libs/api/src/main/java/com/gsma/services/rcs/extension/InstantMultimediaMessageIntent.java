@@ -18,6 +18,7 @@
  * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
+
 package com.gsma.services.rcs.extension;
 
 /**
@@ -61,4 +62,6 @@ public class InstantMultimediaMessageIntent {
      */
     public final static String EXTRA_CONTENT_TYPE = "contentType";
 
+    private InstantMultimediaMessageIntent() {
+    }
 }
