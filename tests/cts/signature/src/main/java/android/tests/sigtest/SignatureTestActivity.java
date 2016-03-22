@@ -75,6 +75,7 @@ public class SignatureTestActivity extends Activity {
 
     private ArrayAdapter<String> mSpinnerAdapter;
     private int mSelectedResource;
+    private TestSigResultArrayAdapter mAdpater;
 
     /**
      * Define the type of the signature check failures.
@@ -256,9 +257,9 @@ public class SignatureTestActivity extends Activity {
                 SignatureTestLog.d("FAIL: " + failedClassesNumber);
                 result.setText(getString(R.string.test_failed, failedClassesNumber));
             }
-            TestSigResultArrayAdapter adpater = new TestSigResultArrayAdapter(
+            mAdpater = new TestSigResultArrayAdapter(
                     SignatureTestActivity.this, R.layout.rcs_api_signature_item, mFailedItems);
-            mListView.setAdapter(adpater);
+            mListView.setAdapter(mAdpater);
         }
 
         public void notifyFailure(FAILURE_TYPE type, String name, String errorMessage) {

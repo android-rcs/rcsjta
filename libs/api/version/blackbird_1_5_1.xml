@@ -410,14 +410,6 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<constructor name="Intents"
- type="com.gsma.services.rcs.Intents"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</constructor>
 </class>
 <class name="Intents.Chat"
  extends="java.lang.Object"
@@ -925,18 +917,6 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<constructor name="RcsService"
- type="com.gsma.services.rcs.RcsService"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<parameter name="ctx" type="android.content.Context">
-</parameter>
-<parameter name="listener" type="com.gsma.services.rcs.RcsServiceListener">
-</parameter>
-</constructor>
 <method name="addEventListener"
  return="void"
  abstract="false"
@@ -1066,19 +1046,6 @@
 <exception name="RcsServiceNotAvailableException" type="com.gsma.services.rcs.RcsServiceNotAvailableException">
 </exception>
 </method>
-<method name="setApi"
- return="void"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="protected"
->
-<parameter name="api" type="android.os.IInterface">
-</parameter>
-</method>
 <field name="ACTION_SERVICE_PROVISIONING_DATA_CHANGED"
  type="java.lang.String"
  transient="false"
@@ -1099,36 +1066,6 @@
  final="true"
  deprecated="not deprecated"
  visibility="public"
->
-</field>
-<field name="mCtx"
- type="android.content.Context"
- transient="false"
- volatile="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="protected"
->
-</field>
-<field name="mListener"
- type="com.gsma.services.rcs.RcsServiceListener"
- transient="false"
- volatile="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="protected"
->
-</field>
-<field name="mRcsServiceControl"
- type="com.gsma.services.rcs.RcsServiceControl"
- transient="false"
- volatile="false"
- static="false"
- final="true"
- deprecated="not deprecated"
- visibility="protected"
 >
 </field>
 </class>
@@ -1182,14 +1119,6 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<constructor name="RcsService.Build.VERSION_CODES"
- type="com.gsma.services.rcs.RcsService.Build.VERSION_CODES"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</constructor>
 <field name="BASE"
  type="int"
  transient="false"
@@ -1251,7 +1180,7 @@
  native="false"
  synchronized="false"
  static="true"
- final="true"
+ final="false"
  deprecated="not deprecated"
  visibility="public"
 >
@@ -1308,7 +1237,7 @@
  native="false"
  synchronized="false"
  static="true"
- final="true"
+ final="false"
  deprecated="not deprecated"
  visibility="public"
 >
@@ -1966,14 +1895,6 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<constructor name="CapabilitiesLog"
- type="com.gsma.services.rcs.capability.CapabilitiesLog"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</constructor>
 <field name="AUTOMATA"
  type="java.lang.String"
  transient="false"
@@ -2358,14 +2279,6 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<constructor name="ChatLog"
- type="com.gsma.services.rcs.chat.ChatLog"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</constructor>
 </class>
 <class name="ChatLog.GroupChat"
  extends="java.lang.Object"
@@ -2375,14 +2288,6 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<constructor name="ChatLog.GroupChat"
- type="com.gsma.services.rcs.chat.ChatLog.GroupChat"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</constructor>
 <method name="getParticipants"
  return="java.util.Map&lt;com.gsma.services.rcs.contact.ContactId, com.gsma.services.rcs.chat.GroupChat.ParticipantStatus&gt;"
  abstract="false"
@@ -2529,14 +2434,6 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<constructor name="ChatLog.Message"
- type="com.gsma.services.rcs.chat.ChatLog.Message"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</constructor>
 <field name="BASECOLUMN_ID"
  type="java.lang.String"
  transient="false"
@@ -2732,14 +2629,6 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<constructor name="ChatLog.Message.Content"
- type="com.gsma.services.rcs.chat.ChatLog.Message.Content"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</constructor>
 </class>
 <class name="ChatLog.Message.Content.ReasonCode"
  extends="java.lang.Enum"
@@ -2779,7 +2668,7 @@
  native="false"
  synchronized="false"
  static="true"
- final="true"
+ final="false"
  deprecated="not deprecated"
  visibility="public"
 >
@@ -2836,7 +2725,7 @@
  native="false"
  synchronized="false"
  static="true"
- final="true"
+ final="false"
  deprecated="not deprecated"
  visibility="public"
 >
@@ -2863,14 +2752,6 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<constructor name="ChatLog.Message.GroupChatEvent"
- type="com.gsma.services.rcs.chat.ChatLog.Message.GroupChatEvent"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</constructor>
 </class>
 <class name="ChatLog.Message.GroupChatEvent.Status"
  extends="java.lang.Enum"
@@ -2910,7 +2791,7 @@
  native="false"
  synchronized="false"
  static="true"
- final="true"
+ final="false"
  deprecated="not deprecated"
  visibility="public"
 >
@@ -2937,14 +2818,6 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<constructor name="ChatLog.Message.MimeType"
- type="com.gsma.services.rcs.chat.ChatLog.Message.MimeType"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</constructor>
 <field name="GEOLOC_MESSAGE"
  type="java.lang.String"
  transient="false"
@@ -4216,14 +4089,6 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<constructor name="GroupChatIntent"
- type="com.gsma.services.rcs.chat.GroupChatIntent"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</constructor>
 <field name="ACTION_NEW_GROUP_CHAT_MESSAGE"
  type="java.lang.String"
  transient="false"
@@ -4544,14 +4409,6 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<constructor name="OneToOneChatIntent"
- type="com.gsma.services.rcs.chat.OneToOneChatIntent"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</constructor>
 <field name="ACTION_MESSAGE_DELIVERY_EXPIRED"
  type="java.lang.String"
  transient="false"
@@ -4700,14 +4557,6 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<constructor name="ContactProvider"
- type="com.gsma.services.rcs.contact.ContactProvider"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</constructor>
 <field name="MIME_TYPE_BLOCKING_STATE"
  type="java.lang.String"
  transient="false"
@@ -5315,14 +5164,6 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<constructor name="MultimediaMessagingSessionIntent"
- type="com.gsma.services.rcs.extension.MultimediaMessagingSessionIntent"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</constructor>
 <field name="ACTION_NEW_INVITATION"
  type="java.lang.String"
  transient="false"
@@ -6066,14 +5907,6 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<constructor name="MultimediaStreamingSessionIntent"
- type="com.gsma.services.rcs.extension.MultimediaStreamingSessionIntent"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</constructor>
 <field name="ACTION_NEW_INVITATION"
  type="java.lang.String"
  transient="false"
@@ -6637,7 +6470,7 @@
  native="false"
  synchronized="false"
  static="true"
- final="true"
+ final="false"
  deprecated="not deprecated"
  visibility="public"
 >
@@ -6694,7 +6527,7 @@
  native="false"
  synchronized="false"
  static="true"
- final="true"
+ final="false"
  deprecated="not deprecated"
  visibility="public"
 >
@@ -6721,14 +6554,6 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<constructor name="FileTransferIntent"
- type="com.gsma.services.rcs.filetransfer.FileTransferIntent"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</constructor>
 <field name="ACTION_FILE_TRANSFER_DELIVERY_EXPIRED"
  type="java.lang.String"
  transient="false"
@@ -6793,14 +6618,6 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<constructor name="FileTransferLog"
- type="com.gsma.services.rcs.filetransfer.FileTransferLog"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</constructor>
 <field name="BASECOLUMN_ID"
  type="java.lang.String"
  transient="false"
@@ -7823,14 +7640,6 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<constructor name="GroupDeliveryInfo"
- type="com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</constructor>
 </class>
 <class name="GroupDeliveryInfo.ReasonCode"
  extends="java.lang.Enum"
@@ -7870,7 +7679,7 @@
  native="false"
  synchronized="false"
  static="true"
- final="true"
+ final="false"
  deprecated="not deprecated"
  visibility="public"
 >
@@ -7927,7 +7736,7 @@
  native="false"
  synchronized="false"
  static="true"
- final="true"
+ final="false"
  deprecated="not deprecated"
  visibility="public"
 >
@@ -7954,14 +7763,6 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<constructor name="GroupDeliveryInfoLog"
- type="com.gsma.services.rcs.groupdelivery.GroupDeliveryInfoLog"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</constructor>
 <field name="BASECOLUMN_ID"
  type="java.lang.String"
  transient="false"
@@ -8072,14 +7873,6 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<constructor name="HistoryLog"
- type="com.gsma.services.rcs.history.HistoryLog"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</constructor>
 <field name="BASECOLUMN_ID"
  type="java.lang.String"
  transient="false"
@@ -8758,14 +8551,6 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<constructor name="GeolocSharingIntent"
- type="com.gsma.services.rcs.sharing.geoloc.GeolocSharingIntent"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</constructor>
 <field name="ACTION_NEW_INVITATION"
  type="java.lang.String"
  transient="false"
@@ -8867,14 +8652,6 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<constructor name="GeolocSharingLog"
- type="com.gsma.services.rcs.sharing.geoloc.GeolocSharingLog"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</constructor>
 <field name="BASECOLUMN_ID"
  type="java.lang.String"
  transient="false"
@@ -9487,14 +9264,6 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<constructor name="ImageSharingIntent"
- type="com.gsma.services.rcs.sharing.image.ImageSharingIntent"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</constructor>
 <field name="ACTION_NEW_INVITATION"
  type="java.lang.String"
  transient="false"
@@ -9596,14 +9365,6 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<constructor name="ImageSharingLog"
- type="com.gsma.services.rcs.sharing.image.ImageSharingLog"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</constructor>
 <field name="BASECOLUMN_ID"
  type="java.lang.String"
  transient="false"
@@ -10358,14 +10119,6 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<constructor name="VideoSharing.Encoding"
- type="com.gsma.services.rcs.sharing.video.VideoSharing.Encoding"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</constructor>
 <field name="H264"
  type="java.lang.String"
  transient="false"
@@ -10500,14 +10253,6 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<constructor name="VideoSharingIntent"
- type="com.gsma.services.rcs.sharing.video.VideoSharingIntent"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</constructor>
 <field name="ACTION_NEW_INVITATION"
  type="java.lang.String"
  transient="false"
@@ -10590,14 +10335,6 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<constructor name="VideoSharingLog"
- type="com.gsma.services.rcs.sharing.video.VideoSharingLog"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</constructor>
 <field name="BASECOLUMN_ID"
  type="java.lang.String"
  transient="false"

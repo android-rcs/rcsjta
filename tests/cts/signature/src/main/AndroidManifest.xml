@@ -25,6 +25,7 @@
             android:name="SignatureTestActivity"
             android:label="@string/title_sig_test_activity"
             android:icon="@drawable/app_icon"
+            android:screenOrientation="landscape"
             android:stateNotNeeded="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
