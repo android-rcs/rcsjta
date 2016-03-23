@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,7 +68,7 @@ public class ContactProvider {
      * Mime type for the time stamp when the blocking was activated
      */
     public final static String MIME_TYPE_BLOCKING_TIMESTAMP = "vnd.android.cursor.item/com.gsma.services.rcs.blocking-timestamp";
-    
+
     /**
      * IP voice call capability support
      */
@@ -85,4 +85,7 @@ public class ContactProvider {
      * RCS extensions supported
      */
     public final static String MIME_TYPE_EXTENSIONS = "vnd.android.cursor.item/com.gsma.services.rcs.extensions";
+
+    private ContactProvider() {
+    }
 }

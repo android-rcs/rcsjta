@@ -66,11 +66,8 @@ public class ImageSharingListenerImpl extends IImageSharingListener.Stub {
 
     }
 
-    /**
-     * This feature to be implemented in CR005
-     */
     @Override
     public void onDeleted(ContactId contact, List<String> sharingIds) throws RemoteException {
-        mListener.onDeleted(contact, new HashSet<String>(sharingIds));
+        mListener.onDeleted(contact, new HashSet<>(sharingIds));
     }
 }

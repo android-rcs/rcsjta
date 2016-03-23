@@ -23,7 +23,7 @@ import com.gsma.services.rcs.contact.ContactId;
 import android.os.RemoteException;
 
 /**
- * Capabilities event listener implementation
+ * Capabilitues event listener implementation
  * 
  * @author Philippe LEMORDANT
  * @hide

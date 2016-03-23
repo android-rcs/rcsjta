@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -102,8 +102,7 @@ public abstract class GenericSipSession extends ImsServiceSession {
      * @throws PayloadException
      */
     public SipRequest createInvite() throws PayloadException {
-        String ext = new StringBuilder(FeatureTags.FEATURE_3GPP).append("=\"")
-                .append(FeatureTags.FEATURE_3GPP_EXTENSION).append("\"").toString();
+        String ext = FeatureTags.FEATURE_3GPP + "=\"" + FeatureTags.FEATURE_3GPP_EXTENSION + "\"";
         SipRequest invite = SipMessageFactory.createInvite(getDialogPath(), new String[] {
                 getFeatureTag(), ext
         }, new String[] {
@@ -132,13 +131,11 @@ public abstract class GenericSipSession extends ImsServiceSession {
      */
     public SipResponse create200OKResponse() throws PayloadException {
         String ext = FeatureTags.FEATURE_3GPP + "=\"" + FeatureTags.FEATURE_3GPP_EXTENSION + "\"";
-        SipResponse resp = SipMessageFactory.create200OkInviteResponse(getDialogPath(),
-                new String[] {
-                        getFeatureTag(), ext
-                }, new String[] {
-                        getFeatureTag(), ext, SipUtils.EXPLICIT_REQUIRE
-                }, getDialogPath().getLocalContent());
-        return resp;
+        return SipMessageFactory.create200OkInviteResponse(getDialogPath(), new String[] {
+                getFeatureTag(), ext
+        }, new String[] {
+                getFeatureTag(), ext, SipUtils.EXPLICIT_REQUIRE
+        }, getDialogPath().getLocalContent());
     }
 
     /**
@@ -163,8 +160,7 @@ public abstract class GenericSipSession extends ImsServiceSession {
         if (isSessionInterrupted()) {
             return;
         }
-        sLogger.error(new StringBuilder("Session error: ").append(error.getErrorCode())
-                .append(", reason=").append(error.getMessage()).toString());
+        sLogger.error("Session error: " + error.getErrorCode() + ", reason=" + error.getMessage());
         closeMediaSession();
         removeSession();
         ContactId contact = getRemoteContact();
@@ -186,7 +182,6 @@ public abstract class GenericSipSession extends ImsServiceSession {
     @Override
     public void receiveCancel(SipRequest cancel) throws NetworkException, PayloadException {
         super.receiveCancel(cancel);
-
         // Request capabilities to the remote
         getImsService().getImsModule().getCapabilityService()
                 .requestContactCapabilities(getRemoteContact());

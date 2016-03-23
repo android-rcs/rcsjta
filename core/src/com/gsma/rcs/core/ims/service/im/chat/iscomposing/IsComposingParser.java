@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -41,26 +41,29 @@ import javax.xml.parsers.SAXParserFactory;
  * Is composing event parser (RFC3994)
  */
 public class IsComposingParser extends DefaultHandler {
-    /*
-     * IsComposing SAMPLE: <?xml version="1.0" encoding="UTF-8"?> <isComposing
-     * xmlns="urn:ietf:params:xml:ns:im-iscomposing"
-     * xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-     * xsi:schemaLocation="urn:ietf:params:xml:ns:im-composing iscomposing.xsd"> <state>idle</state>
-     * <lastactive>2003-01-27T10:43:00Z</lastactive> <contenttype>audio</contenttype> </isComposing>
-     */
+    // @formatter:off
+    /* Example of CPIM message having application/im-iscomposing+xml for content type:
+    <?xml version="1.0" encoding="utf-8"?>
+        <isComposing xmlns="urn:ietf:params:xml:ns:im-iscomposing"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="urn:ietf:params:xml:ns:im-composing iscomposing.xsd">
+            <state>active</state>
+            <contenttype>text/plain</contenttype>
+            <lastactive>2012-02-22T17:53:49.000Z</lastactive>
+            <refresh>60</refresh>
+    </isComposing>
+*/    // @formatter:on
+
     /**
      * Rate to convert from seconds to milliseconds
      */
     private static final long SECONDS_TO_MILLISECONDS_CONVERSION_RATE = 1000;
 
-    private StringBuffer accumulator = null;
+    private StringBuilder mAccumulator;
 
-    private IsComposingInfo isComposingInfo = null;
+    private IsComposingInfo mComposingInfo;
 
-    /**
-     * The logger
-     */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private static final Logger sLogger = Logger.getLogger(IsComposingParser.class.getSimpleName());
 
     private final InputSource mInputSource;
 
@@ -76,7 +79,6 @@ public class IsComposingParser extends DefaultHandler {
     /**
      * Parse the is composing input
      * 
-     * @throws IsComposingParser
      * @throws ParserConfigurationException
      * @throws SAXException
      * @throws ParseFailureException
@@ -95,78 +97,78 @@ public class IsComposingParser extends DefaultHandler {
     }
 
     public void startDocument() {
-        if (logger.isActivated()) {
-            logger.debug("Start document");
-        }
-        accumulator = new StringBuffer();
+        mAccumulator = new StringBuilder();
     }
 
     public void characters(char buffer[], int start, int length) {
-        accumulator.append(buffer, start, length);
+        mAccumulator.append(buffer, start, length);
     }
 
     public void startElement(String namespaceURL, String localName, String qname, Attributes attr) {
-        accumulator.setLength(0);
-
-        if (localName.equals("isComposing")) {
-            isComposingInfo = new IsComposingInfo();
+        mAccumulator.setLength(0);
+        if ("isComposing".equals(localName)) {
+            mComposingInfo = new IsComposingInfo();
         }
-
     }
 
     public void endElement(String namespaceURL, String localName, String qname) {
-        if (localName.equals("state")) {
-            if (isComposingInfo != null) {
-                isComposingInfo.setState(accumulator.toString());
-            }
-        } else if (localName.equals("lastactive")) {
-            if (isComposingInfo != null) {
-                isComposingInfo.setLastActiveDate(accumulator.toString());
-            }
-        } else if (localName.equals("contenttype")) {
-            if (isComposingInfo != null) {
-                isComposingInfo.setContentType(accumulator.toString());
-            }
-        } else if (localName.equals("refresh")) {
-            if (isComposingInfo != null) {
-                long time = Long.parseLong(accumulator.toString())
-                        * SECONDS_TO_MILLISECONDS_CONVERSION_RATE;
-                isComposingInfo.setRefreshTime(time);
-            }
-        } else if (localName.equals("isComposing")) {
-            if (logger.isActivated()) {
-                logger.debug("Watcher document is complete");
-            }
+        switch (localName) {
+            case "state":
+                if (mComposingInfo != null) {
+                    mComposingInfo.setState(mAccumulator.toString());
+                }
+                break;
+            case "lastactive":
+                if (mComposingInfo != null) {
+                    mComposingInfo.setLastActiveDate(mAccumulator.toString());
+                }
+                break;
+            case "contenttype":
+                if (mComposingInfo != null) {
+                    mComposingInfo.setContentType(mAccumulator.toString());
+                }
+                break;
+            case "refresh":
+                if (mComposingInfo != null) {
+                    long time = Long.parseLong(mAccumulator.toString())
+                            * SECONDS_TO_MILLISECONDS_CONVERSION_RATE;
+                    mComposingInfo.setRefreshTime(time);
+                }
+                break;
+            case "isComposing":
+                if (sLogger.isActivated()) {
+                    sLogger.debug("Watcher document is complete");
+                }
+                break;
         }
     }
 
     public void endDocument() {
-        if (logger.isActivated()) {
-            logger.debug("End document");
-        }
     }
 
     public void warning(SAXParseException exception) {
-        if (logger.isActivated()) {
-            logger.error("Warning: line " + exception.getLineNumber() + ": "
+        if (sLogger.isActivated()) {
+            sLogger.error("Warning: line " + exception.getLineNumber() + ": "
                     + exception.getMessage());
         }
     }
 
     public void error(SAXParseException exception) {
-        if (logger.isActivated()) {
-            logger.error("Error: line " + exception.getLineNumber() + ": " + exception.getMessage());
+        if (sLogger.isActivated()) {
+            sLogger.error("Error: line " + exception.getLineNumber() + ": "
+                    + exception.getMessage());
         }
     }
 
     public void fatalError(SAXParseException exception) throws SAXException {
-        if (logger.isActivated()) {
-            logger.error("Fatal: line " + exception.getLineNumber() + ": " + exception.getMessage());
+        if (sLogger.isActivated()) {
+            sLogger.error("Fatal: line " + exception.getLineNumber() + ": "
+                    + exception.getMessage());
         }
         throw exception;
     }
 
     public IsComposingInfo getIsComposingInfo() {
-        return isComposingInfo;
+        return mComposingInfo;
     }
 }

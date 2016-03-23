@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -82,16 +82,7 @@ public class FileUploadInfo implements Parcelable {
 
     /**
      * Constructor for outgoing message
-     * 
-     * @param file
-     * @param validity
-     * @param filename
-     * @param size
-     * @param type
-     * @param fileIcon
-     * @param fileIconValidity
-     * @param fileIconSize
-     * @param fileIconType
+     *
      * @hide
      */
     public FileUploadInfo(Uri file, long validity, String filename, long size, String type,
@@ -109,12 +100,7 @@ public class FileUploadInfo implements Parcelable {
 
     /**
      * Constructor for outgoing message
-     * 
-     * @param file
-     * @param validity
-     * @param filename
-     * @param size
-     * @param type
+     *
      * @hide
      */
     public FileUploadInfo(Uri file, long validity, String filename, long size, String type) {

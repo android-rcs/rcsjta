@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,8 +54,6 @@ public class ServiceExtensionManager {
 
     private final Core mCore;
 
-    private final ImsModule mImsModule;
-
     private ExternalCapabilityMonitoring mExternalCapabilityMonitoring;
 
     private ExecutorService mUpdateExecutor;
@@ -72,11 +70,10 @@ public class ServiceExtensionManager {
      */
     public ServiceExtensionManager(ImsModule imsModule, Context ctx, Core core,
             RcsSettings rcsSettings) {
-        mImsModule = imsModule;
         mCtx = ctx;
         mCore = core;
         mRcsSettings = rcsSettings;
-        mSupportedExtensionUpdater = new SupportedExtensionUpdater(mCtx, mImsModule, mRcsSettings,
+        mSupportedExtensionUpdater = new SupportedExtensionUpdater(mCtx, imsModule, mRcsSettings,
                 this);
     }
 
@@ -135,10 +132,17 @@ public class ServiceExtensionManager {
             }
             return false;
         }
-        if (sLogger.isActivated()) {
-            sLogger.debug("No control on extension: ".concat(ext));
+        if (mRcsSettings.isExtensionAuthorized(ext)) {
+            if (sLogger.isActivated()) {
+                sLogger.debug("No control on extension ".concat(ext));
+            }
+            return true;
+        } else {
+            if (sLogger.isActivated()) {
+                sLogger.debug("Extension " + ext + " is not allowed");
+            }
+            return false;
         }
-        return true;
     }
 
     /**
@@ -162,7 +166,7 @@ public class ServiceExtensionManager {
      * @return the set of extensions
      */
     public static Set<String> getExtensions(String extensions) {
-        Set<String> result = new HashSet<String>();
+        Set<String> result = new HashSet<>();
         if (TextUtils.isEmpty(extensions)) {
             return result;
         }

@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -36,6 +36,8 @@ import android.util.Log;
 
 /**
  * A utility class to control the activation of the RCS service.
+ * 
+ * @author Philippe LEMORDANT
  */
 public class RcsServiceControl {
 
@@ -152,7 +154,7 @@ public class RcsServiceControl {
     /**
      * Query RCS stack by sending broadcast intent.
      *
-     * @param action of the intent
+     * @param intent Intent
      * @return the result extra data bundle or null if no response is received due to timeout
      * @throws RcsGenericException raised if timeout
      */
@@ -196,7 +198,7 @@ public class RcsServiceControl {
     /**
      * Update flags of the broadcast intent to increase performance
      *
-     * @param intent
+     * @param intent the intent
      */
     private void trySetIntentForActivePackageAndReceiverInForeground(Intent intent) {
         IntentUtils.tryToSetExcludeStoppedPackagesFlag(intent);

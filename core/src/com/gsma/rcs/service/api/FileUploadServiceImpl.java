@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,6 +30,7 @@ import com.gsma.rcs.platform.file.FileDescription;
 import com.gsma.rcs.platform.file.FileFactory;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.service.broadcaster.FileUploadEventBroadcaster;
+import com.gsma.rcs.utils.FileUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.ICommonServiceConfiguration;
 import com.gsma.services.rcs.RcsService;
@@ -173,8 +174,9 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
 
         try {
             FileDescription desc = FileFactory.getFactory().getFileDescription(file);
-            MmContent content = ContentManager
-                    .createMmContent(file, desc.getSize(), desc.getName());
+            String mime = FileUtils.getMimeType(file);
+            MmContent content = ContentManager.createMmContent(file, mime, desc.getSize(),
+                    desc.getName());
 
             mImService.assertFileSizeNotExceedingMaxLimit(content.getSize(),
                     "File exceeds max size.");

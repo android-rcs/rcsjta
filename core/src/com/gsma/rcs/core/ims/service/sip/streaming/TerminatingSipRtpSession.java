@@ -2,7 +2,7 @@
 
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -75,7 +75,9 @@ public class TerminatingSipRtpSession extends GenericSipRtpSession {
             ContactId contact, Intent sessionInvite, RcsSettings rcsSettings, long timestamp,
             ContactManager contactManager) {
         super(parent, contact, GenericSipSession.getIariFeatureTag(invite.getFeatureTags()),
-                rcsSettings, timestamp, contactManager);
+                rcsSettings, timestamp, contactManager,
+                GenericSipRtpSession.getEncoding(invite.getContent()));
+
         mSessionInvite = sessionInvite;
         mImsModule = imsModule;
         /* Create dialog path */
@@ -167,7 +169,7 @@ public class TerminatingSipRtpSession extends GenericSipRtpSession {
             }
 
             String sdp = generateSdp();
-
+            
             /* Set the local SDP part in the dialog path */
             dialogPath.setLocalContent(sdp);
 

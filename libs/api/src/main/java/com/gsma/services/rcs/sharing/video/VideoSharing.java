@@ -216,6 +216,9 @@ public class VideoSharing {
          * H264
          */
         public static final String H264 = "H264";
+
+        private Encoding() {
+        }
     }
 
     /**

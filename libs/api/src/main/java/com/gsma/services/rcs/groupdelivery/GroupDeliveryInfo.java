@@ -57,14 +57,14 @@ public class GroupDeliveryInfo {
 
         private final int mValue;
 
-        private static SparseArray<Status> mValueToEnum = new SparseArray<Status>();
+        private static SparseArray<Status> mValueToEnum = new SparseArray<>();
         static {
             for (Status entry : Status.values()) {
                 mValueToEnum.put(entry.toInt(), entry);
             }
         }
 
-        private Status(int value) {
+        Status(int value) {
             mValue = value;
         }
 
@@ -72,13 +72,13 @@ public class GroupDeliveryInfo {
             return mValue;
         }
 
-        public final static Status valueOf(int value) {
+        public static Status valueOf(int value) {
             Status entry = mValueToEnum.get(value);
             if (entry != null) {
                 return entry;
             }
-            throw new IllegalArgumentException("No enum const class " + Status.class.getName()
-                    + "" + value);
+            throw new IllegalArgumentException("No enum const class " + Status.class.getName() + ""
+                    + value);
         }
     }
 
@@ -104,14 +104,14 @@ public class GroupDeliveryInfo {
 
         private final int mValue;
 
-        private static SparseArray<ReasonCode> mValueToEnum = new SparseArray<ReasonCode>();
+        private static SparseArray<ReasonCode> mValueToEnum = new SparseArray<>();
         static {
             for (ReasonCode entry : ReasonCode.values()) {
                 mValueToEnum.put(entry.toInt(), entry);
             }
         }
 
-        private ReasonCode(int value) {
+        ReasonCode(int value) {
             mValue = value;
         }
 
@@ -119,7 +119,7 @@ public class GroupDeliveryInfo {
             return mValue;
         }
 
-        public final static ReasonCode valueOf(int value) {
+        public static ReasonCode valueOf(int value) {
             ReasonCode entry = mValueToEnum.get(value);
             if (entry != null) {
                 return entry;
@@ -127,5 +127,8 @@ public class GroupDeliveryInfo {
             throw new IllegalArgumentException("No enum const class " + ReasonCode.class.getName()
                     + "" + value);
         }
+    }
+
+    private GroupDeliveryInfo() {
     }
 }

@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -34,10 +34,63 @@ import android.util.SparseArray;
 
 /**
  * File transfer
- * 
+ *
  * @author Jean-Marc AUFFRET
+ * @author Philippe LEMORDANT
  */
 public class FileTransfer {
+
+    /**
+     * File disposition
+     */
+    public enum Disposition {
+        /**
+         * Attachment
+         */
+        ATTACH(0),
+
+        /**
+         * Render
+         */
+        RENDER(1);
+
+        private final int mValue;
+
+        private static SparseArray<Disposition> mValueToEnum = new SparseArray<>();
+        static {
+            for (Disposition entry : Disposition.values()) {
+                mValueToEnum.put(entry.toInt(), entry);
+            }
+        }
+
+        Disposition(int value) {
+            mValue = value;
+        }
+
+        /**
+         * Returns the value of this Disposition as an integer.
+         *
+         * @return integer value
+         */
+        public final int toInt() {
+            return mValue;
+        }
+
+        /**
+         * Returns a Disposition instance representing the specified integer value.
+         *
+         * @param value the integer value
+         * @return State instance
+         */
+        public static Disposition valueOf(int value) {
+            Disposition entry = mValueToEnum.get(value);
+            if (entry != null) {
+                return entry;
+            }
+            throw new IllegalArgumentException("No enum const class " + State.class.getName() + ""
+                    + value + "!");
+        }
+    }
 
     /**
      * File transfer state
@@ -105,20 +158,20 @@ public class FileTransfer {
 
         private final int mValue;
 
-        private static SparseArray<State> mValueToEnum = new SparseArray<State>();
+        private static SparseArray<State> mValueToEnum = new SparseArray<>();
         static {
             for (State entry : State.values()) {
                 mValueToEnum.put(entry.toInt(), entry);
             }
         }
 
-        private State(int value) {
+        State(int value) {
             mValue = value;
         }
 
         /**
          * Returns the value of this State as an integer.
-         * 
+         *
          * @return integer value
          */
         public final int toInt() {
@@ -127,17 +180,17 @@ public class FileTransfer {
 
         /**
          * Returns a State instance representing the specified integer value.
-         * 
+         *
          * @param value the integer value
          * @return State instance
          */
-        public final static State valueOf(int value) {
+        public static State valueOf(int value) {
             State entry = mValueToEnum.get(value);
             if (entry != null) {
                 return entry;
             }
-            throw new IllegalArgumentException(new StringBuilder("No enum const class ")
-                    .append(State.class.getName()).append("").append(value).append("!").toString());
+            throw new IllegalArgumentException("No enum const class " + State.class.getName() + ""
+                    + value + "!");
         }
 
     }
@@ -259,20 +312,20 @@ public class FileTransfer {
 
         private final int mValue;
 
-        private static SparseArray<ReasonCode> mValueToEnum = new SparseArray<ReasonCode>();
+        private static SparseArray<ReasonCode> mValueToEnum = new SparseArray<>();
         static {
             for (ReasonCode entry : ReasonCode.values()) {
                 mValueToEnum.put(entry.toInt(), entry);
             }
         }
 
-        private ReasonCode(int value) {
+        ReasonCode(int value) {
             mValue = value;
         }
 
         /**
          * Returns the value of this ReasonCode as an integer.
-         * 
+         *
          * @return integer value
          */
         public final int toInt() {
@@ -281,18 +334,17 @@ public class FileTransfer {
 
         /**
          * Returns a ReasonCode instance representing the specified integer value.
-         * 
+         *
          * @param value the integer value
          * @return ReasonCode instance
          */
-        public final static ReasonCode valueOf(int value) {
+        public static ReasonCode valueOf(int value) {
             ReasonCode entry = mValueToEnum.get(value);
             if (entry != null) {
                 return entry;
             }
-            throw new IllegalArgumentException(new StringBuilder("No enum const class ")
-                    .append(ReasonCode.class.getName()).append("").append(value).append("!")
-                    .toString());
+            throw new IllegalArgumentException("No enum const class " + ReasonCode.class.getName()
+                    + "" + value + "!");
         }
     }
 
@@ -303,9 +355,8 @@ public class FileTransfer {
 
     /**
      * Constructor
-     * 
+     *
      * @param transferIntf File transfer interface
-     * @hide
      */
     /* package private */FileTransfer(IFileTransfer transferIntf) {
         mTransferInf = transferIntf;
@@ -313,7 +364,7 @@ public class FileTransfer {
 
     /**
      * Returns the chat ID if this file transfer is a group file transfer
-     * 
+     *
      * @return String Chat ID
      * @throws RcsPersistentStorageException
      * @throws RcsGenericException
@@ -330,7 +381,7 @@ public class FileTransfer {
 
     /**
      * Returns the file transfer ID of the file transfer
-     * 
+     *
      * @return String Transfer ID
      * @throws RcsGenericException
      */
@@ -345,7 +396,7 @@ public class FileTransfer {
 
     /**
      * Returns the remote contact identifier
-     * 
+     *
      * @return ContactId
      * @throws RcsPersistentStorageException
      * @throws RcsGenericException
@@ -362,7 +413,7 @@ public class FileTransfer {
 
     /**
      * Returns the complete filename including the path of the file to be transferred
-     * 
+     *
      * @return String Filename
      * @throws RcsPersistentStorageException
      * @throws RcsGenericException
@@ -379,7 +430,7 @@ public class FileTransfer {
 
     /**
      * Returns the size of the file to be transferred
-     * 
+     *
      * @return long Size in bytes
      * @throws RcsPersistentStorageException
      * @throws RcsGenericException
@@ -396,7 +447,7 @@ public class FileTransfer {
 
     /**
      * Returns the MIME type of the file to be transferred
-     * 
+     *
      * @return String Type
      * @throws RcsPersistentStorageException
      * @throws RcsGenericException
@@ -413,7 +464,7 @@ public class FileTransfer {
 
     /**
      * Returns the Uri of the file icon
-     * 
+     *
      * @return Uri the Uri of the file icon or thumbnail
      * @throws RcsPersistentStorageException
      * @throws RcsGenericException
@@ -430,7 +481,7 @@ public class FileTransfer {
 
     /**
      * Returns the MIME type of the file icon to be transfered
-     * 
+     *
      * @return String MIME Type
      * @throws RcsPersistentStorageException
      * @throws RcsGenericException
@@ -447,7 +498,7 @@ public class FileTransfer {
 
     /**
      * Returns the Uri of the file
-     * 
+     *
      * @return Uri of file
      * @throws RcsPersistentStorageException
      * @throws RcsGenericException
@@ -464,7 +515,7 @@ public class FileTransfer {
 
     /**
      * Returns the state of the file transfer
-     * 
+     *
      * @return State
      * @see FileTransfer.State
      * @throws RcsPersistentStorageException
@@ -482,7 +533,7 @@ public class FileTransfer {
 
     /**
      * Returns the reason code of the state of the sharing
-     * 
+     *
      * @return ReasonCode
      * @see ReasonCode
      * @see FileTransfer.ReasonCode
@@ -501,7 +552,7 @@ public class FileTransfer {
 
     /**
      * Returns the direction of the transfer
-     * 
+     *
      * @return Direction
      * @see Direction
      * @throws RcsPersistentStorageException
@@ -521,7 +572,7 @@ public class FileTransfer {
      * Returns the local timestamp of when the file transfer was initiated and/or queued for
      * outgoing file transfers or the local timestamp of when the file transfer invitation was
      * received for incoming file transfers
-     * 
+     *
      * @return long
      * @throws RcsPersistentStorageException
      * @throws RcsGenericException
@@ -540,7 +591,7 @@ public class FileTransfer {
      * Returns the local timestamp of when the file transfer was initiated and /or queued for
      * outgoing file transfers or the remote timestamp of when the file transfer was initiated for
      * incoming file transfers
-     * 
+     *
      * @return long
      * @throws RcsPersistentStorageException
      * @throws RcsGenericException
@@ -558,7 +609,7 @@ public class FileTransfer {
     /**
      * Returns the local timestamp of when the file transfer was delivered for outgoing file
      * transfers or 0 for incoming file transfers or it was not yet displayed
-     * 
+     *
      * @return long
      * @throws RcsPersistentStorageException
      * @throws RcsGenericException
@@ -576,7 +627,7 @@ public class FileTransfer {
     /**
      * Returns the local timestamp of when the file transfer was displayed for outgoing file
      * transfers or 0 for incoming file transfers or it was not yet displayed
-     * 
+     *
      * @return long
      * @throws RcsPersistentStorageException
      * @throws RcsGenericException
@@ -593,7 +644,7 @@ public class FileTransfer {
 
     /**
      * Accepts file transfer invitation
-     * 
+     *
      * @throws RcsPermissionDeniedException
      * @throws RcsPersistentStorageException
      * @throws RcsGenericException
@@ -612,7 +663,7 @@ public class FileTransfer {
 
     /**
      * Rejects file transfer invitation
-     * 
+     *
      * @throws RcsPersistentStorageException
      * @throws RcsPermissionDeniedException
      * @throws RcsGenericException
@@ -631,7 +682,7 @@ public class FileTransfer {
 
     /**
      * Aborts the file transfer
-     * 
+     *
      * @throws RcsPermissionDeniedException
      * @throws RcsGenericException
      */
@@ -648,7 +699,7 @@ public class FileTransfer {
      * Returns true if it is possible to pause this file transfer right now, else returns false. If
      * this filetransfer corresponds to a file transfer that is no longer present in the persistent
      * storage false will be returned (this is no error)
-     * 
+     *
      * @return boolean
      * @throws RcsGenericException
      */
@@ -663,7 +714,7 @@ public class FileTransfer {
 
     /**
      * Pauses the file transfer
-     * 
+     *
      * @throws RcsPermissionDeniedException
      * @throws RcsGenericException
      */
@@ -681,7 +732,7 @@ public class FileTransfer {
      * Returns true if it is possible to resume this file transfer right now, else return false. If
      * this filetransfer corresponds to a file transfer that is no longer present in the persistent
      * storage false will be returned.
-     * 
+     *
      * @return boolean
      * @throws RcsPersistentStorageException
      * @throws RcsGenericException
@@ -699,7 +750,7 @@ public class FileTransfer {
 
     /**
      * Resumes the file transfer
-     * 
+     *
      * @throws RcsPermissionDeniedException
      * @throws RcsPersistentStorageException
      * @throws RcsGenericException
@@ -717,7 +768,7 @@ public class FileTransfer {
 
     /**
      * Returns whether you can resend the transfer.
-     * 
+     *
      * @return boolean
      * @throws RcsPersistentStorageException
      * @throws RcsGenericException
@@ -736,7 +787,7 @@ public class FileTransfer {
     /**
      * Resend a file transfer which was previously failed. This only for 1-1 file transfer, an
      * exception is thrown in case of a file transfer to group.
-     * 
+     *
      * @throws RcsPermissionDeniedException
      * @throws RcsGenericException
      */
@@ -752,7 +803,7 @@ public class FileTransfer {
 
     /**
      * Returns true if file transfer has been marked as read
-     * 
+     *
      * @return boolean
      * @throws RcsPersistentStorageException
      * @throws RcsGenericException
@@ -769,7 +820,7 @@ public class FileTransfer {
 
     /**
      * Returns the time for when file on the content server is no longer valid to download.
-     * 
+     *
      * @return long time in milliseconds or 0 if not applicable or -1 if unknown
      * @throws RcsPersistentStorageException
      * @throws RcsGenericException
@@ -786,7 +837,7 @@ public class FileTransfer {
 
     /**
      * Returns the time for when file icon on the content server is no longer valid to download.
-     * 
+     *
      * @return long time in milliseconds or 0 if not applicable or -1 if unknown
      * @throws RcsPersistentStorageException
      * @throws RcsGenericException
@@ -806,7 +857,7 @@ public class FileTransfer {
      * either that delivery for this file has not yet expired, delivery has been successful,
      * delivery expiration has been cleared (see clearFileTransferDeliveryExpiration) or that this
      * particular file is not eligible for delivery expiration in the first place.
-     * 
+     *
      * @return boolean
      * @throws RcsPersistentStorageException
      * @throws RcsGenericException
@@ -814,6 +865,24 @@ public class FileTransfer {
     public boolean isExpiredDelivery() throws RcsPersistentStorageException, RcsGenericException {
         try {
             return mTransferInf.isExpiredDelivery();
+
+        } catch (Exception e) {
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
+        }
+    }
+
+    /**
+     * Returns the file disposition
+     * {@link com.gsma.services.rcs.filetransfer.FileTransfer.Disposition}.
+     *
+     * @return disposition
+     * @throws RcsPersistentStorageException
+     * @throws RcsGenericException
+     */
+    public Disposition getDisposition() throws RcsPersistentStorageException, RcsGenericException {
+        try {
+            return Disposition.valueOf(mTransferInf.getDisposition());
 
         } catch (Exception e) {
             RcsPersistentStorageException.assertException(e);

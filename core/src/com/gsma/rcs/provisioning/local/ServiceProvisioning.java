@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -117,6 +117,8 @@ public class ServiceProvisioning extends Activity {
         setLongEditTextParam(R.id.MaxImageShareSize, RcsSettingsData.MAX_IMAGE_SHARE_SIZE, helper);
         setLongEditTextParam(R.id.MaxVideoShareDuration, RcsSettingsData.MAX_VIDEO_SHARE_DURATION,
                 helper);
+        setLongEditTextParam(R.id.MaxAudioMessageDuration,
+                RcsSettingsData.MAX_AUDIO_MESSAGE_DURATION, helper);
         setIntegerEditTextParam(R.id.MaxChatSessions, RcsSettingsData.MAX_CHAT_SESSIONS, helper);
         setIntegerEditTextParam(R.id.MaxFileTransferSessions,
                 RcsSettingsData.MAX_FILE_TRANSFER_SESSIONS, helper);
@@ -134,15 +136,18 @@ public class ServiceProvisioning extends Activity {
                 helper);
         setStringEditTextParam(R.id.DirectoryPathVideos, RcsSettingsData.DIRECTORY_PATH_VIDEOS,
                 helper);
+        setStringEditTextParam(R.id.DirectoryPathAudios, RcsSettingsData.DIRECTORY_PATH_AUDIOS,
+                helper);
         setStringEditTextParam(R.id.DirectoryPathFiles, RcsSettingsData.DIRECTORY_PATH_FILES,
                 helper);
-        setStringEditTextParam(R.id.DirectoryPathFileIcons, RcsSettingsData.DIRECTORY_PATH_FILEICONS,
-                helper);
+        setStringEditTextParam(R.id.DirectoryPathFileIcons,
+                RcsSettingsData.DIRECTORY_PATH_FILEICONS, helper);
         setIntegerEditTextParam(R.id.MaxGeolocLabelLength, RcsSettingsData.MAX_GEOLOC_LABEL_LENGTH,
                 helper);
         setLongEditTextParam(R.id.GeolocExpirationTime, RcsSettingsData.GEOLOC_EXPIRATION_TIME,
                 helper);
-
+        setLongEditTextParam(R.id.CallComposerIdleDuration,
+                RcsSettingsData.CALL_COMPOSER_INACTIVITY_TIMEOUT, helper);
         Spinner spinner = (Spinner) findViewById(R.id.ImSessionStart);
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_item, IM_SESSION_START_MODES);
@@ -161,6 +166,7 @@ public class ServiceProvisioning extends Activity {
                 RcsSettingsData.AUTO_ACCEPT_FT_CHANGEABLE, helper);
         setCheckBoxParam(R.id.AutoAcceptChat, RcsSettingsData.AUTO_ACCEPT_CHAT, helper);
         setCheckBoxParam(R.id.AutoAcceptGroupChat, RcsSettingsData.AUTO_ACCEPT_GROUP_CHAT, helper);
+        setCheckBoxParam(R.id.EnrichCalling, RcsSettingsData.ENRICH_CALLING_SERVICE, helper);
     }
 
     @Override
@@ -191,6 +197,8 @@ public class ServiceProvisioning extends Activity {
         saveLongEditTextParam(R.id.MaxImageShareSize, RcsSettingsData.MAX_IMAGE_SHARE_SIZE, helper);
         saveLongEditTextParam(R.id.MaxVideoShareDuration, RcsSettingsData.MAX_VIDEO_SHARE_DURATION,
                 helper);
+        saveLongEditTextParam(R.id.MaxAudioMessageDuration,
+                RcsSettingsData.MAX_AUDIO_MESSAGE_DURATION, helper);
         saveIntegerEditTextParam(R.id.MaxChatSessions, RcsSettingsData.MAX_CHAT_SESSIONS, helper);
         saveIntegerEditTextParam(R.id.MaxFileTransferSessions,
                 RcsSettingsData.MAX_FILE_TRANSFER_SESSIONS, helper);
@@ -212,10 +220,14 @@ public class ServiceProvisioning extends Activity {
                 helper);
         saveStringEditTextParam(R.id.DirectoryPathVideos, RcsSettingsData.DIRECTORY_PATH_VIDEOS,
                 helper);
+        saveStringEditTextParam(R.id.DirectoryPathAudios, RcsSettingsData.DIRECTORY_PATH_AUDIOS,
+                helper);
         saveStringEditTextParam(R.id.DirectoryPathFiles, RcsSettingsData.DIRECTORY_PATH_FILES,
                 helper);
-        saveStringEditTextParam(R.id.DirectoryPathFileIcons, RcsSettingsData.DIRECTORY_PATH_FILEICONS,
-                helper);
+        saveLongEditTextParam(R.id.CallComposerIdleDuration,
+                RcsSettingsData.CALL_COMPOSER_INACTIVITY_TIMEOUT, helper);
+        saveStringEditTextParam(R.id.DirectoryPathFileIcons,
+                RcsSettingsData.DIRECTORY_PATH_FILEICONS, helper);
 
         Spinner spinner = (Spinner) findViewById(R.id.ImSessionStart);
         if (bundle != null) {
@@ -235,6 +247,7 @@ public class ServiceProvisioning extends Activity {
                 RcsSettingsData.AUTO_ACCEPT_FT_CHANGEABLE, helper);
         saveCheckBoxParam(R.id.AutoAcceptChat, RcsSettingsData.AUTO_ACCEPT_CHAT, helper);
         saveCheckBoxParam(R.id.AutoAcceptGroupChat, RcsSettingsData.AUTO_ACCEPT_GROUP_CHAT, helper);
+        saveCheckBoxParam(R.id.EnrichCalling, RcsSettingsData.ENRICH_CALLING_SERVICE, helper);
     }
 
     /**

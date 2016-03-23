@@ -1,21 +1,21 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
- *
- * Copyright (C) 2010 France Telecom S.A.
+ * <p/>
+ * Copyright (C) 2010-2016 Orange.
  * Copyright (C) 2014 Sony Mobile Communications Inc.
- *
+ * <p/>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p/>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p/>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
+ * <p/>
  * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
@@ -31,91 +31,86 @@ import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
  * Is composing info document (see RFC3994)
  */
 public class IsComposingInfo {
-    /**
-     * MIME type
-     */
+
     public static String MIME_TYPE = "application/im-iscomposing+xml";
 
-    /**
-     * CRLF constant
-     */
     private static final String CRLF = "\r\n";
 
-    /**
-     * State
-     */
-    private boolean state = false;
+    private boolean mActive;
 
-    /**
-     * Last active state in milliseconds
-     */
-    private long lastActiveDate = 0L;
+    private long mLastActiveDate;
 
-    /**
-     * Refresh time in milliseconds
-     */
-    private long refreshTime = 0L;
+    private long mRefreshTime;
 
-    /**
-     * Content type
-     */
-    private String contentType = "";
+    private String mContentType;
 
     /**
      * Constructor
      */
     public IsComposingInfo() {
+        mContentType = "";
     }
 
     public void setState(String state) {
-        if (state.equalsIgnoreCase("active")) {
-            this.state = true;
-        } else {
-            this.state = false;
-        }
+        mActive = state.equalsIgnoreCase("active");
     }
 
+    /**
+     * Sets the last active timestamp
+     * 
+     * @param lastActiveTimestamp the last active timestamp
+     */
     public void setLastActiveDate(String lastActiveTimestamp) {
-        this.lastActiveDate = DateUtils.decodeDate(lastActiveTimestamp);
+        mLastActiveDate = DateUtils.decodeDate(lastActiveTimestamp);
     }
 
     /**
      * Sets the refresh time
-     * 
+     *
      * @param refreshTime in milliseconds
      */
     public void setRefreshTime(long refreshTime) {
-        this.refreshTime = refreshTime;
-    }
-
-    public void setContentType(String contentType) {
-        this.contentType = contentType;
-    }
-
-    public boolean isStateActive() {
-        return state;
-    }
-
-    public long getLastActiveDate() {
-        return lastActiveDate;
+        mRefreshTime = refreshTime;
     }
 
     /**
-     * Get the refresh time
+     * Sets the content type
      * 
+     * @param contentType the content type
+     */
+    public void setContentType(String contentType) {
+        mContentType = contentType;
+    }
+
+    public boolean isStateActive() {
+        return mActive;
+    }
+
+    public long getLastActiveDate() {
+        return mLastActiveDate;
+    }
+
+    /**
+     * Gets the refresh time
+     *
      * @return refresh time in milliseconds
      */
     public long getRefreshTime() {
-        return refreshTime;
+        return mRefreshTime;
     }
 
+    /**
+     * Gets the content type
+     * 
+     * @return the content type
+     */
     public String getContentType() {
-        return contentType;
+        return mContentType;
     }
 
     /**
      * Build is composing document
-     * 
+     *
      * @param status Status
      * @return XML document
      */

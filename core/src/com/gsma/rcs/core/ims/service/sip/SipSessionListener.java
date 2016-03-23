@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,8 +42,9 @@ public interface SipSessionListener extends ImsSessionListener {
      * 
      * @param contact Remote contact
      * @param data Received data
+     * @param contentType Data content type
      */
-    public void onDataReceived(ContactId contact, byte[] data);
+    public void onDataReceived(ContactId contact, byte[] data, String contentType);
 
     /**
      * Destination user agent received INVITE, and is alerting user of call
@@ -59,4 +60,11 @@ public interface SipSessionListener extends ImsSessionListener {
      * @param sessionInvite
      */
     public void onInvitationReceived(ContactId contact, Intent sessionInvite);
+
+    /**
+     * Data has been flushed
+     *
+     * @param contact Remote contact
+     */
+    public void onDataFlushed(ContactId contact);
 }

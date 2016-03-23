@@ -285,6 +285,10 @@ public class HttpsProvisioningManager {
                     HttpsProvisioningUtils.getRcsVersion());
             sHttpsReqUriBuilder.appendQueryParameter(PARAM_RCS_PROFILE,
                     HttpsProvisioningUtils.getRcsProfile());
+            if (mRcsSettings.isEnrichCallingServiceSupported()) {
+                sHttpsReqUriBuilder.appendQueryParameter(PARAM_RCS_PROFILE,
+                    HttpsProvisioningUtils.getEnrichCallingProfile());
+            }
             sHttpsReqUriBuilder.appendQueryParameter(PARAM_CLIENT_VENDOR,
                     TerminalInfo.getClientVendor());
             sHttpsReqUriBuilder.appendQueryParameter(PARAM_CLIENT_VERSION,
@@ -318,9 +322,10 @@ public class HttpsProvisioningManager {
 
         /*
          * RCS standard:
-         * "The token shall be stored on the device so it can be used in subsequent configuration requests over non-3GPP access."
-         * <br> In 3GPP access, the token is only compulsory for non 3GPP access and is not used for
-         * 3GPP access. It shall then not be inserted as a URI parameter for 3GPP access.
+         * "The token shall be stored on the device so it can be used in subsequent configuration
+         * requests over non-3GPP access." In 3GPP access, the token is only compulsory for non
+         * 3GPP access and is not used for 3GPP access. It shall then not be inserted as a URI
+         * parameter for 3GPP access.
          */
         if (NetworkUtils.getNetworkAccessType() == NetworkUtils.NETWORK_ACCESS_WIFI) {
             /*

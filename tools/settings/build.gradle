@@ -26,11 +26,11 @@ android {
     buildToolsVersion rootProject.buildToolsVersion
 
     defaultConfig {
-        applicationId "com.orangelabs.rcs.core.control"
+        applicationId "com.gsma.rcs.core.control"
         minSdkVersion rootProject.minSdkVersion
         targetSdkVersion rootProject.targetSdkVersion
         versionCode 1
-        versionName "1.5.1"
+        versionName "2.0"
         archivesBaseName = "settings"
     }
 }

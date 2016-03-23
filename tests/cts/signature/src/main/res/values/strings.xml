@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">RCS ApiSigTest</string>
+    <string name="label_result">Test result:</string>
+    <string name="label_type">Type:</string>
+    <string name="label_name">Name:</string>
+    <string name="label_why">Reason:</string>
+    <string name="test_passed">PASS</string>
+    <string name="test_failed">FAILED (%1$d)</string>
+    <string name="title_sig_test_activity">RCS ApiSigTest</string>
+</resources>

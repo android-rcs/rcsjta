@@ -210,6 +210,23 @@ public class FileTransferServiceConfigurationImpl extends IFileTransferServiceCo
     }
 
     @Override
+    public long getMaxAudioMessageDuration() throws RemoteException {
+        try {
+            return mRcsSettings.getMaxAudioMessageDuration();
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
+    }
+
+    @Override
     public int getMaxFileTransfers() throws RemoteException {
         try {
             return mRcsSettings.getMaxFileTransferSessions();

@@ -1,7 +1,7 @@
 /*******************************************************************************
 w * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -68,7 +68,7 @@ public class DownloadFromResumeFileSharingSession extends TerminatingHttpFileSha
         super(imService,
                 content,
                 resume.getFileExpiration(),
-                resume.getFileicon() != null ? FileTransferUtils.createMmContent(resume.getFileicon()) : null,
+                resume.getFileicon() != null ? FileTransferUtils.createIconContent(resume.getFileicon()) : null,
                 resume.getFileicon() != null ? resume.getIconExpiration() : FileTransferData.UNKNOWN_EXPIRATION,
                 resume.getContact(),
                 resume.getChatId(),

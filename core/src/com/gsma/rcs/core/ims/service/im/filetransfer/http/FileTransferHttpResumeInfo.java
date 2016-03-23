@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,8 +22,6 @@
 
 package com.gsma.rcs.core.ims.service.im.filetransfer.http;
 
-import org.xml.sax.helpers.DefaultHandler;
-
 import android.net.Uri;
 
 /**
@@ -31,7 +29,7 @@ import android.net.Uri;
  * 
  * @author hhff3235
  */
-public class FileTransferHttpResumeInfo extends DefaultHandler {
+public class FileTransferHttpResumeInfo {
     /**
      * start-offset in bytes
      */

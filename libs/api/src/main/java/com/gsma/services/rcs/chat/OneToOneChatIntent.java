@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -66,4 +66,7 @@ public class OneToOneChatIntent {
      * ContactId of remote contact
      */
     public final static String EXTRA_CONTACT = "contact";
+
+    private OneToOneChatIntent() {
+    }
 }

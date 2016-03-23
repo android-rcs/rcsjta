@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -38,9 +38,9 @@ public class MultimediaSessionServiceConfiguration {
      * Constructor
      * 
      * @param iConfig IMultimediaSessionServiceConfiguration instance
-     * @hide
      */
-    public MultimediaSessionServiceConfiguration(IMultimediaSessionServiceConfiguration iConfig) {
+    /* package private */MultimediaSessionServiceConfiguration(
+            IMultimediaSessionServiceConfiguration iConfig) {
         mIConfig = iConfig;
     }
 
@@ -53,7 +53,36 @@ public class MultimediaSessionServiceConfiguration {
     public int getMessageMaxLength() throws RcsGenericException {
         try {
             return mIConfig.getMessageMaxLength();
+        } catch (Exception e) {
+            throw new RcsGenericException(e);
+        }
+    }
 
+    /**
+     * Returns the inactivity timeout of a multimedia messaging session.
+     *
+     * @param serviceId Service ID
+     * @return long Timeout in milliseconds
+     * @throws RcsGenericException
+     */
+    public long getMessagingSessionInactivityTimeout(String serviceId) throws RcsGenericException {
+        try {
+            return mIConfig.getMessagingSessionInactivityTimeout(serviceId);
+        } catch (Exception e) {
+            throw new RcsGenericException(e);
+        }
+    }
+
+    /**
+     * Returns True if the given service ID is activated, else returns False.
+     *
+     * @param serviceId Service ID
+     * @return boolean
+     * @throws RcsGenericException
+     */
+    public boolean isServiceActivated(String serviceId) throws RcsGenericException {
+        try {
+            return mIConfig.isServiceActivated(serviceId);
         } catch (Exception e) {
             throw new RcsGenericException(e);
         }

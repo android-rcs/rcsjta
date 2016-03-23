@@ -1,67 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent" >
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:stretchColumns="1">
 
-    <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical" >
-
-        <TextView
-            android:id="@+id/from"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="5dip"
-            android:layout_marginRight="5dip" />
+    <TableRow android:layout_margin="2dp">
 
         <TextView
-            android:id="@+id/image_size"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
             android:layout_marginLeft="5dip"
-            android:layout_marginRight="5dip" />
+            android:layout_marginRight="5dip"
+            android:text="@string/label_contact" />
 
-        <LinearLayout
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal" >
+        <TextView
+            android:id="@+id/contact"
+            android:singleLine="true"
+            android:text="@string/contact_dummy" />
+    </TableRow>
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="5dip"
-                android:text="@string/label_progress_status" />
+    <TableRow android:layout_margin="2dp">
 
-            <TextView
-                android:id="@+id/progress_status"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="5dip"
-                android:layout_marginRight="5dip"
-                android:singleLine="true" />
-        </LinearLayout>
+        <TextView
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:text="@string/label_selected_size" />
 
-        <LinearLayout
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal" >
+        <TextView
+            android:id="@+id/size"
+            android:singleLine="true"
+            android:text="@string/number_dummy" />
+    </TableRow>
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="right"
-                android:padding="5dip"
-                android:text="@string/label_progress_bar" />
+    <TableRow android:layout_margin="2dp">
 
-            <ProgressBar
-                android:id="@+id/progress_bar"
-                style="?android:attr/progressBarStyleHorizontal"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:gravity="left"
-                android:padding="5dip" />
-        </LinearLayout>
-    </LinearLayout>
+        <TextView
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:text="@string/label_progress_status" />
 
-</ScrollView>
+        <TextView
+            android:id="@+id/progress_status"
+            android:singleLine="true"
+            android:text="@string/text_dummy" />
+    </TableRow>
+
+    <TableRow android:layout_margin="2dp">
+
+        <TextView
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:text="@string/label_progress_bar" />
+
+        <ProgressBar
+            android:id="@+id/progress_bar"
+            style="@android:style/Widget.ProgressBar.Horizontal"
+            android:layout_marginRight="5dip"
+            android:layout_marginEnd="5dip"/>
+    </TableRow>
+</TableLayout>

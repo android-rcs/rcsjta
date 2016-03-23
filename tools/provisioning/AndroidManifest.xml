@@ -2,23 +2,23 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.gsma.rcs.tools.http.provisioning"
     android:versionCode="1"
-    android:versionName="1.5.1" >
+    android:versionName="2.0">
 
     <uses-sdk
         android:minSdkVersion="12"
-        android:targetSdkVersion="22" />
+        android:targetSdkVersion="23" />
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.INTERNET" ></uses-permission>
-    
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:allowBackup="true"
         android:icon="@drawable/rcs_icon"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme" >
+        android:theme="@style/AppTheme">
         <activity
-            android:name="com.gsma.rcs.tools.http.provisioning.ProvisioningTemplateActivity"
-            android:label="@string/app_name" >
+            android:name=".ProvisioningTemplateActivity"
+            android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -26,7 +26,5 @@
             </intent-filter>
         </activity>
     </application>
-    
-    
 
 </manifest>

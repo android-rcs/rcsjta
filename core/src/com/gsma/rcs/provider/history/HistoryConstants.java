@@ -53,7 +53,7 @@ import java.util.Set;
             HistoryLogData.KEY_READ_STATUS, HistoryLogData.KEY_CHAT_ID, HistoryLogData.KEY_CONTENT,
             HistoryLogData.KEY_FILEICON, HistoryLogData.KEY_FILEICON_MIME_TYPE,
             HistoryLogData.KEY_FILENAME, HistoryLogData.KEY_FILESIZE,
-            HistoryLogData.KEY_TRANSFERRED, HistoryLogData.KEY_DURATION
+            HistoryLogData.KEY_TRANSFERRED, HistoryLogData.KEY_DURATION, HistoryLogData.KEY_DISPOSITION
     };
 
     /* package private */static final Set<String> PROTECTED_INTERNAL_DATABASES = getProtectedInternalDatabases();
@@ -168,6 +168,7 @@ import java.util.Set;
         columnMapping.put(HistoryLogData.KEY_FILENAME, FileTransferLog.FILENAME);
         columnMapping.put(HistoryLogData.KEY_FILESIZE, FileTransferLog.FILESIZE);
         columnMapping.put(HistoryLogData.KEY_TRANSFERRED, FileTransferLog.TRANSFERRED);
+        columnMapping.put(HistoryLogData.KEY_DISPOSITION, FileTransferLog.DISPOSITION);
         return columnMapping;
     }
 

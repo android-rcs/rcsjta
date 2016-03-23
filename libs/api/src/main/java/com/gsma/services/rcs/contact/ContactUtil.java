@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,6 +29,7 @@ import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.Configuration;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.ContactsContract;
@@ -347,10 +348,10 @@ public class ContactUtil {
     /**
      * Constructor
      * 
-     * @param context
+     * @param ctx the context
      */
-    private ContactUtil(Context context) {
-        mCtx = context;
+    private ContactUtil(Context ctx) {
+        mCtx = ctx;
     }
 
     /**
@@ -422,13 +423,7 @@ public class ContactUtil {
             tryToDetermineAndCacheCountryAndAreaCodes();
         }
         /* At this point, the mobile country and area codes are resolved */
-        if (TextUtils.isEmpty(mCountryAreaCode)) {
-            return true;
-        }
-        if (strippedContact.startsWith(mCountryAreaCode)) {
-            return true;
-        }
-        return false;
+        return TextUtils.isEmpty(mCountryAreaCode) || strippedContact.startsWith(mCountryAreaCode);
     }
 
     /**
@@ -445,8 +440,7 @@ public class ContactUtil {
         }
         String strippedContact = stripSeparators(contact);
         if (TextUtils.isEmpty(strippedContact)) {
-            throw new IllegalArgumentException(new StringBuilder("Contact '").append(contact)
-                    .append("' has invalid characters or is too long!").toString());
+            throw new IllegalArgumentException("Contact '" + contact + "' has invalid characters or is too long!");
         }
         /* Is Country Code provided ? */
         if (strippedContact.startsWith(COUNTRY_CODE_PREFIX)) {
@@ -475,9 +469,7 @@ public class ContactUtil {
             return new ContactId(new StringBuilder(mCountryCode).append(strippedContact,
                     mCountryAreaCode.length(), strippedContact.length()).toString());
         }
-        throw new IllegalArgumentException(new StringBuilder("Local phone number '")
-                .append(strippedContact).append("' should be prefixed with Country Area Code (")
-                .append(mCountryAreaCode).append(")").toString());
+        throw new IllegalArgumentException("Local phone number '" + strippedContact + "' should be prefixed with Country Area Code (" + mCountryAreaCode + ")");
     }
 
     private void tryToDetermineAndCacheCountryAndAreaCodes() throws RcsPermissionDeniedException {
@@ -489,9 +481,7 @@ public class ContactUtil {
             /* Get the country code information associated to the mobile country code */
             String[] countryCodeInfo = sCountryCodes.get(config.mcc);
             if (countryCodeInfo == null) {
-                throw new RcsPermissionDeniedException(new StringBuilder(
-                        "Failed to get mobile country code (").append(config.mcc).append(")!")
-                        .toString());
+                throw new RcsPermissionDeniedException("Failed to get mobile country code (" + config.mcc + ")!");
             }
             /* Get the country code from map */
             String ccWithoutHeader = countryCodeInfo[COUNTRY_CODE_IDX];
@@ -555,14 +545,16 @@ public class ContactUtil {
      * String)).
      * 
      * @param contactUri Contact URI of the contact in the address book
-     * @return Uri of vCard
+     * @return Uri of vCard or null if not found
      * @throws RcsGenericException
      */
     public Uri getVCard(Uri contactUri) throws RcsGenericException {
         Cursor cursor = null;
         try {
             cursor = mCtx.getContentResolver().query(contactUri, null, null, null, null);
-            /* TODO: Handle cursor when null. */
+            if (cursor == null) {
+                throw new SQLException("Cannot query VCard for URI='"+contactUri+"'");
+            }
             int displayNameColIdx = cursor
                     .getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME);
             int lookupKeyColIdx = cursor
@@ -575,23 +567,23 @@ public class ContactUtil {
                     lookupKey);
             AssetFileDescriptor fd = mCtx.getContentResolver().openAssetFileDescriptor(vCardUri,
                     "r");
-
+            if (fd == null) {
+                return null;
+            }
             FileInputStream fis = fd.createInputStream();
             byte[] vCardData = new byte[(int) fd.getDeclaredLength()];
             fis.read(vCardData);
 
             String name = cursor.getString(displayNameColIdx);
-            String fileName = new StringBuilder(Environment.getExternalStorageDirectory()
-                    .toString()).append(File.separator).append(name).append(".vcf").toString();
+            String fileName = Environment.getExternalStorageDirectory()
+                    .toString() + File.separator + name + ".vcf";
             File vCardFile = new File(fileName);
             if (vCardFile.exists()) {
                 vCardFile.delete();
             }
-
             FileOutputStream fos = new FileOutputStream(vCardFile, true);
             fos.write(vCardData);
             fos.close();
-
             return Uri.fromFile(vCardFile);
 
         } catch (IOException e) {

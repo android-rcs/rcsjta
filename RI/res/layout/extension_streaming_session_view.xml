@@ -9,6 +9,7 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
         android:layout_alignParentTop="true">
 
         <TableRow
@@ -20,7 +21,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="5dip"
-                android:gravity="left"
                 android:text="@string/label_remote" />
 
             <TextView
@@ -28,7 +28,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="5dip"
-                android:text="+33123456789"
+                android:text="@string/contact_dummy"
                 android:textStyle="bold" />
         </TableRow>
 
@@ -41,7 +41,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="5dip"
-                android:gravity="left"
                 android:text="@string/label_service_id" />
 
             <TextView
@@ -49,7 +48,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="5dip"
-                android:text="ext.foo"
+                android:text="@string/extension_dummy"
                 android:textStyle="bold" />
         </TableRow>
 
@@ -64,13 +63,12 @@
         android:layout_margin="5dip"
         android:text="@string/label_start" />
 
-
     <TableLayout
         android:id="@+id/table_counter"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:layout_below="@id/start_stop_btn">
+        android:layout_below="@id/start_stop_btn"
+        android:layout_centerInParent="true">
 
         <TableRow
             android:layout_width="wrap_content"
@@ -81,7 +79,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="5dip"
-                android:gravity="left"
                 android:text="@string/label_rx_count" />
 
             <TextView
@@ -89,7 +86,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="5dip"
-                android:text="0"
+                android:text="@string/number_dummy"
                 android:textStyle="bold" />
         </TableRow>
 
@@ -102,7 +99,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="5dip"
-                android:gravity="left"
                 android:text="@string/label_tx_count" />
 
             <TextView
@@ -110,7 +106,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="5dip"
-                android:text="0"
+                android:text="@string/number_dummy"
                 android:textStyle="bold" />
         </TableRow>
 
@@ -120,9 +116,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:padding="5dip"
         android:layout_centerInParent="true"
         android:gravity="center"
+        android:padding="5dip"
         android:text="@string/label_streaming_info" />
 
 </RelativeLayout>

@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -78,7 +78,7 @@ public class RcsSettingsProvider extends ContentProvider {
     }
 
     private static class DatabaseHelper extends SQLiteOpenHelper {
-        private static final int DATABASE_VERSION = 115;
+        private static final int DATABASE_VERSION = 120;
 
         /**
          * Add a parameter in the db
@@ -120,9 +120,8 @@ public class RcsSettingsProvider extends ContentProvider {
 
         @Override
         public void onCreate(SQLiteDatabase db) {
-            db.execSQL(new StringBuilder("CREATE TABLE IF NOT EXISTS ").append(TABLE).append('(')
-                    .append(RcsSettingsData.KEY_KEY).append(" TEXT NOT NULL PRIMARY KEY,")
-                    .append(RcsSettingsData.KEY_VALUE).append(" TEXT)").toString());
+            db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE + '(' + RcsSettingsData.KEY_KEY
+                    + " TEXT NOT NULL PRIMARY KEY," + RcsSettingsData.KEY_VALUE + " TEXT)");
 
             /* Insert default values for parameters */
             addParameter(db, RcsSettingsData.SERVICE_ACTIVATED,
@@ -157,6 +156,8 @@ public class RcsSettingsProvider extends ContentProvider {
                     RcsSettingsData.DEFAULT_MAX_ISH_SIZE);
             addParameter(db, RcsSettingsData.MAX_VIDEO_SHARE_DURATION,
                     RcsSettingsData.DEFAULT_MAX_VSH_DURATION);
+            addParameter(db, RcsSettingsData.MAX_AUDIO_MESSAGE_DURATION,
+                    RcsSettingsData.DEFAULT_MAX_AUDIO_DURATION);
             addParameter(db, RcsSettingsData.MAX_CHAT_SESSIONS,
                     RcsSettingsData.DEFAULT_MAX_CHAT_SESSIONS);
             addParameter(db, RcsSettingsData.MAX_FILE_TRANSFER_SESSIONS,
@@ -241,6 +242,14 @@ public class RcsSettingsProvider extends ContentProvider {
                     RcsSettingsData.DEFAULT_CAPABILITY_FT_SF);
             addParameter(db, RcsSettingsData.CAPABILITY_RCS_EXTENSIONS,
                     RcsSettingsData.DEFAULT_CAPABILITY_RCS_EXTENSIONS);
+            addParameter(db, RcsSettingsData.CAPABILITY_CALL_COMPOSER,
+                    RcsSettingsData.DEFAULT_CAPABILITY_CALL_COMPOSER);
+            addParameter(db, RcsSettingsData.CAPABILITY_SHARED_MAP,
+                    RcsSettingsData.DEFAULT_CAPABILITY_SHARED_MAP);
+            addParameter(db, RcsSettingsData.CAPABILITY_SHARED_SKETCH,
+                    RcsSettingsData.DEFAULT_CAPABILITY_SHARED_SKETCH);
+            addParameter(db, RcsSettingsData.CAPABILITY_POST_CALL,
+                    RcsSettingsData.DEFAULT_CAPABILITY_POST_CALL);
             addParameter(db, RcsSettingsData.IMS_SERVICE_POLLING_PERIOD,
                     RcsSettingsData.DEFAULT_IMS_SERVICE_POLLING_PERIOD);
             addParameter(db, RcsSettingsData.SIP_DEFAULT_PORT,
@@ -345,6 +354,8 @@ public class RcsSettingsProvider extends ContentProvider {
                     RcsSettingsData.DEFAULT_DIRECTORY_PATH_PHOTOS);
             addParameter(db, RcsSettingsData.DIRECTORY_PATH_VIDEOS,
                     RcsSettingsData.DEFAULT_DIRECTORY_PATH_VIDEOS);
+            addParameter(db, RcsSettingsData.DIRECTORY_PATH_AUDIOS,
+                    RcsSettingsData.DEFAULT_DIRECTORY_PATH_AUDIOS);
             addParameter(db, RcsSettingsData.DIRECTORY_PATH_FILES,
                     RcsSettingsData.DEFAULT_DIRECTORY_PATH_FILES);
             addParameter(db, RcsSettingsData.DIRECTORY_PATH_FILEICONS,
@@ -353,7 +364,7 @@ public class RcsSettingsProvider extends ContentProvider {
                     RcsSettingsData.DEFAULT_SECURE_MSRP_OVER_WIFI);
             addParameter(db, RcsSettingsData.SECURE_RTP_OVER_WIFI,
                     RcsSettingsData.DEFAULT_SECURE_RTP_OVER_WIFI);
-            addParameter(db, RcsSettingsData.KEY_MESSAGING_MODE,
+            addParameter(db, RcsSettingsData.MESSAGING_MODE,
                     RcsSettingsData.DEFAULT_KEY_MESSAGING_MODE);
             addParameter(db, RcsSettingsData.CAPABILITY_SIP_AUTOMATA,
                     RcsSettingsData.DEFAULT_CAPABILITY_SIP_AUTOMATA);
@@ -376,13 +387,15 @@ public class RcsSettingsProvider extends ContentProvider {
                     RcsSettingsData.DEFAULT_ALLOW_EXTENSIONS);
             addParameter(db, RcsSettingsData.MAX_MSRP_SIZE_EXTENSIONS,
                     RcsSettingsData.DEFAULT_MAX_MSRP_SIZE_EXTENSIONS);
+            addParameter(db, RcsSettingsData.CALL_COMPOSER_INACTIVITY_TIMEOUT,
+                    RcsSettingsData.DEFAULT_CALL_COMPOSER_INACTIVITY_TIMEOUT);
             addParameter(db, RcsSettingsData.CONFIGURATION_VALID,
                     RcsSettingsData.DEFAULT_CONFIGURATION_VALID);
             addParameter(db, RcsSettingsData.AUTO_ACCEPT_FT_IN_ROAMING,
                     RcsSettingsData.DEFAULT_AUTO_ACCEPT_FT_IN_ROAMING);
             addParameter(db, RcsSettingsData.AUTO_ACCEPT_FT_CHANGEABLE,
                     RcsSettingsData.DEFAULT_AUTO_ACCEPT_FT_CHANGEABLE);
-            addParameter(db, RcsSettingsData.KEY_DEFAULT_MESSAGING_METHOD,
+            addParameter(db, RcsSettingsData.DEFAULT_MESSAGING_METHOD,
                     RcsSettingsData.DEFAULT_KEY_DEFAULT_MESSAGING_METHOD);
             addParameter(db, RcsSettingsData.KEY_IMAGE_RESIZE_OPTION,
                     RcsSettingsData.DEFAULT_KEY_IMAGE_RESIZE_OPTION);
@@ -409,6 +422,8 @@ public class RcsSettingsProvider extends ContentProvider {
                     RcsSettingsData.DEFAULT_PROV_REJECT_BUTTON);
             addParameter(db, RcsSettingsData.LOCAL_DISPLAY_LANGUAGE,
                     RcsSettingsData.DEFAULT_LOCAL_DISPLAY_LANGUAGE);
+            addParameter(db, RcsSettingsData.ENRICH_CALLING_SERVICE,
+                    RcsSettingsData.DEFAULT_ENRICH_CALLING_SERVICE);
         }
 
         @Override
@@ -420,7 +435,7 @@ public class RcsSettingsProvider extends ContentProvider {
             /*
              * Get all the pairs key/value of the old table to insert them back after update
              */
-            ArrayList<ContentValues> valuesList = new ArrayList<ContentValues>();
+            ArrayList<ContentValues> valuesList = new ArrayList<>();
             while (oldDataCursor.moveToNext()) {
                 String key = null;
                 String value = null;
@@ -461,8 +476,7 @@ public class RcsSettingsProvider extends ContentProvider {
         if (TextUtils.isEmpty(selection)) {
             return SELECTION_WITH_KEY_ONLY;
         }
-        return new StringBuilder("(").append(SELECTION_WITH_KEY_ONLY).append(") AND (")
-                .append(selection).append(')').toString();
+        return "(" + SELECTION_WITH_KEY_ONLY + ") AND (" + selection + ')';
     }
 
     private String[] getSelectionArgsWithKey(String[] selectionArgs, String key) {
@@ -491,8 +505,7 @@ public class RcsSettingsProvider extends ContentProvider {
                 return CursorType.TYPE_ITEM;
 
             default:
-                throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
-                        .append(uri).append("!").toString());
+                throw new IllegalArgumentException("Unsupported URI " + uri + "!");
         }
     }
 
@@ -517,8 +530,7 @@ public class RcsSettingsProvider extends ContentProvider {
                     return cursor;
 
                 default:
-                    throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
-                            .append(uri).append("!").toString());
+                    throw new IllegalArgumentException("Unsupported URI " + uri + "!");
             }
         }
         /*
@@ -551,20 +563,17 @@ public class RcsSettingsProvider extends ContentProvider {
                 return count;
 
             default:
-                throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
-                        .append(uri).append("!").toString());
+                throw new IllegalArgumentException("Unsupported URI " + uri + "!");
         }
     }
 
     @Override
     public Uri insert(Uri uri, ContentValues initialValues) {
-        throw new UnsupportedOperationException(new StringBuilder("Cannot insert URI ").append(uri)
-                .append("!").toString());
+        throw new UnsupportedOperationException("Cannot insert URI " + uri + "!");
     }
 
     @Override
     public int delete(Uri uri, String where, String[] whereArgs) {
-        throw new UnsupportedOperationException(new StringBuilder("Cannot delete URI ").append(uri)
-                .append("!").toString());
+        throw new UnsupportedOperationException("Cannot delete URI " + uri + "!");
     }
 }

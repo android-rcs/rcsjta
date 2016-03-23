@@ -13,6 +13,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+	
 	defaultConfig {
         minSdkVersion rootProject.minSdkVersion
         targetSdkVersion rootProject.targetSdkVersion
@@ -41,11 +42,13 @@ task javadoc(type: Javadoc) {
     options {
         doclet "com.google.doclava.Doclava"
         bootClasspath new File(System.getenv('JAVA_HOME') + "/jre/lib/rt.jar")
-		 addStringOption "d", "./build/docs/javadoc"
+		addStringOption "d", "./build/docs/javadoc"
         addStringOption "hdf project.name", "RCS API"
-        addStringOption "hdf sdk.version", "3.2.3"
-        addStringOption "title", "TAPI 1.5.1"
-        //addStringOption "federate android", "http://developer.android.com/reference/"
+        addStringOption "hdf sdk.version", "1.6"
+        addStringOption "title", "TAPI 1.6.1"
+        addStringOption "federate android", "http://developer.android.com/reference/"
         addStringOption "federationxml android", "http://doclava.googlecode.com/svn/static/api/android-10.xml"
+        addStringOption "since ./version/blackbird_1_5_1.xml", "1.5"
+		addStringOption "since ./version/crane_1_6_1.xml", "1.6"
     }
 }

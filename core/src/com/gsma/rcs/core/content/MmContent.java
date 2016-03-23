@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -48,6 +48,8 @@ public abstract class MmContent {
     private long mSize;
 
     private String mEncoding;
+
+    private boolean mPlayable = false;
 
     /**
      * Stream to write received data directly to file.
@@ -104,7 +106,7 @@ public abstract class MmContent {
     /**
      * Sets the uri
      * 
-     * @param file Uri
+     * @param uri Uri
      */
     public void setUri(Uri uri) {
         mUri = uri;
@@ -184,6 +186,24 @@ public abstract class MmContent {
      */
     public void setName(String fileName) {
         mFileName = fileName;
+    }
+
+    /**
+     * Set content playable
+     *
+     * @param flag Playable flag
+     */
+    public void setPlayable(boolean flag) {
+        mPlayable = flag;
+    }
+
+    /**
+     * Is a playable content
+     *
+     * @return Boolean
+     */
+    public boolean isPlayable() {
+        return mPlayable;
     }
 
     /**

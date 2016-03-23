@@ -87,10 +87,19 @@ public class HttpsProvisioningUtils {
 
     /**
      * Returns the RCS profile
-     * 
+     *
      * @return String(15)
      */
     /* package private */static String getRcsProfile() {
         return "joyn_blackbird";
+    }
+
+    /**
+     * Returns the Enrich Calling profile
+     *
+     * @return String(15)
+     */
+    /* package private */ static String getEnrichCallingProfile() {
+        return "enriched_call";
     }
 }

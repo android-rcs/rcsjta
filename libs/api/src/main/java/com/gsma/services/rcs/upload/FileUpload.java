@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -66,14 +66,14 @@ public class FileUpload {
 
         private final int mValue;
 
-        private static SparseArray<State> mValueToEnum = new SparseArray<State>();
+        private static SparseArray<State> mValueToEnum = new SparseArray<>();
         static {
             for (State entry : State.values()) {
                 mValueToEnum.put(entry.toInt(), entry);
             }
         }
 
-        private State(int value) {
+        State(int value) {
             mValue = value;
         }
 
@@ -92,13 +92,13 @@ public class FileUpload {
          * @param value the integer value
          * @return State instance
          */
-        public static final State valueOf(int value) {
+        public static State valueOf(int value) {
             State entry = mValueToEnum.get(value);
             if (entry != null) {
                 return entry;
             }
-            throw new IllegalArgumentException(new StringBuilder("No enum const class ")
-                    .append(State.class.getName()).append("").append(value).append("!").toString());
+            throw new IllegalArgumentException("No enum const class " + State.class.getName() + ""
+                    + value + "!");
         }
     }
 

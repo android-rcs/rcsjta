@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -202,7 +202,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
         mImService = imService;
         mImdnManager = imService.getImdnManager();
         mMessagingLog = messagingLog;
-        mActivityMgr = new SessionActivityManager(this, rcsSettings);
+        mActivityMgr = new SessionActivityManager(this, mRcsSettings.getChatIdleDuration());
 
         // Create the MSRP manager
         int localMsrpPort = NetworkRessourceManager.generateLocalMsrpPort(rcsSettings);

@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ package com.gsma.rcs.chat;
 import com.gsma.rcs.core.ParseFailureException;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnParser;
+import com.gsma.rcs.utils.DateUtils;
 import com.gsma.rcs.utils.logger.Logger;
 
 import android.test.AndroidTestCase;
@@ -38,14 +39,12 @@ public class ImdnParserTest extends AndroidTestCase {
 
     private static final String CRLF = "\r\n";
 
-    // @formatter:off
-    /*
-     * IMDN SAMPLE: <?xml version="1.0" encoding="UTF-8"?> <imdn
-     * xmlns="urn:ietf:params:xml:ns:imdn"> <message-id>34jk324j</message-id>
-     * <datetime>2008-04-04T12:16:49-05:00</datetime> <display-notification> <status> <displayed/>
-     * </status> </display-notification> </imdn>
-     */
-    // @formatter:on
+    private static final String sXmlContentToParse = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+            + "<imdn xmlns=\"urn:ietf:params:xml:ns:imdn\">\n"
+            + "\t<message-id>34jk324j</message-id>\n"
+            + "\t<datetime>2008-04-04T12:16:49-05:00</datetime>\n" + "\t<display-notification>\n"
+            + "\t\t<status>\n" + "\t\t\t<displayed/>\n" + "\t\t</status>\n"
+            + "\t</display-notification>\n" + "</imdn>";
 
     protected void setUp() throws Exception {
         super.setUp();
@@ -57,37 +56,16 @@ public class ImdnParserTest extends AndroidTestCase {
 
     public void testGetImdnDocument() throws SAXException, ParserConfigurationException,
             IOException, ParseFailureException {
-        /**
-         * Parse a delivery report
-         * 
-         * @param xml XML document
-         * @return IMDN document
-         */
-        StringBuffer sb = new StringBuffer("<?xml version=\"1.08\" encoding=\"UTF-8\"?>");
-        sb.append("<imdn xmlns=\"urn:ietf:params:xml:ns:imdn\">");
-        sb.append("<message-id>34jk324j</message-id>");
-        sb.append("DateTime: 2008-12-13T13:40:00-08:00");
-        sb.append("<display-notification>");
-        sb.append(CRLF);
-        sb.append("<status>");
-        sb.append(CRLF);
-        sb.append("<displayed/>");
-        sb.append(CRLF);
-        sb.append("</status>");
-        sb.append(CRLF);
-        sb.append("</display-notification>");
-        sb.append(CRLF);
-        sb.append("</imdn>");
-        String xml = sb.toString();
-
-        InputSource inputso = new InputSource(new ByteArrayInputStream(xml.getBytes()));
-        ImdnParser parser = new ImdnParser(inputso);
+        ImdnParser parser = new ImdnParser(new InputSource(new ByteArrayInputStream(
+                sXmlContentToParse.getBytes())));
         parser.parse();
         ImdnDocument imdnDoc = parser.getImdnDocument();
         if (logger.isActivated()) {
             logger.info("MsgId=" + imdnDoc.getMsgId() + "  status=" + imdnDoc.getStatus());
         }
-        assertEquals(imdnDoc.getMsgId(), "34jk324j");
-        assertEquals(imdnDoc.getStatus(), "displayed");
+        assertEquals("34jk324j", imdnDoc.getMsgId());
+        assertEquals("displayed", imdnDoc.getStatus());
+        assertEquals("display-notification", imdnDoc.getNotificationType());
+        assertEquals(DateUtils.decodeDate("2008-04-04T12:16:49-05:00"), imdnDoc.getDateTime());
     }
 }

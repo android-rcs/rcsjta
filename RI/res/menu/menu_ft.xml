@@ -3,7 +3,6 @@
 
     <item
         android:id="@+id/menu_close_session"
-        android:icon="@drawable/ri_menu_close_ft"
         android:title="@string/menu_close_session"/>
 
 </menu>

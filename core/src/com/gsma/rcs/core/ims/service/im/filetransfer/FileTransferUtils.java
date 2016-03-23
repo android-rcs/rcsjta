@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -35,8 +35,8 @@ import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
-import com.gsma.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoParser;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpThumbnail;
+import com.gsma.rcs.core.ims.service.im.filetransfer.http.FileTransferXmlParser;
 import com.gsma.rcs.platform.AndroidFactory;
 import com.gsma.rcs.platform.file.FileDescription;
 import com.gsma.rcs.platform.file.FileFactory;
@@ -46,6 +46,7 @@ import com.gsma.rcs.utils.CloseableUtils;
 import com.gsma.rcs.utils.FileUtils;
 import com.gsma.rcs.utils.MimeManager;
 import com.gsma.rcs.utils.logger.Logger;
+import com.gsma.services.rcs.filetransfer.FileTransfer.Disposition;
 
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
@@ -53,10 +54,8 @@ import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.net.Uri;
 
-import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -71,14 +70,13 @@ import javax.xml.parsers.ParserConfigurationException;
  */
 public class FileTransferUtils {
 
-    /**
-     * The logger
-     */
     private static final Logger logger = Logger.getLogger(FileTransferUtils.class.getName());
 
     private static final String FILEICON_INFO = "thumbnail";
 
     private static final String FILE_INFO = "file";
+
+    private static final String FILEICON_MIMETYPE = "image/jpeg";
 
     /**
      * Is a file transfer HTTP event type
@@ -96,7 +94,7 @@ public class FileTransferUtils {
      * 
      * @param file Uri of the image
      * @param fileIconId the identifier of the file icon
-     * @param rcsSettings
+     * @param rcsSettings the RCS settings accessor
      * @return the content of the file icon
      * @throws FileAccessException
      */
@@ -138,15 +136,15 @@ public class FileTransferUtils {
                 quality -= 10;
             }
             // Create fileIcon URL
-            String fileIconName = buildFileiconUrl(fileIconId, "image/jpeg");
+            String fileIconName = buildFileiconUrl(fileIconId, FILEICON_MIMETYPE);
             // Get the fileIcon data
             byte[] fileIconData = out.toByteArray();
 
             // Generate fileIcon content
             Uri fileIconUri = Uri.fromFile(new File(rcsSettings.getFileIconRootDirectory().concat(
                     fileIconName)));
-            fileIcon = ContentManager.createMmContent(fileIconUri, fileIconData.length,
-                    fileIconName);
+            fileIcon = ContentManager.createMmContent(fileIconUri, FILEICON_MIMETYPE,
+                    fileIconData.length, fileIconName);
             // persist the fileIcon content
             fileIcon.writeData2File(fileIconData);
             if (logger.isActivated()) {
@@ -155,8 +153,7 @@ public class FileTransferUtils {
             return fileIcon;
 
         } catch (IOException e) {
-            throw new FileAccessException(new StringBuilder("Failed to create icon for uri : ")
-                    .append(file).toString(), e);
+            throw new FileAccessException("Failed to create icon for uri: " + file, e);
 
         } finally {
             CloseableUtils.tryToClose(in);
@@ -189,7 +186,7 @@ public class FileTransferUtils {
      * Extract file icon from incoming INVITE request
      * 
      * @param request Request
-     * @param rcsSettings
+     * @param rcsSettings the RCS settings accessor
      * @return fileIcon the file icon content persisted on disk
      * @throws FileAccessException
      */
@@ -203,7 +200,7 @@ public class FileTransferUtils {
             if (!multi.isMultipart()) {
                 return null;
             }
-            String mimeType = "image/jpeg";
+            String mimeType = FILEICON_MIMETYPE;
             String data = multi.getPart(mimeType);
             if (data == null) {
                 mimeType = "image/png";
@@ -216,7 +213,8 @@ public class FileTransferUtils {
             Uri fileIconUri = Uri.fromFile(new File(rcsSettings.getFileIconRootDirectory().concat(
                     iconName)));
             byte[] fileIconData = Base64.decodeBase64(mimeType.getBytes(UTF8));
-            result = ContentManager.createMmContent(fileIconUri, fileIconData.length, iconName);
+            result = ContentManager.createMmContent(fileIconUri, mimeType, fileIconData.length,
+                    iconName);
             result.writeData2File(fileIconData);
             return result;
 
@@ -239,20 +237,12 @@ public class FileTransferUtils {
     public static FileTransferHttpInfoDocument parseFileTransferHttpDocument(byte[] xml,
             RcsSettings rcsSettings) throws PayloadException {
         try {
-            InputSource ftHttpInput = new InputSource(new ByteArrayInputStream(xml));
-            FileTransferHttpInfoParser ftHttpParser = new FileTransferHttpInfoParser(ftHttpInput,
-                    rcsSettings).parse();
-            return ftHttpParser.getFtInfo();
+            FileTransferXmlParser ftHttpParser = new FileTransferXmlParser(xml, rcsSettings);
+            ftHttpParser.parse();
+            return ftHttpParser.getFileTransferInfo();
 
-        } catch (ParserConfigurationException e) {
+        } catch (ParserConfigurationException | ParseFailureException | SAXException e) {
             throw new PayloadException("Can't parse FT HTTP document!", e);
-
-        } catch (SAXException e) {
-            throw new PayloadException("Can't parse FT HTTP document!", e);
-
-        } catch (ParseFailureException e) {
-            throw new PayloadException("Can't parse FT HTTP document!", e);
-
         }
     }
 
@@ -272,24 +262,46 @@ public class FileTransferUtils {
         if (message == null || !FileTransferUtils.isFileTransferHttpType(message.getMimeType())) {
             return null;
         }
-        byte[] xml = message.getContent().getBytes(UTF8);
-        return parseFileTransferHttpDocument(xml, rcsSettings);
+        return parseFileTransferHttpDocument(message.getContent().getBytes(UTF8), rcsSettings);
     }
 
     /**
      * Create a content object from URI
      * 
      * @param uri Uri of file
+     * @param mimeType the mime type
+     * @param disposition File disposition
      * @return Content instance
      */
-    public static MmContent createMmContent(Uri uri) {
+    public static MmContent createMmContent(Uri uri, String mimeType, Disposition disposition) {
         final FileDescription desc = FileFactory.getFactory().getFileDescription(uri);
-        return ContentManager.createMmContent(uri, desc.getSize(), desc.getName());
+        MmContent content = ContentManager.createMmContent(uri, mimeType, desc.getSize(),
+                desc.getName());
+        if (Disposition.RENDER == disposition) {
+            content.setPlayable(true);
+        }
+        return content;
+    }
+
+    /**
+     * Create a content object for icon
+     *
+     * @param uri Uri of file
+     * @return Content instance
+     */
+    public static MmContent createIconContent(Uri uri) {
+        final FileDescription desc = FileFactory.getFactory().getFileDescription(uri);
+        String mime = FileUtils.getMimeTypeFromExtension(uri.getPath());
+        return ContentManager.createMmContent(uri, mime, desc.getSize(), desc.getName());
     }
 
     private static String getInfo(String fileType, Uri downloadUri, String name, String mimeType,
-            long size, long expiration) {
-        StringBuilder info = new StringBuilder("<file-info type=\"").append(fileType).append("\">");
+            long size, long expiration, String disposition, int playingLength) {
+        StringBuilder info = new StringBuilder("<file-info type=\"").append(fileType).append("\"");
+        if (disposition != null) {
+            info.append(" file-disposition=\"").append(disposition).append("\"");
+        }
+        info.append(">");
         if (size != 0) {
             info.append("<file-size>").append(size).append("</file-size>");
         }
@@ -299,6 +311,9 @@ public class FileTransferUtils {
         if (mimeType != null) {
             info.append("<content-type>").append(mimeType).append("</content-type>");
         }
+        if (playingLength != -1) {
+            info.append("<am:playing-length>").append(playingLength).append("</am:playing-length>");
+        }
         info.append("<data url = \"").append(downloadUri.toString()).append("\"  until=\"")
                 .append(expiration).append("\"/></file-info>");
         return info.toString();
@@ -307,7 +322,7 @@ public class FileTransferUtils {
     /**
      * Create HTTP file transfer info xml
      * 
-     * @param fileTransferData
+     * @param fileTransferData File transfer info
      * @return String
      */
     public static String createHttpFileTransferXml(FileTransferHttpInfoDocument fileTransferData) {
@@ -316,12 +331,13 @@ public class FileTransferUtils {
                 .append(UTF8_STR).append("\"?><file>");
         if (fileIcon != null) {
             String fileIconInfo = getInfo(FILEICON_INFO, fileIcon.getUri(), null,
-                    fileIcon.getMimeType(), fileIcon.getSize(), fileIcon.getExpiration());
+                    fileIcon.getMimeType(), fileIcon.getSize(), fileIcon.getExpiration(), null, -1);
             info.append(fileIconInfo);
         }
         String fileInfo = getInfo(FILE_INFO, fileTransferData.getUri(),
                 fileTransferData.getFilename(), fileTransferData.getMimeType(),
-                fileTransferData.getSize(), fileTransferData.getExpiration());
+                fileTransferData.getSize(), fileTransferData.getExpiration(),
+                fileTransferData.getFileDisposition(), fileTransferData.getPlayingLength());
         info.append(fileInfo);
         info.append("</file>");
         return info.toString();

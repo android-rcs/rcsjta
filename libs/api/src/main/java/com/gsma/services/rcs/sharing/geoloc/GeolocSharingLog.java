@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2014 Sony Mobile Communications Inc.
+ * Copyright (C) 2010-2016 Orange.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -107,4 +108,7 @@ public class GeolocSharingLog {
      * </P>
      */
     public static final String REASON_CODE = "reason_code";
+
+    private GeolocSharingLog() {
+    }
 }

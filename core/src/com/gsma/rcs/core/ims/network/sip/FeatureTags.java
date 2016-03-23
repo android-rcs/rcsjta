@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -126,9 +126,14 @@ public class FeatureTags {
     public final static String FEATURE_RCSE_IP_VIDEO_CALL = "video";
 
     /**
-     * RCS-e extension feature tag prefix
+     * RCS-e IARI extension feature tag prefix
      */
-    public final static String FEATURE_RCSE_EXTENSION = "urn%3Aurn-7%3A3gpp-application.ims.iari.rcs";
+    public final static String FEATURE_RCSE_IARI_EXTENSION = "urn%3Aurn-7%3A3gpp-application.ims.iari.rcs";
+
+    /**
+     * RCS-e ICSI extension feature tag prefix
+     */
+    public final static String FEATURE_RCSE_ICSI_EXTENSION = "urn%3Aurn-7%3A3gpp-service.ims.icsi";
 
     /**
      * 3GPP RCS extension feature tag

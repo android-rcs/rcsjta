@@ -3,22 +3,22 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:padding="2dip"
-    android:textAppearance="?android:attr/textAppearanceSmall" >
+    android:textAppearance="?android:attr/textAppearanceSmall">
 
     <RelativeLayout
         android:id="@+id/msg_item"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical" 
-        android:layout_centerInParent="true">
+        android:layout_centerInParent="true"
+        android:orientation="vertical">
 
         <TextView
             android:id="@+id/status_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:singleLine="true"
-            android:textColor="@android:color/white" 
-            android:text="@string/label_state_unknown" />
+            android:text="@string/label_state_unknown"
+            android:textColor="@android:color/white" />
 
         <TextView
             android:id="@+id/contact_text"
@@ -26,17 +26,17 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/status_text"
             android:singleLine="true"
-            android:text="@string/label_uninitialized_contact" />
+            android:text="@string/contact_dummy" />
     </RelativeLayout>
 
     <TextView
-        android:id="@+id/date_text"
+        android:id="@+id/timestamp_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/msg_item"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
+        android:layout_below="@id/msg_item"
         android:singleLine="true"
-        android:text="@string/label_uninitialized_date" />
+        android:text="@string/timestamp_dummy" />
 
 </RelativeLayout>

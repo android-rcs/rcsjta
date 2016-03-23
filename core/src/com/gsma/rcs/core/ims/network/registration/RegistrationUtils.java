@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,9 +87,13 @@ public class RegistrationUtils {
         // Extensions
         if (rcsSettings.isExtensionsAllowed()) {
             for (String extension : rcsSettings.getSupportedRcsExtensions()) {
-                StringBuilder sb = new StringBuilder(FeatureTags.FEATURE_RCSE_EXTENSION)
-                        .append('.').append(extension);
-                iariTags.add(sb.toString());
+                if (rcsSettings.isExtensionAuthorized(extension)) {
+                    if (extension.startsWith("gsma.")) {
+                        icsiTags.add(FeatureTags.FEATURE_RCSE_ICSI_EXTENSION + "." + extension);
+                    } else {
+                        iariTags.add(FeatureTags.FEATURE_RCSE_IARI_EXTENSION + "." + extension);
+                    }
+                }
             }
             icsiTags.add(FeatureTags.FEATURE_3GPP_EXTENSION);
         }

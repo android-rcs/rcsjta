@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ public abstract class RcsServiceRegistrationListener {
     /**
      * Callback called when service is unregistered from the network platform
      * 
-     * @param reasonCode
+     * @param reasonCode the reason code
      */
     public abstract void onServiceUnregistered(RcsServiceRegistration.ReasonCode reasonCode);
 }

@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -330,7 +330,7 @@ public class NativeH264EncoderParams {
             H264ConstraintSetFlagType constraintSet3Flag = ((constraintSet3FlagValue == 1) ? H264ConstraintSetFlagType.TRUE
                     : H264ConstraintSetFlagType.FALSE);
 
-            setProfileIOP(profile_iop < 0 ? 0 : profile_iop);
+            setProfileIOP(profile_iop);
             setProfile(H264TypeProfile.getH264ProfileType(profile_idc));
             setLevel(H264TypeLevel.getH264LevelType(level_idc, constraintSet3Flag));
         }

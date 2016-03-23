@@ -8,7 +8,8 @@
         android:layout_height="wrap_content"
         android:paddingTop="10dip"
         android:shrinkColumns="1"
-        android:stretchColumns="1" >
+        android:stretchColumns="1"
+        android:layout_margin="5dip">
 
         <TableRow
             android:layout_width="wrap_content"
@@ -19,15 +20,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="5dip"
-                android:gravity="right"
+                android:layout_marginStart="5dip"
                 android:text="@string/label_remote" />
 
             <TextView
                 android:id="@+id/contact"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="5dip"
-                android:layout_marginRight="5dip"
                 android:textStyle="bold" />
         </TableRow>
 
@@ -35,13 +34,11 @@
 
             <TextView
                 android:layout_marginLeft="5dip"
-                android:gravity="right"
+                android:layout_marginStart="5dip"
                 android:text="@string/label_service_id" />
 
             <TextView
                 android:id="@+id/feature_tag"
-                android:layout_marginLeft="5dip"
-                android:layout_marginRight="5dip"
                 android:textStyle="bold" />
         </TableRow>
 
@@ -49,8 +46,6 @@
 
             <Button
                 android:id="@+id/send_btn"
-                android:layout_marginLeft="5dip"
-                android:layout_marginRight="5dip"
                 android:text="@string/label_send_data" />
         </TableRow>
 
@@ -58,13 +53,11 @@
 
             <TextView
                 android:layout_marginLeft="5dip"
-                android:gravity="right"
+                android:layout_marginStart="5dip"
                 android:text="@string/label_recv_data" />
 
             <TextView
                 android:id="@+id/recv_data"
-                android:layout_marginLeft="5dip"
-                android:layout_marginRight="5dip"
                 android:textStyle="bold" />
         </TableRow>
     </TableLayout>

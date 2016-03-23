@@ -1,35 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent" >
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
 
-    <LinearLayout
+    <TableLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical" >
+        android:layout_margin="5dp"
+        android:stretchColumns="1">
 
-        <TextView
-            android:id="@+id/from"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="5dip"
-            android:layout_marginRight="5dip" />
+        <TableRow android:layout_margin="2dp">
 
-        <TextView
-            android:id="@+id/video_format"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="5dip"
-            android:layout_marginRight="5dip"
-            android:gravity="left"
-            android:visibility="gone" />
+            <TextView
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:text="@string/label_contact" />
 
-        <com.orangelabs.rcs.ri.sharing.video.media.VideoSurfaceView
-            android:id="@+id/video_view"
-            android:layout_width="176dp"
-            android:layout_height="144dp"
-            android:layout_gravity="center"
-            android:layout_marginTop="5dp" />
-    </LinearLayout>
+            <TextView
+                android:id="@+id/contact"
+                android:singleLine="true"
+                android:text="@string/contact_dummy" />
+        </TableRow>
 
-</ScrollView>
+        <TableRow android:layout_margin="2dp">
+
+            <TextView
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:text="@string/label_video_format" />
+
+            <TextView
+                android:id="@+id/video_format"
+                android:singleLine="true" />
+        </TableRow>
+
+    </TableLayout>
+
+    <com.gsma.rcs.ri.sharing.video.media.VideoSurfaceView
+        android:id="@+id/video_view"
+        android:layout_width="176dp"
+        android:layout_height="144dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="5dp" />
+</LinearLayout>

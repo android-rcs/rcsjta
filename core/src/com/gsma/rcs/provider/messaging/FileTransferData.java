@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -134,6 +134,13 @@ public class FileTransferData {
      * File size in bytes
      */
     /* package private */static final String KEY_FILESIZE = FileTransferLog.FILESIZE;
+
+    /**
+     * File transfer disposition
+     *
+     * @see Disposition
+     */
+    /* package private */static final String KEY_DISPOSITION = FileTransferLog.DISPOSITION;
 
     /**
      * Incoming transfer or outgoing transfer

@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,6 @@ public class SupportedExtensionUpdater implements Runnable {
      * @param imsModule
      * @param rcsSettings
      * @param extensionManager
-     * @param capabilityMonitoring
      */
     public SupportedExtensionUpdater(Context ctx, ImsModule imsModule, RcsSettings rcsSettings,
             ServiceExtensionManager extensionManager) {

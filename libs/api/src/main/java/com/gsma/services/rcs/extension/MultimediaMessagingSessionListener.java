@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -36,7 +36,7 @@ public abstract class MultimediaMessagingSessionListener {
      * Callback called when the multimedia messaging session state/reasonCode is changed.
      * 
      * @param contact Contact ID
-     * @param sessionId Session Id
+     * @param sessionId Session ID
      * @param state State
      * @param reasonCode Reason code
      */
@@ -46,9 +46,32 @@ public abstract class MultimediaMessagingSessionListener {
     /**
      * Callback called when a multimedia message or data is received.
      * 
+     * @deprecated Use
+     *             {@link #onMessageReceived(ContactId contact, String sessionId, byte[] content, String contentType)}
+     *             instead.
      * @param contact Contact ID
-     * @param sessionId
+     * @param sessionId Session ID
      * @param content Message content
      */
+    @Deprecated
     public abstract void onMessageReceived(ContactId contact, String sessionId, byte[] content);
+
+    /**
+     * Callback called when a multimedia message or data is received.
+     *
+     * @param contact Contact ID
+     * @param sessionId Session ID
+     * @param content Message content
+     * @param contentType Message content type
+     */
+    public abstract void onMessageReceived(ContactId contact, String sessionId, byte[] content,
+            String contentType);
+
+    /**
+     * Callback called when multimedia messages have been flushed.
+     *
+     * @param contact Contact ID
+     * @param sessionId Session ID
+     */
+    public abstract void onMessagesFlushed(ContactId contact, String sessionId);
 }

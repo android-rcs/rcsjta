@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -52,6 +52,7 @@ import com.gsma.services.rcs.contact.ContactId;
 import android.content.Intent;
 
 import java.util.Collection;
+import java.util.StringTokenizer;
 import java.util.Vector;
 
 /**
@@ -73,12 +74,12 @@ public class TerminatingSipMsrpSession extends GenericSipMsrpSession {
      * 
      * @param parent SIP service
      * @param invite Initial INVITE request
-     * @param imsModule
-     * @param contact
-     * @param sessionInvite
-     * @param rcsSettings
+     * @param imsModule the IMS module
+     * @param contact the remote contact
+     * @param sessionInvite the session invitate
+     * @param rcsSettings the ECS settings accessor
      * @param timestamp Local timestamp for the session
-     * @param contactManager
+     * @param contactManager the contact manager
      */
     public TerminatingSipMsrpSession(SipService parent, SipRequest invite, ImsModule imsModule,
             ContactId contact, Intent sessionInvite, RcsSettings rcsSettings, long timestamp,
@@ -167,8 +168,8 @@ public class TerminatingSipMsrpSession extends GenericSipMsrpSession {
                     return;
 
                 default:
-                    throw new IllegalArgumentException(new StringBuilder(
-                            "Unknown invitation answer in run; answer=").append(answer).toString());
+                    throw new IllegalArgumentException("Unknown invitation answer in run; answer="
+                            + answer);
             }
 
             /* Parse the remote SDP part */
@@ -199,8 +200,34 @@ public class TerminatingSipMsrpSession extends GenericSipMsrpSession {
                 sLogger.debug("Local setup attribute is ".concat(localSetup));
             }
 
+            /* Extract "accept-type" */
+            String[] acceptType = new String[0];
+            MediaAttribute attr3 = mediaDesc.getMediaAttribute("accept-types");
+            if (attr3 != null) {
+                StringTokenizer st = new StringTokenizer(attr3.getValue(), " ");
+                acceptType = new String[st.countTokens()];
+                int i = 0;
+                while (st.hasMoreTokens()) {
+                    acceptType[i] = st.nextToken();
+                    i++;
+                }
+            }
+
+            /* Extract "accept-wrapped-type" */
+            String[] acceptWrappedType = new String[0];
+            MediaAttribute attr4 = mediaDesc.getMediaAttribute("accept-wrapped-types");
+            if (attr4 != null) {
+                StringTokenizer st = new StringTokenizer(attr4.getValue(), " ");
+                acceptWrappedType = new String[st.countTokens()];
+                int i = 0;
+                while (st.hasMoreTokens()) {
+                    acceptWrappedType[i] = st.nextToken();
+                    i++;
+                }
+            }
+
             /* Build SDP answer */
-            String sdp = generateSdp(localSetup);
+            String sdp = generateSdp(localSetup, acceptType, acceptWrappedType);
 
             /* Set the local SDP part in the dialog path */
             dialogPath.setLocalContent(sdp);
@@ -282,26 +309,14 @@ public class TerminatingSipMsrpSession extends GenericSipMsrpSession {
                 handleError(new SipSessionError(SipSessionError.SESSION_INITIATION_FAILED));
             }
 
-        } catch (PayloadException e) {
-            sLogger.error(
-                    new StringBuilder("Session initiation has failed for CallId=")
-                            .append(getDialogPath().getCallId()).append(" ContactId=")
-                            .append(getRemoteContact()).toString(), e);
+        } catch (PayloadException | RuntimeException e) {
+            sLogger.error("Session initiation has failed for CallId=" + getDialogPath().getCallId()
+                    + " ContactId=" + getRemoteContact(), e);
             handleError(new SipSessionError(SipSessionError.MEDIA_FAILED, e));
 
         } catch (NetworkException e) {
             handleError(new SipSessionError(SipSessionError.MEDIA_FAILED, e));
 
-        } catch (RuntimeException e) {
-            /**
-             * Intentionally catch runtime exceptions as else it will abruptly end the thread and
-             * eventually bring the whole system down, which is not intended.
-             */
-            sLogger.error(
-                    new StringBuilder("Session initiation has failed for CallId=")
-                            .append(getDialogPath().getCallId()).append(" ContactId=")
-                            .append(getRemoteContact()).toString(), e);
-            handleError(new SipSessionError(SipSessionError.MEDIA_FAILED, e));
         }
     }
 

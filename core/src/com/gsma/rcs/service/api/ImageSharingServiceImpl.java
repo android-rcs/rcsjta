@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -77,7 +77,7 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 
     private final RcsSettings mRcsSettings;
 
-    private final Map<String, IImageSharing> mImageSharingCache = new HashMap<String, IImageSharing>();
+    private final Map<String, IImageSharing> mImageSharingCache = new HashMap<>();
 
     private static final Logger sLogger = Logger.getLogger(ImageSharingServiceImpl.class
             .getSimpleName());
@@ -123,8 +123,8 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
      */
     private void addImageSharing(ImageSharingImpl imageSharing, String sharingId) {
         if (sLogger.isActivated()) {
-            sLogger.debug(new StringBuilder("Add an image sharing in the list (size=")
-                    .append(mImageSharingCache.size()).append(")").toString());
+            sLogger.debug("Add an image sharing in the list (size=" + mImageSharingCache.size()
+                    + ")");
         }
 
         mImageSharingCache.put(sharingId, imageSharing);
@@ -284,7 +284,8 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
         try {
             Uri localFile = FileUtils.createCopyOfSentFile(file, mRcsSettings);
             FileDescription desc = FileFactory.getFactory().getFileDescription(localFile);
-            MmContent content = ContentManager.createMmContent(localFile, desc.getSize(),
+            String mime = FileUtils.getMimeTypeFromExtension(desc.getName());
+            MmContent content = ContentManager.createMmContent(localFile, mime, desc.getSize(),
                     desc.getName());
             long timestamp = System.currentTimeMillis();
             final ImageTransferSession session = mRichcallService.createImageSharingSession(

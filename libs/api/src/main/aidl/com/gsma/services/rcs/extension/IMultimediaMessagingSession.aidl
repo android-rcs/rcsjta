@@ -26,4 +26,8 @@ interface IMultimediaMessagingSession {
 	void abortSession();
 
 	void sendMessage(in byte[] content);
+
+	void sendMessage2(in byte[] content, in String contentType);
+
+	void flushMessages();
 }

@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -123,8 +123,9 @@ public class FtHttpResumeManager implements Runnable {
         switch (ftHttpResume.getDirection()) {
             case INCOMING:
                 FtHttpResumeDownload downloadInfo = (FtHttpResumeDownload) ftHttpResume;
-                MmContent downloadContent = ContentManager.createMmContent(ftHttpResume.getFile(),
-                        downloadInfo.getSize(), downloadInfo.getFileName());
+                MmContent downloadContent = ContentManager.createMmContent(
+                        ftHttpResume.getFile(), ftHttpResume.getMimeType(), ftHttpResume.getSize(),
+                        downloadInfo.getFileName());
                 final DownloadFromResumeFileSharingSession resumeDownload = new DownloadFromResumeFileSharingSession(
                         mImsService, downloadContent, downloadInfo, mRcsSettings, mMessagingLog,
                         mContactManager);
@@ -136,8 +137,9 @@ public class FtHttpResumeManager implements Runnable {
 
             case OUTGOING:
                 FtHttpResumeUpload uploadInfo = (FtHttpResumeUpload) ftHttpResume;
-                MmContent uploadContent = ContentManager.createMmContent(uploadInfo.getFile(),
-                        uploadInfo.getSize(), uploadInfo.getFileName());
+                MmContent uploadContent = ContentManager.createMmContent(
+                        uploadInfo.getFile(), uploadInfo.getMimeType(), uploadInfo.getSize(),
+                        uploadInfo.getFileName());
                 if (!ftHttpResume.isGroupTransfer()) {
                     final ResumeUploadFileSharingSession resumeUpload = new ResumeUploadFileSharingSession(
                             mImsService, uploadContent, uploadInfo, mRcsSettings, mMessagingLog,
@@ -197,8 +199,8 @@ public class FtHttpResumeManager implements Runnable {
             }
 
             @Override
-            public void onFileTransferred(MmContent content, ContactId contact, long fileExpiration,
-                    long fileIconExpiration, FileTransferProtocol ftProtocol) {
+            public void onFileTransferred(MmContent content, ContactId contact,
+                    long fileExpiration, long fileIconExpiration, FileTransferProtocol ftProtocol) {
                 if (fired.compareAndSet(false, true)) {
                     processNext();
                 }

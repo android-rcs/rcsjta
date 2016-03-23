@@ -1,21 +1,21 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
- *
- * Copyright (C) 2010 France Telecom S.A.
+ * <p/>
+ * Copyright (C) 2010-2016 Orange.
  * Copyright (C) 2015 Sony Mobile Communications Inc.
- *
+ * <p/>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p/>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p/>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
+ * <p/>
  * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
@@ -45,34 +45,22 @@ import javax.xml.parsers.ParserConfigurationException;
  * (idle or active) of contact according to received messages and timers.
  */
 public class IsComposingManager {
-    /**
-     * Timer for expiration timeout
-     */
-    private Timer timer = new Timer();
+
+    private static final long DEFAULT_REFESH_TIMEOUT = 120000;
 
     /**
      * Expiration timer task
      */
-    private ExpirationTimer timerTask = null;
+    private ExpirationTimer mTimerTask;
 
-    /**
-     * Is-composing timeout (in milliseconds)
-     */
-    private long mTimeout = 120000;
+    private final ChatSession mSession;
 
-    /**
-     * IM session
-     */
-    private ChatSession mSession;
-
-    /**
-     * The logger
-     */
-    private static final Logger logger = Logger.getLogger(IsComposingManager.class.getSimpleName());
+    private static final Logger sLogger = Logger
+            .getLogger(IsComposingManager.class.getSimpleName());
 
     /**
      * Constructor
-     * 
+     *
      * @param session IM session
      */
     public IsComposingManager(ChatSession session) {
@@ -81,7 +69,7 @@ public class IsComposingManager {
 
     /**
      * Receive is-composing event
-     * 
+     *
      * @param contact Contact identifier
      * @param event Event
      * @throws PayloadException
@@ -92,16 +80,14 @@ public class IsComposingManager {
             IsComposingParser parser = new IsComposingParser(input).parse();
             IsComposingInfo isComposingInfo = parser.getIsComposingInfo();
             List<ImsSessionListener> sessionListeners = mSession.getListeners();
-            if ((isComposingInfo != null) && isComposingInfo.isStateActive()) {
+            if (isComposingInfo != null && isComposingInfo.isStateActive()) {
                 for (ImsSessionListener sessionListener : sessionListeners) {
                     ((ChatSessionListener) sessionListener).onIsComposingEventReceived(contact,
                             true);
                 }
-
-                // Start the expiration timer
                 long timeout = isComposingInfo.getRefreshTime();
                 if (timeout == 0) {
-                    timeout = mTimeout;
+                    timeout = DEFAULT_REFESH_TIMEOUT;
                 }
                 startExpirationTimer(timeout, contact);
             } else {
@@ -109,83 +95,65 @@ public class IsComposingManager {
                     ((ChatSessionListener) sessionListener).onIsComposingEventReceived(contact,
                             false);
                 }
-
-                // Stop the expiration timer
                 stopExpirationTimer(contact);
             }
-        } catch (ParserConfigurationException e) {
-            throw new PayloadException(new StringBuilder(
-                    "Can't parse is-composing event for session ID : ").append(
-                    mSession.getSessionID()).toString(), e);
+        } catch (ParserConfigurationException | SAXException | ParseFailureException e) {
+            throw new PayloadException("Can't parse is-composing event for session ID : "
+                    + mSession.getSessionID(), e);
 
-        } catch (SAXException e) {
-            throw new PayloadException(new StringBuilder(
-                    "Can't parse is-composing event for session ID : ").append(
-                    mSession.getSessionID()).toString(), e);
-
-        } catch (ParseFailureException e) {
-            throw new PayloadException(new StringBuilder(
-                    "Can't parse is-composing event for session ID : ").append(
-                    mSession.getSessionID()).toString(), e);
         }
     }
 
     /**
      * Receive is-composing event
-     * 
+     *
      * @param contact Contact identifier
      * @param state State
      */
     public void receiveIsComposingEvent(ContactId contact, boolean state) {
-        // We just received an instant message, so if composing info was active, it must
-        // be changed to idle. If it was already idle, no need to notify listener again
-        for (int j = 0; j < mSession.getListeners().size(); j++) {
-            ((ChatSessionListener) mSession.getListeners().get(j)).onIsComposingEventReceived(
-                    contact, state);
+        /*
+         * We just received an instant message, so if composing info was active, it must be changed
+         * to idle. If it was already idle, no need to notify listener again.
+         */
+        for (ImsSessionListener listener : mSession.getListeners()) {
+            ((ChatSessionListener) listener).onIsComposingEventReceived(contact, state);
         }
-
-        // Stop the expiration timer
         stopExpirationTimer(contact);
     }
 
     /**
      * Start the expiration timer for a given contact
-     * 
+     *
      * @param duration Timer period in milliseconds
      * @param contact Contact identifier
      */
     public synchronized void startExpirationTimer(long duration, ContactId contact) {
         // Remove old timer
-        if (timerTask != null) {
-            timerTask.cancel();
-            timerTask = null;
+        if (mTimerTask != null) {
+            mTimerTask.cancel();
+            mTimerTask = null;
         }
-
         // Start timer
-        if (logger.isActivated()) {
-            logger.debug(new StringBuilder("Start is-composing timer for ").append(duration)
-                    .append("ms").toString());
+        if (sLogger.isActivated()) {
+            sLogger.debug("Start is-composing timer for " + duration + "ms");
         }
-        timerTask = new ExpirationTimer(contact);
-        timer = new Timer();
-        timer.schedule(timerTask, duration);
+        mTimerTask = new ExpirationTimer(contact);
+        new Timer().schedule(mTimerTask, duration);
     }
 
     /**
      * Stop the expiration timer for a given contact
-     * 
+     *
      * @param contact Contact identifier
      */
     public synchronized void stopExpirationTimer(ContactId contact) {
-        // Stop timer
-        if (logger.isActivated()) {
-            logger.debug("Stop is-composing timer");
+        if (sLogger.isActivated()) {
+            sLogger.debug("Stop is-composing timer");
         }
-
         // TODO : stop timer for a given contact
-        if (timerTask != null) {
-            timerTask.cancel();
-            timerTask = null;
+        if (mTimerTask != null) {
+            mTimerTask.cancel();
+            mTimerTask = null;
         }
     }
 
@@ -194,19 +162,19 @@ public class IsComposingManager {
      */
     private class ExpirationTimer extends TimerTask {
 
-        private ContactId contact;
+        private ContactId mContact;
 
         public ExpirationTimer(ContactId contact) {
-            this.contact = contact;
+            mContact = contact;
         }
 
         public void run() {
-            if (logger.isActivated()) {
-                logger.debug("Is-composing timer has expired: " + contact
+            if (sLogger.isActivated()) {
+                sLogger.debug("Is-composing timer has expired: " + mContact
                         + " is now considered idle");
             }
             for (ImsSessionListener sessionListener : mSession.getListeners()) {
-                ((ChatSessionListener) sessionListener).onIsComposingEventReceived(contact, false);
+                ((ChatSessionListener) sessionListener).onIsComposingEventReceived(mContact, false);
             }
         }
     }

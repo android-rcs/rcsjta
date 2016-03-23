@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  * Copyright (C) 2015 Sony Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -223,6 +223,10 @@ public class ProfileProvisioning extends Activity {
         setCheckBoxParam(R.id.file_transfer_sf, RcsSettingsData.CAPABILITY_FILE_TRANSFER_SF, helper);
         setCheckBoxParam(R.id.group_chat_sf, RcsSettingsData.CAPABILITY_GROUP_CHAT_SF, helper);
         setCheckBoxParam(R.id.sip_automata, RcsSettingsData.CAPABILITY_SIP_AUTOMATA, helper);
+        setCheckBoxParam(R.id.call_composer, RcsSettingsData.CAPABILITY_CALL_COMPOSER, helper);
+        setCheckBoxParam(R.id.shared_map, RcsSettingsData.CAPABILITY_SHARED_MAP, helper);
+        setCheckBoxParam(R.id.shared_sketch, RcsSettingsData.CAPABILITY_SHARED_SKETCH, helper);
+        setCheckBoxParam(R.id.post_call, RcsSettingsData.CAPABILITY_POST_CALL, helper);
         TextView txt = (TextView) findViewById(R.id.release);
         txt.setText(mRcsSettings.getGsmaRelease().name());
         txt = (TextView) findViewById(R.id.user_msg_title);
@@ -339,6 +343,10 @@ public class ProfileProvisioning extends Activity {
                 helper);
         saveCheckBoxParam(R.id.group_chat_sf, RcsSettingsData.CAPABILITY_GROUP_CHAT_SF, helper);
         saveCheckBoxParam(R.id.sip_automata, RcsSettingsData.CAPABILITY_SIP_AUTOMATA, helper);
+        saveCheckBoxParam(R.id.call_composer, RcsSettingsData.CAPABILITY_CALL_COMPOSER, helper);
+        saveCheckBoxParam(R.id.shared_map, RcsSettingsData.CAPABILITY_SHARED_MAP, helper);
+        saveCheckBoxParam(R.id.shared_sketch, RcsSettingsData.CAPABILITY_SHARED_SKETCH, helper);
+        saveCheckBoxParam(R.id.post_call, RcsSettingsData.CAPABILITY_POST_CALL, helper);
     }
 
     /**

@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -83,14 +83,14 @@ public abstract class MultimediaSession {
 
         private final int mValue;
 
-        private static SparseArray<State> mValueToEnum = new SparseArray<State>();
+        private static SparseArray<State> mValueToEnum = new SparseArray<>();
         static {
             for (State entry : State.values()) {
                 mValueToEnum.put(entry.toInt(), entry);
             }
         }
 
-        private State(int value) {
+        State(int value) {
             mValue = value;
         }
 
@@ -98,7 +98,7 @@ public abstract class MultimediaSession {
             return mValue;
         }
 
-        public static final State valueOf(int value) {
+        public static State valueOf(int value) {
             State entry = mValueToEnum.get(value);
             if (entry != null) {
                 return entry;
@@ -175,14 +175,14 @@ public abstract class MultimediaSession {
 
         private final int mValue;
 
-        private static SparseArray<ReasonCode> mValueToEnum = new SparseArray<ReasonCode>();
+        private static SparseArray<ReasonCode> mValueToEnum = new SparseArray<>();
         static {
             for (ReasonCode entry : ReasonCode.values()) {
                 mValueToEnum.put(entry.toInt(), entry);
             }
         }
 
-        private ReasonCode(int value) {
+        ReasonCode(int value) {
             mValue = value;
         }
 
@@ -190,7 +190,7 @@ public abstract class MultimediaSession {
             return mValue;
         }
 
-        public static final ReasonCode valueOf(int value) {
+        public static ReasonCode valueOf(int value) {
             ReasonCode entry = mValueToEnum.get(value);
             if (entry != null) {
                 return entry;

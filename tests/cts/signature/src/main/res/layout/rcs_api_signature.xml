@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:padding="10dip"
+    android:stretchColumns="1">
+
+
+    <Spinner
+        android:id="@+id/spinner_rcs_version"
+        android:layout_width="wrap_content"
+        android:layout_height="50dip"
+        android:layout_margin="20dip"
+        android:drawSelectorOnTop="true" />
+
+    <TableRow android:padding="2dip">
+
+        <TextView
+            android:layout_marginEnd="5dip"
+            android:layout_marginRight="5dip"
+            android:text="@string/label_result" />
+
+        <TextView android:id="@+id/test_result" />
+    </TableRow>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@android:color/darker_gray"/>
+
+    <ListView
+        android:id="@+id/report_list"
+        android:layout_width="fill_parent"
+        android:layout_marginLeft="5dip"
+        android:layout_marginRight="5dip"
+        android:paddingTop="5dip" />
+
+</TableLayout>

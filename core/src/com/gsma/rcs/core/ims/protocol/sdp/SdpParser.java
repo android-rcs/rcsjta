@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -98,7 +98,8 @@ public class SdpParser extends Parser {
         }
 
         // Bandwidth information
-        if (getToken(bin, "b=")) {
+        while (getToken(bin, "b=")) {
+            //session bandwidth information is not used right now; just consumed for parsing
             sessionDescription.bandwidthInfo = getLine(bin);
         }
 

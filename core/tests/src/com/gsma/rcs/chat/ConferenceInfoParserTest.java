@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,72 @@ import javax.xml.parsers.ParserConfigurationException;
 public class ConferenceInfoParserTest extends AndroidTestCase {
     private Logger logger = Logger.getLogger(this.getClass().getName());
 
-    private static final String CRLF = "\r\n";
+    private static final String sXmlContentToParse1 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+            + "<conference-info entity=\"sips:conf233@example.com\" state=\"full\" version=\"1\" xmlns=\"urn:ietf:params:xml:ns:conference-info\">\n"
+            + "\t<!-- CONFERENCE INFO -->\n"
+            + "\t<conference-description>\n"
+            + "\t\t<subject>Agenda: This month's\n"
+            + "     goals</subject>\n"
+            + "\t\t<service-uris>\n"
+            + "\t\t\t<entry>\n"
+            + "\t\t\t\t<uri>http://sharepoint/salesgroup/</uri>\n"
+            + "\t\t\t\t<purpose>web-page</purpose>\n"
+            + "\t\t\t</entry>\n"
+            + "\t\t</service-uris>\n"
+            + "\t\t<maximum-user-count>50</maximum-user-count>\n"
+            + "\t</conference-description>\n"
+            + "\t<!-- CONFERENCE STATE-->\n"
+            + "\t<conference-state>\n"
+            + "\t\t<user-count>33</user-count>\n"
+            + "\t</conference-state>\n"
+            + "\t<!-- USERS -->\n"
+            + "\t<users>\n"
+            + "\t\t<!-- USER 1 -->\n"
+            + "\t\t<user entity=\"sip:bob@example.com\" state=\"full\">\n"
+            + "\t\t\t<display-text>Bob Hoskins</display-text>\n"
+            + "\t\t\t<!-- ENDPOINTS -->\n"
+            + "\t\t\t<endpoint entity=\"sip:bob@pc33.example.com\">\n"
+            + "\t\t\t\t<display-text>Bob's Laptop</display-text>\n"
+            + "\t\t\t\t<status>disconnected</status>\n"
+            + "\t\t\t\t<disconnection-method>departed</disconnection-method>\n"
+            + "\t\t\t\t<disconnection-info>\n"
+            + "\t\t\t\t\t<when>2005-03-04T20:00:00Z</when>\n"
+            + "\t\t\t\t\t<reason>bad voice quality</reason>\n"
+            + "\t\t\t\t\t<by>sip:mike@example.com</by>\n"
+            + "\t\t\t\t</disconnection-info>\n"
+            + "\t\t\t\t<!-- MEDIA -->\n"
+            + "\t\t\t\t<media id=\"1\">\n"
+            + "\t\t\t\t\t<display-text>main audio</display-text>\n"
+            + "\t\t\t\t\t<type>audio</type>\n"
+            + "\t\t\t\t\t<label>34567</label>\n"
+            + "\t\t\t\t\t<src-id>432424</src-id>\n"
+            + "\t\t\t\t\t<status>sendrecv</status>\n"
+            + "\t\t\t\t</media>\n"
+            + "\t\t\t</endpoint>\n"
+            + "\t\t</user>\n"
+            + "\t\t<!-- USER 2-->\n"
+            + "\t\t<user entity=\"sip:alice@example.com\" state=\"full\">\n"
+            + "\t\t\t<display-text>Alice</display-text>\n"
+            + "\t\t\t<!-- ENDPOINTS -->\n"
+            + "\t\t\t<endpoint entity=\"sip:4kfk4j392jsu@example.com;grid=433kj4j3u\">\n"
+            + "\t\t\t\t<status>connected</status>\n"
+            + "\t\t\t\t<joining-method>dialed-out</joining-method>\n"
+            + "\t\t\t\t<joining-info>\n"
+            + "\t\t\t\t\t<when>2005-03-04T20:00:00Z</when>\n"
+            + "\t\t\t\t\t<by>sip:mike@example.com</by>\n"
+            + "\t\t\t\t</joining-info>\n"
+            + "\t\t\t\t<!-- MEDIA-->\n"
+            + "\t\t\t\t<media id=\"1\">\n"
+            + "\t\t\t\t\t<display-text>main audio</display-text>\n"
+            + "\t\t\t\t\t<type>audio</type>\n"
+            + "\t\t\t\t\t<label>34567</label>\n"
+            + "\t\t\t\t\t<src-id>534232</src-id>\n"
+            + "\t\t\t\t\t<status>sendrecv</status>\n"
+            + "\t\t\t\t</media>\n"
+            + "\t\t\t</endpoint>\n"
+            + "\t\t</user>\n"
+            + "\t</users>\n"
+            + "</conference-info>";
 
     protected void setUp() throws Exception {
         super.setUp();
@@ -46,75 +111,11 @@ public class ConferenceInfoParserTest extends AndroidTestCase {
         super.tearDown();
     }
 
-    // @formatter:off
-    /*
-     * Conference-Info SAMPLE: <?xml version="1.0" encoding="UTF-8"?> <conference-info
-     * xmlns="urn:ietf:params:xml:ns:conference-info" entity="sips:conf233@example.com" state="full"
-     * version="1"> <!-- CONFERENCE INFO --> <conference-description> <subject>Agenda: This month's
-     * goals</subject> <service-uris><entry> <uri>http://sharepoint/salesgroup/</uri>
-     * <purpose>web-page</purpose> </entry></service-uris>
-     * <maximum-user-count>50</maximum-user-count> </conference-description> <!-- CONFERENCE STATE
-     * --> <conference-state> <user-count>33</user-count></conference-state> <!-- USERS --> <users>
-     * <!-- USER 1 --> <user entity="sip:bob@example.com" state="full"> <display-text>Bob
-     * Hoskins</display-text> <!-- ENDPOINTS --> <endpoint entity="sip:bob@pc33.example.com">
-     * <display-text>Bob's Laptop</display-text> <status>disconnected</status>
-     * <disconnection-method>departed</disconnection-method> <disconnection-info>
-     * <when>2005-03-04T20:00:00Z</when> <reason>bad voice quality</reason>
-     * <by>sip:mike@example.com</by> </disconnection-info> <!-- MEDIA --> <media id="1">
-     * <display-text>main audio</display-text> <type>audio</type> <label>34567</label>
-     * <src-id>432424</src-id> <status>sendrecv</status></media></endpoint> </user> <!-- USER 2 -->
-     * <user entity="sip:alice@example.com" state="full"> <display-text>Alice</display-text> <!--
-     * ENDPOINTS --> <endpoint entity="sip:4kfk4j392jsu@example.com;grid=433kj4j3u">
-     * <status>connected</status> <joining-method>dialed-out</joining-method>
-     * <joining-info><when>2005-03-04T20:00:00Z</when> <by>sip:mike@example.com</by></joining-info>
-     * <!-- MEDIA --> <media id="1"> <display-text>main audio</display-text> <type>audio</type>
-     * <label>34567</label> <src-id>534232</src-id> <status>sendrecv</status> </media> </endpoint>
-     * </user> </users> </conference-info>
-     */
-    // @formatter:on
-
     public void testGetConferenceInfo() throws ParserConfigurationException, SAXException,
             IOException, ParseFailureException {
-        StringBuffer sb = new StringBuffer("<?xml version=\"1.08\" encoding=\"UTF-8\"?>");
-        sb.append(CRLF);
-        sb.append("<conference-info xmlns=\"urn:ietf:params:xml:ns:conference-info\" entity=\"sips:conf233@example.com\" state=\"full\" version=\"1\">");
-        sb.append(CRLF);
-        sb.append("<conference-description>");
-        sb.append("<subject>Agenda: This month's goals</subject>");
-        sb.append("<service-uris>");
-        sb.append("<entry> <uri>http://sharepoint/salesgroup/</uri> <purpose>web-page</purpose> </entry>");
-        sb.append("</service-uris> <maximum-user-count>50</maximum-user-count>");
-        sb.append("</conference-description>");
-        sb.append(CRLF);
-        sb.append("<conference-state>");
-        sb.append("<user-count>33</user-count> </conference-state> ");
-        sb.append(CRLF);
-        sb.append("<users>");
-        sb.append("<user entity=\"sip:bob@example.com\" state=\"full\"> ");
-        sb.append("<display-text>Bob Hoskins</display-text> ");
-        sb.append("<endpoint entity=\"sip:4kfk4j392jsu@example.com;grid=433kj4j3u\"> ");
-        sb.append("<display-text>Bob's Laptop</display-text> ");
-        sb.append("<status>disconnected</status> <disconnection-method>departed</disconnection-method> ");
-        sb.append("<disconnection-info> <when>2005-03-04T20:00:00Z</when> ");
-        sb.append("<by>sip:mike@example.com</by> </disconnection-info> ");
-        sb.append("<media id=\"1\"> <display-text>main audio</display-text> ");
-        sb.append("<type>audio</type> <label>34567</label> <src-id>534232</src-id> ");
-        sb.append("<status>sendrecv</status> </media> </endpoint> </user> ");
-        sb.append(CRLF);
-        sb.append("<user entity=\"sip:alice@example.com\" state=\"full\"> ");
-        sb.append("<display-text>Alice</display-text> ");
-        sb.append("<endpoint entity=\"sip:4kfk4j392jsu@example.com;grid=433kj4j3u\"> ");
-        sb.append("<status>connected</status> <joining-method>dialed-out</joining-method> ");
-        sb.append("<joining-info> <when>2005-03-04T20:00:00Z</when> ");
-        sb.append("<by>sip:mike@example.com</by> </joining-info> ");
-        sb.append("<media id=\"1\"> <display-text>main audio</display-text> ");
-        sb.append("<type>audio</type> <label>34567</label> <src-id>534232</src-id> ");
-        sb.append("<status>sendrecv</status> </media> </endpoint> </user> ");
-        sb.append("</users> </conference-info> ");
-        String xml = sb.toString();
 
-        InputSource inputso = new InputSource(new ByteArrayInputStream(xml.getBytes()));
-        ConferenceInfoParser parser = new ConferenceInfoParser(inputso);
+        ConferenceInfoParser parser = new ConferenceInfoParser(new InputSource(
+                new ByteArrayInputStream(sXmlContentToParse1.getBytes())));
         parser.parse();
         ConferenceInfoDocument confInfoDoc = parser.getConferenceInfo();
 

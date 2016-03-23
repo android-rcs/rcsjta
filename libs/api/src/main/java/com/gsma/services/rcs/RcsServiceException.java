@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -85,8 +85,7 @@ public class RcsServiceException extends Exception {
 
     /**
      * Extracts server side exception message thrown over the AIDL layer after parsing it based on
-     * {@link DELIMITER_PIPE}
-     * 
+     *
      * @param e Exception
      * @return Server exception message
      */

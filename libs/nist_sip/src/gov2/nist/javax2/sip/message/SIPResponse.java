@@ -688,36 +688,10 @@ public final class SIPResponse
         this.setBranch( via, method );
         newRequest.setHeader(via);
         newRequest.setHeader(cseq);
-        Iterator headerIterator = getHeaders();
-        while (headerIterator.hasNext()) {
-            SIPHeader nextHeader = (SIPHeader) headerIterator.next();
-            // Some headers do not belong in a Request ....
-            if (SIPMessage.isResponseHeader(nextHeader)
-                || nextHeader instanceof ViaList
-                || nextHeader instanceof CSeq
-                || nextHeader instanceof ContentType
-                || nextHeader instanceof ContentLength
-                || nextHeader instanceof RecordRouteList
-                || nextHeader instanceof RequireList
-                || nextHeader instanceof ContactList    // JvB: added
-                || nextHeader instanceof ContentLength
-                || nextHeader instanceof ServerHeader
-                || nextHeader instanceof ReasonHeader
-                || nextHeader instanceof SessionExpires
-                || nextHeader instanceof ReasonList) {
-                continue;
-            }
-            if (nextHeader instanceof To)
-                nextHeader = (SIPHeader) to;
-            else if (nextHeader instanceof From)
-                nextHeader = (SIPHeader) from;
-            try {
-                newRequest.attachHeader(nextHeader, false);
-            } catch (SIPDuplicateHeaderException e) {
-                //Should not happen!
-                e.printStackTrace();
-            }
-        }
+        // aligned with NIST version 1.2
+        newRequest.setHeader(from);
+        newRequest.setHeader(to);
+        newRequest.setHeader(getCallId());
 
         try {
           // JvB: all requests need a Max-Forwards

@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -61,7 +61,7 @@ public abstract class OneToOneChatListener {
      * one chat messages was deleted specified by the msgIds parameter corresponding to a specific
      * contact.
      *
-     * @param chatId chat id of those deleted messages
+     * @param contact contact id of those deleted messages
      * @param msgIds message ids of those deleted messages
      */
     public abstract void onMessagesDeleted(ContactId contact, Set<String> msgIds);

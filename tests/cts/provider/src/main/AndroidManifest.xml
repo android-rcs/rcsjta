@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="android.tests.provider">
+
+    <uses-permission android:name="android.permission.RUN_INSTRUMENTATION" />
+
+    <uses-permission android:name="com.gsma.services.permission.RCS" />
+
+    <application
+        android:label="@string/app_name">
+        <uses-library android:name="android.test.runner" />
+    </application>
+
+</manifest>

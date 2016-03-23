@@ -500,6 +500,39 @@
                 android:enabled="true"
                 android:text="@string/SIP_automata"
                 android:textStyle="bold" />
+
+            <CheckBox
+                android:id="@+id/call_composer"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:enabled="true"
+                android:text="@string/call_composer"
+                android:textStyle="bold" />
+
+            <CheckBox
+                android:id="@+id/shared_map"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:enabled="true"
+                android:text="@string/shared_map"
+                android:textStyle="bold" />
+
+            <CheckBox
+                android:id="@+id/shared_sketch"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:enabled="true"
+                android:text="@string/shared_sketch"
+                android:textStyle="bold" />
+
+            <CheckBox
+                android:id="@+id/post_call"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:enabled="true"
+                android:text="@string/post_call"
+                android:textStyle="bold" />
+
         </LinearLayout>
     </ScrollView>
 

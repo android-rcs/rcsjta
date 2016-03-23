@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,7 +24,6 @@ package com.gsma.rcs.core.ims.service;
 
 import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
-import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.PeriodicRefresher;
 import com.gsma.rcs.utils.logger.Logger;
 
@@ -42,27 +41,25 @@ public class SessionActivityManager extends PeriodicRefresher {
     /**
      * ImsServiceSession
      */
-    private ImsServiceSession mSession;
+    private final ImsServiceSession mSession;
 
     /**
-     * The logger
+     * Timeout
      */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private final long mTimeout;
 
-    /**
-     * RcsSettings
-     */
-    private RcsSettings mRcsSettings;
+    private static final Logger sLogger = Logger.getLogger(SessionActivityManager.class
+            .getSimpleName());
 
     /**
      * Constructor
      * 
      * @param session IM session
-     * @param rcsSettings
+     * @param timeout Idle timeout
      */
-    public SessionActivityManager(ImsServiceSession session, RcsSettings rcsSettings) {
+    public SessionActivityManager(ImsServiceSession session, long timeout) {
         mSession = session;
-        mRcsSettings = rcsSettings;
+        mTimeout = timeout;
     }
 
     /**
@@ -76,28 +73,29 @@ public class SessionActivityManager extends PeriodicRefresher {
      * Start manager
      */
     public void start() {
-        long timeout = mRcsSettings.getChatIdleDuration();
-        if (logger.isActivated()) {
-            logger.info(new StringBuilder("Start the activity manager for ").append(timeout)
-                    .append("ms").toString());
+        if (mTimeout == 0) {
+            if (sLogger.isActivated()) {
+                sLogger.info("Activity manager is disabled (no idle timeout)");
+            }
+            return;
         }
-
+        if (sLogger.isActivated()) {
+            sLogger.info("Start the activity manager for " + mTimeout + "ms");
+        }
         // Reset the inactivity timestamp
         updateActivity();
 
         // Start a timer to check if the inactivity period has been reach or not each 10seconds
-        startTimer(System.currentTimeMillis(), timeout);
+        startTimer(System.currentTimeMillis(), mTimeout);
     }
 
     /**
      * Stop manager
      */
     public void stop() {
-        if (logger.isActivated()) {
-            logger.info("Stop the activity manager");
+        if (sLogger.isActivated()) {
+            sLogger.info("Stop the activity manager");
         }
-
-        // Stop timer
         stopTimer();
     }
 
@@ -108,23 +106,20 @@ public class SessionActivityManager extends PeriodicRefresher {
      * @throws PayloadException
      */
     public void periodicProcessing() throws PayloadException, NetworkException {
-        long timeout = mRcsSettings.getChatIdleDuration();
+        long timeout = mTimeout;
         long inactivityPeriod = System.currentTimeMillis() - mActivityTimestamp;
         long remainingPeriod = timeout - inactivityPeriod;
-        if (logger.isActivated()) {
-            logger.debug(new StringBuilder("Check inactivity period: inactivity=")
-                    .append(inactivityPeriod).append(", remaining=").append(remainingPeriod)
-                    .toString());
+        if (sLogger.isActivated()) {
+            sLogger.debug("Check inactivity period: inactivity=" + inactivityPeriod
+                    + ", remaining=" + remainingPeriod);
         }
-
         if (inactivityPeriod >= timeout) {
-            if (logger.isActivated()) {
-                logger.debug(new StringBuilder("No activity on the session during ")
-                        .append(timeout).append("ms: abort the session").toString());
+            if (sLogger.isActivated()) {
+                sLogger.debug("No activity on the session during " + timeout
+                        + "ms: abort the session");
             }
             mSession.handleInactivityEvent();
         } else {
-            // Restart timer
             startTimer(System.currentTimeMillis(), remainingPeriod);
         }
     }

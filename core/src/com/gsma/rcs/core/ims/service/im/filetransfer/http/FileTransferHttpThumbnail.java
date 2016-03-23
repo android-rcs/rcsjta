@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -52,7 +52,7 @@ public class FileTransferHttpThumbnail {
     /**
      * Constructor
      * 
-     * @param rcsSettings
+     * @param rcsSettings the RCS settings accessor
      */
     public FileTransferHttpThumbnail(RcsSettings rcsSettings) {
         mRcsSettings = rcsSettings;
@@ -79,7 +79,7 @@ public class FileTransferHttpThumbnail {
     /**
      * Sets expiration
      * 
-     * @param expiration
+     * @param expiration the expiration
      */
     public void setExpiration(long expiration) {
         mExpiration = expiration;
@@ -115,7 +115,7 @@ public class FileTransferHttpThumbnail {
     /**
      * Sets mime type
      * 
-     * @param mimetype
+     * @param mimetype the mime-type
      */
     public void setMimeType(String mimetype) {
         mMimeType = mimetype;
@@ -133,7 +133,7 @@ public class FileTransferHttpThumbnail {
     /**
      * Sets size
      * 
-     * @param size
+     * @param size the size
      */
     public void setSize(int size) {
         mSize = size;
@@ -142,13 +142,12 @@ public class FileTransferHttpThumbnail {
     /**
      * Gets local MmContent
      * 
-     * @param fileTransferId
+     * @param fileTransferId the file transfer ID
      * @return local content
      */
     public MmContent getLocalMmContent(String fileTransferId) {
         String iconName = FileTransferUtils.buildFileiconUrl(fileTransferId, mMimeType);
-        return ContentManager.createMmContent(
-                Uri.fromFile(new File(mRcsSettings.getFileIconRootDirectory().concat(iconName))),
-                mSize, iconName);
+        Uri file = Uri.fromFile(new File(mRcsSettings.getFileIconRootDirectory().concat(iconName)));
+        return ContentManager.createMmContent(file, mMimeType, mSize, iconName);
     }
 }

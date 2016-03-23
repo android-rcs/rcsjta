@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -99,6 +99,16 @@ public class FileTransferLog {
      * </P>
      */
     public static final String MIME_TYPE = "mime_type";
+
+    /**
+     * The name of the column containing the file disposition.
+     * <P>
+     * Type: INTEGER
+     * </P>
+     *
+     * @see Direction
+     */
+    public static final String DISPOSITION = "disposition";
 
     /**
      * The name of the column containing the direction of the transfer.
@@ -233,4 +243,6 @@ public class FileTransferLog {
      */
     public static final long UNKNOWN_EXPIRATION = 0L;
 
+    private FileTransferLog() {
+    }
 }

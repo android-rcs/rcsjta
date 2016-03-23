@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -46,6 +46,11 @@ public abstract class FtHttpResume {
      * The file name
      */
     final private String mFileName;
+
+    /**
+     * The file mime type
+     */
+    final private String mMimeType;
 
     /**
      * The size of the file to download
@@ -93,6 +98,7 @@ public abstract class FtHttpResume {
      * @param direction the {@code direction} value.
      * @param file the {@code Uri of file} value.
      * @param fileName the {@code fileName} value.
+     * @param mimeType the {@code mimeType} value.
      * @param size the {@code size} value.
      * @param fileIcon the {@code fileIcon} value.
      * @param contact the {@code contactId} value.
@@ -102,13 +108,13 @@ public abstract class FtHttpResume {
      * @param timestamp the {@code timestamp} value
      * @param timestampSent the {@code timestampSent} value
      */
-    public FtHttpResume(Direction direction, Uri file, String fileName, long size, Uri fileIcon,
+    public FtHttpResume(Direction direction, Uri file, String fileName, String mimeType, long size, Uri fileIcon,
             ContactId contact, String chatId, String fileTransferId, boolean groupTransfer,
             long timestamp, long timestampSent) {
         if (size <= 0 || file == null || fileName == null)
-            throw new IllegalArgumentException(new StringBuilder("size invalid arguments (size=")
-                    .append(size).append(") (file=").append(file).append(") (fileName=")
-                    .append(fileName).append(")").toString());
+            throw new IllegalArgumentException("size invalid arguments (size=" +
+                    size + ") (file=" + file + ") (fileName=" +
+                    fileName + ")");
         mDirection = direction;
         mFile = file;
         mFileName = fileName;
@@ -120,6 +126,7 @@ public abstract class FtHttpResume {
         mGroupTransfer = groupTransfer;
         mTimestamp = timestamp;
         mTimestampSent = timestampSent;
+        mMimeType = mimeType;
     }
 
     public long getTimestamp() {
@@ -209,6 +216,14 @@ public abstract class FtHttpResume {
      */
     public boolean isGroupTransfer() {
         return mGroupTransfer;
+    }
+
+    /**
+     * Gets the file mime type
+     * @return the file mime type
+     */
+    public String getMimeType() {
+      return mMimeType;
     }
 
     @Override

@@ -12,7 +12,7 @@
     <string name="label_confirm_close">Do you confirm ?\nThis will close the session.</string>
     <string name="menu_close_session">Quit</string>
     <string name="menu_clear_log">Clear log</string>
-    <string name="label_file_size">Size: %1$s Kb</string>
+    <string name="label_file_size">Size: %1$s</string>
     <string name="label_command_in_progress">Command in progress…</string>
     <string name="label_session_not_found">Session not found</string>
     <string name="label_api_not_compatible">API is not compatible</string>
@@ -22,60 +22,51 @@
     <string name="label_decline">Decline</string>
     <string name="label_refresh">Refresh</string>
     <string name="label_from_args">From: %s</string>
-    <string name="label_with_args">With: %s</string>
     <string name="label_yes">Yes</string>
     <string name="label_no">No</string>
-    <string name="label_load_log_failed">Database access has failed</string>
+    <string name="label_db_failed">Database access has failed</string>
     <string name="label_log_empty">No entry</string>
     <string name="label_incoming">incoming</string>
     <string name="label_outgoing">outgoing</string>
     <string name="label_direction_unknown">unknown direction</string>
     <string name="label_state_unknown">unknown</string>
-    <string name="label_reason_unknown">unknown</string>
     <string name="label_state_delivered_at">Delivered at %s</string>
     <string name="label_state_displayed_at">Displayed at %s</string>
     <string name="label_status">Status: %s</string>
     <string name="label_reason_code_args">Reason: %s</string>
     <string name="label_reason_code">Reason:</string>
-    <string name="label_session_state">State: %s</string>
-    <string name="label_session_reason">Reason: %s</string>
-    <string name="label_session_date">Date: %s</string>
-    <string name="label_direction">Direction: %s</string>
     <string name="label_filename">File: %s</string>
-    <string name="label_filesize">Size: %s bytes</string>
     <string name="label_progress_status">Status:</string>
+    <string name="label_position">Position:</string>
     <string name="label_progress_bar">Progress:</string>
     <string name="label_file">Selected file:</string>
     <string name="label_size">Size:</string>
-    <string name="label_receive_image">Received image %s</string>
+    <string name="label_contact">Contact:</string>
+    <string name="label_duration">Duration (sec):</string>
     <string name="label_remote">Remote contact:</string>
     <string name="label_select_file">Select file</string>
     <string name="label_invalid_contacts">Invalid list of participants</string>
-    <string name="label_uninitialized_contact">+33XXXXXXX</string>
-    <string name="label_uninitialized_text">blah, blah, blah</string>
-    <string name="label_uninitialized_date">date</string>
-    <string name="label_uninitialized_filename">filename</string>
-    <string name="label_uninitialized_filesize">filesize</string>
-    <string name="label_uninitialized_direction">direction</string>
     <string name="error_api_permission_denied">RCS API permission denied</string>
     <string name="label_todo">Feature not yet implemented</string>
 	<string name="error_not_registered">Not registered to IMS</string>
+    <string name="label_attach">Attachment</string>
+    <string name="label_render">Render</string>
+    <string name="text_dummy">dummy text</string>
+    <string name="timestamp_dummy">2016/01/02 03:00:00</string>
+    <string name="contact_dummy">+33123456789</string>
+    <string name="extension_dummy">ext.foo</string>
+    <string name="direction_dummy">direction</string>
+    <string name="number_dummy">0</string>
+    <string name="error_item_not_found">No record found!</string>
 
     <!-- About menu -->
     <string name="label_about_title">Reference Implementation</string>
-    <string name="label_about_release">Release: %s</string>
-    <string name="label_about_api">API release: %s</string>
-
-    <!-- Quick contact badge -->
-    <string name="label_quick_chat">Chat</string>
+    <string name="label_about_app_version">App release %s</string>
 
     <!-- Contacts API -->
     <string name="menu_contacts">Contacts</string>
     <string name="menu_address_book">Native address book</string>
     <string name="menu_list_rcs_contacts">All RCS contacts</string>
-    <string name="menu_list_online_contacts">Online RCS contacts</string>
-    <string name="menu_list_supported_contacts">Contacts supporting a service</string>
-    <string name="label_ext_tag">Extension tag:</string>
     <string name="menu_contact_vcard">Contact visit card</string>
     <string name="label_vcard">Visit card:</string>
     <string name="label_show_vcard">Show card</string>
@@ -84,6 +75,9 @@
     <string name="label_unblock">Unblock</string>
     <string name="label_contact_blocked">%s has been blocked</string>
     <string name="label_contact_unblocked">%s has been unblocked</string>
+    <string name="label_is_blocked">Is blocked:</string>
+    <string name="label_is_online">On line:</string>
+    <string name="label_block_timestamp">Blocking time:</string>
 
     <!-- Capabilities menu -->
     <string name="menu_capabilities">Capabilities</string>
@@ -101,10 +95,8 @@
     <string name="label_capabilities_extensions">Extensions:</string>
     <string name="label_request_in_background">Request has been sent in background for %s</string>
     <string name="label_capabilities_empty">No capabilities</string>
-    <string name="label_contact">Contact %s</string>
+    <string name="label_contact_arg">Contact %s</string>
     <string name="label_capabilities_geolocation_push">Geolocation push</string>
-    <string name="label_capabilities_ip_voice_call">IP voice call</string>
-    <string name="label_capabilities_ip_video_call">IP video call</string>
     <string name="label_automata">Automata:</string>
     <string name="label_capabilities_timestamp">Last refresh:</string>
     <string name="label_no_capabilities">No capabilities for %s</string>
@@ -113,10 +105,12 @@
     <string name="menu_messaging">Messaging</string>
     <string name="menu_file_transfer">File transfer</string>
     <string name="menu_chat">Chat</string>
+    <string name="menu_messaging_log">Messaging log</string>
+    <string name="menu_view_detail">View details</string>
+    <string name="title_talk_1to1_view">One to one conversation</string>
 
     <!-- File transfer menu -->
     <string name="menu_transfer_file">Transfer a file</string>
-    <string name="menu_file_transfer_log">File transfer log</string>
     <string name="title_recv_file_transfer">File transfer invitation</string>
     <string name="title_file_transfer">File transfer</string>
     <string name="label_transfer_failed">Transfer failed (%1$s)</string>
@@ -131,13 +125,14 @@
     <string name="label_transfer_failed_capacity_too_small">Not enough free space on device storage for File Transfer</string>
     <string name="label_transfer_session_has_expired">Session has expired (timeout or any other error)</string>
     <string name="label_ft_state_changed">%1$s (%2$s)</string>
-    <string name="label_ft_from_size">From: %1$s\nSize: %2$s Kb</string>
+    <string name="label_ft_from_size">From: %1$s\nSize: %2$s</string>
     <string name="menu_ft_config">File transfer configuration</string>
     <string name="label_ft_WarnSize">File size warning:</string>
     <string name="label_ft_MaxSize">Max file size:</string>
     <string name="label_ft_isAutoAccept">AA enabled:</string>
     <string name="label_ft_isAutoAcceptInRoaming">AA enabled in roaming:</string>
     <string name="label_MaxFileTransfers">Max file transfers:</string>
+    <string name="label_max_audio_duration">Max audio file duration (msec):</string>
     <string name="label_GroupFileTransferSupported">Group supported:</string>
     <string name="menu_file_transfer_config">File transfer service configuration</string>
     <string name="label_ft_ImageResizeOption">Image resize option:</string>
@@ -149,13 +144,13 @@
     <string name="title_multi_file_transfer">Multiple file transfer</string>
     <string name="label_pause_ft_not_allowed">Cannot pause HTTP file transfer</string>
     <string name="label_resume_ft_not_allowed">Cannot resume HTTP file transfer</string>
+    <string name="label_delete_file_transfer_success">File transfers with contact %1$s deleted</string>
+
 
     <!-- Chat menu -->
     <string name="menu_initiate_chat">Initiate single chat</string>
     <string name="menu_initiate_group_chat">Initiate group chat</string>
-    <string name="menu_chat_log">Chat log</string>
     <string name="menu_chat_config">Chat service configuration</string>
-    <string name="menu_group_chat_log">Group chat log</string>
     <string name="label_invite">Invite</string>
     <string name="title_recv_chat">Chat from %s</string>
     <string name="title_recv_group_chat">Group chat from %s</string>
@@ -171,24 +166,23 @@
     <string name="label_contacts">Contacts:</string>
     <string name="label_contact_is_composing">%1$s is typing…</string>
     <string name="label_select_contacts">Select contacts</string>
-    <string name="label_chat_initiation_canceled">Chat session has been canceled</string>
     <string name="label_select_quicktext">Quick text</string>
     <string name="menu_quicktext">Quick text</string>
-    <string name="label_continue_chat_failed">Can\'t continue the conversation: RCS service is not available</string>
-    <string name="label_delete_chat_failed">Delete chat conversation failed</string>
     <string name="label_delete_chat_success">Chat with contact %1$s is deleted</string>
     <string name="label_delete_gchat_success">Group chat successfully deleted</string>
     <string name="label_subject">Subject: </string>
     <string name="label_subject_notif">Subject: %s</string>
     <string name="label_max_participants">Can\'t add participants: max number of participants is reached (max=%d)</string>
-    <string name="label_sharing_warn_size">Do you confirm sending a file of %d KB?</string>
+    <string name="label_sharing_warn_size">Do you confirm sending a file of %1$s ?</string>
     <string name="label_me">Me</string>
     <string name="label_chat_empty">No chat</string>
     <string name="label_no_participant_found">No participant found or available</string>
     <string name="label_no_subject">no subject</string>
     <string name="label_no_contact">&#8230;</string>
     <string name="label_ft_thumb">Thumbnail</string>
+    <string name="label_send_audio_msg">Audio message</string>
     <string name="menu_send_file">Send file</string>
+    <string name="menu_delete_talk">Delete all messages</string>
     <string name="label_geoloc_msg">Geoloc</string>
     <string name="label_gc_from_subject">From: %1$s\nSubject: %2$s</string>
     <string name="label_chat_send">Send</string>
@@ -211,40 +205,35 @@
     <string name="label_undelivered_message">%1$s did not receive your message(s)</string>
     <string name="title_undelivered_filetransfer">Undelivered file(s)!</string>
     <string name="label_undelivered_filetransfer">%1$s did not receive your file(s)</string>
+    <string name="menu_view_group_delivery">View delivery information</string>
 
     <!-- Sharing menu -->
     <string name="menu_sharing">Sharing</string>
-    <string name="menu_image_sharing">Image sharing</string>
     <string name="menu_video_sharing">Video sharing</string>
-    <string name="menu_geoloc_sharing">Geoloc sharing</string>
     <string name="label_dial">Dial</string>
     <string name="label_sharing_aborted">Sharing aborted (%1$s)</string>
-    <string name="label_sharing_cancelled">Sharing has been cancelled</string>
     <string name="label_sharing_failed">Sharing failed (%1$s)</string>
     <string name="label_sharing_rejected">Sharing rejected (%1$s)</string>
     <string name="menu_sharing_delete">Delete</string>
-    <string name="label_delete_sharing_success">Sharing successfully deleted</string>
+    <string name="menu_sharing_display">Display</string>
 
     <!-- Image sharing menu -->
     <string name="menu_initiate_image_sharing">Initiate image sharing</string>
-    <string name="menu_image_sharing_log">Image sharing log</string>
     <string name="label_select_picture">Select picture</string>
-    <string name="label_selected_img">Selected picture:</string>
+    <string name="label_selected_img">Filename:</string>
+    <string name="label_selected_size">Size:</string>
     <string name="title_recv_image_sharing">Image sharing invitation</string>
     <string name="title_image_sharing">Image sharing</string>
     <string name="label_ish_state_changed">ISH state %1$s (%2$s)</string>
 
     <!-- Video sharing menu -->
     <string name="menu_initiate_video_sharing">Initiate video sharing</string>
-    <string name="menu_video_sharing_log">Video sharing log</string>
     <string name="label_initiate_sharing">Invite</string>
     <string name="title_recv_video_sharing">Video sharing invitation</string>
     <string name="title_video_sharing">Video sharing</string>
-    <string name="label_video_duration">Duration: %s</string>
     <string name="label_vsh_state_changed">VSH state %1$s (%2$s)</string>
     <string name="label_switch_camera">Switch camera</string>
-    <string name="label_vsh_uninitialized_duration">duration</string>
-    <string name="label_video_format">Format: %s</string>
+    <string name="label_video_format">Format:</string>
 
     <!-- Geoloc sharing menu -->
     <string name="title_recv_geoloc_sharing">Geoloc sharing invitation</string>
@@ -263,6 +252,7 @@
     <string name="menu_messaging_sessions_list">Current messaging sessions</string>
     <string name="menu_initiate_streaming_session">Initiate streaming session</string>
     <string name="menu_streaming_sessions_list">Current streaming sessions</string>
+    <string name="menu_instant_message">Send instant message</string>
     <string name="label_initiate_session">Initiate session</string>
     <string name="label_no_session">No session</string>
     <string name="label_service_id">Service ID:</string>
@@ -275,6 +265,7 @@
     <string name="title_recv_streaming_session">Multimedia streaming invitation</string>
     <string name="title_messaging_session">Messaging session</string>
     <string name="title_streaming_session">Streaming session</string>
+    <string name="title_instant_session">Instant session</string>
     <string name="label_session">Session %s</string>
     <string name="label_send_data">Send data</string>
     <string name="label_start">Start RTP streaming</string>
@@ -285,7 +276,9 @@
     <string name="label_mm_from_id">From: %1$s\nService ID: %2$s</string>
     <string name="label_rx_count">RX :</string>
     <string name="label_tx_count">TX :</string>
-
+    <string name="label_send_message">Send message</string>
+    <string name="label_recv_instant_messsage">Instant multimedia message from %s:</string>
+    <string name="label_instant_message_sent">Message has been sent!</string>
     <!-- Geolocation push -->
     <string name="label_select_geoloc">Select from google map\n(Internet connectivity required)</string>
     <string name="menu_showus_map">Show us in a map</string>
@@ -353,36 +346,50 @@
     <string name="title_group_delivery_info">Group delivery information</string>
 
     <!-- Chat message menu -->
-    <string name="menu_view_groupdelivery">View delivery information</string>
     <string name="menu_delete_message">Delete</string>
     <string name="menu_resend_message">Resend</string>
-
-    <!-- Chat session menu -->
-    <string name="menu_delete_chat_session">Delete</string>
-    <string name="menu_open_chat_session">Open</string>
+    <string name="menu_display_content">Display</string>
+    <string name="menu_listen_content">Listen to</string>
 
     <!-- HistoryLog  menu -->
-    <string name="menu_history_log">History Log</string>
-    <string name="menu_history_log_messaging">Messaging</string>
-    <string name="menu_history_log_sharing">Sharings</string>
-    <string name="title_history_log">History Log</string>
-    <string name="title_history_log_sharing">Sharing Log</string>
+    <string name="label_log_chat_id">Chat Id:</string>
+    <string name="label_log_contact">Contact:</string>
+    <string name="label_log_content">Content:</string>
+    <string name="label_log_date">Date:</string>
+    <string name="label_log_dir">Direction:</string>
+    <string name="label_log_duration">Duration:</string>
+    <string name="label_log_encoding">Encoding:</string>
+    <string name="label_log_file_size">Size:</string>
+    <string name="label_log_filename">Filename:</string>
+    <string name="label_log_height">Height :</string>
+    <string name="label_log_mime">Mime type:</string>
+    <string name="label_log_reason">Reason:</string>
+    <string name="label_log_state">State:</string>
+    <string name="label_log_transferred">Transferred:</string>
+    <string name="label_log_uri">Uri:</string>
+    <string name="label_log_width">Width :</string>
+    <string name="title_sharing_log_item">History Log detail</string>
+    <string name="menu_log_sharing">Sharing log</string>
+    <string name="label_sharing_log_menu_gsh">Geoloc Share</string>
+    <string name="label_sharing_log_menu_ish">Image Share</string>
+    <string name="label_sharing_log_menu_vsh">Video Share</string>
+    <string name="label_sharing_log_contact_spinner_default_value">No contact filter</string>
+    <string name="value_log_duration">Duration: %1$s</string>
+    <string name="title_sharing_log_dialog_filter_logs">Filter</string>
+
     <string name="title_history_log_messaging">Messaging Log</string>
-    <string name="title_history_log_item">History Log detail</string>
+    <string name="title_sharing_log">Sharing Log</string>
     <string name="label_history_log_menu_filter">Change filter</string>
-    <string name="label_history_log_menu_chat">Chat</string>
-    <string name="label_history_log_menu_file_transfer">File Transfer</string>
-    <string name="label_history_log_menu_image_sharing">Image Share</string>
-    <string name="label_history_log_menu_video_sharing">Video Share</string>
-    <string name="label_history_log_menu_geoloc_sharing">Geoloc Share</string>
-    <string name="title_history_log_dialog_filter_logs_title">Filter</string>
     <string name="label_history_log_empty">Log is empty</string>
     <string name="label_history_log_contact_spinner_default_value">No contact filter</string>
-    <string name="label_history_log_group_conversation">Group</string>
-    <string name="label_history_log_single_conversation">One To One</string>
-    <string name="label_history_log_image_sharing">Image share</string>
-    <string name="label_history_log_video_sharing">Video share</string>
-    <string name="label_history_log_geoloc_sharing">Geoloc share</string>
+    <string name="LabelPermissionsError">You must accept permissions to use RSC RI</string>
+    <string name="LabelTitlePermissionsError">ALERT</string>
+    <string name="menu_record_audio">Record audio</string>
+    <string name="label_play_record">Play record</string>
+    <string name="label_start_record">Start audio record</string>
+    <string name="label_stop_record">Stop audio record</string>
+    <string name="label_audio_record">Recorded file:</string>
+    <string name="max_audio_record_reached">Maximum duration is reached!</string>
 
     <!-- States -->
 

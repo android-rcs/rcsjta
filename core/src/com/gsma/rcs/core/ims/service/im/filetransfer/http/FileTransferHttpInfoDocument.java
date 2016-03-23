@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,6 +24,7 @@ package com.gsma.rcs.core.ims.service.im.filetransfer.http;
 
 import com.gsma.rcs.core.content.ContentManager;
 import com.gsma.rcs.core.content.MmContent;
+import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSession;
 import com.gsma.rcs.provider.messaging.FileTransferData;
 import com.gsma.rcs.provider.settings.RcsSettings;
 
@@ -70,12 +71,22 @@ public class FileTransferHttpInfoDocument {
      */
     private String mFileName;
 
+    /**
+     * File disposition
+     */
+    private String mFileDispo = FileSharingSession.FILE_DISPOSITION_ATTACH;
+
+    /**
+     * Playing length
+     */
+    private int mPlayingLength = -1;
+
     private final RcsSettings mRcsSettings;
 
     /**
      * Constructor
      * 
-     * @param rcsSettings
+     * @param rcsSettings the RCS settings accessor
      */
     public FileTransferHttpInfoDocument(RcsSettings rcsSettings) {
         mRcsSettings = rcsSettings;
@@ -140,7 +151,7 @@ public class FileTransferHttpInfoDocument {
     /**
      * Sets file URI
      * 
-     * @param file
+     * @param file the file Uri
      */
     public void setUri(Uri file) {
         mFile = file;
@@ -201,13 +212,53 @@ public class FileTransferHttpInfoDocument {
     }
 
     /**
+     * Sets the file disposition
+     *
+     * @param fileDispo File disposition
+     */
+    public void setFileDisposition(String fileDispo) {
+        mFileDispo = fileDispo;
+    }
+
+    /**
+     * Gets the file disposition
+     *
+     * @return File disposition
+     */
+    public String getFileDisposition() {
+        return mFileDispo;
+    }
+
+    /**
+     * Sets the playing length
+     *
+     * @param length Length in seconds
+     */
+    public void setPlayingLength(int length) {
+        mPlayingLength = length;
+    }
+
+    /**
+     * Gets the playing length or -1 if not set
+     *
+     * @return playing length in seconds
+     */
+    public int getPlayingLength() {
+        return mPlayingLength;
+    }
+
+    /**
      * Gets local MmContent
      * 
      * @return local MmCOntent
      */
     public MmContent getLocalMmContent() {
-        return ContentManager.createMmContent(
-                ContentManager.generateUriForReceivedContent(mFileName, mMimeType, mRcsSettings),
-                mSize, mFileName);
+        Uri file = ContentManager.generateUriForReceivedContent(mFileName, mMimeType, mRcsSettings);
+        MmContent content = ContentManager.createMmContent(file, mMimeType, mSize,
+                mFileName);
+        if (FileSharingSession.FILE_DISPOSITION_RENDER.equals(mFileDispo)) {
+            content.setPlayable(true);
+        }
+        return content;
     }
 }

@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ public interface RcsServiceListener {
     /**
      * ReasonCode
      */
-    public enum ReasonCode {
+    enum ReasonCode {
 
         /**
          * Internal error
@@ -48,14 +48,14 @@ public interface RcsServiceListener {
 
         private final int mValue;
 
-        private static SparseArray<ReasonCode> mValueToEnum = new SparseArray<ReasonCode>();
+        private static SparseArray<ReasonCode> mValueToEnum = new SparseArray<>();
         static {
             for (ReasonCode entry : ReasonCode.values()) {
                 mValueToEnum.put(entry.toInt(), entry);
             }
         }
 
-        private ReasonCode(int value) {
+        ReasonCode(int value) {
             mValue = value;
         }
 
@@ -71,17 +71,16 @@ public interface RcsServiceListener {
         /**
          * Returns a ReasonCode instance for the specified integer value.
          * 
-         * @param value
+         * @param value the value associated with the ReasonCode
          * @return instance
          */
-        public final static ReasonCode valueOf(int value) {
+        public static ReasonCode valueOf(int value) {
             ReasonCode entry = mValueToEnum.get(value);
             if (entry != null) {
                 return entry;
             }
-            throw new IllegalArgumentException(new StringBuilder("No enum const class ")
-                    .append(ReasonCode.class.getName()).append("").append(value).append("!")
-                    .toString());
+            throw new IllegalArgumentException("No enum const class " + ReasonCode.class.getName()
+                    + "" + value + "!");
         }
 
     }
@@ -91,14 +90,14 @@ public interface RcsServiceListener {
      * connected to the RCS service (binding procedure successful): this means the methods of the
      * API may be used.
      */
-    public void onServiceConnected();
+    void onServiceConnected();
 
     /**
      * Callback called when service has been disconnected. This method is called when the service is
      * disconnected from the RCS service (e.g. service deactivated).
      * 
-     * @param reasonCode
+     * @param reasonCode the reason code
      * @see ReasonCode
      */
-    public void onServiceDisconnected(ReasonCode reasonCode);
+    void onServiceDisconnected(ReasonCode reasonCode);
 }

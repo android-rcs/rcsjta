@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,7 +28,7 @@ import com.gsma.services.rcs.RcsGenericException;
  * Chat service configuration
  * 
  * @author Jean-Marc AUFFRET
- * @author yplo6403
+ * @author Philippe LEMORDANT
  */
 public class ChatServiceConfiguration {
 
@@ -240,7 +240,7 @@ public class ChatServiceConfiguration {
      * by the remote.<br>
      * Applicable to one to one chat messages.
      * 
-     * @param enable
+     * @param enable true to set respond to display reports
      * @throws RcsGenericException
      */
     public void setRespondToDisplayReports(boolean enable) throws RcsGenericException {

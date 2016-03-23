@@ -5,17 +5,18 @@
     android:background="#323331"
     android:gravity="center_vertical"
     android:orientation="horizontal"
-    android:padding="10dp" >
+    android:padding="10dp">
 
     <ImageView
         android:id="@+id/filetransfer_alert_title_icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:paddingEnd="10dp"
         android:paddingRight="10dp" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/title_file_transfer" />
- 
+
 </LinearLayout>

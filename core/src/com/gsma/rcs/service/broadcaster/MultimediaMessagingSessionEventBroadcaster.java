@@ -52,12 +52,20 @@ public class MultimediaMessagingSessionEventBroadcaster implements
         mMultimediaMessagingListeners.unregister(listener);
     }
 
-    public void broadcastMessageReceived(ContactId contact, String sessionId, byte[] message) {
+    public void broadcastMessageReceived(ContactId contact, String sessionId, byte[] message, String contentType) {
         final int N = mMultimediaMessagingListeners.beginBroadcast();
         for (int i = 0; i < N; i++) {
             try {
                 mMultimediaMessagingListeners.getBroadcastItem(i).onMessageReceived(contact,
                         sessionId, message);
+            } catch (RemoteException e) {
+                if (logger.isActivated()) {
+                    logger.error("Can't notify listener", e);
+                }
+            }
+            try {
+                mMultimediaMessagingListeners.getBroadcastItem(i).onMessageReceived2(contact,
+                        sessionId, message, contentType);
             } catch (RemoteException e) {
                 if (logger.isActivated()) {
                     logger.error("Can't notify listener", e);
@@ -91,5 +99,19 @@ public class MultimediaMessagingSessionEventBroadcaster implements
         msrpSessionInvite.putExtra(MultimediaMessagingSessionIntent.EXTRA_SESSION_ID, sessionId);
 
         AndroidFactory.getApplicationContext().sendBroadcast(msrpSessionInvite);
+    }
+
+    public void broadcastMessagesFlushed(ContactId contact, String sessionId) {
+        final int N = mMultimediaMessagingListeners.beginBroadcast();
+        for (int i = 0; i < N; i++) {
+            try {
+                mMultimediaMessagingListeners.getBroadcastItem(i).onMessagesFlushed(contact, sessionId);
+            } catch (RemoteException e) {
+                if (logger.isActivated()) {
+                    logger.error("Can't notify listener", e);
+                }
+            }
+        }
+        mMultimediaMessagingListeners.finishBroadcast();
     }
 }

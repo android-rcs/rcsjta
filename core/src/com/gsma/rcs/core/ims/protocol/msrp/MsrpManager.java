@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -292,7 +292,6 @@ public class MsrpManager {
         return mMsrpSession;
     }
 
-    // Changed by Deutsche Telekom
     /**
      * Send data chunks
      * 
@@ -341,5 +340,4 @@ public class MsrpManager {
         }
         return mMsrpSession.isEstablished();
     }
-
 }

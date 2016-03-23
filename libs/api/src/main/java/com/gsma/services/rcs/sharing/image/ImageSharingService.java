@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -64,7 +64,7 @@ public final class ImageSharingService extends RcsService {
      */
     private IImageSharingService mApi;
 
-    private final Map<ImageSharingListener, WeakReference<IImageSharingListener>> mImageSharingListeners = new WeakHashMap<ImageSharingListener, WeakReference<IImageSharingListener>>();
+    private final Map<ImageSharingListener, WeakReference<IImageSharingListener>> mImageSharingListeners = new WeakHashMap<>();
 
     private static boolean sApiCompatible = false;
 
@@ -117,6 +117,7 @@ public final class ImageSharingService extends RcsService {
      * Set API interface
      * 
      * @param api API interface
+     * @hide
      */
     protected void setApi(IInterface api) {
         super.setApi(api);
@@ -267,8 +268,7 @@ public final class ImageSharingService extends RcsService {
         }
         try {
             IImageSharingListener rcsListener = new ImageSharingListenerImpl(listener);
-            mImageSharingListeners.put(listener, new WeakReference<IImageSharingListener>(
-                    rcsListener));
+            mImageSharingListeners.put(listener, new WeakReference<>(rcsListener));
             mApi.addEventListener2(rcsListener);
         } catch (Exception e) {
             RcsIllegalArgumentException.assertException(e);
@@ -325,7 +325,7 @@ public final class ImageSharingService extends RcsService {
      * Deletes image sharing with a given contact from history and abort/reject any associated
      * ongoing session if such exists
      * 
-     * @param contact
+     * @param contact The remote contact
      * @throws RcsServiceNotAvailableException
      * @throws RcsGenericException
      */
@@ -346,7 +346,7 @@ public final class ImageSharingService extends RcsService {
      * deletes an image sharing by its sharing id from history and abort/reject any associated
      * ongoing session if such exists.
      * 
-     * @param sharingId
+     * @param sharingId the sharing ID
      * @throws RcsServiceNotAvailableException
      * @throws RcsGenericException
      */

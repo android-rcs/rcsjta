@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -79,56 +79,6 @@ public class MediaRtpSender {
     }
 
     /**
-     * Prepare the RTP session
-     * 
-     * @param player Media player
-     * @param remoteAddress Remote address
-     * @param remotePort Remote port
-     * @throws NetworkException
-     */
-    public void prepareSession(MediaInput player, String remoteAddress, int remotePort,
-            RtpStreamListener rtpStreamListener) throws NetworkException {
-        try {
-            if (logger.isActivated()) {
-                logger.debug("Prepare session");
-            }
-
-            // Create the input stream
-            inputStream = new MediaCaptureStream(format, player);
-            inputStream.open();
-            if (logger.isActivated()) {
-                logger.debug("Input stream: " + inputStream.getClass().getName());
-            }
-
-            // Create the output stream
-            outputStream = new RtpOutputStream(remoteAddress, remotePort, localPort,
-                    RtpOutputStream.RTCP_SOCKET_TIMEOUT);
-            outputStream.addRtpStreamListener(rtpStreamListener);
-            outputStream.open();
-            if (logger.isActivated()) {
-                logger.debug("Output stream: " + outputStream.getClass().getName());
-            }
-
-            // Create the codec chain
-            Codec[] codecChain = MediaRegistry.generateEncodingCodecChain(format.getCodec());
-
-            // Create the media processor
-            if (logger.isActivated()) {
-                logger.debug("New processor");
-            }
-            processor = new Processor(inputStream, outputStream, codecChain);
-
-            if (logger.isActivated()) {
-                logger.debug("Session has been prepared with success");
-            }
-        } catch (IOException e) {
-            throw new NetworkException(new StringBuilder(
-                    "Can't prepare resources correctly for remoteAddress : ").append(remoteAddress)
-                    .append(" with remotePort : ").append(remotePort).append("!").toString(), e);
-        }
-    }
-
-    /**
      * Prepare the RTP session for a sender associated to a receiver
      * 
      * @param player Media player
@@ -152,8 +102,6 @@ public class MediaRtpSender {
             }
 
             // Create the output stream
-            // outputStream = new RtpOutputStream(remoteAddress, remotePort, localRtpPort,
-            // RtpOutputStream.RTCP_SOCKET_TIMEOUT);
             outputStream = new RtpOutputStream(remoteAddress, remotePort, rtpStream);
             outputStream.addRtpStreamListener(rtpStreamListener);
             outputStream.open();

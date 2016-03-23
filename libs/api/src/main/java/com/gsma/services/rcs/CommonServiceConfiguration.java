@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,7 +29,7 @@ import android.util.SparseArray;
 /**
  * This class represents the common configuration of RCS Services
  * 
- * @author YPLO6403
+ * @author Philippe LEMORDANT
  */
 public class CommonServiceConfiguration {
 
@@ -58,14 +58,14 @@ public class CommonServiceConfiguration {
 
         private int mValue;
 
-        private static SparseArray<MessagingMode> mValueToEnum = new SparseArray<MessagingMode>();
+        private static SparseArray<MessagingMode> mValueToEnum = new SparseArray<>();
         static {
             for (MessagingMode entry : MessagingMode.values()) {
                 mValueToEnum.put(entry.toInt(), entry);
             }
         }
 
-        private MessagingMode(int value) {
+        MessagingMode(int value) {
             mValue = value;
         }
 
@@ -81,7 +81,7 @@ public class CommonServiceConfiguration {
         /**
          * Returns a MessagingMode instance for the specified integer value.
          * 
-         * @param value
+         * @param value the value associated to the MessagingMode
          * @return instance
          */
         public static MessagingMode valueOf(int value) {
@@ -89,8 +89,8 @@ public class CommonServiceConfiguration {
             if (entry != null) {
                 return entry;
             }
-            throw new IllegalArgumentException(new StringBuilder("No enum const class ")
-                    .append(MessagingMode.class.getName()).append("").append(value).toString());
+            throw new IllegalArgumentException("No enum const class "
+                    + MessagingMode.class.getName() + "" + value);
 
         }
 
@@ -115,14 +115,14 @@ public class CommonServiceConfiguration {
 
         private int mValue;
 
-        private static SparseArray<MessagingMethod> mValueToEnum = new SparseArray<MessagingMethod>();
+        private static SparseArray<MessagingMethod> mValueToEnum = new SparseArray<>();
         static {
             for (MessagingMethod entry : MessagingMethod.values()) {
                 mValueToEnum.put(entry.toInt(), entry);
             }
         }
 
-        private MessagingMethod(int value) {
+        MessagingMethod(int value) {
             mValue = value;
         }
 
@@ -138,7 +138,7 @@ public class CommonServiceConfiguration {
         /**
          * Returns a MessagingMethod instance for the specified integer value.
          * 
-         * @param value
+         * @param value the value associated to the MessagingMethod
          * @return instance
          */
         public static MessagingMethod valueOf(int value) {
@@ -146,9 +146,8 @@ public class CommonServiceConfiguration {
             if (entry != null) {
                 return entry;
             }
-            throw new IllegalArgumentException(new StringBuilder("No enum const class ")
-                    .append(MessagingMethod.class.getName()).append("").append(value).toString());
-
+            throw new IllegalArgumentException("No enum const class "
+                    + MessagingMethod.class.getName() + "" + value);
         }
 
     }
@@ -176,14 +175,14 @@ public class CommonServiceConfiguration {
 
         private int mValue;
 
-        private static SparseArray<MinimumBatteryLevel> mValueToEnum = new SparseArray<MinimumBatteryLevel>();
+        private static SparseArray<MinimumBatteryLevel> mValueToEnum = new SparseArray<>();
         static {
             for (MinimumBatteryLevel entry : MinimumBatteryLevel.values()) {
                 mValueToEnum.put(entry.toInt(), entry);
             }
         }
 
-        private MinimumBatteryLevel(int value) {
+        MinimumBatteryLevel(int value) {
             mValue = value;
         }
 
@@ -199,7 +198,7 @@ public class CommonServiceConfiguration {
         /**
          * Returns a MinimumBatteryLevel instance for the specified integer value.
          * 
-         * @param value
+         * @param value the value associated to the MinimumBatteryLevel
          * @return instance
          */
         public static MinimumBatteryLevel valueOf(int value) {
@@ -207,10 +206,8 @@ public class CommonServiceConfiguration {
             if (entry != null) {
                 return entry;
             }
-            throw new IllegalArgumentException(new StringBuilder("No enum const class ")
-                    .append(MinimumBatteryLevel.class.getName()).append("").append(value)
-                    .toString());
-
+            throw new IllegalArgumentException("No enum const class "
+                    + MinimumBatteryLevel.class.getName() + "" + value);
         }
 
     }
@@ -267,6 +264,7 @@ public class CommonServiceConfiguration {
             RcsGenericException {
         try {
             mIConfig.setMyDisplayName(name);
+
         } catch (Exception e) {
             RcsIllegalArgumentException.assertException(e);
             RcsPersistentStorageException.assertException(e);
@@ -330,6 +328,7 @@ public class CommonServiceConfiguration {
     public void setMinimumBatteryLevel(MinimumBatteryLevel level) throws RcsGenericException {
         try {
             mIConfig.setMinimumBatteryLevel(level.toInt());
+
         } catch (Exception e) {
             throw new RcsGenericException(e);
         }
@@ -359,6 +358,7 @@ public class CommonServiceConfiguration {
     public void setDefaultMessagingMethod(MessagingMethod method) throws RcsGenericException {
         try {
             mIConfig.setDefaultMessagingMethod(method.toInt());
+
         } catch (Exception e) {
             throw new RcsGenericException(e);
         }

@@ -1,38 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent" >
+    android:layout_height="fill_parent">
 
     <TableLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:paddingTop="10dip"
-        android:stretchColumns="1" >
+        android:stretchColumns="1">
 
         <Spinner
             android:id="@+id/contact"
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="5dip"
-            android:layout_marginRight="5dip" />
+            android:layout_height="wrap_content" />
 
         <Button
             android:id="@+id/refresh_btn"
-            android:layout_marginLeft="5dip"
-            android:layout_marginRight="5dip"
             android:text="@string/label_refresh" />
 
-        <TableRow android:paddingTop="5dip" >
+        <TableRow android:paddingTop="5dip">
 
             <TextView
                 android:layout_marginLeft="5dip"
-                android:gravity="right"
+                android:layout_marginStart="5dip"
                 android:text="@string/label_capabilities" />
 
             <CheckBox
                 android:id="@+id/image_sharing"
-                android:layout_marginLeft="5dip"
-                android:layout_marginRight="5dip"
                 android:clickable="false"
                 android:text="@string/label_capabilities_image"
                 android:textStyle="bold" />
@@ -42,12 +36,10 @@
 
             <TextView
                 android:layout_marginLeft="5dip"
-                android:gravity="right" />
+                android:layout_marginStart="5dip" />
 
             <CheckBox
                 android:id="@+id/video_sharing"
-                android:layout_marginLeft="5dip"
-                android:layout_marginRight="5dip"
                 android:clickable="false"
                 android:text="@string/label_capabilities_video"
                 android:textStyle="bold" />
@@ -57,12 +49,10 @@
 
             <TextView
                 android:layout_marginLeft="5dip"
-                android:gravity="right" />
+                android:layout_marginStart="5dip" />
 
             <CheckBox
                 android:id="@+id/file_transfer"
-                android:layout_marginLeft="5dip"
-                android:layout_marginRight="5dip"
                 android:clickable="false"
                 android:text="@string/label_capabilities_ft"
                 android:textStyle="bold" />
@@ -72,12 +62,10 @@
 
             <TextView
                 android:layout_marginLeft="5dip"
-                android:gravity="right" />
+                android:layout_marginStart="5dip" />
 
             <CheckBox
                 android:id="@+id/im"
-                android:layout_marginLeft="5dip"
-                android:layout_marginRight="5dip"
                 android:clickable="false"
                 android:text="@string/label_capabilities_im"
                 android:textStyle="bold" />
@@ -87,12 +75,10 @@
 
             <TextView
                 android:layout_marginLeft="5dip"
-                android:gravity="right" />
+                android:layout_marginStart="5dip" />
 
             <CheckBox
                 android:id="@+id/geoloc_push"
-                android:layout_marginLeft="5dip"
-                android:layout_marginRight="5dip"
                 android:clickable="false"
                 android:text="@string/label_capabilities_geolocation_push"
                 android:textStyle="bold" />
@@ -102,13 +88,11 @@
 
             <TextView
                 android:layout_marginLeft="5dip"
-                android:gravity="right"
+                android:layout_marginStart="5dip"
                 android:text="@string/label_capabilities_extensions" />
 
             <TextView
                 android:id="@+id/extensions"
-                android:layout_marginLeft="5dip"
-                android:layout_marginRight="5dip"
                 android:textStyle="bold" />
         </TableRow>
 
@@ -116,13 +100,11 @@
 
             <TextView
                 android:layout_marginLeft="5dip"
-                android:gravity="right"
+                android:layout_marginStart="5dip"
                 android:text="@string/label_automata" />
 
             <CheckBox
                 android:id="@+id/automata"
-                android:layout_marginLeft="5dip"
-                android:layout_marginRight="5dip"
                 android:clickable="false"
                 android:textStyle="bold" />
         </TableRow>
@@ -131,13 +113,11 @@
 
             <TextView
                 android:layout_marginLeft="5dip"
-                android:gravity="right"
+                android:layout_marginStart="5dip"
                 android:text="@string/label_capabilities_timestamp" />
 
             <TextView
                 android:id="@+id/last_refresh"
-                android:layout_marginLeft="5dip"
-                android:layout_marginRight="5dip"
                 android:textStyle="bold" />
         </TableRow>
     </TableLayout>

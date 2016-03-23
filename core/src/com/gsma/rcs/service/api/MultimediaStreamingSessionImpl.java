@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -92,7 +92,7 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
 
     private void handleSessionRejected(ReasonCode reasonCode, ContactId contact) {
         if (sLogger.isActivated()) {
-            sLogger.info("Session rejected; reasonCode=" + reasonCode + ".");
+            sLogger.info("Session rejected; reasonCode=" + reasonCode);
         }
         String sessionId = getSessionId();
         synchronized (mLock) {
@@ -284,7 +284,7 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
                         sLogger.debug("Cannot accept: no session ID=".concat(mSessionId));
                         return;
                     }
-                    ServerApiUtils.testApiExtensionPermission(session.getServiceId());
+                    ServerApiUtils.testImsExtension(session.getServiceId());
                     session.acceptSession();
 
                 } catch (RuntimeException e) {
@@ -295,9 +295,7 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
                      * eventually lead to exit the system and thus can bring the whole system down,
                      * which is not intended.
                      */
-                    sLogger.error(
-                            new StringBuilder("Failed to accept session with ID: ").append(
-                                    mSessionId).toString(), e);
+                    sLogger.error("Failed to accept session with ID: ".concat(mSessionId), e);
                 }
             }
         });
@@ -321,7 +319,7 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
                         sLogger.debug("Cannot reject: no session ID=".concat(mSessionId));
                         return;
                     }
-                    ServerApiUtils.testApiExtensionPermission(session.getServiceId());
+                    ServerApiUtils.testImsExtension(session.getServiceId());
                     session.rejectSession(InvitationStatus.INVITATION_REJECTED_DECLINE);
 
                 } catch (RuntimeException e) {
@@ -332,9 +330,7 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
                      * eventually lead to exit the system and thus can bring the whole system down,
                      * which is not intended.
                      */
-                    sLogger.error(
-                            new StringBuilder("Failed to reject session with ID: ").append(
-                                    mSessionId).toString(), e);
+                    sLogger.error("Failed to reject session with ID: ".concat(mSessionId), e);
                 }
             }
         });
@@ -364,28 +360,15 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
                                 + " is already aborted!");
                         return;
                     }
-                    ServerApiUtils.testApiExtensionPermission(session.getServiceId());
+                    ServerApiUtils.testImsExtension(session.getServiceId());
                     session.terminateSession(TerminationReason.TERMINATION_BY_USER);
 
-                } catch (PayloadException e) {
-                    sLogger.error(
-                            new StringBuilder("Failed to abort session with ID: ").append(
-                                    mSessionId).toString(), e);
+                } catch (PayloadException | RuntimeException e) {
+                    sLogger.error("Failed to abort session with ID: ".concat(mSessionId), e);
                 } catch (NetworkException e) {
                     if (sLogger.isActivated()) {
                         sLogger.debug(e.getMessage());
                     }
-                } catch (RuntimeException e) {
-                    /*
-                     * Normally we are not allowed to catch runtime exceptions as these are genuine
-                     * bugs which should be handled/fixed within the code. However the cases when we
-                     * are executing operations on a thread unhandling such exceptions will
-                     * eventually lead to exit the system and thus can bring the whole system down,
-                     * which is not intended.
-                     */
-                    sLogger.error(
-                            new StringBuilder("Failed to abort session with ID: ").append(
-                                    mSessionId).toString(), e);
                 }
             }
         });
@@ -412,15 +395,13 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
                         }
                         return;
                     }
-                    ServerApiUtils.testApiExtensionPermission(session.getServiceId());
+
                     session.sendPlayload(content);
 
                 } catch (SessionNotEstablishedException e) {
                     if (sLogger.isActivated()) {
-                        sLogger.debug(new StringBuilder(
-                                "Failed to send payload within session with ID '")
-                                .append(mSessionId).append("' due to: ").append(e.getMessage())
-                                .toString());
+                        sLogger.debug("Failed to send payload within session with ID '"
+                                + mSessionId + "' due to: " + e.getMessage());
                     }
                 } catch (RuntimeException e) {
                     /*
@@ -430,9 +411,8 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
                      * eventually lead to exit the system and thus can bring the whole system down,
                      * which is not intended.
                      */
-                    sLogger.error(new StringBuilder(
-                            "Failed to send payload within session with ID: ").append(mSessionId)
-                            .toString(), e);
+                    sLogger.error(
+                            "Failed to send payload within session with ID: ".concat(mSessionId), e);
                 }
             }
         });
@@ -453,8 +433,7 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
     @Override
     public void onSessionAborted(ContactId contact, TerminationReason reason) {
         if (sLogger.isActivated()) {
-            sLogger.debug(new StringBuilder("Session aborted (terminationReason ").append(reason)
-                    .append(")").toString());
+            sLogger.debug("Session aborted (terminationReason " + reason + ")");
         }
         synchronized (mLock) {
             switch (reason) {
@@ -472,8 +451,7 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
                     removeSession(contact, State.ABORTED, ReasonCode.ABORTED_BY_REMOTE);
                     break;
                 default:
-                    throw new IllegalArgumentException(new StringBuilder(
-                            "Unknown TerminationReason=").append(reason).toString());
+                    throw new IllegalArgumentException("Unknown TerminationReason=" + reason);
             }
         }
     }
@@ -504,10 +482,19 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
     }
 
     @Override
-    public void onDataReceived(ContactId contact, byte[] data) {
+    public void onDataReceived(ContactId contact, byte[] data, String contentType) {
         synchronized (mLock) {
             mBroadcaster.broadcastPayloadReceived(contact, mSessionId, data);
         }
+    }
+
+    /**
+     * Data has been flushed
+     *
+     * @param contact Remote contact
+     */
+    public void onDataFlushed(ContactId contact) {
+        // Not applicable for RTP streaming session
     }
 
     @Override
@@ -538,8 +525,7 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
                 handleSessionRejected(ReasonCode.REJECTED_BY_REMOTE, contact);
                 break;
             default:
-                throw new IllegalArgumentException(new StringBuilder(
-                        "Unknown reason RejectedReason=").append(reason).append("!").toString());
+                throw new IllegalArgumentException("Unknown reason RejectedReason=" + reason + "!");
         }
     }
 
@@ -557,5 +543,4 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
             setStateAndReason(contact, State.RINGING, ReasonCode.UNSPECIFIED);
         }
     }
-
 }

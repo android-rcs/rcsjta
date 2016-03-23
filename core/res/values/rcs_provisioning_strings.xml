@@ -58,6 +58,10 @@
     <string name="File_transfer_Store_Forward">File transfer Store &amp; Forward</string>
     <string name="Group_chat_Store_Forward">Group chat Store &amp; Forward</string>
     <string name="SIP_automata">SIP automata</string>
+    <string name="call_composer">Call composer</string>
+    <string name="shared_map">Shared map</string>
+    <string name="shared_sketch">Shared sketch</string>
+    <string name="post_call">Post call</string>
     <!-- rcs_provisioning_service.xml -->
     <string name="Max_photo_icon_size">Max photo-icon size:</string>
     <string name="Max_length_of_the_freetext">Max length of the freetext:</string>
@@ -69,6 +73,7 @@
     <string name="Threshold_warning_on_file_transfer_size">Threshold warning on file transfer size:</string>
     <string name="Max_size_of_an_image_share">Max size of an image share:</string>
     <string name="Max_duration_of_a_video_share_milliseconds">Max duration of a video share (milliseconds):</string>
+    <string name="Max_duration_of_audio_message_milliseconds">Max duration of a audio message (milliseconds):</string>
     <string name="Max_number_of_simultaneous_chat_sessions">Max number of simultaneous chat sessions:</string>
     <string name="Max_number_of_simultaneous_file_transfer_sessions">Max number of simultaneous file transfer sessions:</string>
     <string name="Max_number_of_concurrent_outgoing_file_transfer_sessions">Max number of concurrent outgoing file transfer sessions:</string>
@@ -90,6 +95,8 @@
     <string name="Auto_accept_file_transfer_changeable">Auto-accept file transfer changeable</string>
     <string name="Auto_accept_chat_invitation">Auto-accept chat invitation</string>
     <string name="Auto_accept_group_chat_invitation">Auto-accept group chat invitation</string>
+    <string name="EnrichCalling_support">Enrich calling support</string>
+    <string name="Idle_duration_of_a_callcomposer_session_milliseconds">Idle duration of a call composer session (milliseconds):</string>
     <!-- rcs_provisioning_stack.xml -->
     <string name="config_mode">Configuration mode:</string>
     <string name="Vendor">Vendor:</string>

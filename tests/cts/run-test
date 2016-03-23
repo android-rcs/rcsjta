@@ -1,10 +1,8 @@
-cd provider
-"${ANDROID_HOME}/platform-tools/adb" shell am instrument -w android.tests.provider/android.tests.provider.RcsApiProviderInstrumentationTestRunner
-
-cd ..
-
-cd signature
-"${ANDROID_HOME}/platform-tools/adb" shell am instrument -w android.tests.sigtest/android.test.InstrumentationTestRunner
+cd ../../
+./gradlew :cts_provider:cAT
+echo "See Android Test Results under: ./provider/build/reports/androidTests/connected/index.html"
+./gradlew :cts_signature:cAT
+echo "See Android Test Results under: ./signature/build/reports/androidTests/connected/index.html"
 
 
 

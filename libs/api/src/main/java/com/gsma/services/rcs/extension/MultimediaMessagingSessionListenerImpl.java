@@ -59,4 +59,12 @@ public class MultimediaMessagingSessionListenerImpl extends
     public void onMessageReceived(ContactId contact, String sessionId, byte[] content) {
         mListener.onMessageReceived(contact, sessionId, content);
     }
+
+    public void onMessageReceived2(ContactId contact, String sessionId, byte[] content, String contentType) {
+        mListener.onMessageReceived(contact, sessionId, content, contentType);
+    }
+
+    public void onMessagesFlushed(ContactId contact, String sessionId) {
+        mListener.onMessagesFlushed(contact, sessionId);
+    }
 }

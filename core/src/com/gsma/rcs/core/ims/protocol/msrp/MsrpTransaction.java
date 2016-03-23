@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -41,9 +41,8 @@ public class MsrpTransaction extends Object {
      */
     private int waitingCount = 0;
 
-    // Changed by Deutsche Telekom
     /**
-     * Count the total number of request received 200OK
+     * Count the total number of received 200OK
      */
     private int totalReceivedResponses = 0;
 
@@ -53,7 +52,7 @@ public class MsrpTransaction extends Object {
     private boolean isWaiting = false;
 
     /**
-     * is MSRP session terminated ?
+     * Is MSRP session terminated
      */
     private boolean isTerminated = false;
 

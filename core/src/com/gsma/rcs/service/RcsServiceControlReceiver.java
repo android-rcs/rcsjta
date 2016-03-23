@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -77,12 +77,13 @@ public class RcsServiceControlReceiver extends BroadcastReceiver {
             if (!RcsService.Build.API_CODENAME.equals(codename)) {
                 return false;
             }
-            /*
-             * For the 1rst release of the core stack this method is common to all services so we
-             * don't check the service name
-             */
-            return RcsService.Build.API_VERSION == version
-                    && RcsService.Build.API_INCREMENTAL == increment;
+            switch(version) {
+                case RcsService.Build.VERSION_CODES.BLACKBIRD:
+                case RcsService.Build.VERSION_CODES.CPR:
+                    return true;
+                default:
+                    return false;
+            }
         }
     };
 

@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -68,8 +68,9 @@ public final class FtHttpResumeDownload extends FtHttpResume {
             MmContent content, ContactId contact, String chatId, String filetransferId,
             boolean isGroup, long timestamp, long timestampSent, long fileExpiration,
             long iconExpiration, boolean accepted, String remoteSipInstance) {
-        super(Direction.INCOMING, file, content.getName(), content.getSize(), fileIcon, contact,
-                chatId, filetransferId, isGroup, timestamp, timestampSent);
+        super(Direction.INCOMING, file, content.getName(), content.getEncoding(),
+                content.getSize(), fileIcon, contact, chatId, filetransferId, isGroup, timestamp,
+                timestampSent);
         mServerAddress = downloadServerAddress;
         mFileExpiration = fileExpiration;
         mIconExpiration = iconExpiration;

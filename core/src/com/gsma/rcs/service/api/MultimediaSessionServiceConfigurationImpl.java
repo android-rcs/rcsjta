@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,6 +22,7 @@
 
 package com.gsma.rcs.service.api;
 
+import com.gsma.rcs.core.ims.service.sip.EnrichCallingService;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.extension.IMultimediaSessionServiceConfiguration;
@@ -66,4 +67,39 @@ public class MultimediaSessionServiceConfigurationImpl extends
         }
     }
 
+    @Override
+    public long getMessagingSessionInactivityTimeout(String serviceId) throws RemoteException {
+        try {
+            if (EnrichCallingService.CALL_COMPOSER_SERVICE_ID.equals(serviceId)) {
+                return mRcsSettings.getCallComposerInactivityTimeout();
+            } else {
+                return mRcsSettings.getChatIdleDuration();
+            }
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
+    }
+
+    @Override
+    public boolean isServiceActivated(String serviceId) throws RemoteException {
+        try {
+            return mRcsSettings.isExtensionAuthorized(serviceId);
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
+    }
 }

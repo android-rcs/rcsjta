@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -86,14 +86,14 @@ public class GroupChat {
 
         private final int mValue;
 
-        private static SparseArray<State> mValueToEnum = new SparseArray<State>();
+        private static SparseArray<State> mValueToEnum = new SparseArray<>();
         static {
             for (State state : State.values()) {
                 mValueToEnum.put(state.toInt(), state);
             }
         }
 
-        private State(int value) {
+        State(int value) {
             mValue = value;
         }
 
@@ -109,16 +109,16 @@ public class GroupChat {
         /**
          * Returns a State instance for the specified integer value.
          * 
-         * @param value
+         * @param value the value associated to the state
          * @return instance
          */
-        public final static State valueOf(int value) {
+        public static State valueOf(int value) {
             State state = mValueToEnum.get(value);
             if (state != null) {
                 return state;
             }
-            throw new IllegalArgumentException(new StringBuilder("No enum const class ")
-                    .append(State.class.getName()).append("").append(value).append("!").toString());
+            throw new IllegalArgumentException("No enum const class " + State.class.getName() + ""
+                    + value + "!");
         }
     }
 
@@ -165,14 +165,14 @@ public class GroupChat {
 
         private final int mValue;
 
-        private static SparseArray<ParticipantStatus> mValueToEnum = new SparseArray<ParticipantStatus>();
+        private static SparseArray<ParticipantStatus> mValueToEnum = new SparseArray<>();
         static {
             for (ParticipantStatus status : ParticipantStatus.values()) {
                 mValueToEnum.put(status.toInt(), status);
             }
         }
 
-        private ParticipantStatus(int value) {
+        ParticipantStatus(int value) {
             mValue = value;
         }
 
@@ -180,14 +180,13 @@ public class GroupChat {
             return mValue;
         }
 
-        public final static ParticipantStatus valueOf(int value) {
+        public static ParticipantStatus valueOf(int value) {
             ParticipantStatus status = mValueToEnum.get(value);
             if (status != null) {
                 return status;
             }
-            throw new IllegalArgumentException(new StringBuilder("No enum const class ")
-                    .append(ParticipantStatus.class.getName()).append("").append(value)
-                    .append("!").toString());
+            throw new IllegalArgumentException("No enum const class "
+                    + ParticipantStatus.class.getName() + "" + value + "!");
         }
     }
 
@@ -253,14 +252,14 @@ public class GroupChat {
 
         private final int mValue;
 
-        private static SparseArray<ReasonCode> mValueToEnum = new SparseArray<ReasonCode>();
+        private static SparseArray<ReasonCode> mValueToEnum = new SparseArray<>();
         static {
             for (ReasonCode reasonCode : ReasonCode.values()) {
                 mValueToEnum.put(reasonCode.toInt(), reasonCode);
             }
         }
 
-        private ReasonCode(int value) {
+        ReasonCode(int value) {
             mValue = value;
         }
 
@@ -276,17 +275,16 @@ public class GroupChat {
         /**
          * Returns a ReasonCode instance for the specified integer value.
          * 
-         * @param value
+         * @param value the value associated to the reason code
          * @return instance
          */
-        public final static ReasonCode valueOf(int value) {
+        public static ReasonCode valueOf(int value) {
             ReasonCode reasonCode = mValueToEnum.get(value);
             if (reasonCode != null) {
                 return reasonCode;
             }
-            throw new IllegalArgumentException(new StringBuilder("No enum const class ")
-                    .append(ReasonCode.class.getName()).append("").append(value).append("!")
-                    .toString());
+            throw new IllegalArgumentException("No enum const class " + ReasonCode.class.getName()
+                    + "" + value + "!");
         }
     }
 
@@ -420,7 +418,7 @@ public class GroupChat {
             throws RcsPersistentStorageException, RcsGenericException {
         try {
             Map<ContactId, Integer> apiParticipants = mGroupChatInf.getParticipants();
-            Map<ContactId, ParticipantStatus> participants = new HashMap<ContactId, ParticipantStatus>();
+            Map<ContactId, ParticipantStatus> participants = new HashMap<>();
 
             for (Map.Entry<ContactId, Integer> apiParticipant : apiParticipants.entrySet()) {
                 participants.put(apiParticipant.getKey(),
@@ -564,7 +562,7 @@ public class GroupChat {
      * Returns true if it is possible to invite the specified participant to the group chat right
      * now, else returns false.
      * 
-     * @param participant
+     * @param participant the contact ID
      * @return boolean
      * @throws RcsPersistentStorageException
      * @throws RcsGenericException
@@ -592,7 +590,7 @@ public class GroupChat {
     public void inviteParticipants(Set<ContactId> participants)
             throws RcsPermissionDeniedException, RcsPersistentStorageException, RcsGenericException {
         try {
-            mGroupChatInf.inviteParticipants(new ArrayList<ContactId>(participants));
+            mGroupChatInf.inviteParticipants(new ArrayList<>(participants));
         } catch (Exception e) {
             RcsIllegalArgumentException.assertException(e);
             RcsUnsupportedOperationException.assertException(e);

@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,8 +30,11 @@ import com.gsma.rcs.core.ims.service.capability.CapabilityUtils;
 import com.gsma.rcs.platform.AndroidFactory;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.capability.CapabilityService;
+import com.gsma.services.rcs.extension.InstantMultimediaMessageIntent;
 import com.gsma.services.rcs.extension.MultimediaMessagingSessionIntent;
 import com.gsma.services.rcs.extension.MultimediaStreamingSessionIntent;
+
+import javax2.sip.message.Request;
 
 /**
  * SIP intent manager
@@ -82,12 +85,20 @@ public class SipIntentManager {
         if (content == null) {
             return null;
         }
+        content = content.toLowerCase();
 
         Intent intent = null;
-        if (content.toLowerCase().contains("msrp")) {
-            intent = new Intent(MultimediaMessagingSessionIntent.ACTION_NEW_INVITATION);
-        } else if (content.toLowerCase().contains("rtp")) {
-            intent = new Intent(MultimediaStreamingSessionIntent.ACTION_NEW_INVITATION);
+        String method = request.getMethod();
+        if (Request.INVITE.equals(method)) {
+            if (content.contains("msrp")) {
+                intent = new Intent(MultimediaMessagingSessionIntent.ACTION_NEW_INVITATION);
+            } else if (content.contains("rtp")) {
+                intent = new Intent(MultimediaStreamingSessionIntent.ACTION_NEW_INVITATION);
+            }
+        } else if (Request.MESSAGE.equals(method)) {
+            intent = new Intent(InstantMultimediaMessageIntent.ACTION_NEW_INSTANT_MESSAGE);
+        } else {
+            return null;
         }
 
         if (intent != null) {

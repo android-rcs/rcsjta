@@ -1,5 +1,5 @@
 NOTICE - RCS stack for Android with GSMA Terminal API 
-Release 1.5
+Release 1.6
 
 The RCS stack is under Apache 2 license (see LICENSE-2.0.txt) and uses the following open source libraries:
  - NIST SIP: see LICENSE-NIST.txt.
@@ -7,9 +7,20 @@ The RCS stack is under Apache 2 license (see LICENSE-2.0.txt) and uses the follo
  - The Legion Of The Bouncy Castle: see LICENSE-BOUNCYCASTLE.txt.
 
 Installation:
-The RCS_core.apk must be first installed on the device. Client applications (like RCS_RI.apk, RCS_settings.apk, etc...) must be installed after otherwise permission to bind to the core service is denied.
+The RCS_core.apk must be first installed on the device. Client applications (like RCS_RI.apk, RCS_settings.apk, etc...) 
+must be installed after the core stack otherwise permission to bind to the core service is denied.
 
    News:
+
+   Implementation of additional functions and changes required for Crane Priority Release profile.
+   - Capabilities service:
+   	* Possibility to query for the support of a combination of capabilities.
+	* Better backward compatibility if new capabilities are introduced.
+   - File transfer service:
+   	* Support of audio messages.
+   - Multimedia service:
+   	* Introduction of SIP instant messages (no session).
+	* Possibility to flush pending messages for multimedia messaging sessions.
 
    Bugs fixed:
    -----------

@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -315,6 +315,7 @@ public class RcsCoreService extends Service implements CoreListener {
             // Create multimedia directory on sdcard
             FileFactory.createDirectory(mRcsSettings.getPhotoRootDirectory());
             FileFactory.createDirectory(mRcsSettings.getVideoRootDirectory());
+            FileFactory.createDirectory(mRcsSettings.getAudioRootDirectory());
             FileFactory.createDirectory(mRcsSettings.getFileRootDirectory());
             String fileIconDirectory = mRcsSettings.getFileIconRootDirectory();
             FileFactory.createDirectory(fileIconDirectory);
@@ -325,6 +326,9 @@ public class RcsCoreService extends Service implements CoreListener {
             String sentVideoDirectory = ContentManager.getSentVideoRootDirectory(mRcsSettings);
             FileFactory.createDirectory(sentVideoDirectory);
             FileFactory.setNoMedia(sentVideoDirectory);
+            String sentAudioDirectory = ContentManager.getSentAudioRootDirectory(mRcsSettings);
+            FileFactory.createDirectory(sentAudioDirectory);
+            FileFactory.setNoMedia(sentAudioDirectory);
             String sentFileDirectory = ContentManager.getSentFileRootDirectory(mRcsSettings);
             FileFactory.createDirectory(sentFileDirectory);
             FileFactory.setNoMedia(sentFileDirectory);

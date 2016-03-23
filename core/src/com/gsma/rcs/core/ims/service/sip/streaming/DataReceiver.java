@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,6 +62,6 @@ public class DataReceiver implements MediaOutput {
      */
     public void writeSample(MediaSample sample) {
         // Notify API
-        mParent.receiveData(sample.getData());
+        mParent.receiveData(sample.getData(), "application/*"); // TODO 1.6: add mime-type
     }
 }

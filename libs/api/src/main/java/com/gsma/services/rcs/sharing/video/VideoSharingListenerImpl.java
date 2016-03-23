@@ -64,6 +64,6 @@ public class VideoSharingListenerImpl extends IVideoSharingListener.Stub {
      */
     @Override
     public void onDeleted(ContactId contact, List<String> sharingIds) throws RemoteException {
-        mListener.onDeleted(contact, new HashSet<String>(sharingIds));
+        mListener.onDeleted(contact, new HashSet<>(sharingIds));
     }
 }

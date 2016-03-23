@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -62,4 +62,7 @@ public class GroupChatIntent {
      * Message ID of received message
      */
     public final static String EXTRA_MESSAGE_ID = "messageId";
+
+    private GroupChatIntent() {
+    }
 }

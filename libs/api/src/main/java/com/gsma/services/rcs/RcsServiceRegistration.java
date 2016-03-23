@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import android.util.SparseArray;
 /**
  * A class to hold the reason code for IMS registration
  * 
- * @author YPLO6403
+ * @author Philippe LEMORDANT
  */
 public class RcsServiceRegistration {
     /**
@@ -47,14 +47,14 @@ public class RcsServiceRegistration {
 
         private final int mValue;
 
-        private static SparseArray<ReasonCode> mValueToEnum = new SparseArray<ReasonCode>();
+        private static SparseArray<ReasonCode> mValueToEnum = new SparseArray<>();
         static {
             for (ReasonCode entry : ReasonCode.values()) {
                 mValueToEnum.put(entry.toInt(), entry);
             }
         }
 
-        private ReasonCode(int value) {
+        ReasonCode(int value) {
             mValue = value;
         }
 
@@ -70,17 +70,16 @@ public class RcsServiceRegistration {
         /**
          * Returns a ReasonCode instance for the specified integer value.
          * 
-         * @param value
+         * @param value the value associated with the ReasonCode
          * @return instance
          */
-        public final static ReasonCode valueOf(int value) {
+        public static ReasonCode valueOf(int value) {
             ReasonCode entry = mValueToEnum.get(value);
             if (entry != null) {
                 return entry;
             }
-            throw new IllegalArgumentException(new StringBuilder("No enum const class ")
-                    .append(RcsServiceRegistration.class.getName()).append("").append(value)
-                    .append("!").toString());
+            throw new IllegalArgumentException("No enum const class "
+                    + RcsServiceRegistration.class.getName() + "" + value + "!");
         }
 
     }

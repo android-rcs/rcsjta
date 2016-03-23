@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2015 Sony Mobile Communications Inc.
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -37,6 +37,7 @@ import com.gsma.rcs.service.api.ChatServiceImpl;
 import com.gsma.rcs.service.api.FileTransferServiceImpl;
 import com.gsma.rcs.service.api.GroupChatImpl;
 import com.gsma.rcs.service.api.GroupFileTransferImpl;
+import com.gsma.services.rcs.filetransfer.FileTransfer.Disposition;
 import com.gsma.services.rcs.filetransfer.FileTransfer.State;
 
 import android.content.Context;
@@ -91,6 +92,7 @@ public class GroupChatDequeueTask extends DequeueTask {
         boolean deliveryReportEnabled = imdnManager.isDeliveryDeliveredReportsEnabled();
         int providerId = -1;
         String id = null;
+        Disposition disposition;
         String mimeType = null;
         Cursor cursor = null;
         try {
@@ -116,6 +118,7 @@ public class GroupChatDequeueTask extends DequeueTask {
             int fileIconIdx = cursor.getColumnIndexOrThrow(HistoryLogData.KEY_FILEICON);
             int statusIdx = cursor.getColumnIndexOrThrow(HistoryLogData.KEY_STATUS);
             int fileSizeIdx = cursor.getColumnIndexOrThrow(HistoryLogData.KEY_FILESIZE);
+            int dispositionIdx = cursor.getColumnIndexOrThrow(HistoryLogData.KEY_DISPOSITION);
             GroupChatImpl groupChat = mChatService.getOrCreateGroupChat(mChatId);
             while (cursor.moveToNext()) {
                 try {
@@ -136,6 +139,7 @@ public class GroupChatDequeueTask extends DequeueTask {
                     providerId = cursor.getInt(providerIdIdx);
                     id = cursor.getString(idIdx);
                     mimeType = cursor.getString(mimeTypeIdx);
+                    disposition = Disposition.valueOf(cursor.getInt(dispositionIdx));
                     switch (providerId) {
                         case MessageData.HISTORYLOG_MEMBER_ID:
                             if (!isPossibleToDequeueGroupChatMessagesAndGroupFileTransfers(mChatId)) {
@@ -168,13 +172,14 @@ public class GroupChatDequeueTask extends DequeueTask {
                                     if (!isAllowedToDequeueGroupFileTransfer()) {
                                         continue;
                                     }
-                                    MmContent fileContent = FileTransferUtils.createMmContent(file);
+                                    MmContent fileContent = FileTransferUtils.createMmContent(file,
+                                            mimeType, disposition);
                                     MmContent fileIconContent = null;
                                     String fileIcon = cursor.getString(fileIconIdx);
                                     if (fileIcon != null) {
                                         Uri fileIconUri = Uri.parse(fileIcon);
                                         fileIconContent = FileTransferUtils
-                                                .createMmContent(fileIconUri);
+                                                .createIconContent(fileIconUri);
                                     }
                                     mFileTransferService.dequeueGroupFileTransfer(mChatId, id,
                                             fileContent, fileIconContent);
@@ -205,15 +210,13 @@ public class GroupChatDequeueTask extends DequeueTask {
 
                 } catch (SessionNotEstablishedException | FileAccessException | NetworkException e) {
                     if (logActivated) {
-                        mLogger.debug(new StringBuilder(
-                                "Failed to dequeue group chat entry with id '").append(id)
-                                .append("' on group chat '").append(mChatId).append("' due to: ")
-                                .append(e.getMessage()).toString());
+                        mLogger.debug("Failed to dequeue group chat entry with id '" + id
+                                + "' on group chat '" + mChatId + "' due to: " + e.getMessage());
                     }
 
                 } catch (PayloadException e) {
-                    mLogger.error(new StringBuilder("Failed to dequeue group chat entry with id '")
-                            .append(id).append("' on group chat '").append(mChatId).toString(), e);
+                    mLogger.error("Failed to dequeue group chat entry with id '" + id
+                            + "' on group chat '" + mChatId, e);
                     setGroupChatEntryAsFailedDequeue(providerId, mChatId, id, mimeType);
 
                 } catch (RuntimeException e) {
@@ -223,9 +226,8 @@ public class GroupChatDequeueTask extends DequeueTask {
                      * so the bug can then be properly tracked down and fixed. We also mark the
                      * respective entry that failed to dequeue as FAILED.
                      */
-                    mLogger.error(new StringBuilder("Failed to dequeue group chat entry with id '")
-                            .append(id).append("' and chatId '").append(mChatId).append("'")
-                            .toString(), e);
+                    mLogger.error("Failed to dequeue group chat entry with id '" + id
+                            + "' and chatId '" + mChatId + "'", e);
                     setGroupChatEntryAsFailedDequeue(providerId, mChatId, id, mimeType);
                 }
             }

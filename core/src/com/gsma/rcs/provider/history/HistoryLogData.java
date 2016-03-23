@@ -35,6 +35,8 @@ public class HistoryLogData {
 
     /* package private */static final String KEY_MIME_TYPE = HistoryLog.MIME_TYPE;
 
+    /* package private */static final String KEY_DISPOSITION = HistoryLog.DISPOSITION;
+
     /* package private */static final String KEY_DIRECTION = HistoryLog.DIRECTION;
 
     /* package private */static final String KEY_CONTACT = HistoryLog.CONTACT;
@@ -70,4 +72,5 @@ public class HistoryLogData {
     /* package private */static final String KEY_TRANSFERRED = HistoryLog.TRANSFERRED;
 
     /* package private */static final String KEY_DURATION = HistoryLog.DURATION;
+
 }
