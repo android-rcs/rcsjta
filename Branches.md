@@ -1,10 +1,16 @@
 ## Main branches ##
 
 **`master`** is the official release of the project containing the last stable release.
-  * RCS Blackbird scope: RCS 5.0 and 5.1 specifications including RCS-e 1.2.2 & Hot Fixes
-  * TAPI 1.5.1
+  * RCS Crane Priority Release scope: RCS 5.3
+  * TAPI 1.6.1
   * [Go to branch.](https://github.com/android-rcs/rcsjta/tree/master)
 <br></li></ul>
+
+**`tapi_1.6.1`** contains the Crane Priority Release TAPI 1.6.1 release.
+  * RCS Blackbird scope: RCS 5.30 specifications
+  * TAPI 1.6.1
+  * [Go to branch.](https://github.com/android-rcs/rcsjta/tree/tapi_1.6.1)
+<br>
 
 **`tapi_1.5.1`** contains the Blackbird TAPI 1.5.1 release.
   * RCS Blackbird scope: RCS 5.0 and 5.1 specifications including RCS-e 1.2.2 & Hot Fixes
@@ -36,9 +42,4 @@
   * RCS Blackbird scope: RCS 5.0 and 5.1 specifications including RCS-e 1.2.2 & Hot Fixes
   * First TAPI
   * [Go to branch.](https://github.com/android-rcs/rcsjta/tree/tapi_0.9.0)
-<br>
-
-**`crane`** contains the Crane pre release.
-  * RCS Blackbird scope: RCS 5.2 specifications
-  * [Go to branch.](https://github.com/android-rcs/rcsjta/tree/crane)
 <br>
