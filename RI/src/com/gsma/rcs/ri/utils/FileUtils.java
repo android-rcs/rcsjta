@@ -168,69 +168,77 @@ public class FileUtils {
 
     /**
      * Fetch the file name from URI
-     * 
+     *
      * @param context Context
      * @param file URI
      * @return fileName String
-     * @throws IllegalArgumentException
      */
-    public static String getFileName(Context context, Uri file) throws IllegalArgumentException {
-        Cursor cursor = null;
-        try {
-            cursor = context.getContentResolver().query(file, null, null, null, null);
-            if (cursor == null) {
-                throw new SQLException("Failed to query file " + file);
-            }
-            if (ContentResolver.SCHEME_CONTENT.equals(file.getScheme())) {
-                if (cursor.moveToFirst()) {
-                    return cursor.getString(cursor
-                            .getColumnIndexOrThrow(OpenableColumns.DISPLAY_NAME));
-                } else {
-                    throw new IllegalArgumentException("Error in retrieving file name from the URI");
-                }
-            } else if (ContentResolver.SCHEME_FILE.equals(file.getScheme())) {
+    public static String getFileName(Context context, Uri file) {
+        String scheme = file.getScheme();
+        switch (scheme) {
+            case ContentResolver.SCHEME_FILE:
                 return file.getLastPathSegment();
-            }
-            throw new IllegalArgumentException("Unsupported URI scheme");
 
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+            case ContentResolver.SCHEME_CONTENT:
+                Cursor cursor = null;
+                try {
+                    cursor = context.getContentResolver().query(file, null, null, null, null);
+                    if (cursor == null) {
+                        throw new SQLException("Failed to query file " + file);
+                    }
+                    if (cursor.moveToFirst()) {
+                        return cursor.getString(cursor
+                                .getColumnIndexOrThrow(OpenableColumns.DISPLAY_NAME));
+                    } else {
+                        throw new IllegalArgumentException(
+                                "Error in retrieving file name from the URI");
+                    }
+                } finally {
+                    if (cursor != null) {
+                        cursor.close();
+                    }
+                }
+            default:
+                throw new IllegalArgumentException("Unsupported URI scheme");
         }
     }
 
     /**
      * Fetch the file size from URI
-     * 
+     *
      * @param ctx Context
      * @param file URI
      * @return fileSize long
      * @throws IllegalArgumentException
      */
     public static long getFileSize(Context ctx, Uri file) throws IllegalArgumentException {
-        Cursor cursor = null;
-        try {
-            cursor = ctx.getContentResolver().query(file, null, null, null, null);
-            if (cursor == null) {
-                throw new SQLException("Failed to query file " + file);
-            }
-            if (ContentResolver.SCHEME_CONTENT.equals(file.getScheme())) {
-                if (cursor.moveToFirst()) {
-                    return Long.valueOf(cursor.getString(cursor
-                            .getColumnIndexOrThrow(OpenableColumns.SIZE)));
-                } else {
-                    throw new IllegalArgumentException("Error in retrieving file size form the URI");
-                }
-            } else if (ContentResolver.SCHEME_FILE.equals(file.getScheme())) {
-                return (new File(file.getPath())).length();
-            }
-            throw new IllegalArgumentException("Unsupported URI scheme: " + file);
+        String scheme = file.getScheme();
+        switch (scheme) {
+            case ContentResolver.SCHEME_FILE:
+                File f = new File(file.getPath());
+                return f.length();
 
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+            case ContentResolver.SCHEME_CONTENT:
+                Cursor cursor = null;
+                try {
+                    cursor = ctx.getContentResolver().query(file, null, null, null, null);
+                    if (cursor == null) {
+                        throw new SQLException("Failed to query file " + file);
+                    }
+                    if (cursor.moveToFirst()) {
+                        return Long.valueOf(cursor.getString(cursor
+                                .getColumnIndexOrThrow(OpenableColumns.SIZE)));
+                    } else {
+                        throw new IllegalArgumentException(
+                                "Error in retrieving file size form the URI");
+                    }
+                } finally {
+                    if (cursor != null) {
+                        cursor.close();
+                    }
+                }
+            default:
+                throw new IllegalArgumentException("Unsupported URI scheme");
         }
     }
 
@@ -303,7 +311,7 @@ public class FileUtils {
 
     /**
      * Open file
-     * 
+     *
      * @param activity the activity
      * @param mimeType the mime type
      * @param action the action
@@ -328,7 +336,7 @@ public class FileUtils {
 
     /**
      * Saves the read/write permission for later use by the stack.
-     * 
+     *
      * @param file Uri of file to transfer
      */
     public static void takePersistableContentUriPermission(Context context, Uri file) {
