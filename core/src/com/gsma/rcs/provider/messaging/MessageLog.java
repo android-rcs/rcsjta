@@ -22,7 +22,6 @@
 
 package com.gsma.rcs.provider.messaging;
 
-import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
 import com.gsma.rcs.provider.CursorUtil;
 import com.gsma.rcs.provider.LocalContentResolver;
@@ -72,43 +71,55 @@ public class MessageLog implements IMessageLog {
             MessageData.KEY_STATUS, MessageData.KEY_CONTACT
     };
 
-    private static final String SELECTION_GROUP_CHAT_EVENTS = new StringBuilder(
-            MessageData.KEY_CHAT_ID).append("=? AND ").append(MessageData.KEY_MIME_TYPE)
-            .append("='").append(MimeType.GROUPCHAT_EVENT).append("' GROUP BY ")
-            .append(MessageData.KEY_CONTACT).toString();
+    private static final String SELECTION_GROUP_CHAT_EVENTS = MessageData.KEY_CHAT_ID + "=? AND "
+            + MessageData.KEY_MIME_TYPE + "='" + MimeType.GROUPCHAT_EVENT + "' GROUP BY "
+            + MessageData.KEY_CONTACT;
 
     private static final int FIRST_COLUMN_IDX = 0;
 
-    private static final String SELECTION_QUEUED_ONETOONE_CHAT_MESSAGES = new StringBuilder(
-            MessageData.KEY_CHAT_ID).append("=? AND ").append(MessageData.KEY_STATUS).append("=")
-            .append(Status.QUEUED.toInt()).toString();
+    private static final String SELECTION_QUEUED_ONETOONE_CHAT_MESSAGES = MessageData.KEY_CHAT_ID
+            + "=? AND " + MessageData.KEY_STATUS + "=" + Status.QUEUED.toInt();
 
-    private static final String SELECTION_ALL_QUEUED_ONETOONE_CHAT_MESSAGES = new StringBuilder(
-            MessageData.KEY_CHAT_ID).append("=").append(MessageData.KEY_CONTACT).append(" AND ")
-            .append(MessageData.KEY_STATUS).append("=").append(Status.QUEUED.toInt()).toString();
+    private static final String SELECTION_ALL_QUEUED_ONETOONE_CHAT_MESSAGES = MessageData.KEY_CHAT_ID
+            + "="
+            + MessageData.KEY_CONTACT
+            + " AND "
+            + MessageData.KEY_STATUS
+            + "="
+            + Status.QUEUED.toInt();
 
     private static final int CHAT_MESSAGE_DELIVERY_EXPIRED = 1;
 
     private static final int CHAT_MESSAGE_DELIVERY_EXPIRATION_NOT_APPLICABLE = 0;
 
-    private static final String SELECTION_BY_UNDELIVERED_ONETOONE_CHAT_MESSAGES = new StringBuilder(
-            MessageData.KEY_EXPIRED_DELIVERY).append("<>").append(CHAT_MESSAGE_DELIVERY_EXPIRED)
-            .append(" AND ").append(MessageData.KEY_DELIVERY_EXPIRATION).append("<>")
-            .append(CHAT_MESSAGE_DELIVERY_EXPIRATION_NOT_APPLICABLE).append(" AND ")
-            .append(MessageData.KEY_STATUS).append(" NOT IN(").append(Status.DELIVERED.toInt())
-            .append(",").append(Status.DISPLAYED.toInt()).append(")").toString();
+    private static final String SELECTION_BY_UNDELIVERED_ONETOONE_CHAT_MESSAGES = MessageData.KEY_EXPIRED_DELIVERY
+            + "<>"
+            + CHAT_MESSAGE_DELIVERY_EXPIRED
+            + " AND "
+            + MessageData.KEY_DELIVERY_EXPIRATION
+            + "<>"
+            + CHAT_MESSAGE_DELIVERY_EXPIRATION_NOT_APPLICABLE
+            + " AND "
+            + MessageData.KEY_STATUS
+            + " NOT IN("
+            + Status.DELIVERED.toInt()
+            + ","
+            + Status.DISPLAYED.toInt() + ")";
 
     private static final String ORDER_BY_TIMESTAMP_ASC = MessageData.KEY_TIMESTAMP.concat(" ASC");
 
-    private static final String SELECTION_BY_NOT_DISPLAYED = new StringBuilder(
-            MessageData.KEY_STATUS).append("<>").append(Status.DISPLAYED.toInt()).toString();
+    private static final String SELECTION_BY_NOT_DISPLAYED = MessageData.KEY_STATUS + "<>"
+            + Status.DISPLAYED.toInt();
+
+    private static final String SELECTION_BY_NOT_READ = MessageData.KEY_READ_STATUS + "="
+            + ReadStatus.UNREAD.toInt();
 
     /**
      * Constructor
      * 
      * @param localContentResolver Local content resolver
-     * @param groupChatDeliveryInfoLog
-     * @param rcsSettings
+     * @param groupChatDeliveryInfoLog the GC delivery information
+     * @param rcsSettings the RCS settings accessor
      */
     /* package private */MessageLog(LocalContentResolver localContentResolver,
             GroupDeliveryInfoLog groupChatDeliveryInfoLog, RcsSettings rcsSettings) {
@@ -121,9 +132,8 @@ public class MessageLog implements IMessageLog {
         ContactId contact = msg.getRemoteContact();
         String msgId = msg.getMessageId();
         if (sLogger.isActivated()) {
-            sLogger.debug(new StringBuilder("Add incoming chat message: contact=").append(contact)
-                    .append(", msg=").append(msgId).append(", status=").append(status)
-                    .append(", reasonCode=").append(reasonCode).append(".").toString());
+            sLogger.debug("Add incoming chat message: contact=" + contact + ", msg=" + msgId
+                    + ", status=" + status + ", reasonCode=" + reasonCode + ".");
         }
 
         ContentValues values = new ContentValues();
@@ -153,7 +163,7 @@ public class MessageLog implements IMessageLog {
      * @param msg Chat message
      * @param status Status
      * @param reasonCode Reason code
-     * @param deliveryExpiration
+     * @param deliveryExpiration the delivery expiration
      */
     @Override
     public void addOutgoingOneToOneChatMessage(ChatMessage msg, Status status,
@@ -161,9 +171,8 @@ public class MessageLog implements IMessageLog {
         ContactId contact = msg.getRemoteContact();
         String msgId = msg.getMessageId();
         if (sLogger.isActivated()) {
-            sLogger.debug(new StringBuilder("Add outgoing chat message: contact=").append(contact)
-                    .append(", msg=").append(msgId).append(", status=").append(status)
-                    .append(", reasonCode=").append(reasonCode).append(".").toString());
+            sLogger.debug("Add outgoing chat message: contact=" + contact + ", msg=" + msgId
+                    + ", status=" + status + ", reasonCode=" + reasonCode + ".");
         }
         ContentValues values = new ContentValues();
         values.put(MessageData.KEY_CHAT_ID, contact.toString());
@@ -234,7 +243,6 @@ public class MessageLog implements IMessageLog {
      * @param msg Chat message
      * @param status Status
      * @param reasonCode Reason code
-     * @throws NetworkException
      */
     @Override
     public void addOutgoingGroupChatMessage(String chatId, ChatMessage msg,
@@ -256,9 +264,8 @@ public class MessageLog implements IMessageLog {
         String msgId = msg.getMessageId();
         ContactId contact = msg.getRemoteContact();
         if (sLogger.isActivated()) {
-            sLogger.debug(new StringBuilder("Add group chat message; chatId=").append(chatId)
-                    .append(", msg=").append(msgId).append(", dir=").append(direction)
-                    .append(", contact=").append(contact).append(".").toString());
+            sLogger.debug("Add group chat message; chatId=" + chatId + ", msg=" + msgId + ", dir="
+                    + direction + ", contact=" + contact + ".");
         }
 
         ContentValues values = new ContentValues();
@@ -335,20 +342,14 @@ public class MessageLog implements IMessageLog {
     }
 
     @Override
-    public void markMessageAsRead(String msgId) {
+    public int markMessageAsRead(String msgId) {
         if (sLogger.isActivated()) {
-            sLogger.debug(new StringBuilder("Marking chat message as read: msgId=").append(msgId)
-                    .toString());
+            sLogger.debug("Mark chat message as read ID=" + msgId);
         }
         ContentValues values = new ContentValues();
         values.put(MessageData.KEY_READ_STATUS, ReadStatus.READ.toInt());
-
-        if (mLocalContentResolver.update(Uri.withAppendedPath(MessageData.CONTENT_URI, msgId),
-                values, null, null) < 1) {
-            if (sLogger.isActivated()) {
-                sLogger.warn("There was no message with msgId '" + msgId + "' to mark as read.");
-            }
-        }
+        return mLocalContentResolver.update(Uri.withAppendedPath(MessageData.CONTENT_URI, msgId),
+                values, SELECTION_BY_NOT_READ, null);
     }
 
     /**
@@ -365,16 +366,15 @@ public class MessageLog implements IMessageLog {
     public boolean setChatMessageStatusAndReasonCode(String msgId, Status status,
             ReasonCode reasonCode) {
         if (sLogger.isActivated()) {
-            sLogger.debug(new StringBuilder("Update chat message: msgId=").append(msgId)
-                    .append(", status=").append(status).append(", reasonCode=").append(reasonCode)
-                    .toString());
+            sLogger.debug("Update chat message: msgId=" + msgId + ", status=" + status
+                    + ", reasonCode=" + reasonCode);
         }
         switch (status) {
             case DELIVERED:
             case DISPLAYED:
-                throw new IllegalArgumentException(new StringBuilder("Status that requires ")
-                        .append("timestamp passed, use specific method taking timestamp")
-                        .append(" to set status ").append(status.toString()).toString());
+                throw new IllegalArgumentException("Status that requires "
+                        + "timestamp passed, use specific method taking timestamp"
+                        + " to set status " + status.toString());
             default:
         }
         ContentValues values = new ContentValues();
@@ -568,9 +568,8 @@ public class MessageLog implements IMessageLog {
     @Override
     public boolean setChatMessageTimestamp(String msgId, long timestamp, long timestampSent) {
         if (sLogger.isActivated()) {
-            sLogger.debug(new StringBuilder("Set chat message timestamp msgId=").append(msgId)
-                    .append(", timestamp=").append(timestamp).append(", timestampSent=")
-                    .append(timestampSent).toString());
+            sLogger.debug("Set chat message timestamp msgId=" + msgId + ", timestamp=" + timestamp
+                    + ", timestampSent=" + timestampSent);
         }
         ContentValues values = new ContentValues();
         values.put(MessageData.KEY_TIMESTAMP, timestamp);
@@ -593,7 +592,7 @@ public class MessageLog implements IMessageLog {
             if (!cursor.moveToNext()) {
                 return Collections.emptyMap();
             }
-            Map<ContactId, GroupChatEvent.Status> groupChatEvents = new HashMap<ContactId, GroupChatEvent.Status>();
+            Map<ContactId, GroupChatEvent.Status> groupChatEvents = new HashMap<>();
             int columnIdxStatus = cursor.getColumnIndexOrThrow(MessageData.KEY_STATUS);
             int columnIdxContact = cursor.getColumnIndexOrThrow(MessageData.KEY_CONTACT);
             do {
@@ -635,8 +634,8 @@ public class MessageLog implements IMessageLog {
     @Override
     public boolean setChatMessageStatusDelivered(String msgId, long timestampDelivered) {
         if (sLogger.isActivated()) {
-            sLogger.debug(new StringBuilder("setChatMessageStatusDelivered msgId=").append(msgId)
-                    .append(", timestampDelivered=").append(timestampDelivered).toString());
+            sLogger.debug("setChatMessageStatusDelivered msgId=" + msgId + ", timestampDelivered="
+                    + timestampDelivered);
         }
 
         ContentValues values = new ContentValues();
@@ -652,8 +651,8 @@ public class MessageLog implements IMessageLog {
     @Override
     public boolean setChatMessageStatusDisplayed(String msgId, long timestampDisplayed) {
         if (sLogger.isActivated()) {
-            sLogger.debug(new StringBuilder("setChatMessageStatusDisplayed msgId=").append(msgId)
-                    .append(", timestampDisplayed=").append(timestampDisplayed).toString());
+            sLogger.debug("setChatMessageStatusDisplayed msgId=" + msgId + ", timestampDisplayed="
+                    + timestampDisplayed);
         }
 
         ContentValues values = new ContentValues();
@@ -670,12 +669,12 @@ public class MessageLog implements IMessageLog {
         ContentValues values = new ContentValues();
         values.put(MessageData.KEY_DELIVERY_EXPIRATION, 0);
         values.put(MessageData.KEY_EXPIRED_DELIVERY, 0);
-        List<String> parameters = new ArrayList<String>();
+        List<String> parameters = new ArrayList<>();
         for (int i = 0; i < msgIds.size(); i++) {
             parameters.add("?");
         }
-        String selection = new StringBuilder(MessageData.KEY_MESSAGE_ID).append(" IN (")
-                .append(TextUtils.join(",", parameters)).append(")").toString();
+        String selection = MessageData.KEY_MESSAGE_ID + " IN (" + TextUtils.join(",", parameters)
+                + ")";
         mLocalContentResolver.update(MessageData.CONTENT_URI, values, selection,
                 msgIds.toArray(new String[msgIds.size()]));
     }
@@ -700,10 +699,9 @@ public class MessageLog implements IMessageLog {
     public boolean setChatMessageStatusAndTimestamp(String msgId, Status status,
             ReasonCode reasonCode, long timestamp, long timestampSent) {
         if (sLogger.isActivated()) {
-            sLogger.debug(new StringBuilder("Update chat message: msgId=").append(msgId)
-                    .append(", status=").append(status).append(", reasonCode=").append(reasonCode)
-                    .append(", timestamp=").append(timestamp).append(", timestampSent=")
-                    .append(timestampSent).toString());
+            sLogger.debug("Update chat message: msgId=" + msgId + ", status=" + status
+                    + ", reasonCode=" + reasonCode + ", timestamp=" + timestamp
+                    + ", timestampSent=" + timestampSent);
         }
         ContentValues values = new ContentValues();
         values.put(MessageData.KEY_STATUS, status.toInt());

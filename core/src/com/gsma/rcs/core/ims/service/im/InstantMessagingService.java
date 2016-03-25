@@ -252,7 +252,7 @@ public class InstantMessagingService extends ImsService {
         mImDeleteOperationHandler = allocateBgHandler(IM_DELETE_OPERATION_THREAD_NAME);
         mStoreAndFwdMgr = new StoreAndForwardManager(this, mRcsSettings, mContactManager,
                 mMessagingLog);
-        mImdnManager = new ImdnManager(this, mRcsSettings);
+        mImdnManager = new ImdnManager(this, mRcsSettings, mMessagingLog);
         mDeliveryExpirationManager = new DeliveryExpirationManager(this, ctx, mMessagingLog);
     }
 
