@@ -43,12 +43,17 @@ public class DelayedDisplayNotificationDispatcher implements Runnable {
             MessageData.KEY_TIMESTAMP_DISPLAYED
     };
 
-    private final static String SELECTION_READ_CHAT_MESSAGES_WITH_DISPLAY_REPORT_REQUESTED = new StringBuilder(
-            MessageData.KEY_MIME_TYPE).append(" IN('").append(MimeType.TEXT_MESSAGE).append("','")
-            .append(MimeType.GEOLOC_MESSAGE).append("') AND ").append(MessageData.KEY_READ_STATUS)
-            .append("=").append(ReadStatus.READ.toInt()).append(" AND ")
-            .append(MessageData.KEY_STATUS).append("=")
-            .append(Status.DISPLAY_REPORT_REQUESTED.toInt()).toString();
+    private final static String SELECTION_READ_CHAT_MESSAGES_WITH_DISPLAY_REPORT_REQUESTED = MessageData.KEY_MIME_TYPE
+            + " IN('"
+            + MimeType.TEXT_MESSAGE
+            + "','"
+            + MimeType.GEOLOC_MESSAGE
+            + "') AND "
+            + MessageData.KEY_READ_STATUS
+            + "="
+            + ReadStatus.READ.toInt()
+            + " AND "
+            + MessageData.KEY_STATUS + "=" + Status.DISPLAY_REPORT_REQUESTED.toInt();
 
     private static final String ORDER_BY_TIMESTAMP_ASC = MessageData.KEY_TIMESTAMP.concat(" ASC");
 
@@ -80,7 +85,6 @@ public class DelayedDisplayNotificationDispatcher implements Runnable {
                 String chatId = cursor.getString(columnIdxChatId);
                 String msgId = cursor.getString(columIdxMessageId);
                 long timestampDisplayed = cursor.getLong(columnIdxTimestampDisplayed);
-
                 /* Do no check validity for trusted data */
                 ContactId contact = ContactUtil.createContactIdFromTrustedData(contactNumber);
 

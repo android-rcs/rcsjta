@@ -40,6 +40,8 @@ public class BasicViewHolder {
     protected final int mColumnStatusIdx;
     protected final int mColumnReasonCodeIdx;
     protected final int mColumnMimetypeIdx;
+    protected final int mColumnReadStatusIdx;
+    protected final int mColumnIdIdx;
 
     /**
      * Constructor
@@ -55,6 +57,8 @@ public class BasicViewHolder {
         mColumnMimetypeIdx = cursor.getColumnIndexOrThrow(HistoryLog.MIME_TYPE);
         mColumnReasonCodeIdx = cursor.getColumnIndexOrThrow(HistoryLog.REASON_CODE);
         mColumnContactIdx = cursor.getColumnIndexOrThrow(HistoryLog.CONTACT);
+        mColumnReadStatusIdx = cursor.getColumnIndexOrThrow(HistoryLog.READ_STATUS);
+        mColumnIdIdx = cursor.getColumnIndexOrThrow(HistoryLog.ID);
         /* Save children views */
         mStatusText = (TextView) base.findViewById(R.id.status_text);
         mTimestampText = (TextView) base.findViewById(R.id.timestamp_text);
@@ -95,5 +99,14 @@ public class BasicViewHolder {
 
     public int getColumnContactIdx() {
         return mColumnContactIdx;
+    }
+
+
+    public int getColumnReadStatusIdx() {
+        return mColumnReadStatusIdx;
+    }
+
+    public int getColumnIdIdx() {
+        return mColumnIdIdx;
     }
 }

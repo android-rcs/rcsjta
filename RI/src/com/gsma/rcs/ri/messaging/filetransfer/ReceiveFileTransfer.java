@@ -20,6 +20,7 @@ package com.gsma.rcs.ri.messaging.filetransfer;
 
 import com.gsma.services.rcs.RcsPermissionDeniedException;
 import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
 import com.gsma.services.rcs.filetransfer.FileTransferIntent;
@@ -537,6 +538,7 @@ public class ReceiveFileTransfer extends RcsActivity {
 
         try {
             mFileTransferService.markFileTransferAsRead(mTransferId);
+        } catch (RcsServiceNotAvailableException ignore) {
         } catch (RcsServiceException e) {
             showExceptionThenExit(e);
         }

@@ -22,7 +22,6 @@
 
 package com.gsma.rcs.core.ims.network;
 
-import com.gsma.rcs.core.CoreException;
 import com.gsma.rcs.core.access.NetworkAccess;
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.registration.GibaRegistrationProcedure;
@@ -65,7 +64,7 @@ public abstract class ImsNetworkInterface {
     /**
      * The maximum time in seconds that a negative response will be stored in this DNS Cache.
      */
-    private static int DNS_NEGATIVE_CACHING_TIME = 5;
+    private static final int DNS_NEGATIVE_CACHING_TIME = 5;
 
     /**
      * IPv4 address format
@@ -123,8 +122,8 @@ public abstract class ImsNetworkInterface {
         /**
          * Constructor
          * 
-         * @param ipAddress
-         * @param port
+         * @param ipAddress the IP address
+         * @param port the IP port
          */
         public DnsResolvedFields(String ipAddress, int port) {
             mIpAddress = ipAddress;
@@ -200,7 +199,7 @@ public abstract class ImsNetworkInterface {
      * @param proxyPort IMS proxy port
      * @param proxyProtocol IMS proxy protocol
      * @param authentMode IMS authentication mode
-     * @param rcsSettings
+     * @param rcsSettings the RCS settings accessor
      */
     public ImsNetworkInterface(ImsModule imsModule, int type, NetworkAccess access,
             String proxyAddr, int proxyPort, String proxyProtocol,
@@ -236,7 +235,7 @@ public abstract class ImsNetworkInterface {
     /**
      * Set NAT traversal flag
      * 
-     * @param flag
+     * @param flag the flag
      */
     public void setNatTraversal(boolean flag) {
         mNatTraversal = flag;
@@ -292,15 +291,6 @@ public abstract class ImsNetworkInterface {
     }
 
     /**
-     * Returns the IMS authentication mode
-     * 
-     * @return Authentication mode
-     */
-    public AuthenticationProcedure getAuthenticationMode() {
-        return mImsAuthentMode;
-    }
-
-    /**
      * Returns the registration manager
      * 
      * @return Registration manager
@@ -321,7 +311,7 @@ public abstract class ImsNetworkInterface {
     /**
      * Sets the Retry header time
      * 
-     * @param retryHeader Retry-After duration value
+     * @param retryValue Retry-After duration value
      */
     public void setRetryAfterHeaderDuration(long retryValue) {
         mRetryDuration = retryValue;
@@ -483,8 +473,8 @@ public abstract class ImsNetworkInterface {
      */
     private SRVRecord getBestDnsSRV(Record[] records) {
         SRVRecord result = null;
-        for (int i = 0; i < records.length; i++) {
-            SRVRecord srv = (SRVRecord) records[i];
+        for (Record record : records) {
+            SRVRecord srv = (SRVRecord) record;
             if (sLogger.isActivated()) {
                 sLogger.debug("SRV record: " + srv.toString());
             }
@@ -523,7 +513,6 @@ public abstract class ImsNetworkInterface {
         return query.toString();
     }
 
-    // Changed by Deutsche Telekom
     /**
      * Get the DNS resolved fields.
      * 
@@ -534,7 +523,6 @@ public abstract class ImsNetworkInterface {
     protected DnsResolvedFields getDnsResolvedFields() throws PayloadException,
             UnknownHostException {
         try {
-            // Changed by Deutsche Telekom
             DnsResolvedFields dnsResolvedFields;
             boolean useDns = true;
             if (mImsProxyAddr.matches(REGEX_IPV4)) {
@@ -547,11 +535,9 @@ public abstract class ImsNetworkInterface {
             } else {
                 dnsResolvedFields = new DnsResolvedFields(null, mImsProxyPort);
             }
-
             if (useDns) {
                 ResolverConfig.refresh();
                 ExtendedResolver resolver = new ExtendedResolver();
-
                 /*
                  * Resolve the IMS proxy configuration: first try to resolve via a NAPTR query, then
                  * a SRV query and finally via A query
@@ -559,30 +545,29 @@ public abstract class ImsNetworkInterface {
                 if (sLogger.isActivated()) {
                     sLogger.debug("Resolve IMS proxy address ".concat(mImsProxyAddr));
                 }
-
                 /* DNS NAPTR lookup */
                 String service;
                 if (ListeningPoint.UDP.equals(mImsProxyProtocol)) {
                     service = DNS_SIP_UDP_SERVICE;
+
                 } else if (ListeningPoint.TCP.equals(mImsProxyProtocol)) {
                     service = DNS_SIP_TCP_SERVICE;
+
                 } else if (ListeningPoint.TLS.equals(mImsProxyProtocol)) {
                     service = DNS_SIP_TLS_SERVICE;
-                } else {
-                    throw new PayloadException(new StringBuilder("Unkown SIP protocol : ").append(
-                            mImsProxyProtocol).toString());
-                }
 
+                } else {
+                    throw new PayloadException("Unkown SIP protocol : " + mImsProxyProtocol);
+                }
                 boolean resolved = false;
                 Record[] naptrRecords = getDnsRequest(mImsProxyAddr, resolver, Type.NAPTR);
                 if ((naptrRecords != null) && (naptrRecords.length > 0)) {
                     /* First try with NAPTR */
                     if (sLogger.isActivated()) {
-                        sLogger.debug(new StringBuilder("NAPTR records found: ").append(
-                                naptrRecords.length).toString());
+                        sLogger.debug("NAPTR records found: " + naptrRecords.length);
                     }
-                    for (int i = 0; i < naptrRecords.length; i++) {
-                        NAPTRRecord naptr = (NAPTRRecord) naptrRecords[i];
+                    for (Record naptrRecord : naptrRecords) {
+                        NAPTRRecord naptr = (NAPTRRecord) naptrRecord;
                         if (sLogger.isActivated()) {
                             sLogger.debug("NAPTR record: ".concat(naptr.toString()));
                         }
@@ -603,7 +588,6 @@ public abstract class ImsNetworkInterface {
                         }
                     }
                 }
-
                 if (!resolved) {
                     /* If no NAPTR: direct DNS SRV lookup */
                     if (sLogger.isActivated()) {
@@ -623,7 +607,6 @@ public abstract class ImsNetworkInterface {
                         dnsResolvedFields.mPort = srvRecord.getPort();
                         resolved = true;
                     }
-
                     if (!resolved) {
                         /* If not resolved: direct DNS A lookup */
                         if (sLogger.isActivated()) {
@@ -633,30 +616,24 @@ public abstract class ImsNetworkInterface {
                     }
                 }
             }
-
             if (dnsResolvedFields.mIpAddress == null) {
-                // Changed by Deutsche Telekom
                 /* Try to use IMS proxy address as a fallback */
                 String imsProxyAddrResolved = getDnsA(mImsProxyAddr);
                 if (imsProxyAddrResolved == null) {
-                    throw new PayloadException(new StringBuilder("Proxy IP address : ")
-                            .append(mImsProxyAddr).append(" not found!").toString());
+                    throw new PayloadException("Proxy IP address : " + mImsProxyAddr
+                            + " not found!");
                 }
                 dnsResolvedFields = new DnsResolvedFields(imsProxyAddrResolved, mImsProxyPort);
             }
-
             if (sLogger.isActivated()) {
-                sLogger.debug(new StringBuilder("SIP outbound proxy configuration: ")
-                        .append(dnsResolvedFields.mIpAddress).append(":")
-                        .append(dnsResolvedFields.mPort).append(";").append(mImsProxyProtocol)
-                        .toString());
+                sLogger.debug("SIP outbound proxy configuration: " + dnsResolvedFields.mIpAddress
+                        + ":" + dnsResolvedFields.mPort + ";" + mImsProxyProtocol);
             }
             return dnsResolvedFields;
 
         } catch (TextParseException e) {
-            throw new PayloadException(new StringBuilder(
-                    "Failed to resolve dns for proxy configuration: ").append(mImsProxyAddr)
-                    .append(" with protocol: ").append(mImsProxyProtocol).append("!").toString(), e);
+            throw new PayloadException("Failed to resolve dns for proxy configuration: "
+                    + mImsProxyAddr + " with protocol: " + mImsProxyProtocol + "!", e);
         }
     }
 
@@ -665,26 +642,20 @@ public abstract class ImsNetworkInterface {
      * 
      * @param dnsResolvedFields The {@link DnsResolvedFields} object containing the DNS resolved
      *            fields.
-     * @return Registration result
      * @throws PayloadException
      * @throws NetworkException
      */
-    // Changed by Deutsche Telekom
     public void register(DnsResolvedFields dnsResolvedFields) throws PayloadException,
             NetworkException {
         try {
             if (sLogger.isActivated()) {
                 sLogger.debug("Register to IMS");
             }
-
-            // Changed by Deutsche Telekom
             if (dnsResolvedFields == null) {
                 dnsResolvedFields = getDnsResolvedFields();
             }
-
-            // Changed by Deutsche Telekom
             mSip.initStack(mAccess.getIpAddress(), dnsResolvedFields.mIpAddress,
-                    dnsResolvedFields.mPort, mImsProxyProtocol, mTcpFallback, getType());
+                    dnsResolvedFields.mPort, mImsProxyProtocol, mTcpFallback);
             mSip.getSipStack().addSipEventListener(mImsModule);
 
             mRegistration.register();
@@ -693,7 +664,6 @@ public abstract class ImsNetworkInterface {
                 sLogger.debug("IMS registered: ".concat(Boolean.toString(mRegistration
                         .isRegistered())));
             }
-
             /**
              * Even if DUT is not behind NAT (Network Address Translation) and PROTOCOL !=
              * ListeningPoint.UDP, it should still send the keep-Alive (double CRLF).
@@ -703,9 +673,9 @@ public abstract class ImsNetworkInterface {
                 mSip.getSipStack().getKeepAliveManager().start();
             }
         } catch (UnknownHostException e) {
-            throw new PayloadException(new StringBuilder(
-                    "Unable to register due to stack initialization failure for address : ")
-                    .append(mImsProxyAddr).toString(), e);
+            throw new PayloadException(
+                    "Unable to register due to stack initialization failure for address : "
+                            + mImsProxyAddr, e);
         }
     }
 
@@ -740,13 +710,4 @@ public abstract class ImsNetworkInterface {
         mSip.closeStack();
     }
 
-    /**
-     * Returns the network access info
-     * 
-     * @return String
-     * @throws CoreException
-     */
-    public String getAccessInfo() throws CoreException {
-        return getNetworkAccess().getType();
-    }
 }

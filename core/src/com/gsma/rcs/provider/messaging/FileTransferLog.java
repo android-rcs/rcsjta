@@ -123,6 +123,9 @@ public class FileTransferLog implements IFileTransferLog {
         FileTransferData.KEY_FT_ID
     };
 
+    private static final String SELECTION_BY_NOT_READ = FileTransferData.KEY_READ_STATUS + "="
+            + ReadStatus.UNREAD.toInt();
+
     private static final int FIRST_COLUMN_IDX = 0;
 
     private final LocalContentResolver mLocalContentResolver;
@@ -343,21 +346,15 @@ public class FileTransferLog implements IFileTransferLog {
     }
 
     @Override
-    public void markFileTransferAsRead(String fileTransferId) {
+    public int markFileTransferAsRead(String fileTransferId) {
         if (sLogger.isActivated()) {
-            sLogger.debug("markFileTransferAsRead  (fileTransferId=" + fileTransferId + ")");
+            sLogger.debug("Mark file transfer as read ID=" + fileTransferId);
         }
         ContentValues values = new ContentValues();
         values.put(FileTransferData.KEY_READ_STATUS, ReadStatus.READ.toInt());
-        if (mLocalContentResolver.update(
-                Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), values, null,
-                null) < 1) {
-            /* TODO: Throw exception */
-            if (sLogger.isActivated()) {
-                sLogger.warn("There was no file with fileTransferId '" + fileTransferId
-                        + "' to mark as read.");
-            }
-        }
+        return mLocalContentResolver.update(
+                Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), values,
+                SELECTION_BY_NOT_READ, null);
     }
 
     @Override

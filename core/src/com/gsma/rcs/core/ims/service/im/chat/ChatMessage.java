@@ -53,7 +53,6 @@ public class ChatMessage {
      * @param remote Remote contact
      * @param content Text message
      * @param mimeType MIME type
-     * @param serverReceiptAt Receipt date of the message on the server
      * @param timestamp Local timestamp for both incoming and outgoing chat message
      * @param timestampSent Timestamp sent in payload for both incoming and outgoing chat message
      * @param displayName the name to display
@@ -137,13 +136,10 @@ public class ChatMessage {
     @Override
     public String toString() {
         if (mContent != null && mContent.length() < 30) {
-            return new StringBuilder("IM [from=").append(mRemote).append(", pseudo='")
-                    .append(mDisplayName).append("', msg='").append(mContent).append("', msgId=")
-                    .append(mMsgId).append("', mimeType='").append(mMimeType).append("']")
-                    .append("]").toString();
+            return "IM [from=" + mRemote + ", pseudo='" + mDisplayName + "', msg='" + mContent
+                    + "', msgId=" + mMsgId + "', mimeType='" + mMimeType + "']" + "]";
         }
-        return new StringBuilder("IM [from=").append(mRemote).append(", pseudo='")
-                .append(mDisplayName).append("', msgId=").append(mMsgId).append("', mimeType='")
-                .append(mMimeType).append("']").toString();
+        return "IM [from=" + mRemote + ", pseudo='" + mDisplayName + "', msgId=" + mMsgId
+                + "', mimeType='" + mMimeType + "']";
     }
 }

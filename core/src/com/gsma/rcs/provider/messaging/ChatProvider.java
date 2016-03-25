@@ -104,7 +104,7 @@ public class ChatProvider extends ContentProvider {
             GroupChatData.KEY_PARTICIPANTS
     };
 
-    private static final Set<String> GROUP_CHAT_COLUMNS_SET_ALLOWED_FOR_EXTERNAL_ACCESS = new HashSet<String>(
+    private static final Set<String> GROUP_CHAT_COLUMNS_SET_ALLOWED_FOR_EXTERNAL_ACCESS = new HashSet<>(
             Arrays.asList(GROUP_CHAT_COLUMNS_ALLOWED_FOR_EXTERNAL_ACCESS));
 
     /**
@@ -119,7 +119,7 @@ public class ChatProvider extends ContentProvider {
             MessageData.KEY_TIMESTAMP_SENT
     };
 
-    private static final Set<String> MESSAGE_COLUMNS_SET_ALLOWED_FOR_EXTERNAL_ACCESS = new HashSet<String>(
+    private static final Set<String> MESSAGE_COLUMNS_SET_ALLOWED_FOR_EXTERNAL_ACCESS = new HashSet<>(
             Arrays.asList(MESSAGE_COLUMNS_ALLOWED_FOR_EXTERNAL_ACCESS));
 
     private static final class UriType {
@@ -248,8 +248,7 @@ public class ChatProvider extends ContentProvider {
         if (TextUtils.isEmpty(selection)) {
             return SELECTION_WITH_CHAT_ID_ONLY;
         }
-        return new StringBuilder("(").append(SELECTION_WITH_CHAT_ID_ONLY).append(") AND (")
-                .append(selection).append(')').toString();
+        return "(" + SELECTION_WITH_CHAT_ID_ONLY + ") AND (" + selection + ')';
     }
 
     private String[] getSelectionArgsWithChatId(String[] selectionArgs, String chatId) {
@@ -266,8 +265,7 @@ public class ChatProvider extends ContentProvider {
         if (TextUtils.isEmpty(selection)) {
             return SELECTION_WITH_MSG_ID_ONLY;
         }
-        return new StringBuilder("(").append(SELECTION_WITH_MSG_ID_ONLY).append(") AND (")
-                .append(selection).append(')').toString();
+        return "(" + SELECTION_WITH_MSG_ID_ONLY + ") AND (" + selection + ')';
     }
 
     private String[] getSelectionArgsWithMessageId(String[] selectionArgs, String messageId) {
@@ -287,9 +285,8 @@ public class ChatProvider extends ContentProvider {
         }
         for (String projectedColumn : projection) {
             if (!GROUP_CHAT_COLUMNS_SET_ALLOWED_FOR_EXTERNAL_ACCESS.contains(projectedColumn)) {
-                throw new UnsupportedOperationException(new StringBuilder(
-                        "No visibility to the accessed column ").append(projectedColumn)
-                        .append("!").toString());
+                throw new UnsupportedOperationException("No visibility to the accessed column "
+                        + projectedColumn + "!");
             }
         }
         return projection;
@@ -302,9 +299,8 @@ public class ChatProvider extends ContentProvider {
         }
         for (String projectedColumn : projection) {
             if (!MESSAGE_COLUMNS_SET_ALLOWED_FOR_EXTERNAL_ACCESS.contains(projectedColumn)) {
-                throw new UnsupportedOperationException(new StringBuilder(
-                        "No visibility to the accessed column ").append(projectedColumn)
-                        .append("!").toString());
+                throw new UnsupportedOperationException("No visibility to the accessed column "
+                        + projectedColumn + "!");
             }
         }
         return projection;
@@ -340,8 +336,7 @@ public class ChatProvider extends ContentProvider {
                 return CursorType.Message.TYPE_ITEM;
 
             default:
-                throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
-                        .append(uri).append("!").toString());
+                throw new IllegalArgumentException("Unsupported URI " + uri + "!");
         }
     }
 
@@ -425,8 +420,7 @@ public class ChatProvider extends ContentProvider {
                     return cursor;
 
                 default:
-                    throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
-                            .append(uri).append("!").toString());
+                    throw new IllegalArgumentException("Unsupported URI " + uri + "!");
             }
 
         } /*
@@ -493,12 +487,11 @@ public class ChatProvider extends ContentProvider {
             case UriType.Message.MESSAGE_WITH_ID:
                 /* Intentional fall through */
             case UriType.Message.MESSAGE:
-                throw new UnsupportedOperationException(new StringBuilder("This provider (URI=")
-                        .append(uri).append(") supports read only access!").toString());
+                throw new UnsupportedOperationException("This provider (URI=" + uri
+                        + ") supports read only access!");
 
             default:
-                throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
-                        .append(uri).append("!").toString());
+                throw new IllegalArgumentException("Unsupported URI " + uri + "!");
         }
     }
 
@@ -514,8 +507,8 @@ public class ChatProvider extends ContentProvider {
                         .createUniqueId(getContext(), ChatLog.GroupChat.HISTORYLOG_MEMBER_ID));
 
                 if (db.insert(TABLE_GROUP_CHAT, null, initialValues) == INVALID_ROW_ID) {
-                    throw new ServerApiPersistentStorageException(new StringBuilder(
-                            "Unable to insert row for URI ").append(uri).append('!').toString());
+                    throw new ServerApiPersistentStorageException("Unable to insert row for URI "
+                            + uri + '!');
                 }
                 Uri notificationUri = Uri.withAppendedPath(ChatLog.GroupChat.CONTENT_URI, chatId);
                 getContext().getContentResolver().notifyChange(notificationUri, null);
@@ -530,8 +523,8 @@ public class ChatProvider extends ContentProvider {
                         .createUniqueId(getContext(), MessageData.HISTORYLOG_MEMBER_ID));
 
                 if (db.insert(TABLE_MESSAGE, null, initialValues) == INVALID_ROW_ID) {
-                    throw new ServerApiPersistentStorageException(new StringBuilder(
-                            "Unable to insert row for URI ").append(uri).append('!').toString());
+                    throw new ServerApiPersistentStorageException("Unable to insert row for URI "
+                            + uri + '!');
                 }
                 notificationUri = Uri.withAppendedPath(ChatLog.Message.CONTENT_URI, messageId);
                 getContext().getContentResolver().notifyChange(notificationUri, null);
@@ -544,12 +537,11 @@ public class ChatProvider extends ContentProvider {
             case UriType.Message.MESSAGE:
                 /* Intentional fall through */
             case UriType.Message.MESSAGE_WITH_ID:
-                throw new UnsupportedOperationException(new StringBuilder("This provider (URI=")
-                        .append(uri).append(") supports read only access!").toString());
+                throw new UnsupportedOperationException("This provider (URI=" + uri
+                        + ") supports read only access!");
 
             default:
-                throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
-                        .append(uri).append("!").toString());
+                throw new IllegalArgumentException("Unsupported URI " + uri + "!");
         }
     }
 
@@ -605,12 +597,11 @@ public class ChatProvider extends ContentProvider {
             case UriType.Message.MESSAGE_WITH_ID:
                 /* Intentional fall through */
             case UriType.Message.MESSAGE:
-                throw new UnsupportedOperationException(new StringBuilder("This provider (URI=")
-                        .append(uri).append(") supports read only access!").toString());
+                throw new UnsupportedOperationException("This provider (URI=" + uri
+                        + ") supports read only access!");
 
             default:
-                throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
-                        .append(uri).append("!").toString());
+                throw new IllegalArgumentException("Unsupported URI " + uri + "!");
         }
     }
 

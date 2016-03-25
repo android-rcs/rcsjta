@@ -18,7 +18,25 @@
 
 package com.gsma.rcs.ri.messaging;
 
-import com.gsma.services.rcs.CommonServiceConfiguration;
+import com.gsma.rcs.api.connection.ConnectionManager;
+import com.gsma.rcs.api.connection.utils.ExceptionUtil;
+import com.gsma.rcs.api.connection.utils.RcsFragmentActivity;
+import com.gsma.rcs.ri.R;
+import com.gsma.rcs.ri.RI;
+import com.gsma.rcs.ri.messaging.adapter.TalkCursorAdapter;
+import com.gsma.rcs.ri.messaging.chat.ChatCursorObserver;
+import com.gsma.rcs.ri.messaging.chat.ChatMessageLogView;
+import com.gsma.rcs.ri.messaging.chat.ChatPendingIntentManager;
+import com.gsma.rcs.ri.messaging.chat.IsComposingManager;
+import com.gsma.rcs.ri.messaging.chat.single.SendSingleFile;
+import com.gsma.rcs.ri.messaging.chat.single.SingleChatIntentService;
+import com.gsma.rcs.ri.messaging.filetransfer.FileTransferIntentService;
+import com.gsma.rcs.ri.messaging.filetransfer.FileTransferLogView;
+import com.gsma.rcs.ri.messaging.geoloc.EditGeoloc;
+import com.gsma.rcs.ri.utils.ContactUtil;
+import com.gsma.rcs.ri.utils.LogUtils;
+import com.gsma.rcs.ri.utils.RcsContactUtil;
+import com.gsma.rcs.ri.utils.Utils;
 import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.RcsGenericException;
 import com.gsma.services.rcs.RcsPermissionDeniedException;
@@ -42,33 +60,12 @@ import com.gsma.services.rcs.filetransfer.FileTransferService;
 import com.gsma.services.rcs.history.HistoryLog;
 import com.gsma.services.rcs.history.HistoryUriBuilder;
 
-import com.gsma.rcs.api.connection.ConnectionManager;
-import com.gsma.rcs.api.connection.utils.ExceptionUtil;
-import com.gsma.rcs.api.connection.utils.RcsFragmentActivity;
-import com.gsma.rcs.ri.R;
-import com.gsma.rcs.ri.RI;
-import com.gsma.rcs.ri.messaging.adapter.TalkCursorAdapter;
-import com.gsma.rcs.ri.messaging.chat.ChatCursorObserver;
-import com.gsma.rcs.ri.messaging.chat.ChatMessageLogView;
-import com.gsma.rcs.ri.messaging.chat.ChatPendingIntentManager;
-import com.gsma.rcs.ri.messaging.chat.IsComposingManager;
-import com.gsma.rcs.ri.messaging.chat.single.SendSingleFile;
-import com.gsma.rcs.ri.messaging.chat.single.SingleChatIntentService;
-import com.gsma.rcs.ri.messaging.filetransfer.FileTransferIntentService;
-import com.gsma.rcs.ri.messaging.filetransfer.FileTransferLogView;
-import com.gsma.rcs.ri.messaging.geoloc.EditGeoloc;
-import com.gsma.rcs.ri.utils.ContactUtil;
-import com.gsma.rcs.ri.utils.LogUtils;
-import com.gsma.rcs.ri.utils.RcsContactUtil;
-import com.gsma.rcs.ri.utils.Utils;
-
 import android.app.AlertDialog;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
-import android.database.SQLException;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -94,9 +91,7 @@ import android.widget.TextView;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -127,16 +122,9 @@ public class OneToOneTalkView extends RcsFragmentActivity implements
             HistoryLog.FILENAME,
             HistoryLog.FILESIZE,
             HistoryLog.TRANSFERRED,
-            HistoryLog.REASON_CODE};
+            HistoryLog.REASON_CODE,
+            HistoryLog.READ_STATUS};
     // @formatter:on
-
-    private final static String UNREADS_WHERE_CLAUSE = HistoryLog.CHAT_ID + "=? AND "
-            + HistoryLog.READ_STATUS + "=" + RcsService.ReadStatus.UNREAD.toInt() + " AND "
-            + HistoryLog.DIRECTION + "=" + RcsService.Direction.INCOMING.toInt();
-
-    private static final String[] PROJECTION_UNREAD_MESSAGE = new String[] {
-            HistoryLog.PROVIDER_ID, HistoryLog.ID
-    };
 
     private final static String EXTRA_CONTACT = "contact";
 
@@ -413,42 +401,19 @@ public class OneToOneTalkView extends RcsFragmentActivity implements
         });
 
         /* Initialize the adapter. */
-        mAdapter = new TalkCursorAdapter(this, true);
+        mAdapter = new TalkCursorAdapter(this, true, mChatService, mFileTransferService);
 
         /* Associate the list adapter with the ListView. */
         ListView listView = (ListView) findViewById(android.R.id.list);
         listView.setDivider(null);
         listView.setAdapter(mAdapter);
-
         registerForContextMenu(listView);
     }
 
-    private void markMessagesAsRead() throws RcsGenericException, RcsPersistentStorageException,
-            RcsServiceNotAvailableException {
-        /* Mark as read messages if required */
-        Map<String, Integer> msgIdUnReads = getUnreadMessageIds(this, mUriHistoryProvider,
-                mContact.toString());
-        for (Map.Entry<String, Integer> entryMsgIdUnread : msgIdUnReads.entrySet()) {
-            int providerId = entryMsgIdUnread.getValue();
-            String id = entryMsgIdUnread.getKey();
-            switch (providerId) {
-                case ChatLog.Message.HISTORYLOG_MEMBER_ID:
-                    mChatService.markMessageAsRead(id);
-                    break;
-
-                case FileTransferLog.HISTORYLOG_MEMBER_ID:
-                    mFileTransferService.markFileTransferAsRead(id);
-                    break;
-
-                default:
-                    throw new IllegalArgumentException("Invalid provider ID=" + providerId);
-            }
-        }
-    }
-
     private boolean processIntent(Intent intent) {
+        String action = intent.getAction();
         if (LogUtils.isActive) {
-            Log.d(LOGTAG, "processIntent ".concat(intent.getAction()));
+            Log.d(LOGTAG, "processIntent " + action);
         }
         ContactId newContact = intent.getParcelableExtra(EXTRA_CONTACT);
         if (newContact == null) {
@@ -457,7 +422,6 @@ public class OneToOneTalkView extends RcsFragmentActivity implements
             }
             return false;
         }
-        String action = intent.getAction();
         if (action == null) {
             if (LogUtils.isActive) {
                 Log.w(LOGTAG, "Cannot process intent: action is null");
@@ -478,7 +442,6 @@ public class OneToOneTalkView extends RcsFragmentActivity implements
             /* Set activity title with display name */
             String displayName = RcsContactUtil.getInstance(this).getDisplayName(mContact);
             setTitle(getString(R.string.title_chat, displayName));
-            markMessagesAsRead();
             switch (action) {
                 case OneToOneChatIntent.ACTION_NEW_ONE_TO_ONE_CHAT_MESSAGE:
                     /*
@@ -727,71 +690,49 @@ public class OneToOneTalkView extends RcsFragmentActivity implements
         try {
             switch (item.getItemId()) {
                 case R.id.menu_delete_message:
-                    switch (providerId) {
-                        case ChatLog.Message.HISTORYLOG_MEMBER_ID:
-                            mChatService.deleteMessage(id);
-                            return true;
-
-                        case FileTransferLog.HISTORYLOG_MEMBER_ID:
-                            mFileTransferService.deleteFileTransfer(id);
-                            return true;
-
-                        default:
-                            throw new IllegalArgumentException("Invalid provider ID=" + providerId);
+                    if (ChatLog.Message.HISTORYLOG_MEMBER_ID == providerId) {
+                        mChatService.deleteMessage(id);
+                    } else {
+                        mFileTransferService.deleteFileTransfer(id);
                     }
 
                 case R.id.menu_resend_message:
-                    switch (providerId) {
-                        case ChatLog.Message.HISTORYLOG_MEMBER_ID:
-                            OneToOneChat chat = mChatService.getOneToOneChat(mContact);
-                            if (chat != null) {
-                                chat.resendMessage(id);
-                            }
-                            return true;
-
-                        case FileTransferLog.HISTORYLOG_MEMBER_ID:
-                            FileTransfer fileTransfer = mFileTransferService.getFileTransfer(id);
-                            if (fileTransfer != null) {
-                                fileTransfer.resendTransfer();
-                            }
-                            return true;
-
-                        default:
-                            throw new IllegalArgumentException("Invalid provider ID=" + providerId);
+                    if (ChatLog.Message.HISTORYLOG_MEMBER_ID == providerId) {
+                        OneToOneChat chat = mChatService.getOneToOneChat(mContact);
+                        if (chat != null) {
+                            chat.resendMessage(id);
+                        }
+                    } else {
+                        FileTransfer fileTransfer = mFileTransferService.getFileTransfer(id);
+                        if (fileTransfer != null) {
+                            fileTransfer.resendTransfer();
+                        }
                     }
+                    return true;
 
                 case R.id.menu_display_content:
-                    switch (providerId) {
-                        case FileTransferLog.HISTORYLOG_MEMBER_ID:
-                            String file = cursor.getString(cursor
-                                    .getColumnIndexOrThrow(HistoryLog.CONTENT));
-                            Utils.showPicture(this, Uri.parse(file));
-                            return true;
-
-                        default:
-                            throw new IllegalArgumentException("Invalid provider ID=" + providerId);
+                    if (FileTransferLog.HISTORYLOG_MEMBER_ID == providerId) {
+                        String file = cursor.getString(cursor
+                                .getColumnIndexOrThrow(HistoryLog.CONTENT));
+                        Utils.showPicture(this, Uri.parse(file));
+                        markFileTransferAsRead(cursor, id);
                     }
+                    return true;
 
                 case R.id.menu_listen_content:
-                    switch (providerId) {
-                        case FileTransferLog.HISTORYLOG_MEMBER_ID:
-                            String file = cursor.getString(cursor
-                                    .getColumnIndexOrThrow(HistoryLog.CONTENT));
-                            Utils.playAudio(this, Uri.parse(file));
-                            return true;
-                        default:
-                            throw new IllegalArgumentException("Invalid provider ID=" + providerId);
+                    if (FileTransferLog.HISTORYLOG_MEMBER_ID == providerId) {
+                        String file = cursor.getString(cursor
+                                .getColumnIndexOrThrow(HistoryLog.CONTENT));
+                        Utils.playAudio(this, Uri.parse(file));
+                        markFileTransferAsRead(cursor, id);
                     }
+                    return true;
+
                 case R.id.menu_view_detail:
-                    switch (providerId) {
-                        case ChatLog.Message.HISTORYLOG_MEMBER_ID:
-                            ChatMessageLogView.startActivity(this, id);
-                            break;
-                        case FileTransferLog.HISTORYLOG_MEMBER_ID:
-                            FileTransferLogView.startActivity(this, id);
-                            break;
-                        default:
-                            throw new IllegalArgumentException("Invalid provider ID=" + providerId);
+                    if (ChatLog.Message.HISTORYLOG_MEMBER_ID == providerId) {
+                        ChatMessageLogView.startActivity(this, id);
+                    } else {
+                        FileTransferLogView.startActivity(this, id);
                     }
                     return true;
 
@@ -805,6 +746,29 @@ public class OneToOneTalkView extends RcsFragmentActivity implements
         } catch (RcsServiceNotAvailableException e) {
             Utils.displayLongToast(this, getString(R.string.label_service_not_available));
             return true;
+        }
+    }
+
+    private void markFileTransferAsRead(Cursor cursor, String ftId) {
+        try {
+            RcsService.Direction dir = RcsService.Direction.valueOf(cursor.getInt(cursor
+                    .getColumnIndexOrThrow(HistoryLog.DIRECTION)));
+            if (RcsService.Direction.INCOMING == dir) {
+                RcsService.ReadStatus status = RcsService.ReadStatus.valueOf(cursor.getInt(cursor
+                        .getColumnIndexOrThrow(HistoryLog.READ_STATUS)));
+                if (RcsService.ReadStatus.UNREAD == status) {
+                    mFileTransferService.markFileTransferAsRead(ftId);
+                    if (LogUtils.isActive) {
+                        Log.d(LOGTAG, "Mark file transfer " + ftId + " as read");
+                    }
+                }
+            }
+        } catch (RcsServiceNotAvailableException e) {
+            if (LogUtils.isActive) {
+                Log.d(LOGTAG, "Cannot mark message as read: service not available");
+            }
+        } catch (RcsGenericException | RcsPersistentStorageException e) {
+            Log.e(LOGTAG, ExceptionUtil.getFullStackTrace(e));
         }
     }
 
@@ -918,15 +882,6 @@ public class OneToOneTalkView extends RcsFragmentActivity implements
         return builder.show();
     }
 
-    private String getMyDisplayName() throws RcsGenericException, RcsServiceNotAvailableException {
-        CommonServiceConfiguration config = mChatService.getCommonConfiguration();
-        String myDisplayName = config.getMyDisplayName();
-        if (myDisplayName == null) {
-            myDisplayName = config.getMyContactId().toString();
-        }
-        return myDisplayName;
-    }
-
     private void requestCapabilities(ContactId contact) throws RcsServiceNotAvailableException,
             RcsGenericException {
         try {
@@ -938,40 +893,4 @@ public class OneToOneTalkView extends RcsFragmentActivity implements
         }
     }
 
-    /**
-     * Get unread messages for contact
-     *
-     * @param ctx the context
-     * @param chatId the chat ID
-     * @return Map of unread message IDs associated with the provider ID
-     */
-    public static Map<String, Integer> getUnreadMessageIds(Context ctx, Uri uri, String chatId) {
-        Map<String, Integer> unReadMessageIDs = new HashMap<>();
-        String[] where_args = new String[] {
-            chatId
-        };
-        Cursor cursor = null;
-        try {
-            cursor = ctx.getContentResolver().query(uri, PROJECTION_UNREAD_MESSAGE,
-                    UNREADS_WHERE_CLAUSE, where_args, ORDER_ASC);
-            if (cursor == null) {
-                throw new SQLException("Cannot query unread messages for chatId=" + chatId);
-            }
-            if (!cursor.moveToFirst()) {
-                return unReadMessageIDs;
-            }
-            int msgIdcolumIdx = cursor.getColumnIndexOrThrow(HistoryLog.ID);
-            int providerIdColumIdx = cursor.getColumnIndexOrThrow(HistoryLog.PROVIDER_ID);
-            do {
-                unReadMessageIDs.put(cursor.getString(msgIdcolumIdx),
-                        cursor.getInt(providerIdColumIdx));
-            } while (cursor.moveToNext());
-            return unReadMessageIDs;
-
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
-        }
-    }
 }

@@ -1277,24 +1277,20 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         if (TextUtils.isEmpty(transferId)) {
             throw new ServerApiIllegalArgumentException("transferId must not be null or empty!");
         }
-        mImService.scheduleImOperation(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    /* No notification type corresponds currently to mark as read */
-                    mMessagingLog.markFileTransferAsRead(transferId);
-                } catch (RuntimeException e) {
-                    /*
-                     * Normally we are not allowed to catch runtime exceptions as these are genuine
-                     * bugs which should be handled/fixed within the code. However the cases when we
-                     * are executing operations on a thread unhandling such exceptions will
-                     * eventually lead to exit the system and thus can bring the whole system down,
-                     * which is not intended.
-                     */
-                    sLogger.error("Failed to mark message as read!", e);
-                }
+        try {
+            /* No notification type corresponds currently to mark as read */
+            mMessagingLog.markFileTransferAsRead(transferId);
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
-        });
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
     }
 
     /**

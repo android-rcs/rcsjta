@@ -66,13 +66,13 @@ public abstract class FileSharingSession extends ImsServiceSession {
 
     private boolean mFileTransferred = false;
 
-    protected Map<ContactId, ParticipantStatus> mParticipants = new HashMap<ContactId, ParticipantStatus>();
+    protected final Map<ContactId, ParticipantStatus> mParticipants;
 
-    private MmContent mFileIcon;
+    private final MmContent mFileIcon;
 
     private boolean mFileTransferPaused = false;
 
-    private String mFiletransferId;
+    private final String mFiletransferId;
 
     protected final ImdnManager mImdnManager;
 
@@ -96,11 +96,11 @@ public abstract class FileSharingSession extends ImsServiceSession {
                               ContactId contact, Uri remoteContact, MmContent fileIcon, String filetransferId,
                               RcsSettings rcsSettings, long timestamp, ContactManager contactManager) {
         super(imService, contact, remoteContact, rcsSettings, timestamp, contactManager);
-
         mContent = content;
         mFileIcon = fileIcon;
         mFiletransferId = filetransferId;
         mImdnManager = imService.getImdnManager();
+        mParticipants = new HashMap<>();
     }
 
     /**
@@ -222,9 +222,9 @@ public abstract class FileSharingSession extends ImsServiceSession {
      */
     public static FileSharingError isFileCapacityAcceptable(long fileSize, RcsSettings rcsSettings) {
         long maxFileSharingSize = rcsSettings.getMaxFileTransferSize();
-        boolean fileIsToBig = (maxFileSharingSize > 0) ? fileSize > maxFileSharingSize : false;
-        boolean storageIsTooSmall = (StorageUtils.getExternalStorageFreeSpace() > 0) ? fileSize > StorageUtils
-                .getExternalStorageFreeSpace() : false;
+        boolean fileIsToBig = (maxFileSharingSize > 0) && fileSize > maxFileSharingSize;
+        boolean storageIsTooSmall = (StorageUtils.getExternalStorageFreeSpace() > 0) && fileSize > StorageUtils
+                .getExternalStorageFreeSpace();
         if (fileIsToBig) {
             if (sLogger.isActivated()) {
                 sLogger.warn("File is too big, reject the file transfer");
