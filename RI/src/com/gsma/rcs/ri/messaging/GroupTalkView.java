@@ -18,11 +18,30 @@
 
 package com.gsma.rcs.ri.messaging;
 
-import static com.gsma.rcs.ri.messaging.OneToOneTalkView.getUnreadMessageIds;
-
+import com.gsma.rcs.api.connection.ConnectionManager;
+import com.gsma.rcs.api.connection.utils.ExceptionUtil;
+import com.gsma.rcs.api.connection.utils.RcsFragmentActivity;
+import com.gsma.rcs.ri.R;
+import com.gsma.rcs.ri.RI;
+import com.gsma.rcs.ri.RiApplication;
+import com.gsma.rcs.ri.messaging.adapter.TalkCursorAdapter;
+import com.gsma.rcs.ri.messaging.chat.ChatCursorObserver;
+import com.gsma.rcs.ri.messaging.chat.ChatMessageLogView;
+import com.gsma.rcs.ri.messaging.chat.ChatPendingIntentManager;
+import com.gsma.rcs.ri.messaging.chat.IsComposingManager;
+import com.gsma.rcs.ri.messaging.chat.IsComposingManager.INotifyComposing;
+import com.gsma.rcs.ri.messaging.chat.group.SendGroupFile;
+import com.gsma.rcs.ri.messaging.filetransfer.FileTransferLogView;
+import com.gsma.rcs.ri.messaging.geoloc.DisplayGeoloc;
+import com.gsma.rcs.ri.messaging.geoloc.EditGeoloc;
+import com.gsma.rcs.ri.utils.LogUtils;
+import com.gsma.rcs.ri.utils.RcsContactUtil;
+import com.gsma.rcs.ri.utils.Smileys;
+import com.gsma.rcs.ri.utils.Utils;
 import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.RcsGenericException;
 import com.gsma.services.rcs.RcsPersistentStorageException;
+import com.gsma.services.rcs.RcsService;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsServiceNotAvailableException;
@@ -44,27 +63,6 @@ import com.gsma.services.rcs.filetransfer.FileTransferService;
 import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo;
 import com.gsma.services.rcs.history.HistoryLog;
 import com.gsma.services.rcs.history.HistoryUriBuilder;
-
-import com.gsma.rcs.api.connection.ConnectionManager;
-import com.gsma.rcs.api.connection.utils.ExceptionUtil;
-import com.gsma.rcs.api.connection.utils.RcsFragmentActivity;
-import com.gsma.rcs.ri.R;
-import com.gsma.rcs.ri.RI;
-import com.gsma.rcs.ri.RiApplication;
-import com.gsma.rcs.ri.messaging.adapter.TalkCursorAdapter;
-import com.gsma.rcs.ri.messaging.chat.ChatCursorObserver;
-import com.gsma.rcs.ri.messaging.chat.ChatMessageLogView;
-import com.gsma.rcs.ri.messaging.chat.ChatPendingIntentManager;
-import com.gsma.rcs.ri.messaging.chat.IsComposingManager;
-import com.gsma.rcs.ri.messaging.chat.IsComposingManager.INotifyComposing;
-import com.gsma.rcs.ri.messaging.chat.group.SendGroupFile;
-import com.gsma.rcs.ri.messaging.filetransfer.FileTransferLogView;
-import com.gsma.rcs.ri.messaging.geoloc.DisplayGeoloc;
-import com.gsma.rcs.ri.messaging.geoloc.EditGeoloc;
-import com.gsma.rcs.ri.utils.LogUtils;
-import com.gsma.rcs.ri.utils.RcsContactUtil;
-import com.gsma.rcs.ri.utils.Smileys;
-import com.gsma.rcs.ri.utils.Utils;
 
 import android.app.AlertDialog;
 import android.content.ContentResolver;
@@ -130,7 +128,8 @@ public class GroupTalkView extends RcsFragmentActivity implements
             HistoryLog.FILENAME,
             HistoryLog.FILESIZE,
             HistoryLog.TRANSFERRED,
-            HistoryLog.REASON_CODE};
+            HistoryLog.REASON_CODE,
+            HistoryLog.READ_STATUS};
     // @formatter:on
 
     /**
@@ -142,10 +141,9 @@ public class GroupTalkView extends RcsFragmentActivity implements
      * Intent parameters
      */
     private final static String EXTRA_PARTICIPANTS = "participants";
-
     private final static String EXTRA_SUBJECT = "subject";
-
     private final static String EXTRA_MODE = "mode";
+
     private Handler mHandler;
     private EditText mComposeText;
     private ChatService mChatService;
@@ -185,6 +183,7 @@ public class GroupTalkView extends RcsFragmentActivity implements
                 ConnectionManager.RcsServiceName.CONTACT,
                 ConnectionManager.RcsServiceName.CAPABILITY,
                 ConnectionManager.RcsServiceName.FILE_TRANSFER)) {
+            showMessageThenExit(R.string.label_service_not_available);
             return;
         }
         startMonitorServices(ConnectionManager.RcsServiceName.CHAT,
@@ -351,32 +350,10 @@ public class GroupTalkView extends RcsFragmentActivity implements
             public void afterTextChanged(Editable s) {
             }
         });
-        mAdapter = new TalkCursorAdapter(this, false);
+        mAdapter = new TalkCursorAdapter(this, false, mChatService, mFileTransferService);
         ListView listView = (ListView) findViewById(android.R.id.list);
         listView.setAdapter(mAdapter);
         registerForContextMenu(listView);
-    }
-
-    private void markMessagesAsRead() throws RcsGenericException, RcsPersistentStorageException,
-            RcsServiceNotAvailableException {
-        /* Mark as read messages if required */
-        Map<String, Integer> msgIdUnReads = getUnreadMessageIds(this, mUriHistoryProvider, mChatId);
-        for (Map.Entry<String, Integer> entryMsgIdUnread : msgIdUnReads.entrySet()) {
-            int providerId = entryMsgIdUnread.getValue();
-            String id = entryMsgIdUnread.getKey();
-            switch (providerId) {
-                case ChatLog.Message.HISTORYLOG_MEMBER_ID:
-                    mChatService.markMessageAsRead(id);
-                    break;
-
-                case FileTransferLog.HISTORYLOG_MEMBER_ID:
-                    mFileTransferService.markFileTransferAsRead(id);
-                    break;
-
-                default:
-                    throw new IllegalArgumentException("Invalid provider ID=" + providerId);
-            }
-        }
     }
 
     private boolean processIntent(Intent intent) {
@@ -431,7 +408,6 @@ public class GroupTalkView extends RcsFragmentActivity implements
                         Log.i(LOGTAG, "processIntent chatId=" + mChatId + " subject='" + mSubject
                                 + "'");
                     }
-                    markMessagesAsRead();
                     return true;
 
                 case INCOMING:
@@ -549,8 +525,41 @@ public class GroupTalkView extends RcsFragmentActivity implements
         /* Get the list item position. */
         AdapterContextMenuInfo info = (AdapterContextMenuInfo) menuInfo;
         Cursor cursor = (Cursor) mAdapter.getItem(info.position);
+        int providerId = cursor.getInt(cursor.getColumnIndexOrThrow(HistoryLog.PROVIDER_ID));
         Direction direction = Direction.valueOf(cursor.getInt(cursor
                 .getColumnIndexOrThrow(Message.DIRECTION)));
+        if (FileTransferLog.HISTORYLOG_MEMBER_ID == providerId) {
+            String mimeType = cursor.getString(cursor.getColumnIndexOrThrow(HistoryLog.MIME_TYPE));
+            boolean isImage = Utils.isImageType(mimeType);
+            if (isImage || Utils.isAudioType(mimeType)) {
+                if (RcsService.Direction.INCOMING == direction) {
+                    Long transferred = cursor.getLong(cursor
+                            .getColumnIndexOrThrow(HistoryLog.TRANSFERRED));
+                    Long size = cursor.getLong(cursor.getColumnIndexOrThrow(HistoryLog.FILESIZE));
+                    if (!size.equals(transferred)) {
+                        /* file is not transferred: do no allow to display */
+                        menu.findItem(R.id.menu_display_content).setVisible(false);
+                        menu.findItem(R.id.menu_listen_content).setVisible(false);
+                    } else if (isImage) {
+                        menu.findItem(R.id.menu_listen_content).setVisible(false);
+                    } else {
+                        menu.findItem(R.id.menu_display_content).setVisible(false);
+                    }
+                } else if (isImage) {
+                    menu.findItem(R.id.menu_listen_content).setVisible(false);
+                } else {
+                    menu.findItem(R.id.menu_display_content).setVisible(false);
+                }
+            } else {
+                // only image files are playable
+                menu.findItem(R.id.menu_display_content).setVisible(false);
+                menu.findItem(R.id.menu_listen_content).setVisible(false);
+            }
+        } else {
+            // Only file are playable
+            menu.findItem(R.id.menu_display_content).setVisible(false);
+            menu.findItem(R.id.menu_listen_content).setVisible(false);
+        }
         if (Direction.OUTGOING != direction) {
             menu.findItem(R.id.menu_view_group_delivery).setVisible(false);
         }
@@ -560,42 +569,80 @@ public class GroupTalkView extends RcsFragmentActivity implements
     public boolean onContextItemSelected(MenuItem item) {
         AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
         Cursor cursor = (Cursor) (mAdapter.getItem(info.position));
+        int providerId = cursor.getInt(cursor.getColumnIndexOrThrow(HistoryLog.PROVIDER_ID));
         String id = cursor.getString(cursor.getColumnIndexOrThrow(HistoryLog.ID));
         if (LogUtils.isActive) {
             Log.d(LOGTAG, "onContextItemSelected Id=".concat(id));
         }
-        int providerId = cursor.getInt(cursor.getColumnIndexOrThrow(HistoryLog.PROVIDER_ID));
-        switch (item.getItemId()) {
-            case R.id.menu_view_group_delivery:
-                GroupDeliveryInfoList.startActivity(this, id);
-                return true;
+        try {
+            switch (item.getItemId()) {
+                case R.id.menu_view_group_delivery:
+                    GroupDeliveryInfoList.startActivity(this, id);
+                    return true;
 
-            case R.id.menu_delete_message:
-                try {
+                case R.id.menu_delete_message:
                     if (ChatLog.Message.HISTORYLOG_MEMBER_ID == providerId) {
                         mChatService.deleteMessage(id);
                     } else {
                         mFileTransferService.deleteFileTransfer(id);
                     }
                     return true;
-                } catch (RcsServiceException e) {
-                    showException(e);
-                }
-            case R.id.menu_view_detail:
-                switch (providerId) {
-                    case ChatLog.Message.HISTORYLOG_MEMBER_ID:
-                        ChatMessageLogView.startActivity(this, id);
-                        break;
-                    case FileTransferLog.HISTORYLOG_MEMBER_ID:
-                        FileTransferLogView.startActivity(this, id);
-                        break;
-                    default:
-                        throw new IllegalArgumentException("Invalid provider ID=" + providerId);
-                }
-                return true;
 
-            default:
-                return super.onContextItemSelected(item);
+                case R.id.menu_view_detail:
+                    if (ChatLog.Message.HISTORYLOG_MEMBER_ID == providerId) {
+                        ChatMessageLogView.startActivity(this, id);
+                    } else {
+                        FileTransferLogView.startActivity(this, id);
+                    }
+                    return true;
+
+                case R.id.menu_display_content:
+                    if (FileTransferLog.HISTORYLOG_MEMBER_ID == providerId) {
+                        String file = cursor.getString(cursor
+                                .getColumnIndexOrThrow(HistoryLog.CONTENT));
+                        Utils.showPicture(this, Uri.parse(file));
+                        markFileTransferAsRead(cursor, id);
+                    }
+                    return true;
+
+                case R.id.menu_listen_content:
+                    if (FileTransferLog.HISTORYLOG_MEMBER_ID == providerId) {
+                        String file = cursor.getString(cursor
+                                .getColumnIndexOrThrow(HistoryLog.CONTENT));
+                        Utils.playAudio(this, Uri.parse(file));
+                        markFileTransferAsRead(cursor, id);
+                    }
+                    return true;
+
+                default:
+                    return super.onContextItemSelected(item);
+            }
+        } catch (RcsServiceException e) {
+            showException(e);
+        }
+        return true;
+    }
+
+    private void markFileTransferAsRead(Cursor cursor, String ftId) {
+        try {
+            RcsService.Direction dir = RcsService.Direction.valueOf(cursor.getInt(cursor
+                    .getColumnIndexOrThrow(HistoryLog.DIRECTION)));
+            if (RcsService.Direction.INCOMING == dir) {
+                RcsService.ReadStatus status = RcsService.ReadStatus.valueOf(cursor.getInt(cursor
+                        .getColumnIndexOrThrow(HistoryLog.READ_STATUS)));
+                if (RcsService.ReadStatus.UNREAD == status) {
+                    mFileTransferService.markFileTransferAsRead(ftId);
+                    if (LogUtils.isActive) {
+                        Log.d(LOGTAG, "Mark file transfer " + ftId + " as read");
+                    }
+                }
+            }
+        } catch (RcsServiceNotAvailableException e) {
+            if (LogUtils.isActive) {
+                Log.d(LOGTAG, "Cannot mark message as read: service not available");
+            }
+        } catch (RcsGenericException | RcsPersistentStorageException e) {
+            Log.e(LOGTAG, ExceptionUtil.getFullStackTrace(e));
         }
     }
 

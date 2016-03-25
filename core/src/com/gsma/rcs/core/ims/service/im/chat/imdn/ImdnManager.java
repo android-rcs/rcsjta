@@ -36,10 +36,12 @@ import com.gsma.rcs.core.ims.service.SessionAuthenticationAgent;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.core.ims.service.im.chat.cpim.CpimMessage;
+import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.FifoBuffer;
 import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.rcs.utils.logger.Logger;
+import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.contact.ContactId;
 
 import java.text.ParseException;
@@ -55,22 +57,23 @@ import javax2.sip.message.Response;
 public class ImdnManager extends Thread {
 
     private final InstantMessagingService mImService;
-
+    private final MessagingLog mMessagingLog;
     private FifoBuffer mBuffer = new FifoBuffer();
-
     private final RcsSettings mRcsSettings;
-
     private final static Logger sLogger = Logger.getLogger(ImdnManager.class.getSimpleName());
 
     /**
      * Constructor
      * 
      * @param imService IM service
-     * @param rcsSettings
+     * @param rcsSettings the RCS settings accessor
+     * @param messagingLog the messaging log accessor
      */
-    public ImdnManager(InstantMessagingService imService, RcsSettings rcsSettings) {
+    public ImdnManager(InstantMessagingService imService, RcsSettings rcsSettings,
+            MessagingLog messagingLog) {
         mImService = imService;
         mRcsSettings = rcsSettings;
+        mMessagingLog = messagingLog;
     }
 
     /**
@@ -122,36 +125,45 @@ public class ImdnManager extends Thread {
                 && mRcsSettings.isRequestAndRespondToGroupDisplayReportsEnabled();
     }
 
-    /**
-     * Background processing
-     */
+    @Override
     public void run() {
-        DeliveryStatus delivery = null;
+        DeliveryStatus delivery;
         while ((delivery = (DeliveryStatus) mBuffer.getObject()) != null) {
             try {
+                boolean imdnDisplay = ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(delivery
+                        .getStatus());
+                String msgId = delivery.getMsgId();
+                if (imdnDisplay) {
+                    /*
+                     * Display notification are processed asynchronously from the server API.
+                     * Therefore the IMDN message may have already been processed. Here we need to
+                     * check if the Display Report is still requested.
+                     */
+                    ChatLog.Message.Content.Status status = mMessagingLog.getMessageStatus(msgId);
+                    if (ChatLog.Message.Content.Status.DISPLAY_REPORT_REQUESTED != status) {
+                        if (sLogger.isActivated()) {
+                            sLogger.debug("Display report for ID: " + msgId + " already processed!");
+                        }
+                        continue;
+                    }
+                }
                 sendSipMessageDeliveryStatus(delivery, null); // TODO: add sip.instance
                 /*
                  * Update rich messaging history when sending DISPLAYED report Since the requested
                  * display report was now successfully send we mark this message as fully received
                  */
-                if (ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(delivery.getStatus())) {
+                if (imdnDisplay) {
                     mImService.onChatMessageDisplayReportSent(delivery.getChatId(),
-                            delivery.getRemote(), delivery.getMsgId());
+                            delivery.getRemote(), msgId);
                 }
-            } catch (PayloadException e) {
-                sLogger.error("Failed to send delivery status for chatId: " +
-                        delivery.getChatId(), e);
+            } catch (PayloadException | RuntimeException e) {
+                sLogger.error("Failed to send delivery status for chatId: " + delivery.getChatId(),
+                        e);
+
             } catch (NetworkException e) {
                 if (sLogger.isActivated()) {
                     sLogger.debug(e.getMessage());
                 }
-            } catch (RuntimeException e) {
-                /*
-                 * Intentionally catch runtime exceptions as else it will abruptly end the thread
-                 * and eventually bring the whole system down, which is not intended.
-                 */
-                sLogger.error("Failed to send delivery status for chatId: " +
-                        delivery.getChatId(), e);
             }
         }
     }
@@ -179,7 +191,7 @@ public class ImdnManager extends Thread {
      * @param remote Remote contact
      * @param msgId Message ID
      * @param status Delivery status
-     * @param remoteInstanceId
+     * @param remoteInstanceId the remote instance ID
      * @param timestamp Timestamp sent in payload for IMDN datetime
      * @throws PayloadException
      * @throws NetworkException
@@ -230,8 +242,8 @@ public class ImdnManager extends Thread {
                 }
                 break;
             default:
-                throw new NetworkException("Delivery report has failed: " + statusCode +
-                    " response received");
+                throw new NetworkException("Delivery report has failed: " + statusCode
+                        + " response received");
         }
     }
 
@@ -288,12 +300,9 @@ public class ImdnManager extends Thread {
             // Analyze received message
             analyzeSipResponse(ctx, authenticationAgent, dialogPath, cpim);
 
-        } catch (InvalidArgumentException e) {
-            throw new PayloadException("Unable to set authorization header for remoteInstanceId: " +
-                    remoteInstanceId, e);
-        } catch (ParseException e) {
-            throw new PayloadException("Unable to set authorization header for remoteInstanceId: " +
-                    remoteInstanceId, e);
+        } catch (InvalidArgumentException | ParseException e) {
+            throw new PayloadException("Unable to set authorization header for remoteInstanceId: "
+                    + remoteInstanceId, e);
         }
     }
 

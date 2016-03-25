@@ -227,4 +227,22 @@ public class ChatMessageTest extends AndroidTestCase {
         assertEquals(0, cursor.getCount());
         CursorUtil.close(cursor);
     }
+
+    public void testMarkMessageAsRead() {
+        String msgId = Long.toString(System.currentTimeMillis());
+        assertEquals(null, mMessagingLog.isMessageRead(msgId));
+        assertEquals(0, mMessagingLog.markMessageAsRead(msgId));
+        ChatMessage msg = new ChatMessage(msgId, mContact, mText, MimeType.TEXT_MESSAGE,
+                mTimestamp, mTimestampSent, "display");
+        mMessagingLog.addIncomingOneToOneChatMessage(msg, true);
+        assertFalse(mMessagingLog.isMessageRead(msgId));
+        int count = mMessagingLog.markMessageAsRead(msgId);
+        assertEquals(1, count);
+        assertTrue(mMessagingLog.isMessageRead(msgId));
+        count = mMessagingLog.markMessageAsRead(msgId);
+        assertEquals(0, count);
+        mLocalContentResolver.delete(Uri.withAppendedPath(MessageData.CONTENT_URI, msgId), null,
+                null);
+        assertFalse(mMessagingLog.isMessagePersisted(msgId));
+    }
 }

@@ -122,14 +122,13 @@ public class SipManager {
      * @param proxyPort Outbound proxy port
      * @param protocol the protocol
      * @param tcpFallback TCP fallback according to RFC3261 chapter 18.1.1
-     * @param networkType type of network
      * @throws PayloadException
      */
     public synchronized void initStack(String localAddr, String proxyAddr, int proxyPort,
-            String protocol, boolean tcpFallback, int networkType) throws PayloadException {
+            String protocol, boolean tcpFallback) throws PayloadException {
         closeStack();
         mSipInterface = new SipInterface(localAddr, proxyAddr, proxyPort, protocol, tcpFallback,
-                networkType, mRcsSettings);
+                mRcsSettings);
         mSipInterface.initialize();
     }
 

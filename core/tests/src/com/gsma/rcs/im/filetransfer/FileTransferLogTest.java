@@ -44,6 +44,7 @@ import com.gsma.services.rcs.filetransfer.FileTransferLog;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.net.Uri;
 import android.test.AndroidTestCase;
 
@@ -349,5 +350,45 @@ public class FileTransferLogTest extends AndroidTestCase {
         cursor = mMessagingLog.getUnDeliveredOneToOneFileTransfers();
         assertEquals(0, cursor.getCount());
         CursorUtil.close(cursor);
+    }
+
+    public Boolean isFileTransferRead(String msgId) {
+        Uri uri = Uri.withAppendedPath(FileTransferLog.CONTENT_URI, msgId);
+        Cursor cursor = null;
+        try {
+            cursor = mContentResolver.query(uri, new String[] {
+                FileTransferLog.READ_STATUS
+            }, null, null, null);
+            if (cursor == null) {
+                throw new SQLException("Cannot query file transfer read status");
+            }
+            if (!cursor.moveToFirst()) {
+                return null;
+            }
+            return (cursor.getInt(cursor.getColumnIndexOrThrow(FileTransferLog.READ_STATUS)) == ReadStatus.READ
+                    .toInt());
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+    }
+
+    public void testMarkFileTransferAsRead() {
+        long fileIconExpiration = mRandom.nextLong();
+        assertEquals(0, mMessagingLog.markFileTransferAsRead(mFileTransferId));
+        // Add entry
+        mMessagingLog.addIncomingGroupFileTransfer(mFileTransferId, mChatId, mContact, mContent,
+                ICON_CONTENT, State.ACCEPTING, ReasonCode.UNSPECIFIED, mTimestamp, mTimestampSent,
+                mFileExpiration, fileIconExpiration);
+        assertFalse(isFileTransferRead(mFileTransferId));
+        int count = mMessagingLog.markFileTransferAsRead(mFileTransferId);
+        assertEquals(1, count);
+        assertTrue(isFileTransferRead(mFileTransferId));
+        count = mMessagingLog.markFileTransferAsRead(mFileTransferId);
+        assertEquals(0, count);
+        mLocalContentResolver.delete(
+                Uri.withAppendedPath(FileTransferData.CONTENT_URI, mFileTransferId), null, null);
+        assertEquals(false, mMessagingLog.isFileTransfer(mFileTransferId));
     }
 }

@@ -50,8 +50,6 @@ import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnManager;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnUtils;
 import com.gsma.rcs.core.ims.service.im.chat.iscomposing.IsComposingManager;
-import com.gsma.rcs.core.ims.service.im.chat.standfw.TerminatingStoreAndForwardOneToOneChatMessageSession;
-import com.gsma.rcs.core.ims.service.im.chat.standfw.TerminatingStoreAndForwardOneToOneChatNotificationSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.DownloadFromInviteFileSharingSession;
@@ -121,16 +119,6 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * Wrapped types
      */
     private String mWrappedTypes;
-
-    /**
-     * Geolocation push supported by remote
-     */
-    private boolean mGeolocSupportedByRemote = false;
-
-    /**
-     * File transfer supported by remote
-     */
-    private boolean mFtSupportedByRemote = false;
 
     private static final Logger sLogger = Logger.getLogger(ChatSession.class.getSimpleName());
 
@@ -354,30 +342,11 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
     }
 
     /**
-     * Is geolocation supported by remote
-     * 
-     * @return Boolean
-     */
-    public boolean isGeolocSupportedByRemote() {
-        return mGeolocSupportedByRemote;
-    }
-
-    /**
      * Set geolocation supported by remote
      * 
      * @param supported Supported
      */
     public void setGeolocSupportedByRemote(boolean supported) {
-        mGeolocSupportedByRemote = supported;
-    }
-
-    /**
-     * Is file transfer supported by remote
-     * 
-     * @return Boolean
-     */
-    public boolean isFileTransferSupportedByRemote() {
-        return mFtSupportedByRemote;
     }
 
     /**
@@ -478,8 +447,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
     public void receiveMsrpData(String msgId, byte[] data, String mimeType)
             throws PayloadException, NetworkException, ContactManagerException {
         if (sLogger.isActivated()) {
-            sLogger.info(new StringBuilder("Data received (type ").append(mimeType).append(")")
-                    .toString());
+            sLogger.info("Data received (type " + mimeType + ")");
         }
         mActivityMgr.updateActivity();
         if ((data == null) || (data.length == 0)) {
@@ -584,8 +552,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
             }
         } else {
             if (sLogger.isActivated()) {
-                sLogger.debug(new StringBuilder("Not supported content ").append(mimeType)
-                        .append(" in chat session").toString());
+                sLogger.debug("Not supported content " + mimeType + " in chat session");
             }
         }
     }
@@ -648,10 +615,9 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
     }
 
     private void handleResendFileTransferInvitationRejected(String fileTransferId,
-            ContactId contact, FileTransfer.ReasonCode reasonCode, long timestamp,
-            long timestampSent) {
-        mImService.setResendFileTransferInvitationRejected(fileTransferId, reasonCode,
-                timestamp, timestampSent);
+            FileTransfer.ReasonCode reasonCode, long timestamp, long timestampSent) {
+        mImService.setResendFileTransferInvitationRejected(fileTransferId, reasonCode, timestamp,
+                timestampSent);
     }
 
     /**
@@ -686,21 +652,20 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
                     .getFileThumbnail();
             if (mImService.isFileTransferAlreadyOngoing(msgId)) {
                 if (sLogger.isActivated()) {
-                    sLogger.debug(new StringBuilder("File transfer with fileTransferId '")
-                            .append(msgId).append("' already ongoing, so ignoring this one.")
-                            .toString());
+                    sLogger.debug("File transfer with fileTransferId '" + msgId
+                            + "' already ongoing, so ignoring this one.");
                 }
                 return;
             }
             boolean fileResent = mImService.isFileTransferResentAndNotAlreadyOngoing(msgId);
             if (mContactManager.isBlockedForContact(contact)) {
                 if (sLogger.isActivated()) {
-                    sLogger.debug(new StringBuilder("Contact ").append(contact)
-                            .append(" is blocked, reject the HTTP File transfer").toString());
+                    sLogger.debug("Contact " + contact
+                            + " is blocked, reject the HTTP File transfer");
                 }
                 if (fileResent) {
-                    handleResendFileTransferInvitationRejected(msgId, contact,
-                            ReasonCode.REJECTED_SPAM, timestamp, timestampSent);
+                    handleResendFileTransferInvitationRejected(msgId, ReasonCode.REJECTED_SPAM,
+                            timestamp, timestampSent);
                     return;
                 }
                 MmContent fileIconContent = (fileTransferHttpThumbnail == null) ? null
@@ -725,7 +690,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
                 switch (errorCode) {
                     case FileSharingError.MEDIA_SIZE_TOO_BIG:
                         if (fileResent) {
-                            handleResendFileTransferInvitationRejected(msgId, contact,
+                            handleResendFileTransferInvitationRejected(msgId,
                                     ReasonCode.REJECTED_MAX_SIZE, timestamp, timestampSent);
                             break;
                         }
@@ -735,7 +700,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
                         break;
                     case FileSharingError.NOT_ENOUGH_STORAGE_SPACE:
                         if (fileResent) {
-                            handleResendFileTransferInvitationRejected(msgId, contact,
+                            handleResendFileTransferInvitationRejected(msgId,
                                     ReasonCode.REJECTED_LOW_SPACE, timestamp, timestampSent);
                             break;
                         }
@@ -759,7 +724,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
                 MmContent fileIconContent = (fileTransferHttpThumbnail == null) ? null
                         : fileTransferHttpThumbnail.getLocalMmContent(msgId);
                 if (fileResent) {
-                    handleResendFileTransferInvitationRejected(msgId, contact,
+                    handleResendFileTransferInvitationRejected(msgId,
                             ReasonCode.REJECTED_MAX_FILE_TRANSFERS, timestamp, timestampSent);
                     return;
                 }
@@ -777,12 +742,11 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
                     fileSession.downloadFileIcon();
                 } catch (NetworkException e) {
                     if (sLogger.isActivated()) {
-                        sLogger.debug(new StringBuilder("Failed to download file icon! (")
-                                .append(e.getMessage()).append(")").toString());
+                        sLogger.debug("Failed to download file icon! (" + e.getMessage() + ")");
                     }
                     MmContent fileIconContent = fileTransferHttpThumbnail.getLocalMmContent(msgId);
                     if (fileResent) {
-                        handleResendFileTransferInvitationRejected(msgId, contact,
+                        handleResendFileTransferInvitationRejected(msgId,
                                 ReasonCode.REJECTED_MAX_FILE_TRANSFERS, timestamp, timestampSent);
                         return;
                     }
@@ -796,7 +760,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
                 mImService.receiveResendFileTransferInvitation(fileSession, contact, displayName);
             } else {
                 mImService.receiveFileTransferInvitation(fileSession, isGroupChat(), contact,
-                        displayName, fileTransferInfo.getExpiration());
+                        displayName);
             }
 
             if (mImdnManager.isDeliveryDeliveredReportsEnabled()) {
@@ -807,9 +771,8 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
             fileSession.startSession();
 
         } catch (FileAccessException e) {
-            throw new PayloadException(new StringBuilder(
-                    "Failed to receive file transfer with fileTransferId : ").append(msgId)
-                    .append("for contact : ").append(contact).toString(), e);
+            throw new PayloadException("Failed to receive file transfer with fileTransferId : "
+                    + msgId + "for contact : " + contact, e);
         }
     }
 
@@ -836,16 +799,6 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * @return Boolean
      */
     public abstract boolean isGroupChat();
-
-    /**
-     * Is Store & Forward
-     * 
-     * @return Boolean
-     */
-    public boolean isStoreAndForward() {
-        return this instanceof TerminatingStoreAndForwardOneToOneChatMessageSession
-                || this instanceof TerminatingStoreAndForwardOneToOneChatNotificationSession;
-    }
 
     /**
      * Send a chat message
@@ -910,12 +863,11 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
                 typeMsrpChunk = TypeMsrpChunk.MessageDeliveredReport;
             }
         }
-
         // Send data
         sendDataChunks(IdGenerator.generateMessageID(), content, CpimMessage.MIME_TYPE,
                 typeMsrpChunk);
         if (ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(status)) {
-            if (mMessagingLog.getMessageChatId(msgId) != null) {
+            if (mMessagingLog.isMessagePersisted(msgId)) {
                 for (ImsSessionListener listener : getListeners()) {
                     ((ChatSessionListener) listener).onChatMessageDisplayReportSent(msgId);
                 }
@@ -938,8 +890,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
                         imdn);
             }
         } catch (SAXException | ParserConfigurationException | ParseFailureException e) {
-            throw new PayloadException(new StringBuilder(
-                    "Failed to parse IMDN document for contact : ").append(contact).toString(), e);
+            throw new PayloadException("Failed to parse IMDN document for contact : " + contact, e);
         }
     }
 
