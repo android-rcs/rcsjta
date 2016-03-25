@@ -252,7 +252,7 @@ public class InstantMessagingService extends ImsService {
         mImDeleteOperationHandler = allocateBgHandler(IM_DELETE_OPERATION_THREAD_NAME);
         mStoreAndFwdMgr = new StoreAndForwardManager(this, mRcsSettings, mContactManager,
                 mMessagingLog);
-        mImdnManager = new ImdnManager(this, mRcsSettings);
+        mImdnManager = new ImdnManager(this, mRcsSettings, mMessagingLog);
         mDeliveryExpirationManager = new DeliveryExpirationManager(this, ctx, mMessagingLog);
     }
 
@@ -875,18 +875,8 @@ public class InstantMessagingService extends ImsService {
                     }
                     tryToSendErrorResponse(invite, Response.BUSY_HERE);
 
-                } catch (FileAccessException | ContactManagerException | PayloadException e) {
-                    sLogger.error("Failed to receive msrp file transfer invitation!", e);
-                    tryToSendErrorResponse(invite, Response.DECLINE);
-
-                } catch (RuntimeException e) {
-                    /*
-                     * Normally we are not allowed to catch runtime exceptions as these are genuine
-                     * bugs which should be handled/fixed within the code. However the cases when we
-                     * are executing operations on a thread unhandling such exceptions will
-                     * eventually lead to exit the system and thus can bring the whole system down,
-                     * which is not intended.
-                     */
+                } catch (FileAccessException | ContactManagerException | PayloadException
+                        | RuntimeException e) {
                     sLogger.error("Failed to receive msrp file transfer invitation!", e);
                     tryToSendErrorResponse(invite, Response.DECLINE);
                 }
@@ -1060,18 +1050,8 @@ public class InstantMessagingService extends ImsService {
                     }
                     tryToSendErrorResponse(invite, Response.BUSY_HERE);
 
-                } catch (FileAccessException | ContactManagerException | PayloadException e) {
-                    sLogger.error("Failed to receive o2o chat invitation!", e);
-                    tryToSendErrorResponse(invite, Response.DECLINE);
-
-                } catch (RuntimeException e) {
-                    /*
-                     * Normally we are not allowed to catch runtime exceptions as these are genuine
-                     * bugs which should be handled/fixed within the code. However the cases when we
-                     * are executing operations on a thread unhandling such exceptions will
-                     * eventually lead to exit the system and thus can bring the whole system down,
-                     * which is not intended.
-                     */
+                } catch (FileAccessException | ContactManagerException | PayloadException
+                        | RuntimeException e) {
                     sLogger.error("Failed to receive o2o chat invitation!", e);
                     tryToSendErrorResponse(invite, Response.DECLINE);
                 }
@@ -1194,18 +1174,8 @@ public class InstantMessagingService extends ImsService {
                     }
                     tryToSendErrorResponse(invite, Response.BUSY_HERE);
 
-                } catch (FileAccessException | ContactManagerException | PayloadException e) {
-                    sLogger.error("Failed to receive group chat invitation!", e);
-                    tryToSendErrorResponse(invite, Response.DECLINE);
-
-                } catch (RuntimeException e) {
-                    /*
-                     * Normally we are not allowed to catch runtime exceptions as these are genuine
-                     * bugs which should be handled/fixed within the code. However the cases when we
-                     * are executing operations on a thread unhandling such exceptions will
-                     * eventually lead to exit the system and thus can bring the whole system down,
-                     * which is not intended.
-                     */
+                } catch (FileAccessException | ContactManagerException | PayloadException
+                        | RuntimeException e) {
                     sLogger.error("Failed to receive group chat invitation!", e);
                     tryToSendErrorResponse(invite, Response.DECLINE);
                 }
@@ -1373,17 +1343,7 @@ public class InstantMessagingService extends ImsService {
                                 + e.getMessage() + ")");
                     }
                 } catch (ParserConfigurationException | ParseFailureException | SAXException
-                        | PayloadException e) {
-                    sLogger.error("Failed to receive chat message delivery report!", e);
-
-                } catch (RuntimeException e) {
-                    /*
-                     * Normally we are not allowed to catch runtime exceptions as these are genuine
-                     * bugs which should be handled/fixed within the code. However the cases when we
-                     * are executing operations on a thread unhandling such exceptions will
-                     * eventually lead to exit the system and thus can bring the whole system down,
-                     * which is not intended.
-                     */
+                        | PayloadException | RuntimeException e) {
                     sLogger.error("Failed to receive chat message delivery report!", e);
                 }
             }
@@ -1449,17 +1409,8 @@ public class InstantMessagingService extends ImsService {
                                 + ")");
                     }
                     tryToSendErrorResponse(invite, Response.BUSY_HERE);
-                } catch (PayloadException e) {
-                    sLogger.error("Failed to receive s&f chat messages!", e);
-                    tryToSendErrorResponse(invite, Response.DECLINE);
-                } catch (RuntimeException e) {
-                    /*
-                     * Normally we are not allowed to catch runtime exceptions as these are genuine
-                     * bugs which should be handled/fixed within the code. However the cases when we
-                     * are executing operations on a thread unhandling such exceptions will
-                     * eventually lead to exit the system and thus can bring the whole system down,
-                     * which is not intended.
-                     */
+
+                } catch (PayloadException | RuntimeException e) {
                     sLogger.error("Failed to receive s&f chat messages!", e);
                     tryToSendErrorResponse(invite, Response.DECLINE);
                 }
@@ -1509,17 +1460,8 @@ public class InstantMessagingService extends ImsService {
                                 + e.getMessage() + ")");
                     }
                     tryToSendErrorResponse(invite, Response.BUSY_HERE);
-                } catch (PayloadException e) {
-                    sLogger.error("Failed to receive s&f push notifications!", e);
-                    tryToSendErrorResponse(invite, Response.DECLINE);
-                } catch (RuntimeException e) {
-                    /*
-                     * Normally we are not allowed to catch runtime exceptions as these are genuine
-                     * bugs which should be handled/fixed within the code. However the cases when we
-                     * are executing operations on a thread unhandling such exceptions will
-                     * eventually lead to exit the system and thus can bring the whole system down,
-                     * which is not intended.
-                     */
+
+                } catch (PayloadException | RuntimeException e) {
                     sLogger.error("Failed to receive s&f push notifications!", e);
                     tryToSendErrorResponse(invite, Response.DECLINE);
                 }
@@ -1583,10 +1525,8 @@ public class InstantMessagingService extends ImsService {
                     boolean fileResent = isFileTransferResentAndNotAlreadyOngoing(fileTransferId);
                     if (mContactManager.isBlockedForContact(remote)) {
                         if (logActivated) {
-                            sLogger.debug(new StringBuilder("Contact ")
-                                    .append(remote)
-                                    .append(" is blocked, automatically reject the HTTP File transfer")
-                                    .toString());
+                            sLogger.debug("Contact " + remote
+                                    + " is blocked, automatically reject the HTTP File transfer");
                         }
                         sendErrorResponse(invite, Response.DECLINE);
                         if (fileResent) {
@@ -1760,18 +1700,8 @@ public class InstantMessagingService extends ImsService {
                     }
                     tryToSendErrorResponse(invite, Response.BUSY_HERE);
 
-                } catch (FileAccessException | PayloadException | ContactManagerException e) {
-                    sLogger.error("Failed to receive http o2o file transfer invitation!", e);
-                    tryToSendErrorResponse(invite, Response.DECLINE);
-
-                } catch (RuntimeException e) {
-                    /*
-                     * Normally we are not allowed to catch runtime exceptions as these are genuine
-                     * bugs which should be handled/fixed within the code. However the cases when we
-                     * are executing operations on a thread unhandling such exceptions will
-                     * eventually lead to exit the system and thus can bring the whole system down,
-                     * which is not intended.
-                     */
+                } catch (FileAccessException | PayloadException | ContactManagerException
+                        | RuntimeException e) {
                     sLogger.error("Failed to receive http o2o file transfer invitation!", e);
                     tryToSendErrorResponse(invite, Response.DECLINE);
                 }
@@ -1904,17 +1834,8 @@ public class InstantMessagingService extends ImsService {
                                 + e.getMessage() + ")");
                     }
                     tryToSendErrorResponse(invite, Response.BUSY_HERE);
-                } catch (PayloadException e) {
-                    sLogger.error("Failed to receive s&f o2o file http transfer invitation!", e);
-                    tryToSendErrorResponse(invite, Response.DECLINE);
-                } catch (RuntimeException e) {
-                    /*
-                     * Normally we are not allowed to catch runtime exceptions as these are genuine
-                     * bugs which should be handled/fixed within the code. However the cases when we
-                     * are executing operations on a thread unhandling such exceptions will
-                     * eventually lead to exit the system and thus can bring the whole system down,
-                     * which is not intended.
-                     */
+
+                } catch (PayloadException | RuntimeException e) {
                     sLogger.error("Failed to receive s&f o2o file http transfer invitation!", e);
                     tryToSendErrorResponse(invite, Response.DECLINE);
                 }
@@ -2283,10 +2204,9 @@ public class InstantMessagingService extends ImsService {
      * @param isGroup is Group file transfer
      * @param contact Contact ID
      * @param displayName the display name of the remote contact
-     * @param fileExpiration file transfer validity in milliseconds (or 0 if not applicable)
      */
     public void receiveFileTransferInvitation(FileSharingSession fileSharingSession,
-            boolean isGroup, ContactId contact, String displayName, long fileExpiration) {
+            boolean isGroup, ContactId contact, String displayName) {
         if (sLogger.isActivated()) {
             sLogger.debug("Handle event file transfer invitation");
         }

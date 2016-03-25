@@ -46,7 +46,7 @@ public interface IMessageLog {
      * 
      * @param msg Chat message
      */
-    public void addOneToOneSpamMessage(ChatMessage msg);
+    void addOneToOneSpamMessage(ChatMessage msg);
 
     /**
      * Add a chat message
@@ -54,7 +54,7 @@ public interface IMessageLog {
      * @param msg Chat message
      * @param imdnDisplayedRequested IMDN display report requested
      */
-    public void addIncomingOneToOneChatMessage(ChatMessage msg, boolean imdnDisplayedRequested);
+    void addIncomingOneToOneChatMessage(ChatMessage msg, boolean imdnDisplayedRequested);
 
     /**
      * Add a chat message
@@ -64,8 +64,8 @@ public interface IMessageLog {
      * @param reasonCode Status reason code
      * @param deliveryExpiration TODO
      */
-    public void addOutgoingOneToOneChatMessage(ChatMessage msg, Status status,
-            ReasonCode reasonCode, long deliveryExpiration);
+    void addOutgoingOneToOneChatMessage(ChatMessage msg, Status status, ReasonCode reasonCode,
+            long deliveryExpiration);
 
     /**
      * Add an incoming group chat message
@@ -74,8 +74,7 @@ public interface IMessageLog {
      * @param msg Chat message
      * @param imdnDisplayedRequested IMDN display report requested
      */
-    public void addIncomingGroupChatMessage(String chatId, ChatMessage msg,
-            boolean imdnDisplayedRequested);
+    void addIncomingGroupChatMessage(String chatId, ChatMessage msg, boolean imdnDisplayedRequested);
 
     /**
      * Add an outgoing group chat message
@@ -85,8 +84,8 @@ public interface IMessageLog {
      * @param status Message status
      * @param reasonCode Status reason code
      */
-    public void addOutgoingGroupChatMessage(String chatId, ChatMessage msg,
-            Set<ContactId> recipients, Status status, ReasonCode reasonCode);
+    void addOutgoingGroupChatMessage(String chatId, ChatMessage msg, Set<ContactId> recipients,
+            Status status, ReasonCode reasonCode);
 
     /**
      * Add group chat system message
@@ -97,15 +96,16 @@ public interface IMessageLog {
      * @param timestamp Local timestamp when got group chat notification
      * @return the message ID created for the group chat system event
      */
-    public String addGroupChatEvent(String chatId, ContactId contact, GroupChatEvent.Status status,
+    String addGroupChatEvent(String chatId, ContactId contact, GroupChatEvent.Status status,
             long timestamp);
 
     /**
      * Update chat message read status
      * 
      * @param msgId Message ID
+     * @return the number of rows affected.
      */
-    public void markMessageAsRead(String msgId);
+    int markMessageAsRead(String msgId);
 
     /**
      * Set chat message status and reason code. Note that this method should not be used for
@@ -117,8 +117,7 @@ public interface IMessageLog {
      * @param reasonCode Message status reason code
      * @return True if an entry was updated, otherwise false
      */
-    public boolean setChatMessageStatusAndReasonCode(String msgId, Status status,
-            ReasonCode reasonCode);
+    boolean setChatMessageStatusAndReasonCode(String msgId, Status status, ReasonCode reasonCode);
 
     /**
      * Set chat message timestamp and timestampSent
@@ -128,7 +127,7 @@ public interface IMessageLog {
      * @param timestampSent New timestamp sent in payload
      * @return True if an entry was updated, otherwise false
      */
-    public boolean setChatMessageTimestamp(String msgId, long timestamp, long timestampSent);
+    boolean setChatMessageTimestamp(String msgId, long timestamp, long timestampSent);
 
     /**
      * Check if the message is already persisted in db
@@ -136,95 +135,95 @@ public interface IMessageLog {
      * @param msgId message ID
      * @return true if the message already exists in db
      */
-    public boolean isMessagePersisted(String msgId);
+    boolean isMessagePersisted(String msgId);
 
     /**
      * Check if the message is read by remote contact
      * 
      * @param msgId message ID
-     * @return true is read
+     * @return true if read, false if unread and null if record is not found
      */
-    public Boolean isMessageRead(String msgId);
+    Boolean isMessageRead(String msgId);
 
     /**
      * Returns the timestamp_sent of a message
      * 
-     * @param msgId
+     * @param msgId message ID
      * @return timestamp_sent
      */
-    public Long getMessageSentTimestamp(String msgId);
+    Long getMessageSentTimestamp(String msgId);
 
     /**
      * Returns the timestamp of a message
      * 
-     * @param msgId
+     * @param msgId message ID
      * @return timestamp
      */
-    public Long getMessageTimestamp(String msgId);
+    Long getMessageTimestamp(String msgId);
 
     /**
      * Get message state from its unique ID
      * 
-     * @param msgId
+     * @param msgId message ID
      * @return State
      */
-    public Status getMessageStatus(String msgId);
+    Status getMessageStatus(String msgId);
 
     /**
      * Get message reason code from its unique ID
      * 
-     * @param msgId
+     * @param msgId message ID
      * @return reason code of the state
      */
-    public ReasonCode getMessageReasonCode(String msgId);
+    ReasonCode getMessageReasonCode(String msgId);
 
     /**
      * Get message MIME-type from its unique ID
      * 
-     * @param msgId
+     * @param msgId message ID
      * @return MIME-type
      */
-    public String getMessageMimeType(String msgId);
+    String getMessageMimeType(String msgId);
 
     /**
      * Get message data from its unique ID
      * 
-     * @param msgId
+     * @param msgId message ID
      * @return Cursor or null if no data exists
      */
-    public Cursor getChatMessageData(String msgId);
+    Cursor getChatMessageData(String msgId);
 
     /**
      * Get chat message content
      * 
-     * @param msgId
+     * @param msgId message ID
      * @return Content of chat message
      */
-    public String getChatMessageContent(String msgId);
+    String getChatMessageContent(String msgId);
 
     /**
      * Get all one-to-one chat messages for specific contact that are in queued state in ascending
      * order of timestamp
      * 
-     * @param contact
+     * @param contact Contact ID
      * @return Cursor
      */
-    public Cursor getQueuedOneToOneChatMessages(ContactId contact);
+    Cursor getQueuedOneToOneChatMessages(ContactId contact);
 
     /**
      * Get all one-to-one chat messages that are in queued state in ascending order of timestamp
      * 
      * @return Cursor
      */
-    public Cursor getAllQueuedOneToOneChatMessages();
+    Cursor getAllQueuedOneToOneChatMessages();
 
     /**
      * Gets group chat events per contacts for chat ID
      * 
-     * @param chatId
+     * @param chatId Chat ID
      * @return group chat events for contacts or null if there is no group chat events
      */
-    public Map<ContactId, GroupChatEvent.Status> getGroupChatEvents(String chatId);
+    Map<ContactId, GroupChatEvent.Status> getGroupChatEvents(String chatId);
 
     /**
      * Returns true if the chat id and contact are same for this message id.
@@ -232,7 +231,7 @@ public interface IMessageLog {
      * @param messageId the message id
      * @return true if the message belongs to one to one conversation
      */
-    public boolean isOneToOneChatMessage(String messageId);
+    boolean isOneToOneChatMessage(String messageId);
 
     /**
      * Set chat message delivered
@@ -241,7 +240,7 @@ public interface IMessageLog {
      * @param timestampDelivered Delivered time
      * @return True if an entry was updated, otherwise false
      */
-    public boolean setChatMessageStatusDelivered(String msgId, long timestampDelivered);
+    boolean setChatMessageStatusDelivered(String msgId, long timestampDelivered);
 
     /**
      * Set chat message displayed
@@ -250,29 +249,29 @@ public interface IMessageLog {
      * @param timestampDisplayed Displayed time
      * @return True if an entry was updated, otherwise false
      */
-    public boolean setChatMessageStatusDisplayed(String msgId, long timestampDisplayed);
+    boolean setChatMessageStatusDisplayed(String msgId, long timestampDisplayed);
 
     /**
      * Marks undelivered chat messages to indicate that messages have been processed.
      * 
-     * @param msgIds
+     * @param msgIds the message IDs
      */
-    public void clearMessageDeliveryExpiration(List<String> msgIds);
+    void clearMessageDeliveryExpiration(List<String> msgIds);
 
     /**
      * Set message delivery expired for specified message id.
      * 
-     * @param msgId
+     * @param msgId message ID
      * @return True if an entry was updated, otherwise false
      */
-    public boolean setChatMessageDeliveryExpired(String msgId);
+    boolean setChatMessageDeliveryExpired(String msgId);
 
     /**
      * Get one-one chat messages with unexpired delivery
      * 
      * @return Cursor
      */
-    public Cursor getUndeliveredOneToOneChatMessages();
+    Cursor getUndeliveredOneToOneChatMessages();
 
     /**
      * Returns true if delivery for this chat message has expired or false otherwise. Note: false
@@ -280,10 +279,10 @@ public interface IMessageLog {
      * successful, delivery expiration has been cleared (see clearMessageDeliveryExpiration) or that
      * this particular chat message is not eligible for delivery expiration in the first place.
      * 
-     * @param msgId
+     * @param msgId message ID
      * @return boolean
      */
-    public Boolean isChatMessageExpiredDelivery(String msgId);
+    Boolean isChatMessageExpiredDelivery(String msgId);
 
     /**
      * Get chat id for chat message
@@ -291,33 +290,33 @@ public interface IMessageLog {
      * @param msgId Message ID
      * @return ChatId
      */
-    public String getMessageChatId(String msgId);
+    String getMessageChatId(String msgId);
 
     /**
      * Set chat message status and sent timestamp for outgoing messages
      * 
-     * @param msgId
-     * @param status
-     * @param reasonCode
-     * @param timestamp
-     * @param timestampSent
+     * @param msgId message ID
+     * @param status Message status
+     * @param reasonCode Message status reason code
+     * @param timestamp timestamp
+     * @param timestampSent timestamp sent
      * @return boolean
      */
-    public boolean setChatMessageStatusAndTimestamp(String msgId, Status status,
-            ReasonCode reasonCode, long timestamp, long timestampSent);
+    boolean setChatMessageStatusAndTimestamp(String msgId, Status status, ReasonCode reasonCode,
+            long timestamp, long timestampSent);
 
     /**
      * Add a one to one chat message for which delivery report has failed
      * 
-     * @param msg
+     * @param msg Chat message
      */
     void addOneToOneFailedDeliveryMessage(ChatMessage msg);
 
     /**
      * Add a group chat message for which delivery report has failed
      * 
-     * @param chatId
-     * @param msg
+     * @param chatId the chat ID
+     * @param msg Chat message
      */
     void addGroupChatFailedDeliveryMessage(String chatId, ChatMessage msg);
 }

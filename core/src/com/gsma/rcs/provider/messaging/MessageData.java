@@ -98,7 +98,7 @@ public class MessageData {
     /**
      * This is set on the receiver side when the message has been displayed.
      * 
-     * @see com.gsma.services.rcs.RcsCommon.ReadStatus for the list of status.
+     * @see com.gsma.services.rcs.RcsService.ReadStatus for the list of status.
      */
     /* package private */static final String KEY_READ_STATUS = ChatLog.Message.READ_STATUS;
 

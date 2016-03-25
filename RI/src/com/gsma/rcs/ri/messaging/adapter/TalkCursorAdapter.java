@@ -18,6 +18,7 @@
 
 package com.gsma.rcs.ri.messaging.adapter;
 
+import com.gsma.rcs.api.connection.utils.ExceptionUtil;
 import com.gsma.rcs.ri.R;
 import com.gsma.rcs.ri.RiApplication;
 import com.gsma.rcs.ri.utils.BitmapCache;
@@ -26,19 +27,26 @@ import com.gsma.rcs.ri.utils.BitmapLoader.BitmapCacheInfo;
 import com.gsma.rcs.ri.utils.ContactUtil;
 import com.gsma.rcs.ri.utils.FileUtils;
 import com.gsma.rcs.ri.utils.ImageBitmapLoader;
+import com.gsma.rcs.ri.utils.LogUtils;
 import com.gsma.rcs.ri.utils.RcsContactUtil;
 import com.gsma.rcs.ri.utils.SmileyParser;
 import com.gsma.rcs.ri.utils.Smileys;
 import com.gsma.rcs.ri.utils.Utils;
 import com.gsma.services.rcs.Geoloc;
+import com.gsma.services.rcs.RcsGenericException;
+import com.gsma.services.rcs.RcsPersistentStorageException;
+import com.gsma.services.rcs.RcsService;
 import com.gsma.services.rcs.RcsService.Direction;
+import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content;
 import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
+import com.gsma.services.rcs.chat.ChatService;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
 import com.gsma.services.rcs.filetransfer.FileTransfer.ReasonCode;
 import com.gsma.services.rcs.filetransfer.FileTransferLog;
+import com.gsma.services.rcs.filetransfer.FileTransferService;
 import com.gsma.services.rcs.history.HistoryLog;
 
 import android.app.Activity;
@@ -53,6 +61,7 @@ import android.support.v4.widget.CursorAdapter;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -65,6 +74,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class TalkCursorAdapter extends CursorAdapter {
+
+    private static final String LOGTAG = LogUtils.getTag(TalkCursorAdapter.class.getName());
+
     private static final int MAX_IMAGE_HEIGHT = 100;
     private static final int MAX_IMAGE_WIDTH = 100;
     private static final int VIEW_TYPE_RCS_CHAT_IN = 0;
@@ -72,6 +84,8 @@ public class TalkCursorAdapter extends CursorAdapter {
     private static final int VIEW_TYPE_RCS_FILE_TRANSFER_IN = 2;
     private static final int VIEW_TYPE_RCS_FILE_TRANSFER_OUT = 3;
     private static final int VIEW_TYPE_RCS_GROUP_CHAT_EVENT = 4;
+    private final ChatService mChatService;
+    private final FileTransferService mFileTransferService;
     private BitmapCache bitmapCache;
     private final Activity mActivity;
     private Map<ContactId, String> mContactIdDisplayNameMap;
@@ -86,8 +100,10 @@ public class TalkCursorAdapter extends CursorAdapter {
      *
      * @param activity The activity
      * @param singleChat True if single chat
+     * @param chatService the chat service
      */
-    public TalkCursorAdapter(Activity activity, boolean singleChat) {
+    public TalkCursorAdapter(Activity activity, boolean singleChat, ChatService chatService,
+            FileTransferService fileTransferService) {
         super(activity, null, 0);
         mContactIdDisplayNameMap = new HashMap<>();
         mActivity = activity;
@@ -102,6 +118,8 @@ public class TalkCursorAdapter extends CursorAdapter {
         bitmapCache = BitmapCache.getInstance();
         mSmileyResources = new Smileys(activity);
         mSingleChat = singleChat;
+        mChatService = chatService;
+        mFileTransferService = fileTransferService;
     }
 
     @Override
@@ -128,14 +146,13 @@ public class TalkCursorAdapter extends CursorAdapter {
                 return view;
 
             case VIEW_TYPE_RCS_FILE_TRANSFER_OUT:
-                view = mInflater.inflate(
-                        this.mSingleChat ? R.layout.talk_item_rcs_file_transfer_out
-                                : R.layout.gchat_item_rcs_file_transfer_out, parent, false);
+                view = mInflater.inflate(mSingleChat ? R.layout.talk_item_rcs_file_transfer_out
+                        : R.layout.gchat_item_rcs_file_transfer_out, parent, false);
                 view.setTag(new RcsFileTransferOutViewHolder(view, cursor));
                 return view;
 
             case VIEW_TYPE_RCS_GROUP_CHAT_EVENT:
-                view = this.mInflater.inflate(R.layout.groupchat_event_view_item, parent, false);
+                view = mInflater.inflate(R.layout.groupchat_event_view_item, parent, false);
                 view.setTag(new BasicViewHolder(view, cursor));
                 return view;
             default:
@@ -161,6 +178,7 @@ public class TalkCursorAdapter extends CursorAdapter {
         }
     }
 
+    @Override
     public void bindView(View view, Context ctx, Cursor cursor) {
         if (!mSingleChat) {
             bindRemoteContact(view, ctx, cursor);
@@ -309,7 +327,7 @@ public class TalkCursorAdapter extends CursorAdapter {
     }
 
     private void bindRcsFileTransferInView(View view, Cursor cursor) {
-        RcsFileTransferInViewHolder holder = (RcsFileTransferInViewHolder) view.getTag();
+        final RcsFileTransferInViewHolder holder = (RcsFileTransferInViewHolder) view.getTag();
         holder.getTimestampText().setText(
                 DateUtils.getRelativeTimeSpanString(cursor.getLong(holder.getColumnTimestampIdx()),
                         System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS,
@@ -330,6 +348,9 @@ public class TalkCursorAdapter extends CursorAdapter {
         } else {
             imageView.setImageResource(R.drawable.ri_filetransfer_on);
             final Uri file = Uri.parse(cursor.getString(holder.getColumnContentIdx()));
+            final RcsService.ReadStatus readStatus = RcsService.ReadStatus.valueOf(cursor
+                    .getInt(holder.getColumnReadStatusIdx()));
+            final String id = cursor.getString(cursor.getColumnIndexOrThrow(HistoryLog.ID));
             if (Utils.isImageType(mimeType)) {
                 final String filePath = FileUtils.getPath(mContext, file);
                 Bitmap imageBitmap = null;
@@ -359,6 +380,7 @@ public class TalkCursorAdapter extends CursorAdapter {
                         @Override
                         public void onClick(View v) {
                             Utils.showPicture(mActivity, file);
+                            markFileTransferAsRead(id, readStatus);
                         }
                     });
                 }
@@ -368,6 +390,7 @@ public class TalkCursorAdapter extends CursorAdapter {
                     @Override
                     public void onClick(View v) {
                         Utils.playAudio(mActivity, file);
+                        markFileTransferAsRead(id, readStatus);
                     }
                 });
             }
@@ -379,15 +402,24 @@ public class TalkCursorAdapter extends CursorAdapter {
         holder.getStatusText().setText(getRcsFileTransferStatus(cursor, holder));
     }
 
-    private void bindRcsChatOutView(View view, Cursor cursor) {
-        bindRcsChatInView(view, cursor);
-        RcsChatOutViewHolder holder = (RcsChatOutViewHolder) view.getTag();
-        boolean undeliveredExpiration = cursor.getInt(holder.getColumnExpiredDeliveryIdx()) == 1;
-        holder.getStatusText().setCompoundDrawablesWithIntrinsicBounds(
-                undeliveredExpiration ? R.drawable.chat_view_undelivered : 0, 0, 0, 0);
+    private void markFileTransferAsRead(String ftId, RcsService.ReadStatus readStatus) {
+        try {
+            if (RcsService.ReadStatus.UNREAD == readStatus) {
+                if (LogUtils.isActive) {
+                    Log.d(LOGTAG, "Mark file transfer " + ftId + " as read");
+                }
+                mFileTransferService.markFileTransferAsRead(ftId);
+            }
+        } catch (RcsServiceNotAvailableException e) {
+            if (LogUtils.isActive) {
+                Log.d(LOGTAG, "Cannot mark message as read: service not available");
+            }
+        } catch (RcsGenericException | RcsPersistentStorageException e) {
+            Log.e(LOGTAG, ExceptionUtil.getFullStackTrace(e));
+        }
     }
 
-    private void bindRcsChatInView(View view, Cursor cursor) {
+    private RcsChatInViewHolder bindRcsChatView(View view, Cursor cursor) {
         RcsChatInViewHolder holder = (RcsChatInViewHolder) view.getTag();
         holder.getTimestampText().setText(
                 DateUtils.getRelativeTimeSpanString(cursor.getLong(holder.getColumnTimestampIdx()),
@@ -402,6 +434,40 @@ public class TalkCursorAdapter extends CursorAdapter {
             contentText.setText(formatGeolocation(mContext, new Geoloc(data)));
         }
         holder.getStatusText().setText(getRcsChatStatus(cursor, holder));
+        return holder;
+    }
+
+    private void bindRcsChatOutView(View view, Cursor cursor) {
+        RcsChatOutViewHolder holder = (RcsChatOutViewHolder) bindRcsChatView(view, cursor);
+        boolean undeliveredExpiration = cursor.getInt(holder.getColumnExpiredDeliveryIdx()) == 1;
+        holder.getStatusText().setCompoundDrawablesWithIntrinsicBounds(
+                undeliveredExpiration ? R.drawable.chat_view_undelivered : 0, 0, 0, 0);
+    }
+
+    private void bindRcsChatInView(View view, Cursor cursor) {
+        RcsChatInViewHolder holder = bindRcsChatView(view, cursor);
+        // Only mark message as read when actually displayed on screen
+        markChatMessageAsRead(cursor, holder);
+    }
+
+    private void markChatMessageAsRead(Cursor cursor, RcsChatInViewHolder holder) {
+        try {
+            RcsService.ReadStatus readStatus = RcsService.ReadStatus.valueOf(cursor.getInt(holder
+                    .getColumnReadStatusIdx()));
+            if (RcsService.ReadStatus.UNREAD == readStatus) {
+                String msgId = cursor.getString(holder.getColumnIdIdx());
+                if (LogUtils.isActive) {
+                    Log.d(LOGTAG, "Mark message " + msgId + " as read");
+                }
+                mChatService.markMessageAsRead(msgId);
+            }
+        } catch (RcsServiceNotAvailableException e) {
+            if (LogUtils.isActive) {
+                Log.d(LOGTAG, "Cannot mark message as read: service not available");
+            }
+        } catch (RcsGenericException | RcsPersistentStorageException e) {
+            Log.e(LOGTAG, ExceptionUtil.getFullStackTrace(e));
+        }
     }
 
     private String getRcsFileTransferStatus(Cursor cursor, RcsFileTransferInViewHolder holder) {

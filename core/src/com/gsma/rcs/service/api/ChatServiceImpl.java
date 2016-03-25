@@ -134,10 +134,8 @@ public class ChatServiceImpl extends IChatService.Stub {
         } else if (ImdnDocument.DISPLAY_NOTIFICATION.equals(notificationType)) {
             return ReasonCode.FAILED_DISPLAY;
         }
-
-        throw new IllegalArgumentException(new StringBuilder(
-                "Received invalid imdn notification type:'").append(notificationType).append("'")
-                .toString());
+        throw new IllegalArgumentException("Received invalid imdn notification type:'"
+                + notificationType + "'");
     }
 
     /**
@@ -173,7 +171,6 @@ public class ChatServiceImpl extends IChatService.Stub {
                     ImdnDocument.DELIVERY_STATUS_DISPLAYED, timestamp);
             return;
         }
-
         if (sLogger.isActivated()) {
             sLogger.info("Using the available session to send displayed for " + msgId);
         }
@@ -272,9 +269,8 @@ public class ChatServiceImpl extends IChatService.Stub {
     public void receiveOneToOneChatInvitation(OneToOneChatSession session) {
         ContactId contact = session.getRemoteContact();
         if (sLogger.isActivated()) {
-            sLogger.info(new StringBuilder("Chat invitation from ").append(contact)
-                    .append(" (display=").append(session.getRemoteDisplayName()).append(")")
-                    .toString());
+            sLogger.info("Chat invitation from " + contact + " (display="
+                    + session.getRemoteDisplayName() + ")");
         }
         OneToOneChatImpl oneToOneChat = getOrCreateOneToOneChat(contact);
         session.addListener(oneToOneChat);
@@ -394,9 +390,8 @@ public class ChatServiceImpl extends IChatService.Stub {
     public void receiveGroupChatInvitation(GroupChatSession session) {
         ContactId remote = session.getRemoteContact();
         if (sLogger.isActivated()) {
-            sLogger.info(new StringBuilder("Group chat invitation from ").append(remote)
-                    .append(" (display=").append(session.getRemoteDisplayName()).append(")")
-                    .toString());
+            sLogger.info("Group chat invitation from " + remote + " (display="
+                    + session.getRemoteDisplayName() + ")");
         }
         String chatId = session.getContributionID();
         GroupChatImpl groupChat = getOrCreateGroupChat(chatId);
@@ -475,9 +470,8 @@ public class ChatServiceImpl extends IChatService.Stub {
                 public void run() {
                     try {
                         if (!isServiceRegistered() || !mImService.isChatSessionAvailable()) {
-                            sLogger.error(new StringBuilder(
-                                    "Failed to initiate group chat with chatId '").append(chatId)
-                                    .append("'!").toString());
+                            sLogger.error("Failed to initiate group chat with chatId '" + chatId
+                                    + "'!");
                             setGroupChatStateAndReasonCode(chatId, GroupChat.State.FAILED,
                                     GroupChat.ReasonCode.FAILED_INITIATION);
                             return;
@@ -485,33 +479,17 @@ public class ChatServiceImpl extends IChatService.Stub {
                         session.addListener(groupChat);
                         session.startSession();
 
-                    } catch (PayloadException e) {
-                        sLogger.error(new StringBuilder(
-                                "Failed to initiate group chat with chatId '").append(chatId)
-                                .append("'!").toString(), e);
+                    } catch (PayloadException | RuntimeException e) {
+                        sLogger.error(
+                                "Failed to initiate group chat with chatId '" + chatId + "'!", e);
                         setGroupChatStateAndReasonCode(chatId, GroupChat.State.FAILED,
                                 GroupChat.ReasonCode.FAILED_INITIATION);
 
                     } catch (NetworkException e) {
                         if (sLogger.isActivated()) {
-                            sLogger.debug(new StringBuilder(
-                                    "Failed to initiate group chat with chatId '").append(chatId)
-                                    .append("'! (").append(e.getMessage()).append(")").toString());
+                            sLogger.debug("Failed to initiate group chat with chatId '" + chatId
+                                    + "'! (" + e.getMessage() + ")");
                         }
-                        setGroupChatStateAndReasonCode(chatId, GroupChat.State.FAILED,
-                                GroupChat.ReasonCode.FAILED_INITIATION);
-
-                    } catch (RuntimeException e) {
-                        /*
-                         * Normally we are not allowed to catch runtime exceptions as these are
-                         * genuine bugs which should be handled/fixed within the code. However the
-                         * cases when we are executing operations on a thread unhandling such
-                         * exceptions will eventually lead to exit the system and thus can bring the
-                         * whole system down, which is not intended.
-                         */
-                        sLogger.error(new StringBuilder(
-                                "Failed to initiate group chat with chatId '").append(chatId)
-                                .append("'!").toString(), e);
                         setGroupChatStateAndReasonCode(chatId, GroupChat.State.FAILED,
                                 GroupChat.ReasonCode.FAILED_INITIATION);
                     }
@@ -632,27 +610,23 @@ public class ChatServiceImpl extends IChatService.Stub {
             Capabilities contactCapabilities = mContactManager.getContactCapabilities(contact);
             if (contactCapabilities == null) {
                 if (sLogger.isActivated()) {
-                    sLogger.debug(new StringBuilder(
-                            "Cannot initiate group chat as the capabilities of the participant '")
-                            .append(contact).append("' are not known.").toString());
+                    sLogger.debug("Cannot initiate group chat as the capabilities of the participant '"
+                            + contact + "' are not known.");
                 }
                 return false;
             }
             if (!contactCapabilities.isImSessionSupported()) {
                 if (sLogger.isActivated()) {
-                    sLogger.debug(new StringBuilder(
-                            "Cannot initiate group chat as the participant '").append(contact)
-                            .append("' does not have IM capabilities.").toString());
+                    sLogger.debug("Cannot initiate group chat as the participant '" + contact
+                            + "' does not have IM capabilities.");
                 }
                 return false;
             }
             if (mRcsSettings.isGroupChatInviteIfFullStoreForwardSupported()
                     && !contactCapabilities.isGroupChatStoreForwardSupported()) {
                 if (sLogger.isActivated()) {
-                    sLogger.debug(new StringBuilder(
-                            "Cannot initiate group chat as the participant '").append(contact)
-                            .append("' does not have store and forward feature supported.")
-                            .toString());
+                    sLogger.debug("Cannot initiate group chat as the participant '" + contact
+                            + "' does not have store and forward feature supported.");
                 }
                 return false;
             }
@@ -898,11 +872,36 @@ public class ChatServiceImpl extends IChatService.Stub {
         if (TextUtils.isEmpty(msgId)) {
             throw new ServerApiIllegalArgumentException("msgId must not be null or empty!");
         }
+        /*
+         * Firstly message is marked as read in the chat provider. Operation is done synchronously
+         * to avoid multiple mark as read requests.
+         */
+        try {
+            if (mMessagingLog.markMessageAsRead(msgId) == 0) {
+                /* no reporting towards the network if message is already marked as read */
+                if (sLogger.isActivated()) {
+                    sLogger.info("Message with ID " + msgId + " is already marked as read!");
+                }
+                return;
+            }
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
+        /*
+         * Then reporting towards the network is performed asynchronously (i.e. in background).
+         */
         mImService.scheduleImOperation(new Runnable() {
             @Override
             public void run() {
                 try {
-                    mMessagingLog.markMessageAsRead(msgId);
                     if (mRcsSettings.isImReportsActivated()
                             && mRcsSettings.isRespondToDisplayReports()) {
                         if (sLogger.isActivated()) {
