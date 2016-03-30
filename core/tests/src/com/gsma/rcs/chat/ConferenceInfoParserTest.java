@@ -34,7 +34,7 @@ import java.io.IOException;
 import javax.xml.parsers.ParserConfigurationException;
 
 public class ConferenceInfoParserTest extends AndroidTestCase {
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private static Logger sLogger = Logger.getLogger(ConferenceInfoParserTest.class.getName());
 
     private static final String sXmlContentToParse1 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
             + "<conference-info entity=\"sips:conf233@example.com\" state=\"full\" version=\"1\" xmlns=\"urn:ietf:params:xml:ns:conference-info\">\n"
@@ -103,13 +103,6 @@ public class ConferenceInfoParserTest extends AndroidTestCase {
             + "\t</users>\n"
             + "</conference-info>";
 
-    protected void setUp() throws Exception {
-        super.setUp();
-    }
-
-    protected void tearDown() throws Exception {
-        super.tearDown();
-    }
 
     public void testGetConferenceInfo() throws ParserConfigurationException, SAXException,
             IOException, ParseFailureException {
@@ -119,10 +112,10 @@ public class ConferenceInfoParserTest extends AndroidTestCase {
         parser.parse();
         ConferenceInfoDocument confInfoDoc = parser.getConferenceInfo();
 
-        if (logger.isActivated()) {
-            logger.info("conference info URI = " + confInfoDoc.getEntity());
-            logger.info("conference info state = " + confInfoDoc.getState());
-            logger.info("conference info users = " + confInfoDoc.getUserCount());
+        if (sLogger.isActivated()) {
+            sLogger.info("conference info URI = " + confInfoDoc.getEntity());
+            sLogger.info("conference info state = " + confInfoDoc.getState());
+            sLogger.info("conference info users = " + confInfoDoc.getUserCount());
         }
         assertEquals(confInfoDoc.getEntity(), "sips:conf233@example.com");
         assertEquals(confInfoDoc.getState(), "full");

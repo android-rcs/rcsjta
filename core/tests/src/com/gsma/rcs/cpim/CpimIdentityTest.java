@@ -18,19 +18,11 @@
 
 package com.gsma.rcs.cpim;
 
-import android.test.InstrumentationTestCase;
-
 import com.gsma.rcs.core.ims.service.im.chat.cpim.CpimIdentity;
 
+import android.test.InstrumentationTestCase;
+
 public class CpimIdentityTest extends InstrumentationTestCase {
-
-    protected void setUp() throws Exception {
-        super.setUp();
-    }
-
-    protected void tearDown() throws Exception {
-        super.tearDown();
-    }
 
     public void testCpimIdentity() {
         String test1 = "<sip:user@domain.com>";
@@ -38,15 +30,16 @@ public class CpimIdentityTest extends InstrumentationTestCase {
         String test3 = "Winnie the Pooh <im:pooh@100akerwood.com>";
         String test4 = "im:pooh@100akerwood.com";
 
-        CpimIdentity id = new CpimIdentity(test1);
-        assertTrue("test failed with " + test1,
-                id.getDisplayName() == null && id.getUri().equals("sip:user@domain.com"));
+        CpimIdentity id;
+        id = new CpimIdentity(test1);
+        assertTrue("test failed with " + test1, id.getDisplayName() == null
+                && "sip:user@domain.com".equals(id.getUri()));
         id = new CpimIdentity(test2);
-        assertTrue("test failed with " + test2, id.getDisplayName().equals("Winnie the Pooh")
-                && id.getUri().equals("tel:+33674538159"));
+        assertTrue("test failed with " + test2, "Winnie the Pooh".equals(id.getDisplayName())
+                && "tel:+33674538159".equals(id.getUri()));
         id = new CpimIdentity(test3);
-        assertTrue("test failed with " + test3, id.getDisplayName().equals("Winnie the Pooh")
-                && id.getUri().equals("im:pooh@100akerwood.com"));
+        assertTrue("test failed with " + test3, "Winnie the Pooh".equals(id.getDisplayName())
+                && "im:pooh@100akerwood.com".equals(id.getUri()));
         Throwable exception = null;
         try {
             new CpimIdentity(test4);

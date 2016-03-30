@@ -43,14 +43,10 @@ public class ChatLogTest extends AndroidTestCase {
 
     protected void setUp() throws Exception {
         super.setUp();
-
         mContext = getContext();
         mContactUtils = ContactUtil.getInstance(new ContactUtilMockContext(mContext));
     }
 
-    protected void tearDown() throws Exception {
-        super.tearDown();
-    }
 
     public void testGetParticipants() throws RcsPermissionDeniedException {
         Map<ContactId, ParticipantStatus> participants;
@@ -59,17 +55,17 @@ public class ChatLogTest extends AndroidTestCase {
         assertEquals(2, participants.size());
 
         ContactId contact1 = mContactUtils.formatContact("+330123");
-        AbstractMap.SimpleEntry<ContactId, ParticipantStatus> formatContactParticipant1 = new HashMap.SimpleEntry<ContactId, ParticipantStatus>(
+        AbstractMap.SimpleEntry<ContactId, ParticipantStatus> formatContactParticipant1 = new HashMap.SimpleEntry<>(
                 contact1, ParticipantStatus.CONNECTED);
-        AbstractMap.SimpleEntry<ContactId, ParticipantStatus> participantsParticipant1 = new HashMap.SimpleEntry<ContactId, ParticipantStatus>(
+        AbstractMap.SimpleEntry<ContactId, ParticipantStatus> participantsParticipant1 = new HashMap.SimpleEntry<>(
                 contact1, participants.get(contact1));
 
         assertTrue(formatContactParticipant1.equals(participantsParticipant1));
 
         ContactId contact2 = mContactUtils.formatContact("+330124");
-        AbstractMap.SimpleEntry<ContactId, ParticipantStatus> formatContactParticipant2 = new HashMap.SimpleEntry<ContactId, ParticipantStatus>(
+        AbstractMap.SimpleEntry<ContactId, ParticipantStatus> formatContactParticipant2 = new HashMap.SimpleEntry<>(
                 contact2, ParticipantStatus.DEPARTED);
-        AbstractMap.SimpleEntry<ContactId, ParticipantStatus> participantsParticipant2 = new HashMap.SimpleEntry<ContactId, ParticipantStatus>(
+        AbstractMap.SimpleEntry<ContactId, ParticipantStatus> participantsParticipant2 = new HashMap.SimpleEntry<>(
                 contact2, participants.get(contact2));
 
         assertTrue(formatContactParticipant2.equals(participantsParticipant2));
