@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010-2016 Orange.
+ * Copyright (C) 2010 France Telecom S.A.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,13 +24,15 @@ public class Base64Test extends AndroidTestCase {
 
     public final void testBase64() {
         String ss = "2 + 2 = quatre, non 5?";
-        assertEquals("MiArIDIgPSBxdWF0cmUsIG5vbiA1Pw==", Base64.encodeBase64ToString(ss.getBytes()));
-        assertEquals("MiArIDIgPSBxdWF0cmUsIG5vbiA1Pw==",
-                new String(Base64.encodeBase64(ss.getBytes())));
-        assertEquals("MiArIDIgPSBxdWF0cmUsIG5vbiA1Pw==", Base64.encodeBase64ToString(Base64
-                .decodeBase64("MiArIDIgPSBxdWF0cmUsIG5vbiA1Pw==".getBytes())));
-        assertEquals(ss,
-                new String(Base64.decodeBase64("MiArIDIgPSBxdWF0cmUsIG5vbiA1Pw==".getBytes())));
+        assertEquals(Base64.encodeBase64ToString(ss.getBytes()), "MiArIDIgPSBxdWF0cmUsIG5vbiA1Pw==");
+        assertEquals(new String(Base64.encodeBase64(ss.getBytes())),
+                "MiArIDIgPSBxdWF0cmUsIG5vbiA1Pw==");
+        assertEquals(Base64.encodeBase64ToString(Base64
+                .decodeBase64(("MiArIDIgPSBxdWF0cmUsIG5vbiA1Pw==").getBytes())),
+                "MiArIDIgPSBxdWF0cmUsIG5vbiA1Pw==");
+        assertEquals(
+                new String(Base64.decodeBase64(("MiArIDIgPSBxdWF0cmUsIG5vbiA1Pw==").getBytes())),
+                ss);
     }
 
 }

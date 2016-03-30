@@ -179,7 +179,8 @@ public class ContactManagerTest extends AndroidTestCase {
         assertTrue(mContactManager.isBlockedForContact(mContact));
     }
 
-    public CapabilitiesBuilder createRcsContact() throws ContactManagerException, FileAccessException {
+    public CapabilitiesBuilder createRcsContact() throws ContactManagerException,
+            FileAccessException {
         long now = System.currentTimeMillis();
         CapabilitiesBuilder capaBuilder = new CapabilitiesBuilder();
         /*

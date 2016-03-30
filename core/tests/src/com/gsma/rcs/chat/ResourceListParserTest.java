@@ -45,14 +45,6 @@ public class ResourceListParserTest extends AndroidTestCase {
 
     private Logger logger = Logger.getLogger(this.getClass().getName());
 
-    protected void setUp() throws Exception {
-        super.setUp();
-    }
-
-    protected void tearDown() throws Exception {
-        super.tearDown();
-    }
-
     public void testGetResourceListDocument() throws ParserConfigurationException, SAXException,
             IOException, ParseFailureException {
 
