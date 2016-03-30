@@ -33,13 +33,9 @@ public class ServiceExtensionManagerTest extends AndroidTestCase {
 
     protected void setUp() throws Exception {
         super.setUp();
-        extensions = new HashSet<String>();
+        extensions = new HashSet<>();
         extensions.add(UUID.randomUUID().toString());
         extensions.add(UUID.randomUUID().toString());
-    }
-
-    protected void tearDown() throws Exception {
-        super.tearDown();
     }
 
     public void testGetExtensions() {

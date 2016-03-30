@@ -18,11 +18,11 @@
 
 package com.gsma.service.rcs;
 
-import java.util.NoSuchElementException;
+import com.gsma.services.rcs.Geoloc;
 
 import android.test.AndroidTestCase;
 
-import com.gsma.services.rcs.Geoloc;
+import java.util.NoSuchElementException;
 
 public class GeolocTest extends AndroidTestCase {
 

@@ -199,7 +199,7 @@ public class VideoCodecManager {
      * @return List of video codecs
      */
     public static Vector<VideoCodec> extractVideoCodecsFromSdp(Vector<MediaDescription> medias) {
-        Vector<VideoCodec> codecs = new Vector<VideoCodec>();
+        Vector<VideoCodec> codecs = new Vector<>();
         for (MediaDescription media : medias) {
             VideoCodec codec = createVideoCodecFromSdp(media);
             if (codec != null) {

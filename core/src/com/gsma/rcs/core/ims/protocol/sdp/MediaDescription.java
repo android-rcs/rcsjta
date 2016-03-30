@@ -94,7 +94,7 @@ public class MediaDescription {
     /**
      * Media attributes
      */
-    public Vector<MediaAttribute> mMediaAttributes = new Vector<MediaAttribute>();
+    public Vector<MediaAttribute> mMediaAttributes = new Vector<>();
 
     /**
      * Constructor

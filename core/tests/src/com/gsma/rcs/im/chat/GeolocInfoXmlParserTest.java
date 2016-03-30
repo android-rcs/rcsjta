@@ -32,9 +32,7 @@ import java.io.ByteArrayInputStream;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-/**
- * Created by Romain Caron & Sandrine Lacharme
- */
+
 public class GeolocInfoXmlParserTest extends AndroidTestCase {
 
     private static final String sXmlContentToParse = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"

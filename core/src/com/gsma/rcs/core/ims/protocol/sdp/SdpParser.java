@@ -23,7 +23,7 @@ import java.util.Vector;
 
 /**
  * SDP parser
- * 
+ *
  * @author jexa7410
  */
 public class SdpParser extends Parser {
@@ -44,7 +44,7 @@ public class SdpParser extends Parser {
 
     /**
      * Constructor
-     * 
+     *
      * @param data Data
      */
     public SdpParser(byte data[]) {
@@ -136,7 +136,7 @@ public class SdpParser extends Parser {
 
     /**
      * Parse time description
-     * 
+     *
      * @return Time description
      */
     private TimeDescription parseTimeDescription() {
@@ -277,7 +277,7 @@ public class SdpParser extends Parser {
 
     /**
      * Returns session attribute
-     * 
+     *
      * @param name Attribute name
      * @return Attribute
      */
@@ -290,7 +290,7 @@ public class SdpParser extends Parser {
 
     /**
      * Returns a media description
-     * 
+     *
      * @param name Media name
      * @return Media
      */
@@ -310,7 +310,7 @@ public class SdpParser extends Parser {
 
     /**
      * Returns media descriptions
-     * 
+     *
      * @param name Media name
      * @return Medias
      */
@@ -329,7 +329,7 @@ public class SdpParser extends Parser {
 
     /**
      * Returns all media descriptions
-     * 
+     *
      * @return Medias
      */
     public Vector<MediaDescription> getMediaDescriptions() {

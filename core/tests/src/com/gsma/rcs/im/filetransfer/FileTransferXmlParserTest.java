@@ -8,6 +8,8 @@
  * You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
+ *      @Author : Created by yplo6403 on 24/02/2016.
+ *
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -37,9 +39,6 @@ import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-/**
- * Created by yplo6403 on 24/02/2016.
- */
 public class FileTransferXmlParserTest extends AndroidTestCase {
 
     private static final Logger sLogger = Logger.getLogger(FileTransferXmlParserTest.class
