@@ -18,10 +18,9 @@
 
 package com.gsma.rcs.dns;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+import com.gsma.rcs.utils.logger.Logger;
 
-import javax2.sip.ListeningPoint;
+import android.test.AndroidTestCase;
 
 import org.xbill.DNS.Lookup;
 import org.xbill.DNS.NAPTRRecord;
@@ -30,44 +29,37 @@ import org.xbill.DNS.SRVRecord;
 import org.xbill.DNS.TextParseException;
 import org.xbill.DNS.Type;
 
-import android.test.AndroidTestCase;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
-import com.gsma.rcs.utils.logger.Logger;
+import javax2.sip.ListeningPoint;
 
 public class DnsTest extends AndroidTestCase {
 
-    private Logger logger = Logger.getLogger(this.getClass().getName());
-
-    protected void setUp() throws Exception {
-        super.setUp();
-    }
-
-    protected void tearDown() throws Exception {
-        super.tearDown();
-    }
+    private static Logger sLogger = Logger.getLogger(DnsTest.class.getName());
 
     public void testDnsLib() {
         String domain = "rcs.lannion.com";
         try {
-            if (logger.isActivated()) {
-                logger.debug("DNS NAPTR lookup for " + domain);
+            if (sLogger.isActivated()) {
+                sLogger.debug("DNS NAPTR lookup for " + domain);
             }
             Lookup lookup = new Lookup(domain, Type.NAPTR);
             lookup.setCache(null);
             lookup.run();
             int code = lookup.getResult();
             if (code != Lookup.SUCCESSFUL) {
-                if (logger.isActivated()) {
-                    logger.warn("Lookup error: " + code + "/" + lookup.getErrorString());
+                if (sLogger.isActivated()) {
+                    sLogger.warn("Lookup error: " + code + "/" + lookup.getErrorString());
                 }
             }
         } catch (TextParseException e) {
-            if (logger.isActivated()) {
-                logger.debug("Not a valid DNS name");
+            if (sLogger.isActivated()) {
+                sLogger.debug("Not a valid DNS name");
             }
         } catch (IllegalArgumentException e) {
-            if (logger.isActivated()) {
-                logger.debug("Not a valid DNS type");
+            if (sLogger.isActivated()) {
+                sLogger.debug("Not a valid DNS type");
             }
         }
     }
@@ -81,8 +73,8 @@ public class DnsTest extends AndroidTestCase {
 
         // First try to resolve via a NAPTR query, then a SRV
         // query and finally via A query
-        if (logger.isActivated()) {
-            logger.debug("Resolve IMS proxy address...");
+        if (sLogger.isActivated()) {
+            sLogger.debug("Resolve IMS proxy address...");
         }
         String ipAddress = null;
 
@@ -97,13 +89,13 @@ public class DnsTest extends AndroidTestCase {
         }
         Record[] naptrRecords = getDnsNAPTR(imsProxyAddr);
         if ((naptrRecords != null) && (naptrRecords.length > 0)) {
-            if (logger.isActivated()) {
-                logger.debug("NAPTR records found: " + naptrRecords.length);
+            if (sLogger.isActivated()) {
+                sLogger.debug("NAPTR records found: " + naptrRecords.length);
             }
-            for (int i = 0; i < naptrRecords.length; i++) {
-                NAPTRRecord naptr = (NAPTRRecord) naptrRecords[i];
-                if (logger.isActivated()) {
-                    logger.debug("NAPTR record: " + naptr.toString());
+            for (Record naptrRecord : naptrRecords) {
+                NAPTRRecord naptr = (NAPTRRecord) naptrRecord;
+                if (sLogger.isActivated()) {
+                    sLogger.debug("NAPTR record: " + naptr.toString());
                 }
                 if ((naptr != null) && naptr.getService().equalsIgnoreCase(service)) {
                     // DNS SRV lookup
@@ -120,8 +112,8 @@ public class DnsTest extends AndroidTestCase {
             }
         } else {
             // Direct DNS SRV lookup
-            if (logger.isActivated()) {
-                logger.debug("No NAPTR record found: use DNS SRV instead");
+            if (sLogger.isActivated()) {
+                sLogger.debug("No NAPTR record found: use DNS SRV instead");
             }
             String query;
             if (imsProxyAddr.startsWith("_sip.")) {
@@ -136,8 +128,8 @@ public class DnsTest extends AndroidTestCase {
                 imsProxyPort = srvRecord.getPort();
             } else {
                 // Direct DNS A lookup
-                if (logger.isActivated()) {
-                    logger.debug("No SRV record found: use DNS A instead");
+                if (sLogger.isActivated()) {
+                    sLogger.debug("No SRV record found: use DNS A instead");
                 }
                 ipAddress = getDnsA(imsProxyAddr);
             }
@@ -145,35 +137,35 @@ public class DnsTest extends AndroidTestCase {
 
         imsProxyAddr = ipAddress;
 
-        if (logger.isActivated()) {
-            logger.debug("SIP outbound proxy configuration: " + imsProxyAddr + ":" + imsProxyPort
+        if (sLogger.isActivated()) {
+            sLogger.debug("SIP outbound proxy configuration: " + imsProxyAddr + ":" + imsProxyPort
                     + ";" + imsProxyProtocol);
         }
     }
 
     private Record[] getDnsNAPTR(String domain) {
         try {
-            if (logger.isActivated()) {
-                logger.debug("DNS NAPTR lookup for " + domain);
+            if (sLogger.isActivated()) {
+                sLogger.debug("DNS NAPTR lookup for " + domain);
             }
             Lookup lookup = new Lookup(domain, Type.NAPTR);
             lookup.setCache(null);
             Record[] result = lookup.run();
             int code = lookup.getResult();
             if (code != Lookup.SUCCESSFUL) {
-                if (logger.isActivated()) {
-                    logger.warn("Lookup error: " + code + "/" + lookup.getErrorString());
+                if (sLogger.isActivated()) {
+                    sLogger.warn("Lookup error: " + code + "/" + lookup.getErrorString());
                 }
             }
             return result;
         } catch (TextParseException e) {
-            if (logger.isActivated()) {
-                logger.debug("Not a valid DNS name");
+            if (sLogger.isActivated()) {
+                sLogger.debug("Not a valid DNS name");
             }
             return null;
         } catch (IllegalArgumentException e) {
-            if (logger.isActivated()) {
-                logger.debug("Not a valid DNS type");
+            if (sLogger.isActivated()) {
+                sLogger.debug("Not a valid DNS type");
             }
             return null;
         }
@@ -181,27 +173,27 @@ public class DnsTest extends AndroidTestCase {
 
     private Record[] getDnsSRV(String domain) {
         try {
-            if (logger.isActivated()) {
-                logger.debug("DNS SRV lookup for " + domain);
+            if (sLogger.isActivated()) {
+                sLogger.debug("DNS SRV lookup for " + domain);
             }
             Lookup lookup = new Lookup(domain, Type.SRV);
             lookup.setCache(null);
             Record[] result = lookup.run();
             int code = lookup.getResult();
             if (code != Lookup.SUCCESSFUL) {
-                if (logger.isActivated()) {
-                    logger.warn("Lookup error: " + code + "/" + lookup.getErrorString());
+                if (sLogger.isActivated()) {
+                    sLogger.warn("Lookup error: " + code + "/" + lookup.getErrorString());
                 }
             }
             return result;
         } catch (TextParseException e) {
-            if (logger.isActivated()) {
-                logger.debug("Not a valid DNS name");
+            if (sLogger.isActivated()) {
+                sLogger.debug("Not a valid DNS name");
             }
             return null;
         } catch (IllegalArgumentException e) {
-            if (logger.isActivated()) {
-                logger.debug("Not a valid DNS type");
+            if (sLogger.isActivated()) {
+                sLogger.debug("Not a valid DNS type");
             }
             return null;
         }
@@ -209,13 +201,13 @@ public class DnsTest extends AndroidTestCase {
 
     private String getDnsA(String domain) {
         try {
-            if (logger.isActivated()) {
-                logger.debug("DNS A lookup for " + domain);
+            if (sLogger.isActivated()) {
+                sLogger.debug("DNS A lookup for " + domain);
             }
             return InetAddress.getByName(domain).getHostAddress();
         } catch (UnknownHostException e) {
-            if (logger.isActivated()) {
-                logger.debug("Unknown host for " + domain);
+            if (sLogger.isActivated()) {
+                sLogger.debug("Unknown host for " + domain);
             }
             return null;
         }
@@ -223,10 +215,10 @@ public class DnsTest extends AndroidTestCase {
 
     private SRVRecord getBestDnsSRV(Record[] records) {
         SRVRecord result = null;
-        for (int i = 0; i < records.length; i++) {
-            SRVRecord srv = (SRVRecord) records[i];
-            if (logger.isActivated()) {
-                logger.debug("SRV record: " + srv.toString());
+        for (Record record : records) {
+            SRVRecord srv = (SRVRecord) record;
+            if (sLogger.isActivated()) {
+                sLogger.debug("SRV record: " + srv.toString());
             }
             if (result == null) {
                 // First record

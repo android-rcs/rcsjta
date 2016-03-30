@@ -45,7 +45,7 @@ public class ContactUtilMockContext extends MockContext {
     @Override
     public Resources getResources() {
         mDelegatedContext.getResources();
-        Resources res = new MockResources() {
+        return new MockResources() {
 
             @Override
             public Configuration getConfiguration() {
@@ -55,6 +55,5 @@ public class ContactUtilMockContext extends MockContext {
             }
 
         };
-        return res;
     }
 }

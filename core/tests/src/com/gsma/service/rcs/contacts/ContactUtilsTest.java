@@ -38,10 +38,6 @@ public class ContactUtilsTest extends AndroidTestCase {
                 .valueOf(ContactUtilMockContext.COUNTRY_AREA_CODE) + 1);
     }
 
-    protected void tearDown() throws Exception {
-        super.tearDown();
-    }
-
     public void testIsValidContactNull() {
         try {
             assertFalse(mContactUtils.isValidContact(null));
@@ -99,9 +95,8 @@ public class ContactUtilsTest extends AndroidTestCase {
     }
 
     public void testIsValidContactNormalCase_7() throws RcsPermissionDeniedException {
-        assertTrue(mContactUtils.isValidContact(new StringBuilder(" ")
-                .append(ContactUtilMockContext.COUNTRY_AREA_CODE)
-                .append("-1 2-3 4-5 6-7 8-9 0-1 2-3 4 ").toString()));
+        assertTrue(mContactUtils.isValidContact(" " + ContactUtilMockContext.COUNTRY_AREA_CODE
+                + "-1 2-3 4-5 6-7 8-9 0-1 2-3 4 "));
     }
 
     public void testIsValidContactNormalCase_8() throws RcsPermissionDeniedException {
@@ -113,8 +108,7 @@ public class ContactUtilsTest extends AndroidTestCase {
         try {
             mContactUtils.formatContact(null);
             fail("Expected IllegalArgumentException to be thrown");
-        } catch (IllegalArgumentException e) {
-            assertTrue(e instanceof IllegalArgumentException);
+        } catch (IllegalArgumentException ignore) {
         }
     }
 

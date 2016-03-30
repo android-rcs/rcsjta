@@ -14,8 +14,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- ******************************************************************************/
-
+ **
+ /**
+ * Created by yplo6403 on 24/02/2016.
+ */
 package com.gsma.rcs.chat;
 
 import com.gsma.rcs.core.ParseFailureException;
@@ -32,9 +34,6 @@ import java.io.ByteArrayInputStream;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-/**
- * Created by yplo6403 on 24/02/2016.
- */
 public class IsComposingParserTest extends AndroidTestCase {
 
     private static final String sXmlContentToParse1 = "<?xml version=\"1.0\" encoding=\"utf-8\"?>"

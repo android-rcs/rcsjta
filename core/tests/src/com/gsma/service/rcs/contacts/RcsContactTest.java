@@ -1,14 +1,14 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
- *
- * Copyright (C) 2010-2016 Orange.
- *
+ * <p/>
+ * Copyright (C) 2010 France Telecom S.A.
+ * <p/>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p/>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p/>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,13 +18,6 @@
 
 package com.gsma.service.rcs.contacts;
 
-import java.util.HashSet;
-import java.util.Random;
-import java.util.Set;
-
-import android.os.Parcel;
-import android.test.AndroidTestCase;
-
 import com.gsma.rcs.utils.ContactUtilMockContext;
 import com.gsma.service.rcs.capabilities.CapabilitiesTest;
 import com.gsma.services.rcs.capability.Capabilities;
@@ -32,61 +25,47 @@ import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.contact.ContactUtil;
 import com.gsma.services.rcs.contact.RcsContact;
 
+import android.os.Parcel;
+import android.test.AndroidTestCase;
+
+import java.util.HashSet;
+import java.util.Random;
+
 public class RcsContactTest extends AndroidTestCase {
 
-    private boolean imageSharing;
+    private Capabilities mCapabilities;
 
-    private boolean videoSharing;
+    private boolean mRegistered;
 
-    private boolean imSession;
+    private ContactId mContactId;
 
-    private boolean fileTransfer;
-
-    private boolean geolocPush;
-
-    private Set<String> extensions;
-
-    private boolean automata;
-
-    private Capabilities capabilities;
-
-    private boolean registered;
-
-    private ContactId contactId;
-
-    private String displayName;
-
-    private long timestamp;
+    private String mDisplayName;
 
     protected void setUp() throws Exception {
         super.setUp();
         Random random = new Random();
-        imageSharing = random.nextBoolean();
-        videoSharing = random.nextBoolean();
-        imSession = random.nextBoolean();
-        fileTransfer = random.nextBoolean();
-        geolocPush = random.nextBoolean();
-        automata = random.nextBoolean();
-        extensions = new HashSet<String>();
+        boolean mBimageSharing = random.nextBoolean();
+        boolean videoSharing = random.nextBoolean();
+        boolean imSession = random.nextBoolean();
+        boolean fileTransfer = random.nextBoolean();
+        boolean geolocPush = random.nextBoolean();
+        boolean automata = random.nextBoolean();
+        HashSet<String> extensions = new HashSet<>();
         extensions.add(String.valueOf(random.nextInt(96) + 32));
         extensions.add(String.valueOf(random.nextInt(96) + 32));
-        timestamp = random.nextLong();
+        long timestamp = random.nextLong();
 
-        capabilities = new Capabilities(imageSharing, videoSharing, imSession, fileTransfer,
+        mCapabilities = new Capabilities(mBimageSharing, videoSharing, imSession, fileTransfer,
                 geolocPush, extensions, automata, timestamp);
-        registered = random.nextBoolean();
+        mRegistered = random.nextBoolean();
         ContactUtil contactUtils = ContactUtil
                 .getInstance(new ContactUtilMockContext(getContext()));
-        contactId = contactUtils.formatContact("+33123456789");
-        displayName = "displayName";
-    }
-
-    protected void tearDown() throws Exception {
-        super.tearDown();
+        mContactId = contactUtils.formatContact("+33123456789");
+        mDisplayName = "displayName";
     }
 
     public void testRcsContactContactNull() {
-        RcsContact rcsContact = new RcsContact(null, registered, capabilities, displayName, false,
+        RcsContact rcsContact = new RcsContact(null, mRegistered, mCapabilities, mDisplayName, false,
                 -1L);
         Parcel parcel = Parcel.obtain();
         rcsContact.writeToParcel(parcel, 0);
@@ -98,7 +77,7 @@ public class RcsContactTest extends AndroidTestCase {
     }
 
     public void testRcsContactCapabilitiesNull() {
-        RcsContact rcsContact = new RcsContact(contactId, registered, null, displayName, false, -1L);
+        RcsContact rcsContact = new RcsContact(mContactId, mRegistered, null, mDisplayName, false, -1L);
         Parcel parcel = Parcel.obtain();
         rcsContact.writeToParcel(parcel, 0);
         // done writing, now reset parcel for reading
@@ -109,7 +88,7 @@ public class RcsContactTest extends AndroidTestCase {
     }
 
     public void testRcsContactDisplayNameNull() {
-        RcsContact rcsContact = new RcsContact(contactId, registered, capabilities, null, false,
+        RcsContact rcsContact = new RcsContact(mContactId, mRegistered, mCapabilities, null, false,
                 -1L);
         Parcel parcel = Parcel.obtain();
         rcsContact.writeToParcel(parcel, 0);
@@ -121,7 +100,7 @@ public class RcsContactTest extends AndroidTestCase {
     }
 
     public void testRcsContact() {
-        RcsContact rcsContact = new RcsContact(contactId, registered, capabilities, displayName,
+        RcsContact rcsContact = new RcsContact(mContactId, mRegistered, mCapabilities, mDisplayName,
                 false, -1L);
         Parcel parcel = Parcel.obtain();
         rcsContact.writeToParcel(parcel, 0);
@@ -136,6 +115,7 @@ public class RcsContactTest extends AndroidTestCase {
         if (rcs1.isOnline() != rcs2.isOnline()) {
             return false;
         }
+
         if (rcs1.getContactId() != null) {
             if (!rcs1.getContactId().equals(rcs2.getContactId())) {
                 return false;
@@ -145,6 +125,7 @@ public class RcsContactTest extends AndroidTestCase {
                 return false;
             }
         }
+
         if (rcs1.getCapabilities() != null) {
             if (!CapabilitiesTest.capabilitiesIsEqual(rcs1.getCapabilities(),
                     rcs2.getCapabilities())) {
@@ -155,10 +136,12 @@ public class RcsContactTest extends AndroidTestCase {
                 return false;
             }
         }
+
         if (rcs1.getDisplayName() != null) {
             if (!rcs1.getDisplayName().equals(rcs2.getDisplayName())) {
                 return false;
             }
+
         } else {
             if (rcs2.getDisplayName() != null) {
                 return false;
