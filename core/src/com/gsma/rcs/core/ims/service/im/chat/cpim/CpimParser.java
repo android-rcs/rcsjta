@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -43,10 +43,7 @@ public class CpimParser {
      */
     private static final String DOUBLE_CRLF = CRLF + CRLF;
 
-    /**
-     * CPIM message
-     */
-    private CpimMessage mMessage = null;
+    private CpimMessage mMessage;
 
     /**
      * Constructor
@@ -92,29 +89,26 @@ public class CpimParser {
         int end = data.indexOf(DOUBLE_CRLF, begin);
         String block2 = data.substring(begin, end);
         StringTokenizer lines = new StringTokenizer(block2, CRLF);
-        Hashtable<String, String> headers = new Hashtable<String, String>();
+        Hashtable<String, String> headers = new Hashtable<>();
         while (lines.hasMoreTokens()) {
             String token = lines.nextToken();
             CpimHeader hd = CpimHeader.parseHeader(token);
             headers.put(hd.getName(), hd.getValue());
         }
-
         /* Read the MIME-encapsulated content header */
         begin = end + 4;
         end = data.indexOf(DOUBLE_CRLF, begin);
         String block3 = data.substring(begin, end);
         lines = new StringTokenizer(block3, CRLF);
-        Hashtable<String, String> contentHeaders = new Hashtable<String, String>();
+        Hashtable<String, String> contentHeaders = new Hashtable<>();
         while (lines.hasMoreTokens()) {
             String token = lines.nextToken();
             CpimHeader hd = CpimHeader.parseHeader(token);
             contentHeaders.put(hd.getName(), hd.getValue());
         }
-
         /* Read the message content */
         begin = end + 4;
         String content = data.substring(begin);
-
         mMessage = new CpimMessage(headers, contentHeaders, content);
     }
 }

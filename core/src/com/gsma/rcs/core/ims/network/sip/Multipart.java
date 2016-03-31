@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -37,10 +37,12 @@ public class Multipart {
      */
     public final static String BOUNDARY_DELIMITER = "--";
 
+    private static final String DOUBLE_CRLF = "\r\n\r\n";
+
     /**
      * Parts
      */
-    private Hashtable<String, String> parts = new Hashtable<String, String>();
+    private Hashtable<String, String> parts = new Hashtable<>();
 
     /**
      * Constructor
@@ -49,32 +51,32 @@ public class Multipart {
      * @param boundary Boundary delimiter
      */
     public Multipart(String content, String boundary) {
-        if ((content != null) && (boundary != null)) {
-            String[] fragments = content.split(BOUNDARY_DELIMITER + boundary);
-            for (String fragment : fragments) {
-                String trimmedFragment = fragment.trim();
-                if ((trimmedFragment.length() > 0) && !BOUNDARY_DELIMITER.equals(trimmedFragment)) {
-                    int begin = fragment.indexOf(SipUtils.CRLF + SipUtils.CRLF);
-                    if (begin != -1) {
-                        /* Extract content type */
-                        String type = fragment.substring(0, begin).trim();
-
-                        /* Extract content part */
-                        String part = fragment.substring(begin).trim();
-
-                        /* Extract MIME type from content type */
-                        int beginType = type.indexOf(ContentTypeHeader.NAME);
-                        int endType = type.indexOf(SipUtils.CRLF, beginType);
-                        String mime;
-                        if (endType == -1) {
-                            mime = type.substring(beginType + ContentTypeHeader.NAME.length() + 1)
-                                    .trim();
-                        } else {
-                            mime = type.substring(beginType + ContentTypeHeader.NAME.length() + 1,
-                                    endType).trim();
-                        }
-                        parts.put(mime.toLowerCase(), part);
+        String[] fragments = content.split(BOUNDARY_DELIMITER + boundary);
+        for (String fragment : fragments) {
+            if (fragment.length() > 0 && !BOUNDARY_DELIMITER.equals(fragment)) {
+                int begin = fragment.indexOf(DOUBLE_CRLF);
+                if (begin != -1) {
+                    begin += DOUBLE_CRLF.length();
+                    /* Extract content type */
+                    String type = fragment.substring(0, begin);
+                    /* Extract MIME type from content type */
+                    int beginType = type.indexOf(ContentTypeHeader.NAME);
+                    int endType = type.indexOf(SipUtils.CRLF, beginType);
+                    String mime;
+                    if (endType == -1) {
+                        mime = type.substring(beginType + ContentTypeHeader.NAME.length() + 1)
+                                .trim();
+                    } else {
+                        mime = type.substring(beginType + ContentTypeHeader.NAME.length() + 1,
+                                endType).trim();
                     }
+                    /* Extract content part */
+                    String part = fragment.substring(begin);
+                    int endPart = part.lastIndexOf(SipUtils.CRLF);
+                    if (endPart != -1) {
+                        part = part.substring(0, endPart);
+                    }
+                    parts.put(mime.toLowerCase(), part);
                 }
             }
         }
@@ -99,12 +101,4 @@ public class Multipart {
         return parts.get(type.toLowerCase());
     }
 
-    /**
-     * Get parts
-     * 
-     * @return List of parts
-     */
-    public Hashtable<String, String> getParts() {
-        return parts;
-    }
 }
