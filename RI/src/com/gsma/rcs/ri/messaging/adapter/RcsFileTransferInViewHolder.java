@@ -20,9 +20,8 @@
 
 package com.gsma.rcs.ri.messaging.adapter;
 
-import com.gsma.services.rcs.history.HistoryLog;
-
 import com.gsma.rcs.ri.R;
+import com.gsma.services.rcs.history.HistoryLog;
 
 import android.database.Cursor;
 import android.view.View;

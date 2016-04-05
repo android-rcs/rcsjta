@@ -18,14 +18,13 @@
 
 package com.gsma.rcs.ri.contacts;
 
-import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.capability.Capabilities;
-import com.gsma.services.rcs.contact.RcsContact;
-
 import com.gsma.rcs.api.connection.ConnectionManager.RcsServiceName;
 import com.gsma.rcs.api.connection.utils.RcsListActivity;
 import com.gsma.rcs.ri.R;
 import com.gsma.rcs.ri.utils.RcsContactUtil;
+import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.capability.Capabilities;
+import com.gsma.services.rcs.contact.RcsContact;
 
 import android.content.Context;
 import android.content.pm.ActivityInfo;
@@ -46,7 +45,7 @@ import java.util.Set;
  * List of RCS contacts
  *
  * @author Philippe LEMORDANT
- * @author Jean-Marc AUUFRET
+ * @author Jean-Marc AUFFRET
  */
 public class RcsContactsList extends RcsListActivity {
 
@@ -119,8 +118,8 @@ public class RcsContactsList extends RcsListActivity {
                 holder.numberText.setText(getString(R.string.label_contact_arg, displayName));
                 Capabilities capa = item.getCapabilities();
                 holder.imBox.setChecked(capa.hasCapabilities(Capabilities.CAPABILITY_IM));
-                holder.ftBox.setChecked(capa
-                        .hasCapabilities(Capabilities.CAPABILITY_FILE_TRANSFER));
+                holder.ftBox
+                        .setChecked(capa.hasCapabilities(Capabilities.CAPABILITY_FILE_TRANSFER));
                 holder.ishBox.setChecked(capa
                         .hasCapabilities(Capabilities.CAPABILITY_IMAGE_SHARING));
                 holder.vshBox.setChecked(capa

@@ -18,14 +18,6 @@
 
 package com.gsma.rcs.ri.extension.streaming;
 
-import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.services.rcs.extension.MultimediaSession;
-import com.gsma.services.rcs.extension.MultimediaSessionService;
-import com.gsma.services.rcs.extension.MultimediaStreamingSession;
-import com.gsma.services.rcs.extension.MultimediaStreamingSessionIntent;
-import com.gsma.services.rcs.extension.MultimediaStreamingSessionListener;
-
 import com.gsma.rcs.api.connection.ConnectionManager.RcsServiceName;
 import com.gsma.rcs.api.connection.utils.ExceptionUtil;
 import com.gsma.rcs.api.connection.utils.RcsActivity;
@@ -34,6 +26,13 @@ import com.gsma.rcs.ri.RiApplication;
 import com.gsma.rcs.ri.utils.LogUtils;
 import com.gsma.rcs.ri.utils.RcsContactUtil;
 import com.gsma.rcs.ri.utils.RcsSessionUtil;
+import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.extension.MultimediaSession;
+import com.gsma.services.rcs.extension.MultimediaSessionService;
+import com.gsma.services.rcs.extension.MultimediaStreamingSession;
+import com.gsma.services.rcs.extension.MultimediaStreamingSessionIntent;
+import com.gsma.services.rcs.extension.MultimediaStreamingSessionListener;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -456,8 +455,8 @@ public class StreamingSessionView extends RcsActivity {
                                     Log.d(LOGTAG,
                                             "onMultimediaStreamingStateChanged "
                                                     + getString(R.string.label_mms_state_changed,
-                                                    RiApplication.sMultimediaStates[state
-                                                            .toInt()], _reasonCode));
+                                                            RiApplication.sMultimediaStates[state
+                                                                    .toInt()], _reasonCode));
                                 }
                         }
                     }

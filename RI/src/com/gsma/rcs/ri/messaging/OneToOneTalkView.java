@@ -695,6 +695,7 @@ public class OneToOneTalkView extends RcsFragmentActivity implements
                     } else {
                         mFileTransferService.deleteFileTransfer(id);
                     }
+                    return true;
 
                 case R.id.menu_resend_message:
                     if (ChatLog.Message.HISTORYLOG_MEMBER_ID == providerId) {

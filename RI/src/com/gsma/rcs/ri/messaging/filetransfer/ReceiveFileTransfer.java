@@ -18,18 +18,6 @@
 
 package com.gsma.rcs.ri.messaging.filetransfer;
 
-import com.gsma.services.rcs.RcsPermissionDeniedException;
-import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.RcsServiceNotAvailableException;
-import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.services.rcs.filetransfer.FileTransfer;
-import com.gsma.services.rcs.filetransfer.FileTransferIntent;
-import com.gsma.services.rcs.filetransfer.FileTransferLog;
-import com.gsma.services.rcs.filetransfer.FileTransferService;
-import com.gsma.services.rcs.filetransfer.GroupFileTransferListener;
-import com.gsma.services.rcs.filetransfer.OneToOneFileTransferListener;
-import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo;
-
 import com.gsma.rcs.api.connection.ConnectionManager.RcsServiceName;
 import com.gsma.rcs.api.connection.utils.ExceptionUtil;
 import com.gsma.rcs.api.connection.utils.RcsActivity;
@@ -41,6 +29,17 @@ import com.gsma.rcs.ri.utils.LogUtils;
 import com.gsma.rcs.ri.utils.RcsContactUtil;
 import com.gsma.rcs.ri.utils.RcsSessionUtil;
 import com.gsma.rcs.ri.utils.Utils;
+import com.gsma.services.rcs.RcsPermissionDeniedException;
+import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.RcsServiceNotAvailableException;
+import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.filetransfer.FileTransfer;
+import com.gsma.services.rcs.filetransfer.FileTransferIntent;
+import com.gsma.services.rcs.filetransfer.FileTransferLog;
+import com.gsma.services.rcs.filetransfer.FileTransferService;
+import com.gsma.services.rcs.filetransfer.GroupFileTransferListener;
+import com.gsma.services.rcs.filetransfer.OneToOneFileTransferListener;
+import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo;
 
 import android.app.AlertDialog;
 import android.content.Context;

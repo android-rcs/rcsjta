@@ -19,11 +19,10 @@
 
 package com.gsma.rcs.ri.messaging.filetransfer;
 
-import com.gsma.services.rcs.contact.ContactId;
-
 import com.gsma.rcs.api.connection.utils.RcsActivity;
 import com.gsma.rcs.ri.R;
 import com.gsma.rcs.ri.RiApplication;
+import com.gsma.services.rcs.contact.ContactId;
 
 import android.content.Context;
 import android.content.Intent;

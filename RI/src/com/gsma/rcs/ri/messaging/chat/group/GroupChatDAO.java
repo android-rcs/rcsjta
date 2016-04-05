@@ -18,14 +18,13 @@
 
 package com.gsma.rcs.ri.messaging.chat.group;
 
+import com.gsma.rcs.ri.utils.ContactUtil;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.GroupChat;
 import com.gsma.services.rcs.chat.GroupChat.ReasonCode;
 import com.gsma.services.rcs.chat.GroupChat.State;
 import com.gsma.services.rcs.contact.ContactId;
-
-import com.gsma.rcs.ri.utils.ContactUtil;
 
 import android.content.ContentResolver;
 import android.content.Context;

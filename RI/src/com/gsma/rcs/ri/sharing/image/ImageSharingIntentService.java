@@ -18,14 +18,13 @@
 
 package com.gsma.rcs.ri.sharing.image;
 
-import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.services.rcs.sharing.image.ImageSharing;
-import com.gsma.services.rcs.sharing.image.ImageSharingIntent;
-
 import com.gsma.rcs.ri.R;
 import com.gsma.rcs.ri.utils.LogUtils;
 import com.gsma.rcs.ri.utils.RcsContactUtil;
 import com.gsma.rcs.ri.utils.Utils;
+import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.sharing.image.ImageSharing;
+import com.gsma.services.rcs.sharing.image.ImageSharingIntent;
 
 import android.app.IntentService;
 import android.app.Notification;

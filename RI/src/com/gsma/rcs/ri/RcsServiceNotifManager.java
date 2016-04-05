@@ -18,6 +18,8 @@
 
 package com.gsma.rcs.ri;
 
+import com.gsma.rcs.api.connection.utils.TimerUtils;
+import com.gsma.rcs.ri.utils.LogUtils;
 import com.gsma.services.rcs.RcsService;
 import com.gsma.services.rcs.RcsServiceControl;
 import com.gsma.services.rcs.RcsServiceException;
@@ -25,10 +27,6 @@ import com.gsma.services.rcs.RcsServiceListener;
 import com.gsma.services.rcs.RcsServiceRegistration;
 import com.gsma.services.rcs.RcsServiceRegistrationListener;
 import com.gsma.services.rcs.capability.CapabilityService;
-
-import com.gsma.rcs.api.connection.utils.TimerUtils;
-import com.gsma.rcs.ri.utils.LogUtils;
-import com.gsma.rcs.ri.R;
 
 import android.app.AlarmManager;
 import android.app.Notification;

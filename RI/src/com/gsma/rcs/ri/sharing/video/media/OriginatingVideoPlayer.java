@@ -18,10 +18,13 @@
 
 package com.gsma.rcs.ri.sharing.video.media;
 
+import com.gsma.rcs.api.connection.utils.ExceptionUtil;
+import com.gsma.rcs.ri.utils.DatagramConnection;
+import com.gsma.rcs.ri.utils.LogUtils;
+import com.gsma.rcs.ri.utils.NetworkRessourceManager;
 import com.gsma.services.rcs.sharing.video.VideoCodec;
 import com.gsma.services.rcs.sharing.video.VideoPlayer;
 
-import com.gsma.rcs.api.connection.utils.ExceptionUtil;
 import com.orangelabs.rcs.core.ims.protocol.rtp.RtpException;
 import com.orangelabs.rcs.core.ims.protocol.rtp.RtpUtils;
 import com.orangelabs.rcs.core.ims.protocol.rtp.VideoRtpSender;
@@ -38,9 +41,6 @@ import com.orangelabs.rcs.core.ims.protocol.rtp.media.MediaException;
 import com.orangelabs.rcs.core.ims.protocol.rtp.media.MediaInput;
 import com.orangelabs.rcs.core.ims.protocol.rtp.media.VideoSample;
 import com.orangelabs.rcs.core.ims.protocol.rtp.stream.RtpStreamListener;
-import com.gsma.rcs.ri.utils.DatagramConnection;
-import com.gsma.rcs.ri.utils.LogUtils;
-import com.gsma.rcs.ri.utils.NetworkRessourceManager;
 
 import android.hardware.Camera;
 import android.os.SystemClock;

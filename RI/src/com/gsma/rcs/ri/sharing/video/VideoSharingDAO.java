@@ -18,12 +18,11 @@
 
 package com.gsma.rcs.ri.sharing.video;
 
+import com.gsma.rcs.ri.utils.ContactUtil;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.sharing.video.VideoSharing;
 import com.gsma.services.rcs.sharing.video.VideoSharingLog;
-
-import com.gsma.rcs.ri.utils.ContactUtil;
 
 import android.content.ContentResolver;
 import android.content.Context;

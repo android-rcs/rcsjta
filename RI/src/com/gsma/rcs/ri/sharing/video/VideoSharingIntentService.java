@@ -18,13 +18,12 @@
 
 package com.gsma.rcs.ri.sharing.video;
 
-import com.gsma.services.rcs.sharing.video.VideoSharing;
-import com.gsma.services.rcs.sharing.video.VideoSharingIntent;
-
 import com.gsma.rcs.ri.R;
 import com.gsma.rcs.ri.utils.LogUtils;
 import com.gsma.rcs.ri.utils.RcsContactUtil;
 import com.gsma.rcs.ri.utils.Utils;
+import com.gsma.services.rcs.sharing.video.VideoSharing;
+import com.gsma.services.rcs.sharing.video.VideoSharingIntent;
 
 import android.app.IntentService;
 import android.app.Notification;

@@ -18,10 +18,9 @@
 
 package com.gsma.rcs.ri.messaging.geoloc;
 
+import com.gsma.rcs.ri.R;
 import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.contact.ContactId;
-
-import com.gsma.rcs.ri.R;
 
 import android.app.Activity;
 import android.content.Context;

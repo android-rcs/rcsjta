@@ -18,13 +18,12 @@
 
 package com.gsma.rcs.ri.messaging.filetransfer;
 
+import com.gsma.rcs.ri.utils.ContactUtil;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsService.ReadStatus;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
 import com.gsma.services.rcs.filetransfer.FileTransferLog;
-
-import com.gsma.rcs.ri.utils.ContactUtil;
 
 import android.content.ContentResolver;
 import android.content.Context;

@@ -18,14 +18,13 @@
 
 package com.gsma.rcs.ri.sharing.geoloc;
 
+import com.gsma.rcs.ri.utils.ContactUtil;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharing;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharing.ReasonCode;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharing.State;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharingLog;
-
-import com.gsma.rcs.ri.utils.ContactUtil;
 
 import android.content.ContentResolver;
 import android.content.Context;

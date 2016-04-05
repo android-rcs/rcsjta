@@ -20,17 +20,16 @@ package com.gsma.rcs.ri.messaging.chat.group;
 
 import static com.gsma.rcs.ri.utils.FileUtils.takePersistableContentUriPermission;
 
+import com.gsma.rcs.ri.R;
+import com.gsma.rcs.ri.RiApplication;
+import com.gsma.rcs.ri.messaging.chat.SendFile;
+import com.gsma.rcs.ri.utils.LogUtils;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
 import com.gsma.services.rcs.filetransfer.FileTransferService;
 import com.gsma.services.rcs.filetransfer.GroupFileTransferListener;
 import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo;
-
-import com.gsma.rcs.ri.R;
-import com.gsma.rcs.ri.RiApplication;
-import com.gsma.rcs.ri.messaging.chat.SendFile;
-import com.gsma.rcs.ri.utils.LogUtils;
 
 import android.content.Context;
 import android.content.Intent;

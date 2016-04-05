@@ -18,10 +18,9 @@
 
 package com.gsma.rcs.ri.utils;
 
+import com.gsma.rcs.ri.RiApplication;
 import com.gsma.services.rcs.RcsPermissionDeniedException;
 import com.gsma.services.rcs.contact.ContactId;
-
-import com.gsma.rcs.ri.RiApplication;
 
 import android.util.Log;
 
