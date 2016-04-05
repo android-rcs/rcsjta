@@ -18,12 +18,11 @@
 
 package com.gsma.rcs.ri.messaging.adapter;
 
+import com.gsma.rcs.ri.R;
+import com.gsma.rcs.ri.utils.RcsContactUtil;
 import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.contact.ContactId;
-
-import com.gsma.rcs.ri.R;
-import com.gsma.rcs.ri.utils.RcsContactUtil;
 
 import android.app.Activity;
 import android.content.Context;

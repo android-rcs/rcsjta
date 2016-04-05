@@ -18,15 +18,6 @@
 
 package com.gsma.rcs.ri.extension.messaging;
 
-import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.services.rcs.extension.MultimediaMessagingSession;
-import com.gsma.services.rcs.extension.MultimediaMessagingSessionIntent;
-import com.gsma.services.rcs.extension.MultimediaMessagingSessionListener;
-import com.gsma.services.rcs.extension.MultimediaSession;
-import com.gsma.services.rcs.extension.MultimediaSessionService;
-import com.gsma.services.rcs.extension.MultimediaSessionServiceConfiguration;
-
 import com.gsma.rcs.api.connection.ConnectionManager.RcsServiceName;
 import com.gsma.rcs.api.connection.utils.ExceptionUtil;
 import com.gsma.rcs.api.connection.utils.RcsActivity;
@@ -35,6 +26,14 @@ import com.gsma.rcs.ri.RiApplication;
 import com.gsma.rcs.ri.utils.LogUtils;
 import com.gsma.rcs.ri.utils.RcsContactUtil;
 import com.gsma.rcs.ri.utils.RcsSessionUtil;
+import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.extension.MultimediaMessagingSession;
+import com.gsma.services.rcs.extension.MultimediaMessagingSessionIntent;
+import com.gsma.services.rcs.extension.MultimediaMessagingSessionListener;
+import com.gsma.services.rcs.extension.MultimediaSession;
+import com.gsma.services.rcs.extension.MultimediaSessionService;
+import com.gsma.services.rcs.extension.MultimediaSessionServiceConfiguration;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -342,7 +341,8 @@ public class MessagingSessionView extends RcsActivity {
             public void onClick(View v) {
                 try {
                     String data = "data".concat(String.valueOf(i++));
-                    mSession.sendMessage(data.getBytes(), MessagingSessionUtils.SERVICE_CONTENT_TYPE);
+                    mSession.sendMessage(data.getBytes(),
+                            MessagingSessionUtils.SERVICE_CONTENT_TYPE);
                 } catch (RcsServiceException e) {
                     showExceptionThenExit(e);
                 }
@@ -408,7 +408,8 @@ public class MessagingSessionView extends RcsActivity {
             }
 
             @Override
-            public void onMessageReceived(ContactId contact, String sessionId, byte[] content, String contentType) {
+            public void onMessageReceived(ContactId contact, String sessionId, byte[] content,
+                    String contentType) {
                 if (LogUtils.isActive) {
                     Log.d(LOGTAG, "onMessageReceived contact=" + contact + " sessionId="
                             + sessionId);
@@ -432,8 +433,8 @@ public class MessagingSessionView extends RcsActivity {
             @Override
             public void onMessagesFlushed(ContactId contact, String sessionId) {
                 if (LogUtils.isActive) {
-                    Log.d(LOGTAG, "onMessagesFlushed contact=" + contact +
-                                    " sessionId=" + sessionId);
+                    Log.d(LOGTAG, "onMessagesFlushed contact=" + contact + " sessionId="
+                            + sessionId);
                 }
             }
         };

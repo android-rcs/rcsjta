@@ -168,7 +168,7 @@ public class FileUtils {
 
     /**
      * Fetch the file name from URI
-     * 
+     *
      * @param context Context
      * @param file URI
      * @return fileName String
@@ -205,7 +205,7 @@ public class FileUtils {
 
     /**
      * Fetch the file size from URI
-     * 
+     *
      * @param ctx Context
      * @param file URI
      * @return fileSize long
@@ -311,7 +311,7 @@ public class FileUtils {
 
     /**
      * Open file
-     * 
+     *
      * @param activity the activity
      * @param mimeType the mime type
      * @param action the action
@@ -336,7 +336,7 @@ public class FileUtils {
 
     /**
      * Saves the read/write permission for later use by the stack.
-     * 
+     *
      * @param file Uri of file to transfer
      */
     public static void takePersistableContentUriPermission(Context context, Uri file) {

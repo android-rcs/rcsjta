@@ -18,15 +18,14 @@
 
 package com.gsma.rcs.ri.service;
 
-import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.RcsServiceRegistration;
-import com.gsma.services.rcs.RcsServiceRegistrationListener;
-
 import com.gsma.rcs.api.connection.ConnectionManager.RcsServiceName;
 import com.gsma.rcs.api.connection.utils.ExceptionUtil;
 import com.gsma.rcs.api.connection.utils.RcsActivity;
 import com.gsma.rcs.ri.R;
 import com.gsma.rcs.ri.utils.LogUtils;
+import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.RcsServiceRegistration;
+import com.gsma.services.rcs.RcsServiceRegistrationListener;
 
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;

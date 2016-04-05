@@ -18,13 +18,12 @@
 
 package com.gsma.rcs.ri.messaging.chat;
 
-import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.chat.ChatServiceConfiguration;
-
 import com.gsma.rcs.api.connection.ConnectionManager.RcsServiceName;
 import com.gsma.rcs.api.connection.utils.RcsActivity;
 import com.gsma.rcs.ri.R;
 import com.gsma.rcs.ri.utils.LogUtils;
+import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.chat.ChatServiceConfiguration;
 
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;

@@ -308,7 +308,6 @@ public class GroupTalkView extends RcsFragmentActivity implements
 
         };
         mChatService = getChatApi();
-        mChatService.addEventListener(mChatListener);
         mFileTransferService = getFileTransferApi();
 
         HistoryUriBuilder uriBuilder = new HistoryUriBuilder(HistoryLog.CONTENT_URI);
@@ -468,13 +467,6 @@ public class GroupTalkView extends RcsFragmentActivity implements
                 Log.w(LOGTAG, ExceptionUtil.getFullStackTrace(e));
             }
         }
-        try {
-            if (isServiceConnected(ConnectionManager.RcsServiceName.CHAT) && mChatService != null) {
-                mChatService.removeEventListener(mChatListener);
-            }
-        } catch (RcsServiceException e) {
-            Log.w(LOGTAG, ExceptionUtil.getFullStackTrace(e));
-        }
         super.onDestroy();
     }
 
@@ -482,6 +474,14 @@ public class GroupTalkView extends RcsFragmentActivity implements
     protected void onResume() {
         super.onResume();
         RI.sChatIdOnForeground = mChatId;
+        try {
+            if (mChatListener != null && mChatService != null) {
+                mChatService.addEventListener(mChatListener);
+            }
+        } catch (RcsServiceNotAvailableException ignore) {
+        } catch (RcsServiceException e) {
+            Log.w(LOGTAG, ExceptionUtil.getFullStackTrace(e));
+        }
     }
 
     @Override
@@ -496,6 +496,14 @@ public class GroupTalkView extends RcsFragmentActivity implements
     protected void onPause() {
         super.onPause();
         RI.sChatIdOnForeground = null;
+        try {
+            if (mChatListener != null && mChatService != null) {
+                mChatService.removeEventListener(mChatListener);
+            }
+        } catch (RcsServiceNotAvailableException ignore) {
+        } catch (RcsServiceException e) {
+            Log.w(LOGTAG, ExceptionUtil.getFullStackTrace(e));
+        }
     }
 
     @Override

@@ -69,7 +69,7 @@ public class GeolocSharingLogView extends RcsActivity {
         super.onResume();
         GeolocSharingDAO dao = GeolocSharingDAO.getGeolocSharing(this, mSharingId);
         if (dao == null) {
-            showMessageThenExit( R.string.error_item_not_found);
+            showMessageThenExit(R.string.error_item_not_found);
             return;
         }
         mTxtViewContact.setText(dao.getContact().toString());
@@ -83,6 +83,7 @@ public class GeolocSharingLogView extends RcsActivity {
 
     /**
      * Start activity to view details of geolocation sharing record
+     * 
      * @param context the context
      * @param sharingId the sharing ID
      */

@@ -18,12 +18,11 @@
 
 package com.gsma.rcs.ri.contacts;
 
-import com.gsma.services.rcs.RcsGenericException;
-import com.gsma.services.rcs.contact.ContactUtil;
-
 import com.gsma.rcs.api.connection.utils.RcsActivity;
 import com.gsma.rcs.ri.R;
 import com.gsma.rcs.ri.utils.ContactListAdapter;
+import com.gsma.services.rcs.RcsGenericException;
+import com.gsma.services.rcs.contact.ContactUtil;
 
 import android.content.Intent;
 import android.content.pm.ActivityInfo;

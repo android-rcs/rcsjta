@@ -18,6 +18,15 @@
 
 package com.gsma.rcs.ri.utils;
 
+import com.gsma.rcs.api.connection.ConnectionManager;
+import com.gsma.rcs.api.connection.utils.ExceptionUtil;
+import com.gsma.rcs.ri.R;
+import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.RcsServiceNotAvailableException;
+import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.contact.ContactService;
+import com.gsma.services.rcs.contact.RcsContact;
+
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
@@ -31,15 +40,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CursorAdapter;
 import android.widget.TextView;
-
-import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.RcsServiceNotAvailableException;
-import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.services.rcs.contact.ContactService;
-import com.gsma.services.rcs.contact.RcsContact;
-import com.gsma.rcs.api.connection.ConnectionManager;
-import com.gsma.rcs.api.connection.utils.ExceptionUtil;
-import com.gsma.rcs.ri.R;
 
 import java.util.HashSet;
 import java.util.Set;

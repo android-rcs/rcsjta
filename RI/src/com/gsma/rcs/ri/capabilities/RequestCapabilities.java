@@ -18,12 +18,6 @@
 
 package com.gsma.rcs.ri.capabilities;
 
-import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.capability.Capabilities;
-import com.gsma.services.rcs.capability.CapabilitiesListener;
-import com.gsma.services.rcs.capability.CapabilityService;
-import com.gsma.services.rcs.contact.ContactId;
-
 import com.gsma.rcs.api.connection.ConnectionManager.RcsServiceName;
 import com.gsma.rcs.api.connection.utils.ExceptionUtil;
 import com.gsma.rcs.api.connection.utils.RcsActivity;
@@ -32,6 +26,11 @@ import com.gsma.rcs.ri.utils.ContactListAdapter;
 import com.gsma.rcs.ri.utils.ContactUtil;
 import com.gsma.rcs.ri.utils.LogUtils;
 import com.gsma.rcs.ri.utils.Utils;
+import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.capability.Capabilities;
+import com.gsma.services.rcs.capability.CapabilitiesListener;
+import com.gsma.services.rcs.capability.CapabilityService;
+import com.gsma.services.rcs.contact.ContactId;
 
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
@@ -196,15 +195,11 @@ public class RequestCapabilities extends RcsActivity {
 
         if (capabilities != null) {
             // Set capabilities
-            imageCSh.setChecked(capabilities
-                    .hasCapabilities(Capabilities.CAPABILITY_IMAGE_SHARING));
-            videoCSh.setChecked(capabilities
-                    .hasCapabilities(Capabilities.CAPABILITY_VIDEO_SHARING));
-            ft.setChecked(capabilities
-                    .hasCapabilities(Capabilities.CAPABILITY_FILE_TRANSFER));
+            imageCSh.setChecked(capabilities.hasCapabilities(Capabilities.CAPABILITY_IMAGE_SHARING));
+            videoCSh.setChecked(capabilities.hasCapabilities(Capabilities.CAPABILITY_VIDEO_SHARING));
+            ft.setChecked(capabilities.hasCapabilities(Capabilities.CAPABILITY_FILE_TRANSFER));
             im.setChecked(capabilities.hasCapabilities(Capabilities.CAPABILITY_IM));
-            geoloc.setChecked(capabilities
-                    .hasCapabilities(Capabilities.CAPABILITY_GEOLOC_PUSH));
+            geoloc.setChecked(capabilities.hasCapabilities(Capabilities.CAPABILITY_GEOLOC_PUSH));
         }
         // Set extensions
         extensions.setVisibility(View.VISIBLE);

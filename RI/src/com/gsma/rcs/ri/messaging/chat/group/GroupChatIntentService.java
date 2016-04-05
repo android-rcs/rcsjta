@@ -18,11 +18,6 @@
 
 package com.gsma.rcs.ri.messaging.chat.group;
 
-import com.gsma.services.rcs.chat.ChatLog;
-import com.gsma.services.rcs.chat.GroupChat;
-import com.gsma.services.rcs.chat.GroupChatIntent;
-import com.gsma.services.rcs.contact.ContactId;
-
 import com.gsma.rcs.ri.R;
 import com.gsma.rcs.ri.messaging.GroupTalkView;
 import com.gsma.rcs.ri.messaging.TalkList;
@@ -30,6 +25,10 @@ import com.gsma.rcs.ri.messaging.chat.ChatMessageDAO;
 import com.gsma.rcs.ri.messaging.chat.ChatPendingIntentManager;
 import com.gsma.rcs.ri.utils.LogUtils;
 import com.gsma.rcs.ri.utils.RcsContactUtil;
+import com.gsma.services.rcs.chat.ChatLog;
+import com.gsma.services.rcs.chat.GroupChat;
+import com.gsma.services.rcs.chat.GroupChatIntent;
+import com.gsma.services.rcs.contact.ContactId;
 
 import android.app.IntentService;
 import android.app.Notification;
@@ -129,6 +128,7 @@ public class GroupChatIntentService extends IntentService {
             return;
         }
         forwardGCInvitation2UI(invitation, chatId, groupChatDAO);
+        TalkList.notifyNewConversationEvent(this, GroupChatIntent.ACTION_NEW_INVITATION);
     }
 
     private void handleNewGroupChatMessage(Intent newGroupChatMessage, String messageId) {
@@ -142,6 +142,7 @@ public class GroupChatIntentService extends IntentService {
             Log.d(LOGTAG, "Group chat message =".concat(messageDAO.toString()));
         }
         forwardGCMessage2UI(newGroupChatMessage, messageDAO);
+        TalkList.notifyNewConversationEvent(this, GroupChatIntent.ACTION_NEW_GROUP_CHAT_MESSAGE);
     }
 
     private void forwardGCMessage2UI(Intent newGroupChatMessage, ChatMessageDAO message) {
@@ -175,7 +176,6 @@ public class GroupChatIntentService extends IntentService {
             Notification notif = buildNotification(contentIntent, title, msg);
             /* Send notification */
             mChatPendingIntentManager.postNotification(uniqueId, notif);
-            TalkList.notifyNewConversationEvent(this, GroupChatIntent.ACTION_NEW_GROUP_CHAT_MESSAGE);
         }
     }
 
@@ -207,7 +207,6 @@ public class GroupChatIntentService extends IntentService {
             Notification notif = buildNotification(contentIntent, title, msg);
             /* Send notification */
             mChatPendingIntentManager.postNotification(uniqueId, notif);
-            TalkList.notifyNewConversationEvent(this, GroupChatIntent.ACTION_NEW_INVITATION);
         } else {
             if (LogUtils.isActive) {
                 Log.w(LOGTAG, "Received invitation for an existing group chat conversation chatId="

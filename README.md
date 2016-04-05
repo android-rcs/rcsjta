@@ -47,8 +47,8 @@ The RCS core stack is under [Apache 2 license](https://rawgit.com/android-rcs/rc
 
 
 ##SDK nightly builds:
-- see latest SDK of [integration](https://github.com/android-rcs/rcsjta.build/tree/master) branch.
 - see latest SDK of [tapi_1.5](https://github.com/android-rcs/rcsjta.build/tree/tapi_1.5) branch.
+- see latest SDK of [tapi_1.6](https://github.com/android-rcs/rcsjta.build/tree/tapi_1.6) branch.
 
 ##Stack overview:
 

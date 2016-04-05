@@ -18,6 +18,20 @@
 
 package com.gsma.rcs.ri;
 
+import com.gsma.rcs.api.connection.utils.ExceptionUtil;
+import com.gsma.rcs.api.connection.utils.RcsListActivity;
+import com.gsma.rcs.ri.capabilities.TestCapabilitiesApi;
+import com.gsma.rcs.ri.contacts.TestContactsApi;
+import com.gsma.rcs.ri.extension.TestMultimediaSessionApi;
+import com.gsma.rcs.ri.intents.TestIntentApps;
+import com.gsma.rcs.ri.messaging.TestMessagingApi;
+import com.gsma.rcs.ri.service.TestServiceApi;
+import com.gsma.rcs.ri.sharing.TestSharingApi;
+import com.gsma.rcs.ri.upload.InitiateFileUpload;
+import com.gsma.rcs.ri.utils.LogUtils;
+import com.gsma.services.rcs.RcsPermissionDeniedException;
+import com.gsma.services.rcs.contact.ContactUtil;
+
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -31,21 +45,6 @@ import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
-
-import com.gsma.services.rcs.RcsPermissionDeniedException;
-import com.gsma.services.rcs.contact.ContactUtil;
-import com.gsma.rcs.api.connection.utils.ExceptionUtil;
-import com.gsma.rcs.api.connection.utils.RcsListActivity;
-import com.gsma.rcs.ri.capabilities.TestCapabilitiesApi;
-import com.gsma.rcs.ri.contacts.TestContactsApi;
-import com.gsma.rcs.ri.extension.TestMultimediaSessionApi;
-import com.gsma.rcs.ri.intents.TestIntentApps;
-import com.gsma.rcs.ri.messaging.TestMessagingApi;
-import com.gsma.rcs.ri.service.TestServiceApi;
-import com.gsma.rcs.ri.sharing.TestSharingApi;
-import com.gsma.rcs.ri.upload.InitiateFileUpload;
-import com.gsma.rcs.ri.utils.LogUtils;
-import com.gsma.rcs.ri.R;
 
 import java.util.Arrays;
 import java.util.HashSet;

@@ -18,21 +18,9 @@
 
 package com.gsma.rcs.ri.sharing.video;
 
-import com.gsma.services.rcs.RcsGenericException;
-import com.gsma.services.rcs.RcsPersistentStorageException;
-import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.services.rcs.sharing.video.VideoDescriptor;
-import com.gsma.services.rcs.sharing.video.VideoSharing;
-import com.gsma.services.rcs.sharing.video.VideoSharingListener;
-import com.gsma.services.rcs.sharing.video.VideoSharingService;
-
 import com.gsma.rcs.api.connection.ConnectionManager.RcsServiceName;
 import com.gsma.rcs.api.connection.utils.ExceptionUtil;
 import com.gsma.rcs.api.connection.utils.RcsActivity;
-import com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h264.H264Config;
-import com.orangelabs.rcs.core.ims.protocol.rtp.format.video.CameraOptions;
-import com.orangelabs.rcs.core.ims.protocol.rtp.format.video.Orientation;
 import com.gsma.rcs.ri.R;
 import com.gsma.rcs.ri.RiApplication;
 import com.gsma.rcs.ri.sharing.video.media.OriginatingVideoPlayer;
@@ -43,6 +31,18 @@ import com.gsma.rcs.ri.utils.ContactUtil;
 import com.gsma.rcs.ri.utils.LogUtils;
 import com.gsma.rcs.ri.utils.RcsContactUtil;
 import com.gsma.rcs.ri.utils.RcsSessionUtil;
+import com.gsma.services.rcs.RcsGenericException;
+import com.gsma.services.rcs.RcsPersistentStorageException;
+import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.sharing.video.VideoDescriptor;
+import com.gsma.services.rcs.sharing.video.VideoSharing;
+import com.gsma.services.rcs.sharing.video.VideoSharingListener;
+import com.gsma.services.rcs.sharing.video.VideoSharingService;
+
+import com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h264.H264Config;
+import com.orangelabs.rcs.core.ims.protocol.rtp.format.video.CameraOptions;
+import com.orangelabs.rcs.core.ims.protocol.rtp.format.video.Orientation;
 
 import android.Manifest;
 import android.app.AlertDialog;
@@ -602,8 +602,8 @@ public class OutgoingVideoSharing extends RcsActivity implements VideoPlayerList
         Method method = getCameraOpenMethod();
         if (method != null) {
             try {
-                camera = (Camera) method.invoke(camera, new Object[]{
-                        cameraId.getValue()
+                camera = (Camera) method.invoke(camera, new Object[] {
+                    cameraId.getValue()
                 });
             } catch (Exception e) {
                 camera = Camera.open();
@@ -762,8 +762,8 @@ public class OutgoingVideoSharing extends RcsActivity implements VideoPlayerList
         try {
             Class<?> cameraClass = classLoader.loadClass("android.hardware.Camera");
             try {
-                return cameraClass.getMethod("open", new Class[]{
-                        int.class
+                return cameraClass.getMethod("open", new Class[] {
+                    int.class
                 });
             } catch (NoSuchMethodException ignored) {
             }
@@ -792,8 +792,8 @@ public class OutgoingVideoSharing extends RcsActivity implements VideoPlayerList
                         }
                     }
                 }
-                mCamera = (Camera) method.invoke(mCamera, new Object[]{
-                        hCamId
+                mCamera = (Camera) method.invoke(mCamera, new Object[] {
+                    hCamId
                 });
                 mOpenedCameraId = cameraId;
             } catch (Exception e) {
@@ -856,7 +856,7 @@ public class OutgoingVideoSharing extends RcsActivity implements VideoPlayerList
     private VideoSharingListener vshListener = new VideoSharingListener() {
         @Override
         public void onStateChanged(ContactId contact, String sharingId,
-                                   final VideoSharing.State state, VideoSharing.ReasonCode reasonCode) {
+                final VideoSharing.State state, VideoSharing.ReasonCode reasonCode) {
             // Discard event if not for current sharingId
             if (mSharingId == null || !mSharingId.equals(sharingId)) {
                 return;

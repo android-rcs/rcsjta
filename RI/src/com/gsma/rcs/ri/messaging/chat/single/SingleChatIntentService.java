@@ -18,10 +18,6 @@
 
 package com.gsma.rcs.ri.messaging.chat.single;
 
-import com.gsma.services.rcs.chat.ChatLog;
-import com.gsma.services.rcs.chat.OneToOneChatIntent;
-import com.gsma.services.rcs.contact.ContactId;
-
 import com.gsma.rcs.ri.R;
 import com.gsma.rcs.ri.messaging.OneToOneTalkView;
 import com.gsma.rcs.ri.messaging.TalkList;
@@ -29,6 +25,9 @@ import com.gsma.rcs.ri.messaging.chat.ChatMessageDAO;
 import com.gsma.rcs.ri.messaging.chat.ChatPendingIntentManager;
 import com.gsma.rcs.ri.utils.LogUtils;
 import com.gsma.rcs.ri.utils.RcsContactUtil;
+import com.gsma.services.rcs.chat.ChatLog;
+import com.gsma.services.rcs.chat.OneToOneChatIntent;
+import com.gsma.services.rcs.contact.ContactId;
 
 import android.app.IntentService;
 import android.app.Notification;
@@ -185,7 +184,8 @@ public class SingleChatIntentService extends IntentService {
             }
             Notification notif = buildNotification(contentIntent, title, msg);
             mChatPendingIntentManager.postNotification(uniqueId, notif);
-            TalkList.notifyNewConversationEvent(this, OneToOneChatIntent.ACTION_NEW_ONE_TO_ONE_CHAT_MESSAGE);
+            TalkList.notifyNewConversationEvent(this,
+                    OneToOneChatIntent.ACTION_NEW_ONE_TO_ONE_CHAT_MESSAGE);
         }
     }
 

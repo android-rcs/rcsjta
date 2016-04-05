@@ -18,14 +18,12 @@
 
 package com.gsma.rcs.ri;
 
-import com.gsma.services.rcs.RcsService.Direction;
-import com.gsma.services.rcs.RcsServiceControl;
-import com.gsma.services.rcs.filetransfer.FileTransfer.Disposition;
-
 import com.gsma.rcs.api.connection.ConnectionManager;
 import com.gsma.rcs.api.connection.ConnectionManager.RcsServiceName;
 import com.gsma.rcs.ri.utils.LogUtils;
-import com.gsma.rcs.ri.R;
+import com.gsma.services.rcs.RcsService.Direction;
+import com.gsma.services.rcs.RcsServiceControl;
+import com.gsma.services.rcs.filetransfer.FileTransfer.Disposition;
 
 import android.app.Application;
 import android.content.Context;

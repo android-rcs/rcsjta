@@ -18,11 +18,10 @@
 
 package com.gsma.rcs.ri.extension;
 
-import com.gsma.services.rcs.contact.ContactId;
-
 import com.gsma.rcs.ri.R;
 import com.gsma.rcs.ri.utils.ContactListAdapter;
 import com.gsma.rcs.ri.utils.ContactUtil;
+import com.gsma.services.rcs.contact.ContactId;
 
 import android.app.Activity;
 import android.content.pm.ActivityInfo;

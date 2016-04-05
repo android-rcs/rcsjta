@@ -18,14 +18,13 @@
 
 package com.gsma.rcs.ri.messaging.filetransfer;
 
-import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.filetransfer.FileTransferServiceConfiguration;
-import com.gsma.services.rcs.filetransfer.FileTransferServiceConfiguration.ImageResizeOption;
-
 import com.gsma.rcs.api.connection.ConnectionManager.RcsServiceName;
 import com.gsma.rcs.api.connection.utils.RcsActivity;
 import com.gsma.rcs.ri.R;
 import com.gsma.rcs.ri.utils.LogUtils;
+import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.filetransfer.FileTransferServiceConfiguration;
+import com.gsma.services.rcs.filetransfer.FileTransferServiceConfiguration.ImageResizeOption;
 
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;

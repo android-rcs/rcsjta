@@ -18,12 +18,11 @@
 
 package com.gsma.rcs.ri.capabilities;
 
-import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.capability.Capabilities;
-
 import com.gsma.rcs.api.connection.ConnectionManager.RcsServiceName;
 import com.gsma.rcs.api.connection.utils.RcsActivity;
 import com.gsma.rcs.ri.R;
+import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.capability.Capabilities;
 
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
@@ -60,14 +59,11 @@ public class MyCapabilities extends RcsActivity {
             Capabilities capabilities = getCapabilityApi().getMyCapabilities();
             // Set capabilities
             CheckBox imageCSh = (CheckBox) findViewById(R.id.image_sharing);
-            imageCSh.setChecked(capabilities
-                    .hasCapabilities(Capabilities.CAPABILITY_IMAGE_SHARING));
+            imageCSh.setChecked(capabilities.hasCapabilities(Capabilities.CAPABILITY_IMAGE_SHARING));
             CheckBox videoCSh = (CheckBox) findViewById(R.id.video_sharing);
-            videoCSh.setChecked(capabilities
-                    .hasCapabilities(Capabilities.CAPABILITY_VIDEO_SHARING));
+            videoCSh.setChecked(capabilities.hasCapabilities(Capabilities.CAPABILITY_VIDEO_SHARING));
             CheckBox ft = (CheckBox) findViewById(R.id.file_transfer);
-            ft.setChecked(capabilities
-                    .hasCapabilities(Capabilities.CAPABILITY_FILE_TRANSFER));
+            ft.setChecked(capabilities.hasCapabilities(Capabilities.CAPABILITY_FILE_TRANSFER));
             CheckBox im = (CheckBox) findViewById(R.id.im);
             im.setChecked(capabilities.hasCapabilities(Capabilities.CAPABILITY_IM));
             CheckBox geolocationPush = (CheckBox) findViewById(R.id.geoloc_push);

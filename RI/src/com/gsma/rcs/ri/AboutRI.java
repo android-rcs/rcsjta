@@ -19,7 +19,6 @@
 package com.gsma.rcs.ri;
 
 import com.gsma.services.rcs.RcsService.Build;
-import com.gsma.rcs.ri.R;
 
 import android.app.Activity;
 import android.content.pm.ActivityInfo;

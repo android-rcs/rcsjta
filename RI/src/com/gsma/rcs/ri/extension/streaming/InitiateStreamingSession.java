@@ -18,9 +18,8 @@
 
 package com.gsma.rcs.ri.extension.streaming;
 
-import com.gsma.services.rcs.contact.ContactId;
-
 import com.gsma.rcs.ri.extension.InitiateMultimediaSession;
+import com.gsma.services.rcs.contact.ContactId;
 
 import android.content.Intent;
 import android.os.Parcelable;

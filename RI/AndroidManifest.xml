@@ -486,12 +486,7 @@
 
                 <action android:name="com.gsma.services.rcs.action.VIEW_FILE_TRANSFER" />
             </intent-filter>
-            <intent-filter>
-                <category android:name="android.intent.category.LAUNCHER" />
-                <category android:name="android.intent.category.DEFAULT" />
 
-                <action android:name="com.gsma.services.rcs.action.VIEW_GROUP_CHAT" />
-            </intent-filter>
         </activity>
         <activity
             android:name="com.gsma.rcs.ri.sharing.geoloc.GeolocSharingLogView"

@@ -18,11 +18,10 @@
 
 package com.gsma.rcs.ri.capabilities;
 
-import com.gsma.services.rcs.capability.CapabilitiesLog;
-
 import com.gsma.rcs.api.connection.utils.RcsActivity;
 import com.gsma.rcs.ri.R;
 import com.gsma.rcs.ri.utils.RcsContactUtil;
+import com.gsma.services.rcs.capability.CapabilitiesLog;
 
 import android.content.Context;
 import android.content.pm.ActivityInfo;
