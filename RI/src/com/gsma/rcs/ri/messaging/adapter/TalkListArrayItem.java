@@ -18,10 +18,9 @@
 
 package com.gsma.rcs.ri.messaging.adapter;
 
+import com.gsma.rcs.ri.R;
 import com.gsma.services.rcs.RcsService;
 import com.gsma.services.rcs.contact.ContactId;
-
-import com.gsma.rcs.ri.R;
 
 import android.view.View;
 import android.widget.ImageView;

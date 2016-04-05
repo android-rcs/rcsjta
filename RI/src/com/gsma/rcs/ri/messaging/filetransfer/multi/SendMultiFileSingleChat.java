@@ -18,15 +18,14 @@
 
 package com.gsma.rcs.ri.messaging.filetransfer.multi;
 
+import com.gsma.rcs.ri.RiApplication;
+import com.gsma.rcs.ri.utils.LogUtils;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.contact.ContactUtil;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
 import com.gsma.services.rcs.filetransfer.FileTransferService;
 import com.gsma.services.rcs.filetransfer.OneToOneFileTransferListener;
-
-import com.gsma.rcs.ri.RiApplication;
-import com.gsma.rcs.ri.utils.LogUtils;
 
 import android.util.Log;
 

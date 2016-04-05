@@ -18,6 +18,9 @@
 
 package com.gsma.rcs.ri.messaging.geoloc;
 
+import com.gsma.rcs.ri.R;
+import com.gsma.rcs.ri.utils.RcsContactUtil;
+import com.gsma.rcs.ri.utils.Utils;
 import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.chat.ChatLog.Message;
@@ -33,9 +36,6 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.gsma.rcs.ri.R;
-import com.gsma.rcs.ri.utils.RcsContactUtil;
-import com.gsma.rcs.ri.utils.Utils;
 
 import android.content.Context;
 import android.content.Intent;

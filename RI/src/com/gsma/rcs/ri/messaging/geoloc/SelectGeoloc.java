@@ -18,6 +18,7 @@
 
 package com.gsma.rcs.ri.messaging.geoloc;
 
+import com.gsma.rcs.ri.R;
 import com.gsma.services.rcs.Geoloc;
 
 import com.google.android.gms.maps.GoogleMap;
@@ -25,7 +26,6 @@ import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
-import com.gsma.rcs.ri.R;
 
 import android.content.Intent;
 import android.os.Bundle;

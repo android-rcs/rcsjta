@@ -18,17 +18,16 @@
 
 package com.gsma.rcs.ri.service;
 
-import com.gsma.services.rcs.CommonServiceConfiguration;
-import com.gsma.services.rcs.CommonServiceConfiguration.MessagingMethod;
-import com.gsma.services.rcs.CommonServiceConfiguration.MinimumBatteryLevel;
-import com.gsma.services.rcs.RcsServiceControl;
-import com.gsma.services.rcs.RcsServiceException;
-
 import com.gsma.rcs.api.connection.ConnectionManager.RcsServiceName;
 import com.gsma.rcs.api.connection.utils.RcsActivity;
 import com.gsma.rcs.ri.R;
 import com.gsma.rcs.ri.RiApplication;
 import com.gsma.rcs.ri.utils.LogUtils;
+import com.gsma.services.rcs.CommonServiceConfiguration;
+import com.gsma.services.rcs.CommonServiceConfiguration.MessagingMethod;
+import com.gsma.services.rcs.CommonServiceConfiguration.MinimumBatteryLevel;
+import com.gsma.services.rcs.RcsServiceControl;
+import com.gsma.services.rcs.RcsServiceException;
 
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;

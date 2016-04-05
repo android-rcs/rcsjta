@@ -18,18 +18,17 @@
 
 package com.gsma.rcs.ri.service;
 
+import com.gsma.rcs.api.connection.utils.ExceptionUtil;
+import com.gsma.rcs.api.connection.utils.RcsActivity;
+import com.gsma.rcs.ri.R;
+import com.gsma.rcs.ri.RiApplication;
+import com.gsma.rcs.ri.utils.LogUtils;
 import com.gsma.services.rcs.RcsGenericException;
 import com.gsma.services.rcs.RcsPermissionDeniedException;
 import com.gsma.services.rcs.RcsService;
 import com.gsma.services.rcs.RcsServiceControl;
 import com.gsma.services.rcs.RcsServiceListener;
 import com.gsma.services.rcs.capability.CapabilityService;
-
-import com.gsma.rcs.api.connection.utils.ExceptionUtil;
-import com.gsma.rcs.api.connection.utils.RcsActivity;
-import com.gsma.rcs.ri.R;
-import com.gsma.rcs.ri.RiApplication;
-import com.gsma.rcs.ri.utils.LogUtils;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

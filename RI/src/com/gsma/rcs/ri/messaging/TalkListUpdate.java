@@ -18,15 +18,14 @@
 
 package com.gsma.rcs.ri.messaging;
 
+import com.gsma.rcs.ri.messaging.adapter.TalkListArrayItem;
+import com.gsma.rcs.ri.utils.ContactUtil;
 import com.gsma.services.rcs.RcsService;
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransferLog;
 import com.gsma.services.rcs.history.HistoryLog;
 import com.gsma.services.rcs.history.HistoryUriBuilder;
-
-import com.gsma.rcs.ri.messaging.adapter.TalkListArrayItem;
-import com.gsma.rcs.ri.utils.ContactUtil;
 
 import android.content.Context;
 import android.database.Cursor;

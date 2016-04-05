@@ -18,13 +18,12 @@
 
 package com.gsma.rcs.ri.sharing.geoloc;
 
-import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.services.rcs.sharing.geoloc.GeolocSharingIntent;
-
 import com.gsma.rcs.ri.R;
 import com.gsma.rcs.ri.utils.LogUtils;
 import com.gsma.rcs.ri.utils.RcsContactUtil;
 import com.gsma.rcs.ri.utils.Utils;
+import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.sharing.geoloc.GeolocSharingIntent;
 
 import android.app.IntentService;
 import android.app.Notification;

@@ -18,12 +18,11 @@
 
 package com.gsma.rcs.ri.messaging.adapter;
 
-import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo;
-import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfoLog;
-
 import com.gsma.rcs.ri.R;
 import com.gsma.rcs.ri.RiApplication;
 import com.gsma.rcs.ri.utils.RcsContactUtil;
+import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo;
+import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfoLog;
 
 import android.content.Context;
 import android.database.Cursor;

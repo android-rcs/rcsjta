@@ -20,12 +20,6 @@ package com.gsma.rcs.ri.upload;
 
 import static com.gsma.rcs.ri.utils.FileUtils.takePersistableContentUriPermission;
 
-import com.gsma.services.rcs.RcsGenericException;
-import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.upload.FileUpload;
-import com.gsma.services.rcs.upload.FileUploadInfo;
-import com.gsma.services.rcs.upload.FileUploadListener;
-
 import com.gsma.rcs.api.connection.ConnectionManager.RcsServiceName;
 import com.gsma.rcs.api.connection.utils.ExceptionUtil;
 import com.gsma.rcs.api.connection.utils.RcsActivity;
@@ -34,6 +28,11 @@ import com.gsma.rcs.ri.utils.FileUtils;
 import com.gsma.rcs.ri.utils.LogUtils;
 import com.gsma.rcs.ri.utils.RcsSessionUtil;
 import com.gsma.rcs.ri.utils.Utils;
+import com.gsma.services.rcs.RcsGenericException;
+import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.upload.FileUpload;
+import com.gsma.services.rcs.upload.FileUploadInfo;
+import com.gsma.services.rcs.upload.FileUploadListener;
 
 import android.content.Intent;
 import android.content.pm.ActivityInfo;

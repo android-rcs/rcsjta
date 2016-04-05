@@ -18,18 +18,17 @@
 
 package com.gsma.rcs.ri.messaging.chat;
 
-import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.RcsServiceNotAvailableException;
-import com.gsma.services.rcs.capability.CapabilitiesLog;
-import com.gsma.services.rcs.chat.ChatService;
-import com.gsma.services.rcs.contact.ContactId;
-
 import com.gsma.rcs.api.connection.utils.RcsListActivity;
 import com.gsma.rcs.ri.R;
 import com.gsma.rcs.ri.messaging.chat.group.InitiateGroupChat;
 import com.gsma.rcs.ri.messaging.chat.single.InitiateSingleChat;
 import com.gsma.rcs.ri.messaging.geoloc.DisplayGeoloc;
 import com.gsma.rcs.ri.utils.ContactUtil;
+import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.RcsServiceNotAvailableException;
+import com.gsma.services.rcs.capability.CapabilitiesLog;
+import com.gsma.services.rcs.chat.ChatService;
+import com.gsma.services.rcs.contact.ContactId;
 
 import android.content.Intent;
 import android.content.pm.ActivityInfo;

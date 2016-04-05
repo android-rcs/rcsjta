@@ -18,15 +18,14 @@
 
 package com.gsma.rcs.ri.messaging.chat.group;
 
+import com.gsma.rcs.api.connection.utils.RcsActivity;
+import com.gsma.rcs.ri.R;
+import com.gsma.rcs.ri.messaging.GroupTalkView;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.chat.ChatService;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.contact.ContactService;
 import com.gsma.services.rcs.contact.RcsContact;
-
-import com.gsma.rcs.api.connection.utils.RcsActivity;
-import com.gsma.rcs.ri.R;
-import com.gsma.rcs.ri.messaging.GroupTalkView;
 
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;

@@ -18,13 +18,6 @@
 
 package com.gsma.rcs.ri.messaging.chat.single;
 
-import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.capability.Capabilities;
-import com.gsma.services.rcs.capability.CapabilitiesListener;
-import com.gsma.services.rcs.capability.CapabilityService;
-import com.gsma.services.rcs.chat.ChatService;
-import com.gsma.services.rcs.contact.ContactId;
-
 import com.gsma.rcs.api.connection.ConnectionManager;
 import com.gsma.rcs.api.connection.utils.ExceptionUtil;
 import com.gsma.rcs.api.connection.utils.RcsActivity;
@@ -33,6 +26,12 @@ import com.gsma.rcs.ri.messaging.OneToOneTalkView;
 import com.gsma.rcs.ri.utils.ContactListAdapter;
 import com.gsma.rcs.ri.utils.ContactUtil;
 import com.gsma.rcs.ri.utils.LogUtils;
+import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.capability.Capabilities;
+import com.gsma.services.rcs.capability.CapabilitiesListener;
+import com.gsma.services.rcs.capability.CapabilityService;
+import com.gsma.services.rcs.chat.ChatService;
+import com.gsma.services.rcs.contact.ContactId;
 
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
@@ -107,7 +106,8 @@ public class InitiateSingleChat extends RcsActivity {
         mCapabilitiesListener = new CapabilitiesListener() {
             @Override
             public void onCapabilitiesReceived(ContactId contact, Capabilities capabilities) {
-                if (contact.equals(getSelectedContact()) && capabilities.hasCapabilities(2)) {
+                if (contact.equals(getSelectedContact())
+                        && capabilities.hasCapabilities(Capabilities.CAPABILITY_IM)) {
                     mHandler.post(new Runnable() {
                         @Override
                         public void run() {

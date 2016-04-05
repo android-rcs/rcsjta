@@ -18,11 +18,10 @@
 
 package com.gsma.rcs.ri.extension.streaming;
 
-import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.extension.MultimediaStreamingSession;
-
 import com.gsma.rcs.ri.R;
 import com.gsma.rcs.ri.extension.MultimediaSessionList;
+import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.extension.MultimediaStreamingSession;
 
 import android.content.Intent;
 import android.widget.ArrayAdapter;

@@ -18,16 +18,15 @@
 
 package com.gsma.rcs.ri.contacts;
 
-import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.services.rcs.contact.RcsContact;
-
 import com.gsma.rcs.api.connection.ConnectionManager.RcsServiceName;
 import com.gsma.rcs.api.connection.utils.RcsActivity;
 import com.gsma.rcs.ri.R;
 import com.gsma.rcs.ri.utils.ContactListAdapter;
 import com.gsma.rcs.ri.utils.ContactUtil;
 import com.gsma.rcs.ri.utils.Utils;
+import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.contact.RcsContact;
 
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;

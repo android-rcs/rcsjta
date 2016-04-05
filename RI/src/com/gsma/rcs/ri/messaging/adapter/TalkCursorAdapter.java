@@ -101,6 +101,7 @@ public class TalkCursorAdapter extends CursorAdapter {
      * @param activity The activity
      * @param singleChat True if single chat
      * @param chatService the chat service
+     * @param fileTransferService the file transfer service
      */
     public TalkCursorAdapter(Activity activity, boolean singleChat, ChatService chatService,
             FileTransferService fileTransferService) {
@@ -114,7 +115,7 @@ public class TalkCursorAdapter extends CursorAdapter {
         Options opt = new Options();
         opt.inJustDecodeBounds = true;
         BitmapFactory.decodeResource(mActivity.getResources(), R.drawable.ri_filetransfer_off, opt);
-        mImageParamsDefault = new LayoutParams(opt.outWidth, opt.outHeight);
+        mImageParamsDefault = new LayoutParams(opt.outWidth * 2, opt.outHeight * 2);
         bitmapCache = BitmapCache.getInstance();
         mSmileyResources = new Smileys(activity);
         mSingleChat = singleChat;
@@ -125,10 +126,9 @@ public class TalkCursorAdapter extends CursorAdapter {
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
         int viewType = getItemViewType(cursor);
-        View view;
         switch (viewType) {
             case VIEW_TYPE_RCS_CHAT_IN:
-                view = mInflater.inflate(mSingleChat ? R.layout.talk_item_rcs_chat_in
+                View view = mInflater.inflate(mSingleChat ? R.layout.talk_item_rcs_chat_in
                         : R.layout.gchat_item_rcs_chat_in, parent, false);
                 view.setTag(new RcsChatInViewHolder(view, cursor));
                 return view;
@@ -261,8 +261,7 @@ public class TalkCursorAdapter extends CursorAdapter {
                         System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS,
                         DateUtils.FORMAT_ABBREV_RELATIVE));
         String mimeType = cursor.getString(holder.getColumnMimetypeIdx());
-        StringBuilder stringBuilder = new StringBuilder(cursor.getString(holder
-                .getColumnFilenameIdx()));
+        StringBuilder sb = new StringBuilder(cursor.getString(holder.getColumnFilenameIdx()));
         long filesize = cursor.getLong(holder.getColumnFilesizeIdx());
         long transferred = cursor.getLong(holder.getColumnTransferredIdx());
         final ImageView imageView = holder.getFileImageView();
@@ -271,13 +270,12 @@ public class TalkCursorAdapter extends CursorAdapter {
         imageView.setImageResource(R.drawable.ri_filetransfer_on);
         if (filesize != transferred) {
             holder.getProgressText().setText(
-                    stringBuilder.append(" : ")
-                            .append(Utils.getProgressLabel(transferred, filesize)).toString());
+                    sb.append(" : ").append(Utils.getProgressLabel(transferred, filesize))
+                            .toString());
         } else {
             holder.getProgressText().setText(
-                    stringBuilder.append(" (")
-                            .append(FileUtils.humanReadableByteCount(filesize, true)).append(")")
-                            .toString());
+                    sb.append(" (").append(FileUtils.humanReadableByteCount(filesize, true))
+                            .append(")").toString());
         }
         final Uri file = Uri.parse(cursor.getString(holder.getColumnContentIdx()));
         if (Utils.isImageType(mimeType)) {
@@ -333,8 +331,7 @@ public class TalkCursorAdapter extends CursorAdapter {
                         System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS,
                         DateUtils.FORMAT_ABBREV_RELATIVE));
         String mimeType = cursor.getString(holder.getColumnMimetypeIdx());
-        StringBuilder stringBuilder = new StringBuilder(cursor.getString(holder
-                .getColumnFilenameIdx()));
+        StringBuilder sb = new StringBuilder(cursor.getString(holder.getColumnFilenameIdx()));
         long filesize = cursor.getLong(holder.getColumnFilesizeIdx());
         long transferred = cursor.getLong(holder.getColumnTransferredIdx());
         final ImageView imageView = holder.getFileImageView();
@@ -343,8 +340,8 @@ public class TalkCursorAdapter extends CursorAdapter {
         imageView.setImageResource(R.drawable.ri_filetransfer_off);
         if (filesize != transferred) {
             holder.getProgressText().setText(
-                    stringBuilder.append(" : ")
-                            .append(Utils.getProgressLabel(transferred, filesize)).toString());
+                    sb.append(" : ").append(Utils.getProgressLabel(transferred, filesize))
+                            .toString());
         } else {
             imageView.setImageResource(R.drawable.ri_filetransfer_on);
             final Uri file = Uri.parse(cursor.getString(holder.getColumnContentIdx()));
@@ -395,9 +392,8 @@ public class TalkCursorAdapter extends CursorAdapter {
                 });
             }
             holder.getProgressText().setText(
-                    stringBuilder.append(" (")
-                            .append(FileUtils.humanReadableByteCount(filesize, true)).append(")")
-                            .toString());
+                    sb.append(" (").append(FileUtils.humanReadableByteCount(filesize, true))
+                            .append(")").toString());
         }
         holder.getStatusText().setText(getRcsFileTransferStatus(cursor, holder));
     }
@@ -506,9 +502,10 @@ public class TalkCursorAdapter extends CursorAdapter {
     public static String formatGeolocation(Context context, Geoloc geoloc) {
         StringBuilder result = new StringBuilder(context.getString(R.string.label_geolocation_msg))
                 .append("\n");
-        if (geoloc.getLabel() != null) {
-            result.append(context.getString(R.string.label_location)).append(" ")
-                    .append(geoloc.getLabel()).append("\n");
+        String label = geoloc.getLabel();
+        if (label != null) {
+            result.append(context.getString(R.string.label_location)).append(" ").append(label)
+                    .append("\n");
         }
         return result.append(context.getString(R.string.label_latitude)).append(" ")
                 .append(geoloc.getLatitude()).append("\n")

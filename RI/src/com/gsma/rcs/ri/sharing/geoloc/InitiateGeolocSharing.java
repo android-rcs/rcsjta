@@ -18,14 +18,6 @@
 
 package com.gsma.rcs.ri.sharing.geoloc;
 
-import com.gsma.services.rcs.Geoloc;
-import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.RcsServiceNotAvailableException;
-import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.services.rcs.sharing.geoloc.GeolocSharing;
-import com.gsma.services.rcs.sharing.geoloc.GeolocSharingListener;
-import com.gsma.services.rcs.sharing.geoloc.GeolocSharingService;
-
 import com.gsma.rcs.api.connection.ConnectionManager.RcsServiceName;
 import com.gsma.rcs.api.connection.utils.ExceptionUtil;
 import com.gsma.rcs.api.connection.utils.RcsActivity;
@@ -37,6 +29,13 @@ import com.gsma.rcs.ri.utils.ContactListAdapter;
 import com.gsma.rcs.ri.utils.ContactUtil;
 import com.gsma.rcs.ri.utils.LogUtils;
 import com.gsma.rcs.ri.utils.Utils;
+import com.gsma.services.rcs.Geoloc;
+import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.RcsServiceNotAvailableException;
+import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.sharing.geoloc.GeolocSharing;
+import com.gsma.services.rcs.sharing.geoloc.GeolocSharingListener;
+import com.gsma.services.rcs.sharing.geoloc.GeolocSharingService;
 
 import android.Manifest;
 import android.content.Intent;

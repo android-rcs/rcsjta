@@ -18,14 +18,13 @@
 
 package com.gsma.rcs.ri.messaging.filetransfer;
 
-import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.filetransfer.FileTransferServiceConfiguration;
-
 import com.gsma.rcs.api.connection.ConnectionManager;
 import com.gsma.rcs.api.connection.utils.RcsActivity;
 import com.gsma.rcs.ri.R;
 import com.gsma.rcs.ri.utils.FileUtils;
 import com.gsma.rcs.ri.utils.LogUtils;
+import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.filetransfer.FileTransferServiceConfiguration;
 
 import android.content.pm.ActivityInfo;
 import android.media.MediaScannerConnection;

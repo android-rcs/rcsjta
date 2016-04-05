@@ -18,17 +18,9 @@
 
 package com.gsma.rcs.ri.sharing.video;
 
-import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.services.rcs.sharing.video.VideoDescriptor;
-import com.gsma.services.rcs.sharing.video.VideoSharing;
-import com.gsma.services.rcs.sharing.video.VideoSharingListener;
-import com.gsma.services.rcs.sharing.video.VideoSharingService;
-
 import com.gsma.rcs.api.connection.ConnectionManager.RcsServiceName;
 import com.gsma.rcs.api.connection.utils.ExceptionUtil;
 import com.gsma.rcs.api.connection.utils.RcsActivity;
-import com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h264.H264Config;
 import com.gsma.rcs.ri.R;
 import com.gsma.rcs.ri.RiApplication;
 import com.gsma.rcs.ri.sharing.video.media.TerminatingVideoPlayer;
@@ -37,6 +29,14 @@ import com.gsma.rcs.ri.sharing.video.media.VideoSurfaceView;
 import com.gsma.rcs.ri.utils.LogUtils;
 import com.gsma.rcs.ri.utils.RcsContactUtil;
 import com.gsma.rcs.ri.utils.RcsSessionUtil;
+import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.sharing.video.VideoDescriptor;
+import com.gsma.services.rcs.sharing.video.VideoSharing;
+import com.gsma.services.rcs.sharing.video.VideoSharingListener;
+import com.gsma.services.rcs.sharing.video.VideoSharingService;
+
+import com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h264.H264Config;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -346,7 +346,7 @@ public class IncomingVideoSharing extends RcsActivity implements VideoPlayerList
                     + "x" + videoDescriptor.getHeight();
             TextView fmtView = (TextView) findViewById(R.id.video_format);
             fmtView.setVisibility(View.VISIBLE);
-            fmtView.setText( format);
+            fmtView.setText(format);
 
         } catch (RcsServiceException e) {
             showExceptionThenExit(e);

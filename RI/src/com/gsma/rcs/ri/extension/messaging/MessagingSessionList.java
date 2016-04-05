@@ -18,11 +18,10 @@
 
 package com.gsma.rcs.ri.extension.messaging;
 
-import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.extension.MultimediaMessagingSession;
-
 import com.gsma.rcs.ri.R;
 import com.gsma.rcs.ri.extension.MultimediaSessionList;
+import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.extension.MultimediaMessagingSession;
 
 import android.content.Intent;
 import android.widget.ArrayAdapter;
