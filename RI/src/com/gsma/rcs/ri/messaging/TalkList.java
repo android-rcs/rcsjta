@@ -47,7 +47,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -74,7 +73,6 @@ import java.util.Set;
 public class TalkList extends RcsActivity {
 
     private TalkListArrayAdapter mAdapter;
-    private Handler mHandler = new Handler();
     private List<TalkListArrayItem> mMessageLogs;
     private static final String LOGTAG = LogUtils.getTag(TalkList.class.getSimpleName());
 
