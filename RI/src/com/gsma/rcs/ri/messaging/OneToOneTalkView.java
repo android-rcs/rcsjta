@@ -171,6 +171,7 @@ public class OneToOneTalkView extends RcsFragmentActivity implements
 
     private DialogInterface.OnClickListener mClearUndeliveredChat;
     private DialogInterface.OnClickListener mClearUndeliveredFt;
+    private boolean mChatListenerSet;
 
     /**
      * Forge intent to start XmsView activity
@@ -338,7 +339,6 @@ public class OneToOneTalkView extends RcsFragmentActivity implements
 
         };
         mChatService = getChatApi();
-        mChatService.addEventListener(mChatListener);
         mCapabilityService = getCapabilityApi();
         mFileTransferService = getFileTransferApi();
 
@@ -501,21 +501,18 @@ public class OneToOneTalkView extends RcsFragmentActivity implements
     }
 
     @Override
-    public void onDestroy() {
-        try {
-            if (isServiceConnected(ConnectionManager.RcsServiceName.CHAT) && mChatService != null) {
-                mChatService.removeEventListener(mChatListener);
-            }
-        } catch (RcsServiceException e) {
-            Log.w(LOGTAG, ExceptionUtil.getFullStackTrace(e));
-        }
-        super.onDestroy();
-    }
-
-    @Override
     protected void onPause() {
         super.onPause();
         RI.sChatIdOnForeground = null;
+        try {
+            if (mChatListener != null && mChatService != null && mChatListenerSet) {
+                mChatService.removeEventListener(mChatListener);
+                mChatListenerSet = false;
+            }
+        } catch (RcsServiceNotAvailableException ignore) {
+        } catch (RcsGenericException e) {
+            Log.w(LOGTAG, ExceptionUtil.getFullStackTrace(e));
+        }
     }
 
     @Override
@@ -531,6 +528,15 @@ public class OneToOneTalkView extends RcsFragmentActivity implements
         super.onResume();
         if (mContact != null) {
             RI.sChatIdOnForeground = mContact.toString();
+        }
+        try {
+            if (mChatListener != null && mChatService != null && !mChatListenerSet) {
+                mChatService.addEventListener(mChatListener);
+                mChatListenerSet = true;
+            }
+        } catch (RcsServiceNotAvailableException ignore) {
+        } catch (RcsGenericException e) {
+            Log.w(LOGTAG, ExceptionUtil.getFullStackTrace(e));
         }
     }
 
