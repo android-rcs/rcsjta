@@ -581,7 +581,8 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
                 : mImService.getOneToOneChatSession(mContact);
         if (session != null && session.isMediaEstablished()) {
             if (sLogger.isActivated()) {
-                sLogger.info("Use the original session to send the delivery status for " + msgId);
+                sLogger.info("Use the original session to send the delivery display status for "
+                        + msgId);
             }
             session.sendMsrpMessageDeliveryStatus(remote, msgId,
                     ImdnDocument.DELIVERY_STATUS_DISPLAYED, timestamp);
@@ -811,13 +812,15 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
         synchronized (mLock) {
             Boolean composingStatus = mImService.getOneToOneChatComposingStatus(mContact);
             if (composingStatus != null) {
-                if (loggerActivated) {
-                    sLogger.debug("Sending isComposing command with status :"
-                            .concat(composingStatus.toString()));
-                }
                 OneToOneChatSession session = mImService.getOneToOneChatSession(mContact);
                 try {
-                    session.sendIsComposingStatus(composingStatus);
+                    if (session != null) {
+                        if (loggerActivated) {
+                            sLogger.debug("Sending isComposing command with status :"
+                                    .concat(composingStatus.toString()));
+                        }
+                        session.sendIsComposingStatus(composingStatus);
+                    }
                     mImService.removeOneToOneChatComposingStatus(mContact);
                 } catch (NetworkException e) {
                     /*
