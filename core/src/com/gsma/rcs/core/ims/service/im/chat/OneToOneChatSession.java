@@ -85,25 +85,19 @@ public abstract class OneToOneChatSession extends ChatSession {
             MessagingLog messagingLog, long timestamp, ContactManager contactManager) {
         super(imService, contact, remoteContact, rcsSettings, messagingLog, firstMsg, timestamp,
                 contactManager);
-
         List<String> featureTags = ChatUtils.getSupportedFeatureTagsForChat(rcsSettings);
         setFeatureTags(featureTags);
-
         setAcceptContactTags(featureTags);
-
-        String acceptTypes = new StringBuilder(CpimMessage.MIME_TYPE).append(" ")
-                .append(IsComposingInfo.MIME_TYPE).toString();
-        setAcceptTypes(acceptTypes);
-
-        StringBuilder wrappedTypes = new StringBuilder(MimeType.TEXT_MESSAGE).append(" ").append(
-                ImdnDocument.MIME_TYPE);
+        addAcceptTypes(CpimMessage.MIME_TYPE);
+        addAcceptTypes(IsComposingInfo.MIME_TYPE);
+        addWrappedTypes(MimeType.TEXT_MESSAGE);
+        addWrappedTypes(ImdnDocument.MIME_TYPE);
         if (mRcsSettings.isGeoLocationPushSupported()) {
-            wrappedTypes.append(" ").append(GeolocInfoDocument.MIME_TYPE);
+            addWrappedTypes(GeolocInfoDocument.MIME_TYPE);
         }
         if (mRcsSettings.isFileTransferHttpSupported()) {
-            wrappedTypes.append(" ").append(FileTransferHttpInfoDocument.MIME_TYPE);
+            addWrappedTypes(FileTransferHttpInfoDocument.MIME_TYPE);
         }
-        setWrappedTypes(wrappedTypes.toString());
     }
 
     /**
@@ -119,10 +113,7 @@ public abstract class OneToOneChatSession extends ChatSession {
      * Close media session
      */
     public void closeMediaSession() {
-        // Stop the activity manager
         getActivityManager().stop();
-
-        // Close MSRP session
         closeMsrpSession();
     }
 
@@ -156,7 +147,6 @@ public abstract class OneToOneChatSession extends ChatSession {
             data = ChatUtils.buildCpimMessage(from, to, networkContent, networkMimeType,
                     timestampSent);
         }
-
         if (ChatUtils.isGeolocType(networkMimeType)) {
             sendDataChunks(IdGenerator.generateMessageID(), data, CpimMessage.MIME_TYPE,
                     TypeMsrpChunk.GeoLocation);
@@ -172,11 +162,11 @@ public abstract class OneToOneChatSession extends ChatSession {
     /**
      * Send file info within a 1-1 chat session
      * 
-     * @param fileTransfer
-     * @param fileTransferId
-     * @param fileInfo
-     * @param displayedReportEnabled
-     * @param deliveredReportEnabled
+     * @param fileTransfer the file transfer API implementation
+     * @param fileTransferId the file transfer ID
+     * @param fileInfo the file transfer information
+     * @param displayedReportEnabled is displayed report enabled
+     * @param deliveredReportEnabled is delivered report enabled
      * @throws NetworkException
      */
     public void sendFileInfo(OneToOneFileTransferImpl fileTransfer, String fileTransferId,
@@ -187,7 +177,6 @@ public abstract class OneToOneChatSession extends ChatSession {
         /* For outgoing file transfer, timestampSent = timestamp */
         long timestampSent = timestamp;
         mMessagingLog.setFileTransferTimestamps(fileTransferId, timestamp, timestampSent);
-
         if (displayedReportEnabled) {
             networkContent = ChatUtils.buildCpimMessageWithImdn(ChatUtils.ANONYMOUS_URI,
                     ChatUtils.ANONYMOUS_URI, fileTransferId, fileInfo,
@@ -309,11 +298,9 @@ public abstract class OneToOneChatSession extends ChatSession {
             return;
         }
         if (sLogger.isActivated()) {
-            sLogger.info(new StringBuilder("Data transfer error ").append(error)
-                    .append(" for message ").append(msgId).append(" (MSRP chunk type: ")
-                    .append(typeMsrpChunk).append(")").toString());
+            sLogger.info("Data transfer error " + error + " for message " + msgId
+                    + " (MSRP chunk type: " + typeMsrpChunk + ")");
         }
-
         ContactId remote = getRemoteContact();
         if (TypeMsrpChunk.MessageDeliveredReport.equals(typeMsrpChunk)) {
             for (ImsSessionListener listener : getListeners()) {
@@ -325,22 +312,18 @@ public abstract class OneToOneChatSession extends ChatSession {
                 ((OneToOneChatSessionListener) listener).onDeliveryReportSendViaMsrpFailure(msgId,
                         remote, typeMsrpChunk);
             }
-        } else if ((msgId != null) && TypeMsrpChunk.TextMessage.equals(typeMsrpChunk)) {
+        } else if (msgId != null && TypeMsrpChunk.TextMessage.equals(typeMsrpChunk)) {
             for (ImsSessionListener listener : getListeners()) {
                 ImdnDocument imdn = new ImdnDocument(msgId, ImdnDocument.DELIVERY_NOTIFICATION,
                         ImdnDocument.DELIVERY_STATUS_FAILED, ImdnDocument.IMDN_DATETIME_NOT_SET);
-                ContactId contact = null;
-                ((ChatSessionListener) listener).onMessageDeliveryStatusReceived(contact, imdn);
+                ((ChatSessionListener) listener).onMessageDeliveryStatusReceived(null, imdn);
             }
         } else {
             // do nothing
-            sLogger.error(new StringBuilder("MSRP transfer error not handled for message '")
-                    .append(msgId).append("' and chunk type : '").append(typeMsrpChunk)
-                    .append("'!").toString());
+            sLogger.error("MSRP transfer error not handled for message '" + msgId
+                    + "' and chunk type : '" + typeMsrpChunk + "'!");
         }
-
         int errorCode;
-
         if ((error != null)
                 && (error.contains(String.valueOf(Response.REQUEST_ENTITY_TOO_LARGE)) || error
                         .contains(String.valueOf(Response.REQUEST_TIMEOUT)))) {
@@ -365,9 +348,7 @@ public abstract class OneToOneChatSession extends ChatSession {
 
             errorCode = ChatError.MEDIA_SESSION_FAILED;
         }
-
         handleError(getFirstMessage(), new ChatError(errorCode, error));
-
         /* Request capabilities to the remote */
         getImsService().getImsModule().getCapabilityService()
                 .requestContactCapabilities(getRemoteContact());
@@ -402,12 +383,11 @@ public abstract class OneToOneChatSession extends ChatSession {
             return;
         }
         if (sLogger.isActivated()) {
-            sLogger.info(new StringBuilder("Session error: ").append(error.getErrorCode())
-                    .append(", reason=").append(error.getMessage()).toString());
+            sLogger.info("Session error: " + error.getErrorCode() + ", reason="
+                    + error.getMessage());
         }
         closeMediaSession();
         removeSession();
-
         handleError(getFirstMessage(), new ChatError(error));
     }
 

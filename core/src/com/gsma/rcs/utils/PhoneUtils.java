@@ -72,7 +72,7 @@ public class PhoneUtils {
     /**
      * Initializes
      * 
-     * @param mRcsSettings
+     * @param rcsSettings the RCS settings accessor
      */
     public static synchronized void initialize(RcsSettings rcsSettings) {
         sRcsSettings = rcsSettings;
@@ -93,11 +93,10 @@ public class PhoneUtils {
         if (sRcsSettings.isTelUriFormatUsed()) {
             /* Tel-URI format */
             return Uri.parse(TEL_URI_HEADER.concat(contactId.toString()));
-
         }
         /* SIP-URI format */
-        return Uri.parse(new StringBuilder(SIP_URI_HEADER).append(contactId).append("@")
-                .append(sRcsSettings.getUserProfileImsDomain()).append(";user=phone").toString());
+        return Uri.parse(SIP_URI_HEADER + contactId + "@" + sRcsSettings.getUserProfileImsDomain()
+                + ";user=phone");
     }
 
     /**
@@ -116,26 +115,38 @@ public class PhoneUtils {
             uri = uri.substring(index0 + URI_START_DELIMITER.length(),
                     uri.indexOf(URI_END_DELIMITER, index0));
         }
-
         /* Extract a Tel-URI */
         int index1 = uri.indexOf(TEL_URI_HEADER);
         if (index1 != -1) {
             uri = uri.substring(index1 + TEL_URI_HEADER.length());
         }
-
         /* Extract a SIP-URI */
         index1 = uri.indexOf(SIP_URI_HEADER);
         if (index1 != -1) {
             int index2 = uri.indexOf("@", index1);
             uri = uri.substring(index1 + SIP_URI_HEADER.length(), index2);
         }
-
         /* Remove URI parameters */
         int index2 = uri.indexOf(";");
         if (index2 != -1) {
             uri = uri.substring(0, index2);
         }
+        // @formatter:off
+        /* Remove URI headers.
+            According to RFC 3261, headers are formatted as follows:
 
+            SIP-URI =  "sip:" [ userinfo ] hostport uri-parameters [ headers ]
+            headers         =  "?" header *( "&" header )
+            header          =  hname "=" hvalue
+            hname           =  1*( hnv-unreserved / unreserved / escaped )
+            hvalue          =  *( hnv-unreserved / unreserved / escaped )
+            hnv-unreserved  =  "[" / "]" / "/" / "?" / ":" / "+" / "$"
+        */
+        // @formatter:on
+        index2 = uri.indexOf("?");
+        if (index2 != -1) {
+            uri = uri.substring(0, index2);
+        }
         /* Returns the extracted number (username part of the URI) */
         return uri;
     }
@@ -151,7 +162,6 @@ public class PhoneUtils {
             Matcher matcher = PATTERN_EXTRACT_URI.matcher(header);
             if (matcher.find()) {
                 return matcher.group(1);
-
             }
         }
         return header;
