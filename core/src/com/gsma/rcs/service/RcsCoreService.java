@@ -74,6 +74,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -157,8 +158,8 @@ public class RcsCoreService extends Service implements CoreListener {
         mHistoryLog = HistoryLog.getInstance(mLocalContentResolver);
         mRichCallHistory = RichCallHistory.getInstance(mLocalContentResolver);
         mMessagingLog = MessagingLog.getInstance(mLocalContentResolver, mRcsSettings);
-        mContactManager = ContactManager.getInstance(mCtx, mContentResolver,
-                mLocalContentResolver, mRcsSettings);
+        mContactManager = ContactManager.getInstance(mCtx, mContentResolver, mLocalContentResolver,
+                mRcsSettings);
         AndroidFactory.setApplicationContext(mCtx, mRcsSettings);
         final HandlerThread backgroundThread = new HandlerThread(BACKGROUND_THREAD_NAME);
         backgroundThread.start();
@@ -230,18 +231,15 @@ public class RcsCoreService extends Service implements CoreListener {
                         sLogger.debug(e.getMessage());
                     }
 
-                } catch (ContactManagerException e) {
+                } catch (ContactManagerException | RuntimeException | PayloadException e) {
                     sLogger.error("Unable to stop IMS core!", e);
 
-                } catch (PayloadException e) {
-                    sLogger.error("Unable to stop IMS core!", e);
-
-                } catch (RuntimeException e) {
-                    /*
-                     * Intentionally catch runtime exceptions as else it will abruptly end the
-                     * thread and eventually bring the whole system down, which is not intended.
-                     */
-                    sLogger.error("Unable to stop IMS core!", e);
+                } finally {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+                        mBackgroundHandler.getLooper().quitSafely();
+                    } else {
+                        mBackgroundHandler.getLooper().quit();
+                    }
                 }
             }
         });
@@ -272,7 +270,7 @@ public class RcsCoreService extends Service implements CoreListener {
                 .getInstance(this);
         if (!contactUtil.isMyCountryCodeDefined()) {
             if (logActivated) {
-                sLogger.debug("Can't instanciate RCS core service, Reason : Country code not defined!");
+                sLogger.debug("Can't instantiate RCS core service, Reason : Country code not defined!");
             }
             stopSelf();
             return;
