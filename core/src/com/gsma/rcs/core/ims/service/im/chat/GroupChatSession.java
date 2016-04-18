@@ -28,7 +28,6 @@ import com.gsma.rcs.core.FileAccessException;
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.NetworkException;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
-import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
@@ -68,12 +67,10 @@ import gov2.nist.javax2.sip.header.Reason;
 
 import java.text.ParseException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 import javax2.sip.InvalidArgumentException;
-import javax2.sip.header.ExtensionHeader;
 import javax2.sip.message.Response;
 
 /**
@@ -118,38 +115,29 @@ public abstract class GroupChatSession extends ChatSession {
      * @param rcsSettings RCS settings
      * @param messagingLog Messaging log
      * @param timestamp Local timestamp for the session
-     * @param contactManager
+     * @param contactManager the contact manager
      */
     public GroupChatSession(InstantMessagingService imService, ContactId contact, Uri conferenceId,
             Map<ContactId, ParticipantStatus> participants, RcsSettings rcsSettings,
             MessagingLog messagingLog, long timestamp, ContactManager contactManager) {
         super(imService, contact, conferenceId, rcsSettings, messagingLog, null, timestamp,
                 contactManager);
-
         mMaxParticipants = rcsSettings.getMaxChatParticipants();
-
         mParticipants = participants;
-
         mConferenceSubscriber = new ConferenceEventSubscribeManager(this, rcsSettings, messagingLog);
-
         mImsModule = imService.getImsModule();
-
         setFeatureTags(ChatUtils.getSupportedFeatureTagsForGroupChat(rcsSettings));
-
         setAcceptContactTags(ChatUtils.getAcceptContactTagsForGroupChat());
-
-        String acceptTypes = CpimMessage.MIME_TYPE;
-        setAcceptTypes(acceptTypes);
-
-        StringBuilder wrappedTypes = new StringBuilder(MimeType.TEXT_MESSAGE).append(" ").append(
-                IsComposingInfo.MIME_TYPE);
+        addAcceptTypes(CpimMessage.MIME_TYPE);
+        addWrappedTypes(MimeType.TEXT_MESSAGE);
+        addWrappedTypes(IsComposingInfo.MIME_TYPE);
+        addWrappedTypes(ImdnDocument.MIME_TYPE);
         if (rcsSettings.isGeoLocationPushSupported()) {
-            wrappedTypes.append(" ").append(GeolocInfoDocument.MIME_TYPE);
+            addWrappedTypes(GeolocInfoDocument.MIME_TYPE);
         }
         if (rcsSettings.isFileTransferHttpSupported()) {
-            wrappedTypes.append(" ").append(FileTransferHttpInfoDocument.MIME_TYPE);
+            addWrappedTypes(FileTransferHttpInfoDocument.MIME_TYPE);
         }
-        setWrappedTypes(wrappedTypes.toString());
     }
 
     @Override
@@ -182,7 +170,7 @@ public abstract class GroupChatSession extends ChatSession {
      */
     public Map<ContactId, ParticipantStatus> getParticipants() {
         synchronized (mParticipants) {
-            return new HashMap<ContactId, ParticipantStatus>(mParticipants);
+            return new HashMap<>(mParticipants);
         }
     }
 
@@ -194,7 +182,7 @@ public abstract class GroupChatSession extends ChatSession {
      */
     public Map<ContactId, ParticipantStatus> getParticipants(ParticipantStatus status) {
         synchronized (mParticipants) {
-            Map<ContactId, ParticipantStatus> matchingParticipants = new HashMap<ContactId, ParticipantStatus>();
+            Map<ContactId, ParticipantStatus> matchingParticipants = new HashMap<>();
             for (Map.Entry<ContactId, ParticipantStatus> participant : mParticipants.entrySet()) {
                 ParticipantStatus participantStatus = participant.getValue();
                 if (participantStatus == status) {
@@ -208,12 +196,12 @@ public abstract class GroupChatSession extends ChatSession {
     /**
      * Returns participants that matches any of the specified statues.
      * 
-     * @param status of participants to be returned.
+     * @param statuses of participants to be returned.
      * @return Set of participants which has any one the statuses specified.
      */
     public Map<ContactId, ParticipantStatus> getParticipants(Set<ParticipantStatus> statuses) {
         synchronized (mParticipants) {
-            Map<ContactId, ParticipantStatus> matchingParticipants = new HashMap<ContactId, ParticipantStatus>();
+            Map<ContactId, ParticipantStatus> matchingParticipants = new HashMap<>();
             for (Map.Entry<ContactId, ParticipantStatus> participant : mParticipants.entrySet()) {
                 if (statuses.contains(participant.getValue())) {
                     matchingParticipants.put(participant.getKey(), participant.getValue());
@@ -232,7 +220,7 @@ public abstract class GroupChatSession extends ChatSession {
     public Map<ContactId, ParticipantStatus> getParticipantsToUpdate(
             Map<ContactId, ParticipantStatus> participants) {
         synchronized (mParticipants) {
-            Map<ContactId, ParticipantStatus> participantsToUpdate = new HashMap<ContactId, ParticipantStatus>();
+            Map<ContactId, ParticipantStatus> participantsToUpdate = new HashMap<>();
             for (Map.Entry<ContactId, ParticipantStatus> participantUpdate : participants
                     .entrySet()) {
                 ContactId contact = participantUpdate.getKey();
@@ -274,37 +262,11 @@ public abstract class GroupChatSession extends ChatSession {
      * @param status The status to set.
      */
     private void updateParticipants(final Set<ContactId> contacts, ParticipantStatus status) {
-        Map<ContactId, ParticipantStatus> participants = new HashMap<ContactId, ParticipantStatus>();
-
+        Map<ContactId, ParticipantStatus> participants = new HashMap<>();
         for (ContactId contact : contacts) {
             participants.put(contact, status);
         }
-
         updateParticipants(participants);
-    }
-
-    /**
-     * Get replaced session ID
-     * 
-     * @return Session ID
-     */
-    public String getReplacedSessionId() {
-        String result = null;
-        ExtensionHeader sessionReplace = (ExtensionHeader) getDialogPath().getInvite().getHeader(
-                SipUtils.HEADER_SESSION_REPLACES);
-        if (sessionReplace != null) {
-            result = sessionReplace.getValue();
-        } else {
-            String content = getDialogPath().getRemoteContent();
-            if (content != null) {
-                int index1 = content.indexOf("Session-Replaces=");
-                if (index1 != -1) {
-                    int index2 = content.indexOf("\"", index1);
-                    result = content.substring(index1 + 17, index2);
-                }
-            }
-        }
-        return result;
     }
 
     /**
@@ -318,7 +280,6 @@ public abstract class GroupChatSession extends ChatSession {
 
     @Override
     public void closeMediaSession() {
-        // Close MSRP session
         closeMsrpSession();
     }
 
@@ -428,8 +389,7 @@ public abstract class GroupChatSession extends ChatSession {
     public void sendMsrpMessageDeliveryStatus(String fromUri, String toUri, String msgId,
             String status, long timestamp) throws NetworkException {
         if (sLogger.isActivated()) {
-            sLogger.debug(new StringBuilder("Send delivery status ").append(status)
-                    .append(" for message ").append(msgId).toString());
+            sLogger.debug("Send delivery status " + status + " for message " + msgId);
         }
         // Send status in CPIM + IMDN headers
         /* Timestamp for IMDN datetime */
@@ -459,11 +419,11 @@ public abstract class GroupChatSession extends ChatSession {
     /**
      * Send file info on group chat session
      * 
-     * @param fileTransfer
-     * @param fileTransferId
-     * @param fileInfo
-     * @param displayedReportEnabled
-     * @param deliveredReportEnabled
+     * @param fileTransfer the file transfer API implementation
+     * @param fileTransferId the file transfer ID
+     * @param fileInfo the file transfer information
+     * @param displayedReportEnabled is displayed report enabled
+     * @param deliveredReportEnabled is delivered report enabled
      * @throws NetworkException
      */
     public void sendFileInfo(GroupFileTransferImpl fileTransfer, String fileTransferId,
@@ -500,9 +460,7 @@ public abstract class GroupChatSession extends ChatSession {
      */
     public int getMaxNumberOfAdditionalParticipants() {
         synchronized (mParticipants) {
-
             int currentParticipants = 0;
-
             for (ParticipantStatus status : mParticipants.values()) {
                 switch (status) {
                     case INVITE_QUEUED:
@@ -515,22 +473,8 @@ public abstract class GroupChatSession extends ChatSession {
                         break;
                 }
             }
-
             return mMaxParticipants - currentParticipants - 1;
         }
-    }
-
-    /**
-     * Invite a contact to the session
-     * 
-     * @param contact Contact to invite
-     * @throws NetworkException
-     * @throws PayloadException
-     */
-    public void inviteContact(ContactId contact) throws PayloadException, NetworkException {
-        Set<ContactId> contacts = new HashSet<ContactId>();
-        contacts.add(contact);
-        inviteParticipants(contacts);
     }
 
     /**
@@ -544,23 +488,16 @@ public abstract class GroupChatSession extends ChatSession {
             NetworkException {
         try {
             int nbrOfContacts = contacts.size();
-
             if (sLogger.isActivated()) {
                 sLogger.debug("Add " + nbrOfContacts + " participants to the session");
             }
-
             updateParticipants(contacts, ParticipantStatus.INVITING);
-
             SessionAuthenticationAgent authenticationAgent = getAuthenticationAgent();
-
             getDialogPath().incrementCseq();
-
             if (sLogger.isActivated()) {
                 sLogger.debug("Send REFER");
             }
-
             SipRequest refer;
-
             if (nbrOfContacts == 1) {
                 Uri singleContact = PhoneUtils.formatContactIdToUri(contacts.iterator().next());
                 refer = SipMessageFactory.createRefer(getDialogPath(), singleContact, getSubject(),
@@ -571,22 +508,16 @@ public abstract class GroupChatSession extends ChatSession {
             }
             SipTransactionContext ctx = mImsModule.getSipManager().sendSubsequentRequest(
                     getDialogPath(), refer);
-
             int statusCode = ctx.getStatusCode();
-
             if (statusCode == 407) {
                 if (sLogger.isActivated()) {
                     sLogger.debug("407 response received");
                 }
-
                 authenticationAgent.readProxyAuthenticateHeader(ctx.getSipResponse());
-
                 getDialogPath().incrementCseq();
-
                 if (sLogger.isActivated()) {
                     sLogger.info("Send second REFER");
                 }
-
                 if (nbrOfContacts == 1) {
                     Uri singleContact = PhoneUtils.formatContactIdToUri(contacts.iterator().next());
                     refer = SipMessageFactory.createRefer(getDialogPath(), singleContact,
@@ -595,43 +526,34 @@ public abstract class GroupChatSession extends ChatSession {
                     refer = SipMessageFactory.createRefer(getDialogPath(), contacts, getSubject(),
                             getContributionID());
                 }
-
                 authenticationAgent.setProxyAuthorizationHeader(refer);
-
                 ctx = mImsModule.getSipManager().sendSubsequentRequest(getDialogPath(), refer);
-
                 statusCode = ctx.getStatusCode();
-
                 if ((statusCode >= 200) && (statusCode < 300)) {
                     if (sLogger.isActivated()) {
                         sLogger.debug("20x OK response received");
                     }
-
                     updateParticipants(contacts, ParticipantStatus.INVITED);
                 } else {
                     if (sLogger.isActivated()) {
                         sLogger.debug("REFER has failed (" + statusCode + ")");
                     }
-
                     updateParticipants(contacts, ParticipantStatus.FAILED);
                 }
+
             } else if ((statusCode >= 200) && (statusCode < 300)) {
                 if (sLogger.isActivated()) {
                     sLogger.debug("20x OK response received");
                 }
-
                 updateParticipants(contacts, ParticipantStatus.INVITED);
+
             } else {
                 if (sLogger.isActivated()) {
                     sLogger.debug("No response received");
                 }
-
                 updateParticipants(contacts, ParticipantStatus.FAILED);
             }
-        } catch (InvalidArgumentException e) {
-            throw new PayloadException("REFER request has failed for contacts : " + contacts, e);
-
-        } catch (ParseException e) {
+        } catch (InvalidArgumentException | ParseException e) {
             throw new PayloadException("REFER request has failed for contacts : " + contacts, e);
         }
     }
@@ -651,7 +573,6 @@ public abstract class GroupChatSession extends ChatSession {
     public void handle200OK(SipResponse resp) throws PayloadException, NetworkException,
             FileAccessException {
         super.handle200OK(resp);
-
         mConferenceSubscriber.subscribe();
     }
 
@@ -668,7 +589,6 @@ public abstract class GroupChatSession extends ChatSession {
         if (logActivated) {
             sLogger.info("Data received (type " + mimeType + ")");
         }
-
         if (data == null || data.length == 0) {
             // By-pass empty data
             if (logActivated) {
@@ -676,7 +596,6 @@ public abstract class GroupChatSession extends ChatSession {
             }
             return;
         }
-
         if (ChatUtils.isApplicationIsComposingType(mimeType)) {
             // Is composing event
             receiveIsComposing(getRemoteContact(), data);
@@ -713,11 +632,10 @@ public abstract class GroupChatSession extends ChatSession {
         }
         String contentType = cpimMsg.getContentType();
         ContactId remoteId = getRemoteContact();
-        String pseudo = null;
         // In GC, the MSRP 'FROM' header of the SEND message is set to the remote URI
         // Extract URI and optional display name to get pseudo and remoteId
         CpimIdentity cpimIdentity = new CpimIdentity(cpimMsg.getHeader(CpimMessage.HEADER_FROM));
-        pseudo = cpimIdentity.getDisplayName();
+        String pseudo = cpimIdentity.getDisplayName();
         PhoneNumber remoteNumber = ContactUtil.getValidPhoneNumberFromUri(cpimIdentity.getUri());
         if (remoteNumber == null) {
             if (logActivated) {
@@ -729,7 +647,6 @@ public abstract class GroupChatSession extends ChatSession {
                 sLogger.info("Cpim FROM Identity: ".concat(cpimIdentity.toString()));
             }
         }
-
         // Extract local contactId from "TO" header
         ContactId localId = null;
         cpimIdentity = new CpimIdentity(cpimMsg.getHeader(CpimMessage.HEADER_TO));
@@ -742,17 +659,14 @@ public abstract class GroupChatSession extends ChatSession {
                 sLogger.info("Cpim TO Identity: ".concat(cpimIdentity.toString()));
             }
         }
-
         String dispositionNotification = cpimMsg.getHeader(ImdnUtils.HEADER_IMDN_DISPO_NOTIF);
         boolean msgSupportsImdnReport = true;
-
         /**
          * Set message's timestamp to the System.currentTimeMillis, not the session's itself
          * timestamp
          */
         long timestamp = System.currentTimeMillis();
         long timestampSent = cpimMsg.getTimestampSent();
-
         // Analyze received message thanks to the MIME type
         if (FileTransferUtils.isFileTransferHttpType(contentType)) {
             // File transfer over HTTP message
@@ -766,8 +680,6 @@ public abstract class GroupChatSession extends ChatSession {
             } else {
                 // TODO : else return error to Originating side
             }
-
-
         } else {
             if (ChatUtils.isTextPlainType(contentType)) {
                 ChatMessage msg = new ChatMessage(cpimMsgId, remoteId, cpimMsg.getMessageContent(),
@@ -843,11 +755,8 @@ public abstract class GroupChatSession extends ChatSession {
             super.terminateSession(reason);
             return;
         }
-
         interruptSession();
-
         closeSession(reason);
-
         closeMediaSession();
     }
 
@@ -863,9 +772,7 @@ public abstract class GroupChatSession extends ChatSession {
                 return;
             }
             if (sLogger.isActivated()) {
-                sLogger.info(new StringBuilder("Data transfer error ").append(error)
-                        .append(" for message ").append(msgId).append(" (MSRP chunk type: ")
-                        .append(typeMsrpChunk).append(")").toString());
+                sLogger.info("Data transfer error " + error + " for message " + msgId + " (MSRP chunk type: " + typeMsrpChunk + ")");
             }
 
             String chatId = getContributionID();
@@ -883,18 +790,13 @@ public abstract class GroupChatSession extends ChatSession {
                 for (ImsSessionListener listener : getListeners()) {
                     ImdnDocument imdn = new ImdnDocument(msgId, ImdnDocument.DELIVERY_NOTIFICATION,
                             ImdnDocument.DELIVERY_STATUS_FAILED, ImdnDocument.IMDN_DATETIME_NOT_SET);
-                    ContactId contact = null;
-                    ((ChatSessionListener) listener).onMessageDeliveryStatusReceived(contact, imdn);
+                    ((ChatSessionListener) listener).onMessageDeliveryStatusReceived(null, imdn);
                 }
             } else {
                 // do nothing
-                sLogger.error(new StringBuilder("MSRP transfer error not handled for message '")
-                        .append(msgId).append("' and chunk type : '").append(typeMsrpChunk)
-                        .append("'!").toString());
+                sLogger.error("MSRP transfer error not handled for message '" + msgId + "' and chunk type : '" + typeMsrpChunk + "'!");
             }
-
             int errorCode;
-
             if ((error != null)
                     && (error.contains(String.valueOf(Response.REQUEST_ENTITY_TOO_LARGE)) || error
                             .contains(String.valueOf(Response.REQUEST_TIMEOUT)))) {
@@ -908,7 +810,6 @@ public abstract class GroupChatSession extends ChatSession {
                  * while in the process of sending a chunk, and the chunk is interruptible, the
                  * sender MUST interrupt it.
                  */
-
                 errorCode = ChatError.MEDIA_SESSION_BROKEN;
             } else {
                 /*
@@ -919,7 +820,6 @@ public abstract class GroupChatSession extends ChatSession {
 
                 errorCode = ChatError.MEDIA_SESSION_FAILED;
             }
-
             ChatError chatError = new ChatError(errorCode, error);
             for (ImsSessionListener listener : getListeners()) {
                 ((GroupChatSessionListener) listener).onImError(chatError);
@@ -933,8 +833,7 @@ public abstract class GroupChatSession extends ChatSession {
              * exit the system and thus can bring the whole system down, which is not intended.
              */
             sLogger.error(
-                    new StringBuilder("Failed to handle msrp error").append(error)
-                            .append(" for message ").append(msgId).toString(), e);
+                    "Failed to handle msrp error" + error + " for message " + msgId, e);
         }
     }
 
@@ -945,8 +844,7 @@ public abstract class GroupChatSession extends ChatSession {
                 return;
             }
             if (sLogger.isActivated()) {
-                sLogger.info(new StringBuilder("Session error: ").append(error.getErrorCode())
-                        .append(", reason=").append(error.getMessage()).toString());
+                sLogger.info("Session error: " + error.getErrorCode() + ", reason=" + error.getMessage());
             }
             closeMediaSession();
             removeSession();
@@ -962,8 +860,7 @@ public abstract class GroupChatSession extends ChatSession {
              * executing operations on a thread unhandling such exceptions will eventually lead to
              * exit the system and thus can bring the whole system down, which is not intended.
              */
-            sLogger.error(new StringBuilder("Failed to handle error").append(error).append("!")
-                    .toString(), e);
+            sLogger.error("Failed to handle error" + error + "!", e);
         }
     }
 }
