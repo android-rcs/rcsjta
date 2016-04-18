@@ -81,8 +81,7 @@ public class ContactUtil {
             }
         } catch (RcsPermissionDeniedException e) {
             if (sLogger.isActivated()) {
-                sLogger.error(new StringBuilder("Failed to validate phone number from URI '")
-                        .append(uri).append(("'!")).toString(), e);
+                sLogger.error("Failed to validate phone number from URI '" + uri + ("'!"), e);
             }
         }
         return null;
@@ -107,8 +106,7 @@ public class ContactUtil {
                 return new PhoneNumber(contact);
             }
         } catch (RcsPermissionDeniedException e) {
-            sLogger.error(new StringBuilder("Failed to validate phone number from Android '")
-                    .append(contact).append(("'!")).toString(), e);
+            sLogger.error("Failed to validate phone number from Android '" + contact + ("'!"), e);
         }
         return null;
     }
@@ -134,8 +132,8 @@ public class ContactUtil {
              * This exception cannot occur since PhoneNumber can only be instantiated for valid
              * numbers.
              */
-            String errorMessage = new StringBuilder("Phone number '").append(phoneNumber)
-                    .append("' cannot be converted into contactId!").toString();
+            String errorMessage = "Phone number '" + phoneNumber
+                    + "' cannot be converted into contactId!";
             throw new IllegalStateException(errorMessage, e);
         }
     }
@@ -162,8 +160,8 @@ public class ContactUtil {
              * This exception should not occur since core stack cannot be started if country code
              * cannot be resolved.
              */
-            String errorMessage = new StringBuilder("Failed to convert phone number '")
-                    .append(phoneNumber).append("' into contactId!").toString();
+            String errorMessage = "Failed to convert phone number '" + phoneNumber
+                    + "' into contactId!";
             throw new IllegalStateException(errorMessage, e);
         }
     }
