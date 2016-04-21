@@ -179,6 +179,9 @@ public class Core {
      * Initializes Core
      */
     public void initialize() {
+        final HandlerThread backgroundThread = new HandlerThread(BACKGROUND_THREAD_NAME);
+        backgroundThread.start();
+        mBackgroundHandler = new Handler(backgroundThread.getLooper());
         mImsModule.initialize();
     }
 
@@ -223,10 +226,6 @@ public class Core {
         if (mStarted) {
             return;
         }
-        final HandlerThread backgroundThread = new HandlerThread(BACKGROUND_THREAD_NAME);
-        backgroundThread.start();
-        mBackgroundHandler = new Handler(backgroundThread.getLooper());
-
         mImsModule.start();
         mAddressBookManager.start();
         mLocaleManager.start();
