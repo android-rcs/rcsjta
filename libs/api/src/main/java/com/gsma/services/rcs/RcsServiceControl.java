@@ -41,6 +41,8 @@ import android.util.Log;
  */
 public class RcsServiceControl {
 
+    private static final boolean sAccurateLog = false;
+
     /**
      * RCS stack package name
      */
@@ -176,8 +178,10 @@ public class RcsServiceControl {
                         break;
                     }
                     try {
-                        Log.d(LOG_TAG, "Waiting for result for " + action + " during max " + delay
-                                + "ms");
+                        if (sAccurateLog) {
+                            Log.d(LOG_TAG, "Waiting for result for " + action + " during max "
+                                    + delay + "ms");
+                        }
                         broadcastReceiver.wait(delay);
 
                     } catch (InterruptedException e) {
@@ -227,13 +231,17 @@ public class RcsServiceControl {
      * @throws RcsGenericException
      */
     public boolean isActivationModeChangeable() throws RcsGenericException {
-        Log.d(LOG_TAG, "isActivationModeChangeable: Request()");
+        if (sAccurateLog) {
+            Log.d(LOG_TAG, "isActivationModeChangeable: Request()");
+        }
         Bundle result = queryRcsStackByIntent(new Intent(
                 Intents.Service.ACTION_GET_ACTIVATION_MODE_CHANGEABLE));
         boolean activationModeChangeable = result.getBoolean(
                 Intents.Service.EXTRA_GET_ACTIVATION_MODE_CHANGEABLE, false);
-        Log.d(LOG_TAG, "isActivationModeChangeable: Response() = " + activationModeChangeable
-                + " (in " + result.getLong(TIME_SPENT, -1) + "ms)");
+        if (sAccurateLog) {
+            Log.d(LOG_TAG, "isActivationModeChangeable: Response() = " + activationModeChangeable
+                    + " (in " + result.getLong(TIME_SPENT, -1) + "ms)");
+        }
         return activationModeChangeable;
     }
 
@@ -244,12 +252,16 @@ public class RcsServiceControl {
      * @throws RcsGenericException
      */
     public boolean isActivated() throws RcsGenericException {
-        Log.d(LOG_TAG, "isActivated: Request()");
+        if (sAccurateLog) {
+            Log.d(LOG_TAG, "isActivated: Request()");
+        }
         Bundle result = queryRcsStackByIntent(new Intent(Intents.Service.ACTION_GET_ACTIVATION_MODE));
         boolean activated = result.getBoolean(Intents.Service.EXTRA_GET_ACTIVATION_MODE, false);
-        Log.d(LOG_TAG,
-                "isActivated: Response() -> " + activated + " (in "
-                        + result.getLong(TIME_SPENT, -1) + "ms)");
+        if (sAccurateLog) {
+            Log.d(LOG_TAG,
+                    "isActivated: Response() -> " + activated + " (in "
+                            + result.getLong(TIME_SPENT, -1) + "ms)");
+        }
         return activated;
     }
 
@@ -263,12 +275,16 @@ public class RcsServiceControl {
      */
     public void setActivationMode(boolean active) throws RcsPermissionDeniedException,
             RcsGenericException {
-        Log.d(LOG_TAG, "setActivationMode: Request(" + active + ")");
+        if (sAccurateLog) {
+            Log.d(LOG_TAG, "setActivationMode: Request(" + active + ")");
+        }
         Bundle result = queryRcsStackByIntent(generateSetActivationModeIntent(active));
         boolean activationMode = result
                 .getBoolean(Intents.Service.EXTRA_SET_ACTIVATION_MODE, false);
-        Log.d(LOG_TAG, "setActivationMode: Response(" + active + ") -> " + activationMode + " (in "
-                + result.getLong(TIME_SPENT, -1) + "ms)");
+        if (sAccurateLog) {
+            Log.d(LOG_TAG, "setActivationMode: Response(" + active + ") -> " + activationMode
+                    + " (in " + result.getLong(TIME_SPENT, -1) + "ms)");
+        }
         if (active != activationMode) {
             throw new RcsPermissionDeniedException("Stack activation mode is not changeable!");
         }
@@ -285,12 +301,16 @@ public class RcsServiceControl {
      */
     public boolean isCompatible(RcsService service) throws RcsGenericException {
         String serviceName = service.getClass().getSimpleName();
-        Log.d(LOG_TAG, "isCompatible: Request(" + serviceName + ")");
+        if (sAccurateLog) {
+            Log.d(LOG_TAG, "isCompatible: Request(" + serviceName + ")");
+        }
         Bundle result = queryRcsStackByIntent(generateIsCompatibeIntent(serviceName));
         boolean compatible = result.getBoolean(Intents.Service.EXTRA_GET_COMPATIBILITY_RESPONSE,
                 false);
-        Log.d(LOG_TAG, "isCompatible: Response(" + serviceName + ") -> " + compatible + " (in "
-                + result.getLong(TIME_SPENT, -1) + "ms)");
+        if (sAccurateLog) {
+            Log.d(LOG_TAG, "isCompatible: Response(" + serviceName + ") -> " + compatible + " (in "
+                    + result.getLong(TIME_SPENT, -1) + "ms)");
+        }
         return compatible;
     }
 
@@ -301,14 +321,18 @@ public class RcsServiceControl {
      * @throws RcsGenericException
      */
     public boolean isServiceStarted() throws RcsGenericException {
-        Log.d(LOG_TAG, "isServiceStarted: Request()");
+        if (sAccurateLog) {
+            Log.d(LOG_TAG, "isServiceStarted: Request()");
+        }
         Bundle result = queryRcsStackByIntent(new Intent(
                 Intents.Service.ACTION_GET_SERVICE_STARTING_STATE));
         boolean started = result
                 .getBoolean(Intents.Service.EXTRA_GET_SERVICE_STARTING_STATE, false);
-        Log.d(LOG_TAG,
-                "isServiceStarted: Response() -> " + started + " (in "
-                        + result.getLong(TIME_SPENT, -1) + "ms)");
+        if (sAccurateLog) {
+            Log.d(LOG_TAG,
+                    "isServiceStarted: Response() -> " + started + " (in "
+                            + result.getLong(TIME_SPENT, -1) + "ms)");
+        }
         return started;
     }
 }
