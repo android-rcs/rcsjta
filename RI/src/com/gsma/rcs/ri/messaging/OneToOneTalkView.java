@@ -264,7 +264,7 @@ public class OneToOneTalkView extends RcsFragmentActivity implements
                 if (!msgIds.isEmpty()) {
                     try {
                         if (LogUtils.isActive) {
-                            Log.d(OneToOneTalkView.LOGTAG, "Clear delivery expiration for IDs="
+                            Log.d(LOGTAG, "Clear delivery expiration for IDs="
                                     + msgIds);
                         }
                         mChatService.clearMessageDeliveryExpiration(msgIds);
@@ -291,7 +291,7 @@ public class OneToOneTalkView extends RcsFragmentActivity implements
                             mContact);
                     if (!transferIds.isEmpty()) {
                         if (LogUtils.isActive) {
-                            Log.d(OneToOneTalkView.LOGTAG, "Clear delivery expiration for IDs="
+                            Log.d(LOGTAG, "Clear delivery expiration for IDs="
                                     + transferIds);
                         }
                         mFileTransferService.clearFileTransferDeliveryExpiration(transferIds);
