@@ -53,6 +53,11 @@ public interface IConnectionManager {
     void stopMonitorApiCnx();
 
     /**
+     * Check if activity is on foreground
+     */
+    boolean isOnForeground();
+
+    /**
      * Check if services are connected
      *
      * @param services list of services

@@ -18,12 +18,10 @@
 
 package com.gsma.rcs.api.connection.utils;
 
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.app.ProgressDialog;
-import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
-
+import com.gsma.rcs.api.connection.ConnectionManager;
+import com.gsma.rcs.api.connection.ConnectionManager.RcsServiceName;
+import com.gsma.rcs.api.connection.IRcsActivityFinishable;
+import com.gsma.rcs.api.connection.R;
 import com.gsma.services.rcs.RcsServiceListener;
 import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.RcsServiceNotRegisteredException;
@@ -36,10 +34,13 @@ import com.gsma.services.rcs.sharing.geoloc.GeolocSharingService;
 import com.gsma.services.rcs.sharing.image.ImageSharingService;
 import com.gsma.services.rcs.sharing.video.VideoSharingService;
 import com.gsma.services.rcs.upload.FileUploadService;
-import com.gsma.rcs.api.connection.ConnectionManager;
-import com.gsma.rcs.api.connection.ConnectionManager.RcsServiceName;
-import com.gsma.rcs.api.connection.IRcsActivityFinishable;
-import com.gsma.rcs.api.connection.R;
+
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.ProgressDialog;
+import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 
 /**
  * @author LEMORDANT Philippe
@@ -55,6 +56,10 @@ public abstract class RcsFragmentActivity extends FragmentActivity implements
 
     private IRcsActivityFinishable mIFinishable;
 
+    private boolean onForeground;
+
+    private static final String LOGTAG = LogUtils.getTag(RcsFragmentActivity.class.getSimpleName());
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -64,7 +69,16 @@ public abstract class RcsFragmentActivity extends FragmentActivity implements
 
                 @Override
                 public void showMessageThenExit(String msg) {
-                    DialogUtil.showMessageThenExit(RcsFragmentActivity.this, msg, mLockAcces);
+                    if (!RcsFragmentActivity.this.isOnForeground()) {
+                        if (LogUtils.isActive) {
+                            Log.w(LOGTAG,
+                                    "Exit activity " + RcsFragmentActivity.this.getLocalClassName()
+                                            + " <" + msg + ">");
+                        }
+                        RcsFragmentActivity.this.finish();
+                    } else {
+                        DialogUtil.showMessageThenExit(RcsFragmentActivity.this, msg, mLockAcces);
+                    }
                 }
             };
         }
@@ -74,6 +88,23 @@ public abstract class RcsFragmentActivity extends FragmentActivity implements
     protected void onDestroy() {
         super.onDestroy();
         mCnxManager.stopMonitorServices(this);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        onForeground = true;
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        onForeground = false;
+    }
+
+    @Override
+    public boolean isOnForeground() {
+        return onForeground;
     }
 
     @Override
