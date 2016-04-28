@@ -50,7 +50,7 @@ import javax2.sip.message.Request;
 
 /**
  * SIP utility functions
- * 
+ *
  * @author JM. Auffret
  */
 public class SipUtils {
@@ -150,11 +150,6 @@ public class SipUtils {
     public static final String HEADER_SESSION_EXPIRES = "Session-Expires";
 
     /**
-     * Session-Replaces header
-     */
-    public static final String HEADER_SESSION_REPLACES = "Session-Replaces";
-
-    /**
      * Min-SE header
      */
     public static final String HEADER_MIN_SE = "Min-SE";
@@ -221,9 +216,8 @@ public class SipUtils {
      */
     public static String userAgentString() {
         if (sUserAgentString == null) {
-            sUserAgentString = new StringBuilder(UA_HEADER_EXT_TO_EXT_CLIENT)
-                    .append(UA_HEADER_OMA_SIMPLE_IM).append(TerminalInfo.getBuildInfo())
-                    .append(WHITESPACE).append(TerminalInfo.getClientInfo()).toString();
+            sUserAgentString = UA_HEADER_EXT_TO_EXT_CLIENT + UA_HEADER_OMA_SIMPLE_IM
+                    + TerminalInfo.getBuildInfo() + WHITESPACE + TerminalInfo.getClientInfo();
         }
         return sUserAgentString;
     }
@@ -235,9 +229,7 @@ public class SipUtils {
      * @throws ParseException
      */
     public static Header buildUserAgentHeader() throws ParseException {
-        Header userAgentHeader = HEADER_FACTORY.createHeader(UserAgentHeader.NAME,
-                userAgentString());
-        return userAgentHeader;
+        return HEADER_FACTORY.createHeader(UserAgentHeader.NAME, userAgentString());
     }
 
     /**
@@ -248,9 +240,8 @@ public class SipUtils {
      */
     public static Header buildServerHeader() throws ParseException {
         if (sServerHeaderValue == null) {
-            sServerHeaderValue = new StringBuilder(HEADER_EXT_TO_EXT_SERVER)
-                    .append(UA_HEADER_OMA_SIMPLE_IM).append(TerminalInfo.getClientInfo())
-                    .toString();
+            sServerHeaderValue = HEADER_EXT_TO_EXT_SERVER + UA_HEADER_OMA_SIMPLE_IM
+                    + TerminalInfo.getClientInfo();
         }
         return HEADER_FACTORY.createHeader(ServerHeader.NAME, sServerHeaderValue);
     }
@@ -291,9 +282,7 @@ public class SipUtils {
      * @throws ParseException
      */
     public static Header buildAccessNetworkInfo(String info) throws ParseException {
-        Header accessInfo = HEADER_FACTORY
-                .createHeader(SipUtils.HEADER_P_ACCESS_NETWORK_INFO, info);
-        return accessInfo;
+        return HEADER_FACTORY.createHeader(SipUtils.HEADER_P_ACCESS_NETWORK_INFO, info);
     }
 
     /**
@@ -365,7 +354,7 @@ public class SipUtils {
         if (list != null) {
             // There is at most 2 P-Asserted-Identity headers, one with tel uri and one with sip uri
             // We give preference to the tel uri if both are present, if not we return the first one
-            String assertedHeader1 = null;
+            String assertedHeader1;
             if (list.hasNext()) {
                 // Get value of the first header
                 assertedHeader1 = ((ExtensionHeader) list.next()).getValue();
@@ -411,13 +400,12 @@ public class SipUtils {
      * @return List of route headers as string
      */
     public static Vector<String> routeProcessing(SipMessage msg, boolean invert) {
-        Vector<String> result = new Vector<String>();
+        Vector<String> result = new Vector<>();
         ListIterator<Header> list = msg.getHeaders(RecordRouteHeader.NAME);
         if (list == null) {
             // No route available
             return null;
         }
-
         while (list.hasNext()) {
             RecordRouteHeader record = (RecordRouteHeader) list.next();
             RouteHeader route = SipUtils.HEADER_FACTORY.createRouteHeader(record.getAddress());
@@ -493,12 +481,9 @@ public class SipUtils {
              * feature-param.
              */
             for (int i = 0; i < tags.length - 1; i++) {
-                StringBuilder acceptTags = new StringBuilder("*;");
-                acceptTags.append(tags[i]);
-                acceptTags.append(';');
-                acceptTags.append(SipUtils.EXPLICIT_REQUIRE);
                 Header header = SipUtils.HEADER_FACTORY.createHeader(
-                        SipUtils.HEADER_ACCEPT_CONTACT, acceptTags.toString());
+                        SipUtils.HEADER_ACCEPT_CONTACT, "*;" + tags[i] + ';'
+                                + SipUtils.EXPLICIT_REQUIRE);
                 message.addHeader(header);
             }
         } else {
@@ -555,7 +540,6 @@ public class SipUtils {
         if (index == -1) {
             return null;
         }
-
         int begin = index + 4;
         int end = msg.indexOf(SipUtils.CRLF, index + 2);
         return msg.substring(begin, end).trim();
@@ -567,7 +551,7 @@ public class SipUtils {
      * @param message SIP message
      * @return ID or null
      */
-    public static String getRemoteInstanceID(SipMessage message) {
+    public static String getRemoteInstanceId(SipMessage message) {
         ContactHeader contactHeader = (ContactHeader) message.getHeader(ContactHeader.NAME);
         if (contactHeader != null) {
             return contactHeader.getParameter(SIP_INSTANCE_PARAM);
@@ -667,9 +651,8 @@ public class SipUtils {
     public static void assertContentIsNotNull(String content, SipRequest invite)
             throws PayloadException {
         if (content == null) {
-            throw new PayloadException(
-                    new StringBuilder("Unable to extract content from invite : ").append(invite)
-                            .toString());
+            throw new PayloadException("Unable to extract content from invite: " + invite);
         }
     }
+
 }

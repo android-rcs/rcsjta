@@ -23,6 +23,7 @@ import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 import java.security.ProviderException;
@@ -66,21 +67,20 @@ public class HistoryProvider extends MultiDbProvider {
     }
 
     @Override
-    public String getType(Uri uri) {
+    public String getType(@NonNull Uri uri) {
         switch (sUriMatcher.match(uri)) {
             case UriType.History.HISTORY:
             case UriType.InternalHistory.HISTORY:
                 return CursorType.TYPE_DIRECTORY;
 
             default:
-                throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
-                        .append(uri).append("!").toString());
+                throw new IllegalArgumentException("Unsupported URI " + uri + "!");
         }
     }
 
     @Override
-    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
-            String sort) {
+    public Cursor query(@NonNull Uri uri, String[] projection, String selection,
+            String[] selectionArgs, String sort) {
         List<String> historyLogMembers = uri.getQueryParameters(HistoryLogData.KEY_PROVIDER_ID);
         ensureDatabasesAttached(historyLogMembers);
         StringBuilder query = new StringBuilder("SELECT ");
@@ -102,17 +102,17 @@ public class HistoryProvider extends MultiDbProvider {
     }
 
     @Override
-    public int update(Uri uri, ContentValues values, String where, String[] whereArgs) {
+    public int update(@NonNull Uri uri, ContentValues values, String where, String[] whereArgs) {
         throw new ProviderException("Operation not supported!");
     }
 
     @Override
-    public Uri insert(Uri uri, ContentValues initialValues) {
+    public Uri insert(@NonNull Uri uri, ContentValues initialValues) {
         throw new ProviderException("Operation not supported!");
     }
 
     @Override
-    public int delete(Uri uri, String where, String[] whereArgs) {
+    public int delete(@NonNull Uri uri, String where, String[] whereArgs) {
         throw new ProviderException("Operation not supported!");
     }
 

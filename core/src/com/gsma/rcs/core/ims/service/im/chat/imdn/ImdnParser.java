@@ -50,7 +50,7 @@ public class ImdnParser extends DefaultHandler {
      */
     private StringBuffer accumulator;
     private String mNotificationType;
-    private String mStatus;
+    private ImdnDocument.DeliveryStatus mStatus;
     private String mMsgId;
     private long mDateTime;
     private final InputSource mInputSource;
@@ -108,18 +108,24 @@ public class ImdnParser extends DefaultHandler {
     public void endElement(String namespaceURL, String localName, String qname) {
         if (ImdnDocument.MESSAGE_ID_TAG.equals(localName)) {
             mMsgId = accumulator.toString();
+
         } else if (ImdnDocument.IMDN_DATETIME.equals(localName)) {
             mDateTime = DateUtils.decodeDate(accumulator.toString());
-        } else if (ImdnDocument.DELIVERY_STATUS_DELIVERED.equals(localName)) {
-            mStatus = ImdnDocument.DELIVERY_STATUS_DELIVERED;
-        } else if (ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(localName)) {
-            mStatus = ImdnDocument.DELIVERY_STATUS_DISPLAYED;
-        } else if (ImdnDocument.DELIVERY_STATUS_FAILED.equals(localName)) {
-            mStatus = ImdnDocument.DELIVERY_STATUS_FAILED;
-        } else if (ImdnDocument.DELIVERY_STATUS_ERROR.equals(localName)) {
-            mStatus = ImdnDocument.DELIVERY_STATUS_ERROR;
-        } else if (ImdnDocument.DELIVERY_STATUS_FORBIDDEN.equals(localName)) {
-            mStatus = ImdnDocument.DELIVERY_STATUS_FORBIDDEN;
+
+        } else if (ImdnDocument.DeliveryStatus.DELIVERED.equalsName(localName)) {
+            mStatus = ImdnDocument.DeliveryStatus.DELIVERED;
+
+        } else if (ImdnDocument.DeliveryStatus.DISPLAYED.equalsName(localName)) {
+            mStatus = ImdnDocument.DeliveryStatus.DISPLAYED;
+
+        } else if (ImdnDocument.DeliveryStatus.FAILED.equalsName(localName)) {
+            mStatus = ImdnDocument.DeliveryStatus.FAILED;
+
+        } else if (ImdnDocument.DeliveryStatus.ERROR.equalsName(localName)) {
+            mStatus = ImdnDocument.DeliveryStatus.ERROR;
+
+        } else if (ImdnDocument.DeliveryStatus.FORBIDDEN.equalsName(localName)) {
+            mStatus = ImdnDocument.DeliveryStatus.FORBIDDEN;
         }
     }
 
@@ -132,13 +138,15 @@ public class ImdnParser extends DefaultHandler {
 
     public void error(SAXParseException exception) {
         if (sLogger.isActivated()) {
-            sLogger.error("Error: line " + exception.getLineNumber() + ": " + exception.getMessage());
+            sLogger.error("Error: line " + exception.getLineNumber() + ": "
+                    + exception.getMessage());
         }
     }
 
     public void fatalError(SAXParseException exception) throws SAXException {
         if (sLogger.isActivated()) {
-            sLogger.error("Fatal: line " + exception.getLineNumber() + ": " + exception.getMessage());
+            sLogger.error("Fatal: line " + exception.getLineNumber() + ": "
+                    + exception.getMessage());
         }
         throw exception;
     }

@@ -38,27 +38,30 @@ import android.net.Uri;
  */
 public class GroupDeliveryInfoLog implements IGroupDeliveryInfoLog {
 
-    private static final String SELECTION_DELIVERY_INFO_BY_MSG_ID_AND_CONTACT = new StringBuilder(
-            GroupDeliveryInfoData.KEY_ID).append("=? AND ")
-            .append(GroupDeliveryInfoData.KEY_CONTACT).append("=?").toString();
+    private static final String SELECTION_DELIVERY_INFO_BY_MSG_ID_AND_CONTACT = GroupDeliveryInfoData.KEY_ID
+            + "=? AND " + GroupDeliveryInfoData.KEY_CONTACT + "=?";
 
-    private static final String SELECTION_DELIVERY_INFO_BY_MSG_ID_AND_CONTACT_EXCLUDE_DISPLAYED = new StringBuilder(
-            GroupDeliveryInfoData.KEY_ID).append("=? AND ")
-            .append(GroupDeliveryInfoData.KEY_CONTACT).append("=?").append(" AND ")
-            .append(GroupDeliveryInfoData.KEY_STATUS).append("<>").append(Status.DISPLAYED.toInt())
-            .toString();
+    private static final String SELECTION_DELIVERY_INFO_BY_MSG_ID_AND_CONTACT_EXCLUDE_DISPLAYED = GroupDeliveryInfoData.KEY_ID
+            + "=? AND "
+            + GroupDeliveryInfoData.KEY_CONTACT
+            + "=?"
+            + " AND "
+            + GroupDeliveryInfoData.KEY_STATUS + "<>" + Status.DISPLAYED.toInt();
 
-    private static final String SELECTION_CONTACTS_NOT_RECEIVED_MESSAGE = new StringBuilder(
-            GroupDeliveryInfoData.KEY_STATUS).append("=").append(Status.NOT_DELIVERED.toInt())
-            .append(" OR (").append(GroupDeliveryInfoData.KEY_STATUS).append("=")
-            .append(Status.FAILED.toInt()).append(" AND ")
-            .append(GroupDeliveryInfoData.KEY_REASON_CODE).append(" IN (")
-            .append(ReasonCode.FAILED_DELIVERY.toInt()).append(",")
-            .append(ReasonCode.FAILED_DISPLAY.toInt()).append("))").toString();
+    private static final String SELECTION_CONTACTS_NOT_RECEIVED_MESSAGE = GroupDeliveryInfoData.KEY_STATUS
+            + "="
+            + Status.NOT_DELIVERED.toInt()
+            + " OR ("
+            + GroupDeliveryInfoData.KEY_STATUS
+            + "="
+            + Status.FAILED.toInt()
+            + " AND "
+            + GroupDeliveryInfoData.KEY_REASON_CODE
+            + " IN ("
+            + ReasonCode.FAILED_DELIVERY.toInt() + "," + ReasonCode.FAILED_DISPLAY.toInt() + "))";
 
-    private static final String SELECTION_DELIVERY_INFO_NOT_DISPLAYED = new StringBuilder(
-            GroupDeliveryInfoData.KEY_STATUS).append("<>").append(Status.DISPLAYED.toInt())
-            .toString();
+    private static final String SELECTION_DELIVERY_INFO_NOT_DISPLAYED = GroupDeliveryInfoData.KEY_STATUS
+            + "<>" + Status.DISPLAYED.toInt();
 
     private static final String[] PROJECTION_MESSAGE_ID = new String[] {
         GroupDeliveryInfoData.KEY_ID
@@ -114,9 +117,9 @@ public class GroupDeliveryInfoLog implements IGroupDeliveryInfoLog {
         switch (status) {
             case DELIVERED:
             case DISPLAYED:
-                throw new IllegalArgumentException(new StringBuilder("Status that requires ")
-                        .append("timestamp passed, use specific method taking timestamp")
-                        .append(" to set status ").append(status.toString()).toString());
+                throw new IllegalArgumentException("Status that requires "
+                        + "timestamp passed, use specific method taking timestamp"
+                        + " to set status " + status.toString());
             default:
         }
 

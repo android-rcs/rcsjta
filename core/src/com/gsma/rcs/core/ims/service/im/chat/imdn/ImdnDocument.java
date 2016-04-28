@@ -24,8 +24,9 @@ package com.gsma.rcs.core.ims.service.im.chat.imdn;
 
 /**
  * IMDN document
- * 
+ *
  * @author jexa7410
+ * @author Philippe LEMORDANT
  */
 public class ImdnDocument {
     /**
@@ -43,17 +44,24 @@ public class ImdnDocument {
      */
     public static final String DISPLAY_NOTIFICATION = "display-notification";
 
-    public static final String DELIVERY_STATUS_DELIVERED = "delivered";
+    public enum DeliveryStatus {
+        DELIVERED("delivered"), DISPLAYED("displayed"), FAILED("failed"), ERROR("error"), FORBIDDEN(
+                "forbidden");
 
-    public static final String DELIVERY_STATUS_DISPLAYED = "displayed";
+        private final String mName;
 
-    public static final String DELIVERY_STATUS_FAILED = "failed";
+        DeliveryStatus(String name) {
+            mName = name;
+        }
 
-    public static final String DELIVERY_STATUS_ERROR = "error";
+        public boolean equalsName(String otherName) {
+            return (otherName != null) && mName.equals(otherName);
+        }
 
-    public static final String DELIVERY_STATUS_FORBIDDEN = "forbidden";
-
-    public static final String IMDN_TAG = "imdn";
+        public String toString() {
+            return mName;
+        }
+    }
 
     public static final String MESSAGE_ID_TAG = "message-id";
 
@@ -80,13 +88,13 @@ public class ImdnDocument {
 
     private final String mMsgId;
 
-    private final String mStatus;
+    private final DeliveryStatus mStatus;
 
     private final String mNotificationType;
 
     private final long mDateTime;
 
-    public ImdnDocument(String msgId, String notificationType, String status, long dateTime) {
+    public ImdnDocument(String msgId, String notificationType, DeliveryStatus status, long dateTime) {
         mMsgId = msgId;
         mNotificationType = notificationType;
         mStatus = status;
@@ -95,7 +103,7 @@ public class ImdnDocument {
 
     /**
      * Get message ID
-     * 
+     *
      * @return Message ID
      */
     public String getMsgId() {
@@ -104,16 +112,16 @@ public class ImdnDocument {
 
     /**
      * Get status
-     * 
+     *
      * @return Status
      */
-    public String getStatus() {
+    public DeliveryStatus getStatus() {
         return mStatus;
     }
 
     /**
      * Get notification type
-     * 
+     *
      * @return Notification type
      */
     public String getNotificationType() {
@@ -122,7 +130,7 @@ public class ImdnDocument {
 
     /**
      * Get DateTime
-     * 
+     *
      * @return DateTime
      */
     public long getDateTime() {

@@ -22,6 +22,7 @@
 
 package com.gsma.rcs.provider.sharing;
 
+import com.gsma.services.rcs.RcsService;
 import com.gsma.services.rcs.sharing.video.VideoSharing;
 import com.gsma.services.rcs.sharing.video.VideoSharingLog;
 
@@ -80,7 +81,7 @@ public class VideoSharingData {
     /**
      * Incoming sharing or outgoing sharing.
      * 
-     * @see Direction
+     * @see RcsService.Direction
      */
     /* package private */static final String KEY_DIRECTION = VideoSharingLog.DIRECTION;
 

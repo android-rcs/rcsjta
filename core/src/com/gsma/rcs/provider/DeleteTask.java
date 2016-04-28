@@ -47,8 +47,6 @@ public abstract class DeleteTask<T> implements Runnable {
 
     private static final Logger sLogger = Logger.getLogger(DeleteTask.class.getName());
 
-    private final String mColumnPrimaryKey;
-
     private final String mColumnGroupBy;
 
     private final boolean mPathAppended;
@@ -70,16 +68,16 @@ public abstract class DeleteTask<T> implements Runnable {
         }
 
         /**
-         * @param contentResolver
-         * @param contentUri
-         * @param columnPrimaryKey
-         * @param columnContact
-         * @param contact
+         * @param contentResolver the content resolver
+         * @param contentUri the content URI
+         * @param columnPrimaryKey the primary key column
+         * @param columnContact the contact column
+         * @param contact the contact
          */
-        public GroupedByContactId(LocalContentResolver contentResolver,
-                Uri contentUri, String columnPrimaryKey, String columnContact, ContactId contact) {
-            super(contentResolver, contentUri, columnPrimaryKey, columnContact,
-                    new StringBuilder(columnContact).append("=?").toString(), contact.toString());
+        public GroupedByContactId(LocalContentResolver contentResolver, Uri contentUri,
+                String columnPrimaryKey, String columnContact, ContactId contact) {
+            super(contentResolver, contentUri, columnPrimaryKey, columnContact, columnContact
+                    + "=?", contact.toString());
             mContact = contact;
         }
 
@@ -119,8 +117,7 @@ public abstract class DeleteTask<T> implements Runnable {
 
         public NotGrouped(LocalContentResolver contentResolver, Uri contentUri,
                 String columnPrimaryKey, String selection, String... selectionArgs) {
-            super(contentResolver, contentUri, columnPrimaryKey, null, selection,
-                    selectionArgs);
+            super(contentResolver, contentUri, columnPrimaryKey, null, selection, selectionArgs);
         }
 
         @Override
@@ -163,7 +160,7 @@ public abstract class DeleteTask<T> implements Runnable {
             String... selectionArgs) {
         mLocalContentResolver = contentResolver;
         if (selection == null && selectionArgs != null && selectionArgs.length == 1) {
-            mContentUri = contentUri.buildUpon().appendPath(selectionArgs[0].toString()).build();
+            mContentUri = contentUri.buildUpon().appendPath(selectionArgs[0]).build();
             mPathAppended = true;
             selectionArgs = null;
         } else {
@@ -176,15 +173,14 @@ public abstract class DeleteTask<T> implements Runnable {
         } else {
             mSelectionArgs = selectionArgs;
         }
-        mColumnPrimaryKey = columnPrimaryKey;
         mColumnGroupBy = columnGroupBy;
         if (mColumnGroupBy == null) {
             mProjection = new String[] {
-                mColumnPrimaryKey
+                columnPrimaryKey
             };
         } else {
             mProjection = new String[] {
-                    mColumnPrimaryKey, mColumnGroupBy
+                    columnPrimaryKey, mColumnGroupBy
             };
         }
     }
@@ -212,9 +208,9 @@ public abstract class DeleteTask<T> implements Runnable {
                     ids = result.get(groupId);
                 }
                 if (ids == null) {
-                    ids = new HashSet<String>();
+                    ids = new HashSet<>();
                     if (result == null) {
-                        result = new HashMap<T, Set<String>>();
+                        result = new HashMap<>();
                     }
                     result.put(groupId, ids);
                 }
@@ -267,7 +263,7 @@ public abstract class DeleteTask<T> implements Runnable {
 
     /**
      * @param groupId key of the group
-     * @param itemId
+     * @param itemId the item ID
      * @throws PayloadException
      */
     protected abstract void onRowDelete(T groupId, String itemId) throws PayloadException;
@@ -275,7 +271,6 @@ public abstract class DeleteTask<T> implements Runnable {
     /**
      * Called after the delete is completed to report the ids deleted per group chatId or contact.
      * 
-     * @param chatOrContactId the key by which the ids are grouped by.
      * @param deletedIds as a {@link Set} as required by the listeners.
      */
     protected abstract void onCompleted(T groupId, Set<String> deletedIds);
@@ -307,22 +302,14 @@ public abstract class DeleteTask<T> implements Runnable {
                     }
                 }
             }
-        } catch (PayloadException e) {
+        } catch (PayloadException | RuntimeException e) {
             sLogger.error("Exception occurred while deleting!", e);
-        } catch (RuntimeException e) {
-            /*
-             * Normally we are not allowed to catch runtime exceptions as these are genuine bugs
-             * which should be handled/fixed within the code. However the cases when we are
-             * executing operations on a thread unhandling such exceptions will eventually lead to
-             * exit the system and thus can bring the whole system down, which is not intended.
-             */
-            sLogger.error("Exception occurred while deleting!", e);
+
         } finally {
-            if (deletedIds == null) {
-                return;
-            }
-            for (T groupId : deletedIds.keySet()) {
-                onCompleted(groupId, deletedIds.get(groupId));
+            if (deletedIds != null) {
+                for (T groupId : deletedIds.keySet()) {
+                    onCompleted(groupId, deletedIds.get(groupId));
+                }
             }
         }
     }

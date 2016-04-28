@@ -19,11 +19,13 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 /**
  * Group Delivery info provider of chat and file messages
  */
+@SuppressWarnings("ConstantConditions")
 public class GroupDeliveryInfoProvider extends ContentProvider {
 
     private static final int INVALID_ROW_ID = -1;
@@ -82,23 +84,20 @@ public class GroupDeliveryInfoProvider extends ContentProvider {
 
         @Override
         public void onCreate(SQLiteDatabase db) {
-            db.execSQL(new StringBuilder("CREATE TABLE IF NOT EXISTS ").append(DATABASE_TABLE)
-                    .append('(').append(GroupDeliveryInfoData.KEY_CHAT_ID)
-                    .append(" TEXT NOT NULL,").append(GroupDeliveryInfoData.KEY_BASECOLUMN_ID)
-                    .append(" INTEGER NOT NULL,").append(GroupDeliveryInfoData.KEY_ID)
-                    .append(" TEXT NOT NULL,").append(GroupDeliveryInfoData.KEY_CONTACT)
-                    .append(" TEXT NOT NULL,").append(GroupDeliveryInfoData.KEY_STATUS)
-                    .append(" INTEGER NOT NULL,").append(GroupDeliveryInfoData.KEY_REASON_CODE)
-                    .append(" INTEGER NOT NULL,")
-                    .append(GroupDeliveryInfoData.KEY_TIMESTAMP_DELIVERED)
-                    .append(" INTEGER NOT NULL,")
-                    .append(GroupDeliveryInfoData.KEY_TIMESTAMP_DISPLAYED)
-                    .append(" INTEGER NOT NULL, PRIMARY KEY(").append(GroupDeliveryInfoData.KEY_ID)
-                    .append(',').append(GroupDeliveryInfoData.KEY_CONTACT).append("))").toString());
-            db.execSQL(new StringBuilder("CREATE INDEX ")
-                    .append(GroupDeliveryInfoData.KEY_BASECOLUMN_ID).append("_idx").append(" ON ")
-                    .append(DATABASE_TABLE).append('(')
-                    .append(GroupDeliveryInfoData.KEY_BASECOLUMN_ID).append(')').toString());
+            // @formatter:off
+            db.execSQL("CREATE TABLE IF NOT EXISTS " + DATABASE_TABLE + '('
+                    + GroupDeliveryInfoData.KEY_CHAT_ID + " TEXT NOT NULL,"
+                    + GroupDeliveryInfoData.KEY_BASECOLUMN_ID + " INTEGER NOT NULL,"
+                    + GroupDeliveryInfoData.KEY_ID + " TEXT NOT NULL,"
+                    + GroupDeliveryInfoData.KEY_CONTACT + " TEXT NOT NULL,"
+                    + GroupDeliveryInfoData.KEY_STATUS + " INTEGER NOT NULL,"
+                    + GroupDeliveryInfoData.KEY_REASON_CODE + " INTEGER NOT NULL,"
+                    + GroupDeliveryInfoData.KEY_TIMESTAMP_DELIVERED + " INTEGER NOT NULL,"
+                    + GroupDeliveryInfoData.KEY_TIMESTAMP_DISPLAYED + " INTEGER NOT NULL, "
+                    + "PRIMARY KEY(" + GroupDeliveryInfoData.KEY_ID + ',' + GroupDeliveryInfoData.KEY_CONTACT + "))");
+            // @formatter:on
+            db.execSQL("CREATE INDEX " + GroupDeliveryInfoData.KEY_BASECOLUMN_ID + "_idx" + " ON "
+                    + DATABASE_TABLE + '(' + GroupDeliveryInfoData.KEY_BASECOLUMN_ID + ')');
         }
 
         @Override
@@ -114,8 +113,7 @@ public class GroupDeliveryInfoProvider extends ContentProvider {
         if (TextUtils.isEmpty(selection)) {
             return SELECTION_WITH_ID_ONLY;
         }
-        return new StringBuilder("(").append(SELECTION_WITH_ID_ONLY).append(") AND (")
-                .append(selection).append(')').toString();
+        return "(" + SELECTION_WITH_ID_ONLY + ") AND (" + selection + ')';
     }
 
     private String[] getSelectionArgsWithAppendedId(String[] selectionArgs, String appendedId) {
@@ -135,7 +133,7 @@ public class GroupDeliveryInfoProvider extends ContentProvider {
     }
 
     @Override
-    public String getType(Uri uri) {
+    public String getType(@NonNull Uri uri) {
         switch (sUriMatcher.match(uri)) {
             case UriType.InternalGroupDeliveryInfo.DELIVERY:
                 /* Intentional fall through */
@@ -148,14 +146,13 @@ public class GroupDeliveryInfoProvider extends ContentProvider {
                 return CursorType.TYPE_DIRECTORY;
 
             default:
-                throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
-                        .append(uri).append("!").toString());
+                throw new IllegalArgumentException("Unsupported URI " + uri + "!");
         }
     }
 
     @Override
-    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
-            String sort) {
+    public Cursor query(@NonNull Uri uri, String[] projection, String selection,
+            String[] selectionArgs, String sort) {
         Cursor cursor = null;
         try {
             switch (sUriMatcher.match(uri)) {
@@ -195,8 +192,7 @@ public class GroupDeliveryInfoProvider extends ContentProvider {
                     return cursor;
 
                 default:
-                    throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
-                            .append(uri).append("!").toString());
+                    throw new IllegalArgumentException("Unsupported URI " + uri + "!");
             }
         }
         /*
@@ -212,7 +208,7 @@ public class GroupDeliveryInfoProvider extends ContentProvider {
     }
 
     @Override
-    public Uri insert(Uri uri, ContentValues initialValues) {
+    public Uri insert(@NonNull Uri uri, ContentValues initialValues) {
         switch (sUriMatcher.match(uri)) {
             case UriType.InternalGroupDeliveryInfo.DELIVERY:
                 /* Intentional fall through */
@@ -223,9 +219,8 @@ public class GroupDeliveryInfoProvider extends ContentProvider {
                         ContentProviderBaseIdCreator.createUniqueId(getContext(),
                                 GroupDeliveryInfoData.CONTENT_URI));
                 if (db.insert(DATABASE_TABLE, null, initialValues) == INVALID_ROW_ID) {
-                    throw new ServerApiPersistentStorageException(new StringBuilder(
-                            "Unable to insert row for URI ").append(uri.toString()).append('!')
-                            .toString());
+                    throw new ServerApiPersistentStorageException("Unable to insert row for URI "
+                            + uri.toString() + '!');
                 }
                 Uri notificationUri = Uri.withAppendedPath(GroupDeliveryInfoLog.CONTENT_URI,
                         appendedId);
@@ -235,17 +230,17 @@ public class GroupDeliveryInfoProvider extends ContentProvider {
             case UriType.GroupDeliveryInfo.DELIVERY:
                 /* Intentional fall through */
             case UriType.GroupDeliveryInfo.DELIVERY_WITH_ID:
-                throw new UnsupportedOperationException(new StringBuilder("This provider (URI=")
-                        .append(uri).append(") supports read only access!").toString());
+                throw new UnsupportedOperationException("This provider (URI=" + uri
+                        + ") supports read only access!");
 
             default:
-                throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
-                        .append(uri).append("!").toString());
+                throw new IllegalArgumentException("Unsupported URI " + uri + "!");
         }
     }
 
     @Override
-    public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+    public int update(@NonNull Uri uri, ContentValues values, String selection,
+            String[] selectionArgs) {
         Uri notificationUri = GroupDeliveryInfoLog.CONTENT_URI;
         switch (sUriMatcher.match(uri)) {
             case UriType.InternalGroupDeliveryInfo.DELIVERY_WITH_ID:
@@ -266,17 +261,16 @@ public class GroupDeliveryInfoProvider extends ContentProvider {
             case UriType.GroupDeliveryInfo.DELIVERY_WITH_ID:
                 /* Intentional fall through */
             case UriType.GroupDeliveryInfo.DELIVERY:
-                throw new UnsupportedOperationException(new StringBuilder("This provider (URI=")
-                        .append(uri).append(") supports read only access!").toString());
+                throw new UnsupportedOperationException("This provider (URI=" + uri
+                        + ") supports read only access!");
 
             default:
-                throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
-                        .append(uri).append("!").toString());
+                throw new IllegalArgumentException("Unsupported URI " + uri + "!");
         }
     }
 
     @Override
-    public int delete(Uri uri, String selection, String[] selectionArgs) {
+    public int delete(@NonNull Uri uri, String selection, String[] selectionArgs) {
         Uri notificationUri = GroupDeliveryInfoLog.CONTENT_URI;
         switch (sUriMatcher.match(uri)) {
             case UriType.InternalGroupDeliveryInfo.DELIVERY_WITH_ID:
@@ -297,12 +291,11 @@ public class GroupDeliveryInfoProvider extends ContentProvider {
             case UriType.GroupDeliveryInfo.DELIVERY_WITH_ID:
                 /* Intentional fall through */
             case UriType.GroupDeliveryInfo.DELIVERY:
-                throw new UnsupportedOperationException(new StringBuilder("This provider (URI=")
-                        .append(uri).append(") supports read only access!").toString());
+                throw new UnsupportedOperationException("This provider (URI=" + uri
+                        + ") supports read only access!");
 
             default:
-                throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
-                        .append(uri).append("!").toString());
+                throw new IllegalArgumentException("Unsupported URI " + uri + "!");
         }
     }
 }

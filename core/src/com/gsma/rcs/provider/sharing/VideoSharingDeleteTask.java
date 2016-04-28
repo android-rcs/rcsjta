@@ -42,7 +42,6 @@ public class VideoSharingDeleteTask extends DeleteTask.GroupedByContactId {
      * @param videoSharingService the video sharing service impl
      * @param richcallService the rich call service
      * @param contentResolver the local content resolver
-     * @param imsLock the ims operation lock
      */
     public VideoSharingDeleteTask(VideoSharingServiceImpl videoSharingService,
             RichcallService richcallService, LocalContentResolver contentResolver) {
@@ -58,12 +57,10 @@ public class VideoSharingDeleteTask extends DeleteTask.GroupedByContactId {
      * @param videoSharingService the video sharing service impl
      * @param richcallService the rich call service
      * @param contentResolver the local content resolver
-     * @param imsLock the ims operation lock
      * @param sharingId the sharing id
      */
     public VideoSharingDeleteTask(VideoSharingServiceImpl videoSharingService,
-            RichcallService richcallService, LocalContentResolver contentResolver,
-            String sharingId) {
+            RichcallService richcallService, LocalContentResolver contentResolver, String sharingId) {
         super(contentResolver, VideoSharingData.CONTENT_URI, VideoSharingData.KEY_SHARING_ID,
                 VideoSharingData.KEY_CONTACT, null, sharingId);
         mVideoSharingService = videoSharingService;
@@ -76,14 +73,12 @@ public class VideoSharingDeleteTask extends DeleteTask.GroupedByContactId {
      * @param videoSharingService the video sharing service impl
      * @param richcallService the rich call service
      * @param contentResolver the local content resolver
-     * @param imsLock the ims operation lock
      * @param contact the contact id
      */
     public VideoSharingDeleteTask(VideoSharingServiceImpl videoSharingService,
-            RichcallService richcallService, LocalContentResolver contentResolver,
-            ContactId contact) {
-        super(contentResolver, VideoSharingData.CONTENT_URI,
-                VideoSharingData.KEY_SHARING_ID, VideoSharingData.KEY_CONTACT, contact);
+            RichcallService richcallService, LocalContentResolver contentResolver, ContactId contact) {
+        super(contentResolver, VideoSharingData.CONTENT_URI, VideoSharingData.KEY_SHARING_ID,
+                VideoSharingData.KEY_CONTACT, contact);
         mVideoSharingService = videoSharingService;
         mRichcallService = richcallService;
     }

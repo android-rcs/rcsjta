@@ -44,4 +44,5 @@ dependencies {
     compile project(':nist_sip')
     compile project(':api')
 	compile 'dnsjava:dnsjava:2.1.7'
+    compile 'com.android.support:support-v4:23.0.1'
 }

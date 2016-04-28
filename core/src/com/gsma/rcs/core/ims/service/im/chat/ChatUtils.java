@@ -541,13 +541,14 @@ public class ChatUtils {
      * @param timestamp Timestamp sent in payload for IMDN datetime
      * @return XML document
      */
-    public static String buildImdnDeliveryReport(String msgId, String status, long timestamp) {
+    public static String buildImdnDeliveryReport(String msgId, ImdnDocument.DeliveryStatus status,
+            long timestamp) {
         String method;
         switch (status) {
-            case ImdnDocument.DELIVERY_STATUS_DISPLAYED:
+            case DISPLAYED:
                 method = "display-notification";
                 break;
-            case ImdnDocument.DELIVERY_STATUS_DELIVERED:
+            case DELIVERED:
                 method = "delivery-notification";
                 break;
             default:
@@ -868,10 +869,8 @@ public class ChatUtils {
          */
         if (apiMimeType.startsWith(MimeType.GEOLOC_MESSAGE)) {
             return GeolocInfoDocument.MIME_TYPE;
-
         } else if (isTextPlainType(apiMimeType)) {
             return MimeType.TEXT_MESSAGE;
-
         } else if (apiMimeType.startsWith(FileTransferHttpInfoDocument.MIME_TYPE)) {
             return FileTransferHttpInfoDocument.MIME_TYPE;
         }

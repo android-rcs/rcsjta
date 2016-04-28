@@ -180,6 +180,7 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
         return mMessageLog.markMessageAsRead(msgId);
     }
 
+    @Override
     public boolean setChatMessageStatusAndReasonCode(String msgId, Status status,
             Content.ReasonCode reasonCode) {
         return mMessageLog.setChatMessageStatusAndReasonCode(msgId, status, reasonCode);
@@ -438,11 +439,6 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
     }
 
     @Override
-    public String getChatMessageContent(String msgId) {
-        return mMessageLog.getChatMessageContent(msgId);
-    }
-
-    @Override
     public FtHttpResume getFileTransferResumeInfo(String fileTransferId) {
         return mFileTransferLog.getFileTransferResumeInfo(fileTransferId);
     }
@@ -453,11 +449,6 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
     }
 
     @Override
-    public Cursor getAllQueuedOneToOneChatMessages() {
-        return mMessageLog.getAllQueuedOneToOneChatMessages();
-    }
-
-    @Override
     public Cursor getQueuedAndUploadedButNotTransferredFileTransfers() {
         return mFileTransferLog.getQueuedAndUploadedButNotTransferredFileTransfers();
     }
@@ -465,10 +456,6 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
     @Override
     public Cursor getInterruptedFileTransfers() {
         return mFileTransferLog.getInterruptedFileTransfers();
-    }
-
-    public boolean setChatMessageTimestamp(String msgId, long timestamp, long timestampSent) {
-        return mMessageLog.setChatMessageTimestamp(msgId, timestamp, timestampSent);
     }
 
     @Override

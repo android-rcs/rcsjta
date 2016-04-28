@@ -79,9 +79,8 @@ public class GroupChatTerminalExceptionTask implements Runnable {
                                 State.FAILED, FileTransfer.ReasonCode.FAILED_NOT_ALLOWED_TO_SEND);
                         break;
                     default:
-                        throw new IllegalArgumentException(new StringBuilder(
-                                "Not expecting to handle provider id '").append(providerId)
-                                .append("'!").toString());
+                        throw new IllegalArgumentException("Not expecting to handle provider id '"
+                                + providerId + "'!");
                 }
             }
 
@@ -93,9 +92,8 @@ public class GroupChatTerminalExceptionTask implements Runnable {
              * exit the system and thus can bring the whole system down, which is not intended.
              */
             sLogger.error(
-                    new StringBuilder(
-                            "Exception occured while trying to mark queued group chat messages and group file transfers as failed with chatId ")
-                            .append(mChatId).toString(), e);
+                    "Exception occured while trying to mark queued group chat messages and group file transfers as failed with chatId "
+                            + mChatId, e);
         } finally {
             if (cursor != null) {
                 cursor.close();

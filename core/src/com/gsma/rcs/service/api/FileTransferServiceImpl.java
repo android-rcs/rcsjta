@@ -270,9 +270,6 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
     @Override
     public void addEventListener(IRcsServiceRegistrationListener listener) {
-        if (sLogger.isActivated()) {
-            sLogger.info("Add a service listener");
-        }
         synchronized (mLock) {
             mRcsServiceRegistrationEventBroadcaster.addEventListener(listener);
         }
@@ -280,9 +277,6 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
     @Override
     public void removeEventListener(IRcsServiceRegistrationListener listener) {
-        if (sLogger.isActivated()) {
-            sLogger.info("Remove a service listener");
-        }
         synchronized (mLock) {
             mRcsServiceRegistrationEventBroadcaster.removeEventListener(listener);
         }
@@ -920,9 +914,6 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         if (TextUtils.isEmpty(transferId)) {
             throw new ServerApiIllegalArgumentException("transferId must not be null or empty!");
         }
-        if (sLogger.isActivated()) {
-            sLogger.info("Get file transfer session ".concat(transferId));
-        }
         try {
             IFileTransfer fileTransfer = mOneToOneFileTransferCache.get(transferId);
             if (fileTransfer != null) {
@@ -965,9 +956,6 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         if (listener == null) {
             throw new ServerApiIllegalArgumentException("listener must not be null!");
         }
-        if (sLogger.isActivated()) {
-            sLogger.info("Add a OneToOne file transfer invitation listener");
-        }
         try {
             synchronized (mLock) {
                 mOneToOneFileTransferBroadcaster.addOneToOneFileTransferListener(listener);
@@ -994,9 +982,6 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
     public void removeEventListener2(IOneToOneFileTransferListener listener) throws RemoteException {
         if (listener == null) {
             throw new ServerApiIllegalArgumentException("listener must not be null!");
-        }
-        if (sLogger.isActivated()) {
-            sLogger.info("Remove a OneToOne file transfer invitation listener");
         }
         try {
             synchronized (mLock) {
@@ -1025,9 +1010,6 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         if (listener == null) {
             throw new ServerApiIllegalArgumentException("listener must not be null!");
         }
-        if (sLogger.isActivated()) {
-            sLogger.info("Add a group file transfer invitation listener");
-        }
         try {
             synchronized (mLock) {
                 mGroupFileTransferBroadcaster.addGroupFileTransferListener(listener);
@@ -1055,9 +1037,6 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         if (listener == null) {
             throw new ServerApiIllegalArgumentException("listener must not be null!");
         }
-        if (sLogger.isActivated()) {
-            sLogger.info("Remove a group file transfer invitation listener");
-        }
         try {
             synchronized (mLock) {
                 mGroupFileTransferBroadcaster.removeGroupFileTransferListener(listener);
@@ -1083,13 +1062,13 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      * @param contact contact who received file
      */
     public void receiveOneToOneFileDeliveryStatus(ImdnDocument imdn, ContactId contact) {
-        String status = imdn.getStatus();
+        ImdnDocument.DeliveryStatus status = imdn.getStatus();
         long timestamp = imdn.getDateTime();
 
         /* Note: File transfer ID always corresponds to message ID in the imdn pay-load */
         String fileTransferId = imdn.getMsgId();
         switch (status) {
-            case ImdnDocument.DELIVERY_STATUS_DELIVERED:
+            case DELIVERED:
                 mImService.getDeliveryExpirationManager()
                         .cancelDeliveryTimeoutAlarm(fileTransferId);
                 if (mMessagingLog.setFileTransferDelivered(fileTransferId, timestamp)) {
@@ -1098,7 +1077,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
                 }
 
                 break;
-            case ImdnDocument.DELIVERY_STATUS_DISPLAYED:
+            case DISPLAYED:
                 mImService.getDeliveryExpirationManager()
                         .cancelDeliveryTimeoutAlarm(fileTransferId);
                 if (mMessagingLog.setFileTransferDisplayed(fileTransferId, timestamp)) {
@@ -1107,9 +1086,9 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
                 }
 
                 break;
-            case ImdnDocument.DELIVERY_STATUS_ERROR:
-            case ImdnDocument.DELIVERY_STATUS_FAILED:
-            case ImdnDocument.DELIVERY_STATUS_FORBIDDEN:
+            case ERROR:
+            case FAILED:
+            case FORBIDDEN:
                 ReasonCode reasonCode = imdnToFileTransferFailedReasonCode(imdn);
 
                 if (mMessagingLog.setFileTransferStateAndReasonCode(fileTransferId, State.FAILED,
@@ -1189,7 +1168,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      * @param contact Contact ID
      */
     public void receiveGroupFileDeliveryStatus(String chatId, ImdnDocument imdn, ContactId contact) {
-        String status = imdn.getStatus();
+        ImdnDocument.DeliveryStatus status = imdn.getStatus();
         String msgId = imdn.getMsgId();
         long timestamp = imdn.getDateTime();
         if (sLogger.isActivated()) {
@@ -1198,15 +1177,15 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
                     + imdn.getNotificationType());
         }
         switch (status) {
-            case ImdnDocument.DELIVERY_STATUS_DELIVERED:
+            case DELIVERED:
                 setGroupFileDeliveryStatusDelivered(chatId, msgId, contact, timestamp);
                 break;
-            case ImdnDocument.DELIVERY_STATUS_DISPLAYED:
+            case DISPLAYED:
                 setGroupFileDeliveryStatusDisplayed(chatId, msgId, contact, timestamp);
                 break;
-            case ImdnDocument.DELIVERY_STATUS_ERROR:
-            case ImdnDocument.DELIVERY_STATUS_FAILED:
-            case ImdnDocument.DELIVERY_STATUS_FORBIDDEN:
+            case ERROR:
+            case FAILED:
+            case FORBIDDEN:
                 ReasonCode reasonCode = imdnToFileTransferFailedReasonCode(imdn);
                 setGroupFileDeliveryStatusFailed(chatId, msgId, contact, reasonCode);
                 break;

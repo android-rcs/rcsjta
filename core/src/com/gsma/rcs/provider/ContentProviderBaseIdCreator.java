@@ -32,10 +32,9 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class ContentProviderBaseIdCreator {
 
-    private static final String MAX_PROJECTION = new StringBuilder().append("MAX(")
-            .append(BaseColumns._ID).append(")").toString();
+    private static final String MAX_PROJECTION = "MAX(" + BaseColumns._ID + ")";
 
-    private static final Map<Uri, AtomicLong> sNextIds = new HashMap<Uri, AtomicLong>();
+    private static final Map<Uri, AtomicLong> sNextIds = new HashMap<>();
 
     /**
      * Creates a unique ID for a specific content provider by incrementing the last generated id,

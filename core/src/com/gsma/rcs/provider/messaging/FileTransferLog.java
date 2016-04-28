@@ -435,13 +435,13 @@ public class FileTransferLog implements IFileTransferLog {
     }
 
     @Override
-    public boolean setRemoteSipId(String fileTransferId, String remoteInstanceId) {
+    public boolean setRemoteSipId(String fileTransferId, String sipInstanceId) {
         if (sLogger.isActivated()) {
-            sLogger.debug("setRemoteSipId (sip ID=" + fileTransferId + ") (fileTransferId="
+            sLogger.debug("setRemoteSipId (sip ID=" + sipInstanceId + ") (fileTransferId="
                     + fileTransferId + ")");
         }
         ContentValues values = new ContentValues();
-        values.put(FileTransferData.KEY_REMOTE_SIP_ID, remoteInstanceId);
+        values.put(FileTransferData.KEY_REMOTE_SIP_ID, sipInstanceId);
         return mLocalContentResolver.update(
                 Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), values, null,
                 null) > 0;
@@ -653,9 +653,6 @@ public class FileTransferLog implements IFileTransferLog {
 
     @Override
     public State getFileTransferState(String fileTransferId) {
-        if (sLogger.isActivated()) {
-            sLogger.debug("Get file transfer state for ".concat(fileTransferId));
-        }
         Cursor cursor = getFileTransferData(FileTransferData.KEY_STATE, fileTransferId);
         if (cursor == null) {
             return null;
@@ -665,9 +662,6 @@ public class FileTransferLog implements IFileTransferLog {
 
     @Override
     public ReasonCode getFileTransferReasonCode(String fileTransferId) {
-        if (sLogger.isActivated()) {
-            sLogger.debug("Get file transfer reason code for ".concat(fileTransferId));
-        }
         Cursor cursor = getFileTransferData(FileTransferData.KEY_REASON_CODE, fileTransferId);
         if (cursor == null) {
             return null;
@@ -677,9 +671,6 @@ public class FileTransferLog implements IFileTransferLog {
 
     @Override
     public Long getFileTransferTimestamp(String fileTransferId) {
-        if (sLogger.isActivated()) {
-            sLogger.debug("Get file transfer timestamp for ".concat(fileTransferId));
-        }
         Cursor cursor = getFileTransferData(FileTransferData.KEY_TIMESTAMP, fileTransferId);
         if (cursor == null) {
             return null;
@@ -689,9 +680,6 @@ public class FileTransferLog implements IFileTransferLog {
 
     @Override
     public Long getFileTransferSentTimestamp(String fileTransferId) {
-        if (sLogger.isActivated()) {
-            sLogger.debug("Get file transfer sent timestamp for ".concat(fileTransferId));
-        }
         Cursor cursor = getFileTransferData(FileTransferData.KEY_TIMESTAMP_SENT, fileTransferId);
         if (cursor == null) {
             return null;

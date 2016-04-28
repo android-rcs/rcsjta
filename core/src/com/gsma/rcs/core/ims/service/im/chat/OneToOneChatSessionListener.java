@@ -35,31 +35,30 @@ public interface OneToOneChatSessionListener extends ChatSessionListener {
      * 
      * @param contact Remote contact
      */
-    public void onSessionInvited(ContactId contact);
+    void onSessionInvited(ContactId contact);
 
     /**
      * Chat is auto-accepted and the session is in the process of being started
      * 
      * @param contact Remote contact
      */
-    public void onSessionAutoAccepted(ContactId contact);
+    void onSessionAutoAccepted(ContactId contact);
 
     /**
      * Handle Delivery report send via MSRP Failure
      * 
-     * @param msgId
-     * @param contact
-     * @param TypeMsrpChunk
+     * @param msgId the message ID
+     * @param contact the remote contact
+     * @param chunktype the type of chunk
      */
-    public void onDeliveryReportSendViaMsrpFailure(String msgId, ContactId contact,
-            TypeMsrpChunk chunktype);
+    void onDeliveryReportSendViaMsrpFailure(String msgId, ContactId contact, TypeMsrpChunk chunktype);
 
     /**
      * Handle IM error
      * 
      * @param error Error
-     * @param msgId
-     * @param mimeType
+     * @param msgId the message ID
+     * @param mimeType the mime type
      */
-    public void onImError(ChatError error, String msgId, String mimeType);
+    void onImError(ChatError error, String msgId, String mimeType);
 }
