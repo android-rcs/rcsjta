@@ -46,7 +46,7 @@ import java.util.Set;
 public interface IFileTransferLog {
 
     /**
-     * Add outgoing one to one file transfer
+     * Add one to one file transfer
      * 
      * @param fileTransferId File Transfer ID
      * @param contact Contact ID
@@ -75,6 +75,7 @@ public interface IFileTransferLog {
      * @param chatId the identity of the group chat
      * @param content the File content
      * @param fileIcon the fileIcon content
+     * @param recipients the recipients
      * @param state File transfer state
      * @param reasonCode Reason code
      * @param timestamp Local timestamp for outgoing file transfer for a group chat

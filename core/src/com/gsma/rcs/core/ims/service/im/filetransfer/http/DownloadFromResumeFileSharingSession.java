@@ -36,7 +36,6 @@ import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
 /**
@@ -56,11 +55,10 @@ public class DownloadFromResumeFileSharingSession extends TerminatingHttpFileSha
      * @param imService InstantMessagingService
      * @param content the content (url, mime-type and size)
      * @param resume the data object in DB
-     * @param rcsSettings
-     * @param messagingLog
-     * @param contactManager
+     * @param rcsSettings the RCS settings accessor
+     * @param messagingLog the messaging log accessor
+     * @param contactManager the contact manager
      */
-
     public DownloadFromResumeFileSharingSession(InstantMessagingService imService,
             MmContent content, FtHttpResumeDownload resume, RcsSettings rcsSettings,
             MessagingLog messagingLog, ContactManager contactManager) {
@@ -103,53 +101,24 @@ public class DownloadFromResumeFileSharingSession extends TerminatingHttpFileSha
             handleFileTransferred();
             if (mImdnManager.isSendOneToOneDeliveryDisplayedReportsEnabled()) {
                 /* Send delivery report "displayed" */
-                sendDeliveryReport(ImdnDocument.DELIVERY_STATUS_DISPLAYED,
+                sendDeliveryReport(ImdnDocument.DeliveryStatus.DISPLAYED,
                         System.currentTimeMillis());
             }
-
-        } catch (FileNotFoundException e) {
+        } catch (FileNotDownloadedException | IOException e) {
             /* Don't call handleError in case of Pause or Cancel */
             if (mDownloadManager.isCancelled() || mDownloadManager.isPaused()) {
                 return;
             }
-            sLogger.error(new StringBuilder("Resume Download file has failed for ").append(mResume)
-                    .toString(), e);
+            sLogger.error("Resume Download file has failed for " + mResume, e);
             handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED, e));
 
-        } catch (FileNotDownloadedException e) {
-            /* Don't call handleError in case of Pause or Cancel */
-            if (mDownloadManager.isCancelled() || mDownloadManager.isPaused()) {
-                return;
-            }
-            sLogger.error(new StringBuilder("Resume Download file has failed for ").append(mResume)
-                    .toString(), e);
-            handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED, e));
-
-        } catch (IOException e) {
-            /* Don't call handleError in case of Pause or Cancel */
-            if (mDownloadManager.isCancelled() || mDownloadManager.isPaused()) {
-                return;
-            }
-            sLogger.error(new StringBuilder("Resume Download file has failed for ").append(mResume)
-                    .toString(), e);
-            handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED, e));
-
-        } catch (PayloadException e) {
-            sLogger.error(new StringBuilder("Resume Download file has failed for ").append(mResume)
-                    .toString(), e);
+        } catch (PayloadException | RuntimeException e) {
+            sLogger.error("Resume Download file has failed for " + mResume, e);
             handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED, e));
 
         } catch (NetworkException e) {
             handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED, e));
 
-        } catch (RuntimeException e) {
-            /*
-             * Intentionally catch runtime exceptions as else it will abruptly end the thread and
-             * eventually bring the whole system down, which is not intended.
-             */
-            sLogger.error(new StringBuilder("Resume Download file has failed for ").append(mResume)
-                    .toString(), e);
-            handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED, e));
         }
     }
 }

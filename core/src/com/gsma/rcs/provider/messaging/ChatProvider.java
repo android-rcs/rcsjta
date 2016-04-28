@@ -36,6 +36,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 import java.util.Arrays;
@@ -47,6 +48,7 @@ import java.util.Set;
  * 
  * @author Jean-Marc AUFFRET
  */
+@SuppressWarnings("ConstantConditions")
 public class ChatProvider extends ContentProvider {
 
     private static final int INVALID_ROW_ID = -1;
@@ -180,58 +182,52 @@ public class ChatProvider extends ContentProvider {
 
         @Override
         public void onCreate(SQLiteDatabase db) {
-            db.execSQL(new StringBuilder("CREATE TABLE IF NOT EXISTS ").append(TABLE_GROUP_CHAT)
-                    .append('(').append(GroupChatData.KEY_CHAT_ID)
-                    .append(" TEXT NOT NULL PRIMARY KEY,").append(GroupChatData.KEY_BASECOLUMN_ID)
-                    .append(" INTEGER NOT NULL,").append(GroupChatData.KEY_REJOIN_ID)
-                    .append(" TEXT,").append(GroupChatData.KEY_SUBJECT).append(" TEXT,")
-                    .append(GroupChatData.KEY_PARTICIPANTS).append(" TEXT NOT NULL,")
-                    .append(GroupChatData.KEY_STATE).append(" INTEGER NOT NULL,")
-                    .append(GroupChatData.KEY_REASON_CODE).append(" INTEGER NOT NULL,")
-                    .append(GroupChatData.KEY_DIRECTION).append(" INTEGER NOT NULL,")
-                    .append(GroupChatData.KEY_TIMESTAMP).append(" INTEGER NOT NULL,")
-                    .append(GroupChatData.KEY_USER_ABORTION).append(" INTEGER NOT NULL,")
-                    .append(GroupChatData.KEY_CONTACT).append(" TEXT)").toString());
-            db.execSQL(new StringBuilder("CREATE INDEX ").append(TABLE_GROUP_CHAT).append('_')
-                    .append(GroupChatData.KEY_BASECOLUMN_ID).append("_idx").append(" ON ")
-                    .append(TABLE_GROUP_CHAT).append('(').append(GroupChatData.KEY_BASECOLUMN_ID)
-                    .append(')').toString());
-            db.execSQL(new StringBuilder("CREATE INDEX ").append(TABLE_GROUP_CHAT).append('_')
-                    .append(GroupChatData.KEY_TIMESTAMP).append("_idx").append(" ON ")
-                    .append(TABLE_GROUP_CHAT).append('(').append(GroupChatData.KEY_TIMESTAMP)
-                    .append(')').toString());
-            db.execSQL(new StringBuilder("CREATE TABLE IF NOT EXISTS ").append(TABLE_MESSAGE)
-                    .append('(').append(MessageData.KEY_BASECOLUMN_ID).append(" INTEGER NOT NULL,")
-                    .append(MessageData.KEY_CHAT_ID).append(" TEXT NOT NULL,")
-                    .append(MessageData.KEY_CONTACT).append(" TEXT,")
-                    .append(MessageData.KEY_MESSAGE_ID).append(" TEXT NOT NULL PRIMARY KEY,")
-                    .append(MessageData.KEY_CONTENT).append(" TEXT,")
-                    .append(MessageData.KEY_MIME_TYPE).append(" TEXT NOT NULL,")
-                    .append(MessageData.KEY_DIRECTION).append(" INTEGER NOT NULL,")
-                    .append(MessageData.KEY_STATUS).append(" INTEGER NOT NULL,")
-                    .append(MessageData.KEY_REASON_CODE).append(" INTEGER NOT NULL,")
-                    .append(MessageData.KEY_READ_STATUS).append(" INTEGER NOT NULL,")
-                    .append(MessageData.KEY_TIMESTAMP).append(" INTEGER NOT NULL,")
-                    .append(MessageData.KEY_TIMESTAMP_SENT).append(" INTEGER NOT NULL,")
-                    .append(MessageData.KEY_TIMESTAMP_DELIVERED).append(" INTEGER NOT NULL,")
-                    .append(MessageData.KEY_TIMESTAMP_DISPLAYED).append(" INTEGER NOT NULL,")
-                    .append(MessageData.KEY_DELIVERY_EXPIRATION).append(" INTEGER NOT NULL,")
-                    .append(MessageData.KEY_EXPIRED_DELIVERY).append(" INTEGER NOT NULL)")
-                    .toString());
-            db.execSQL(new StringBuilder("CREATE INDEX ").append(TABLE_MESSAGE).append('_')
-                    .append(MessageData.KEY_BASECOLUMN_ID).append("_idx").append(" ON ")
-                    .append(TABLE_MESSAGE).append('(').append(MessageData.KEY_BASECOLUMN_ID)
-                    .append(')').toString());
-            db.execSQL(new StringBuilder("CREATE INDEX ").append(TABLE_MESSAGE).append('_')
-                    .append(MessageData.KEY_CHAT_ID).append("_idx").append(" ON ")
-                    .append(TABLE_MESSAGE).append('(').append(MessageData.KEY_CHAT_ID).append(')')
-                    .toString());
-            db.execSQL(new StringBuilder("CREATE INDEX ").append(MessageData.KEY_TIMESTAMP)
-                    .append("_idx").append(" ON ").append(TABLE_MESSAGE).append('(')
-                    .append(MessageData.KEY_TIMESTAMP).append(')').toString());
-            db.execSQL(new StringBuilder("CREATE INDEX ").append(MessageData.KEY_TIMESTAMP_SENT)
-                    .append("_idx").append(" ON ").append(TABLE_MESSAGE).append('(')
-                    .append(MessageData.KEY_TIMESTAMP_SENT).append(')').toString());
+            // @formatter:off
+            db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_GROUP_CHAT + '('
+                    + GroupChatData.KEY_CHAT_ID + " TEXT NOT NULL PRIMARY KEY,"
+                    + GroupChatData.KEY_BASECOLUMN_ID + " INTEGER NOT NULL,"
+                    + GroupChatData.KEY_REJOIN_ID + " TEXT,"
+                    + GroupChatData.KEY_SUBJECT + " TEXT,"
+                    + GroupChatData.KEY_PARTICIPANTS + " TEXT NOT NULL,"
+                    + GroupChatData.KEY_STATE + " INTEGER NOT NULL,"
+                    + GroupChatData.KEY_REASON_CODE + " INTEGER NOT NULL,"
+                    + GroupChatData.KEY_DIRECTION + " INTEGER NOT NULL,"
+                    + GroupChatData.KEY_TIMESTAMP + " INTEGER NOT NULL,"
+                    + GroupChatData.KEY_USER_ABORTION + " INTEGER NOT NULL,"
+                    + GroupChatData.KEY_CONTACT + " TEXT)");
+            // @formatter:on
+            db.execSQL("CREATE INDEX " + TABLE_GROUP_CHAT + '_' + GroupChatData.KEY_BASECOLUMN_ID
+                    + "_idx" + " ON " + TABLE_GROUP_CHAT + '(' + GroupChatData.KEY_BASECOLUMN_ID
+                    + ')');
+            db.execSQL("CREATE INDEX " + TABLE_GROUP_CHAT + '_' + GroupChatData.KEY_TIMESTAMP
+                    + "_idx" + " ON " + TABLE_GROUP_CHAT + '(' + GroupChatData.KEY_TIMESTAMP + ')');
+            // @formatter:off
+            db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_MESSAGE + '('
+                    + MessageData.KEY_BASECOLUMN_ID + " INTEGER NOT NULL,"
+                    + MessageData.KEY_CHAT_ID + " TEXT NOT NULL,"
+                    + MessageData.KEY_CONTACT + " TEXT,"
+                    + MessageData.KEY_MESSAGE_ID + " TEXT NOT NULL PRIMARY KEY,"
+                    + MessageData.KEY_CONTENT + " TEXT,"
+                    + MessageData.KEY_MIME_TYPE + " TEXT NOT NULL,"
+                    + MessageData.KEY_DIRECTION + " INTEGER NOT NULL,"
+                    + MessageData.KEY_STATUS + " INTEGER NOT NULL,"
+                    + MessageData.KEY_REASON_CODE + " INTEGER NOT NULL,"
+                    + MessageData.KEY_READ_STATUS + " INTEGER NOT NULL,"
+                    + MessageData.KEY_TIMESTAMP + " INTEGER NOT NULL,"
+                    + MessageData.KEY_TIMESTAMP_SENT + " INTEGER NOT NULL,"
+                    + MessageData.KEY_TIMESTAMP_DELIVERED + " INTEGER NOT NULL,"
+                    + MessageData.KEY_TIMESTAMP_DISPLAYED + " INTEGER NOT NULL,"
+                    + MessageData.KEY_DELIVERY_EXPIRATION + " INTEGER NOT NULL,"
+                    + MessageData.KEY_EXPIRED_DELIVERY + " INTEGER NOT NULL)");
+            // @formatter:on
+            db.execSQL("CREATE INDEX " + TABLE_MESSAGE + '_' + MessageData.KEY_BASECOLUMN_ID
+                    + "_idx" + " ON " + TABLE_MESSAGE + '(' + MessageData.KEY_BASECOLUMN_ID + ')');
+            db.execSQL("CREATE INDEX " + TABLE_MESSAGE + '_' + MessageData.KEY_CHAT_ID + "_idx"
+                    + " ON " + TABLE_MESSAGE + '(' + MessageData.KEY_CHAT_ID + ')');
+            db.execSQL("CREATE INDEX " + MessageData.KEY_TIMESTAMP + "_idx" + " ON "
+                    + TABLE_MESSAGE + '(' + MessageData.KEY_TIMESTAMP + ')');
+            db.execSQL("CREATE INDEX " + MessageData.KEY_TIMESTAMP_SENT + "_idx" + " ON "
+                    + TABLE_MESSAGE + '(' + MessageData.KEY_TIMESTAMP_SENT + ')');
         }
 
         @Override
@@ -313,7 +309,7 @@ public class ChatProvider extends ContentProvider {
     }
 
     @Override
-    public String getType(Uri uri) {
+    public String getType(@NonNull Uri uri) {
         switch (sUriMatcher.match(uri)) {
             case UriType.InternalChat.CHAT:
                 /* Intentional fall through */
@@ -341,8 +337,8 @@ public class ChatProvider extends ContentProvider {
     }
 
     @Override
-    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
-            String sort) {
+    public Cursor query(@NonNull Uri uri, String[] projection, String selection,
+            String[] selectionArgs, String sort) {
         Cursor cursor = null;
         try {
             switch (sUriMatcher.match(uri)) {
@@ -436,7 +432,8 @@ public class ChatProvider extends ContentProvider {
     }
 
     @Override
-    public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+    public int update(@NonNull Uri uri, ContentValues values, String selection,
+            String[] selectionArgs) {
         switch (sUriMatcher.match(uri)) {
             case UriType.InternalChat.CHAT_WITH_ID:
                 String chatId = uri.getLastPathSegment();
@@ -496,7 +493,7 @@ public class ChatProvider extends ContentProvider {
     }
 
     @Override
-    public Uri insert(Uri uri, ContentValues initialValues) {
+    public Uri insert(@NonNull Uri uri, ContentValues initialValues) {
         switch (sUriMatcher.match(uri)) {
             case UriType.InternalChat.CHAT:
                 /* Intentional fall through */
@@ -546,7 +543,7 @@ public class ChatProvider extends ContentProvider {
     }
 
     @Override
-    public int delete(Uri uri, String selection, String[] selectionArgs) {
+    public int delete(@NonNull Uri uri, String selection, String[] selectionArgs) {
         switch (sUriMatcher.match(uri)) {
             case UriType.InternalChat.CHAT_WITH_ID:
                 String chatId = uri.getLastPathSegment();

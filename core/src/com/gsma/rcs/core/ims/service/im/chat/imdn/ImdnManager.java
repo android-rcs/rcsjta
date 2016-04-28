@@ -130,8 +130,7 @@ public class ImdnManager extends Thread {
         DeliveryStatus delivery;
         while ((delivery = (DeliveryStatus) mBuffer.getObject()) != null) {
             try {
-                boolean imdnDisplay = ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(delivery
-                        .getStatus());
+                boolean imdnDisplay = ImdnDocument.DeliveryStatus.DISPLAYED == delivery.getStatus();
                 String msgId = delivery.getMsgId();
                 if (imdnDisplay) {
                     /*
@@ -172,13 +171,13 @@ public class ImdnManager extends Thread {
      * Send a message delivery status
      * 
      * @param chatId ChatId
-     * @param remote Remote contact
+     * @param remote the remote contact
      * @param msgId Message ID
      * @param status Delivery status
      * @param timestamp Timestamp sent in payload for IMDN datetime
      */
     public void sendMessageDeliveryStatus(String chatId, ContactId remote, String msgId,
-            String status, long timestamp) {
+            ImdnDocument.DeliveryStatus status, long timestamp) {
         // Add request in the buffer for background processing
         DeliveryStatus delivery = new DeliveryStatus(chatId, remote, msgId, status, timestamp);
         mBuffer.addObject(delivery);
@@ -197,8 +196,8 @@ public class ImdnManager extends Thread {
      * @throws NetworkException
      */
     public void sendMessageDeliveryStatusImmediately(String chatId, ContactId remote, String msgId,
-            String status, final String remoteInstanceId, long timestamp) throws PayloadException,
-            NetworkException {
+            ImdnDocument.DeliveryStatus status, final String remoteInstanceId, long timestamp)
+            throws PayloadException, NetworkException {
         // Execute request in background
         final DeliveryStatus delivery = new DeliveryStatus(chatId, remote, msgId, status, timestamp);
         sendSipMessageDeliveryStatus(delivery, remoteInstanceId);
@@ -210,37 +209,32 @@ public class ImdnManager extends Thread {
         int statusCode = ctx.getStatusCode();
         switch (statusCode) {
             case Response.PROXY_AUTHENTICATION_REQUIRED:
-
                 if (sLogger.isActivated()) {
                     sLogger.info("407 response received");
                 }
-
                 /* Set the Proxy-Authorization header */
                 authenticationAgent.readProxyAuthenticateHeader(ctx.getSipResponse());
-
                 /* Increment the Cseq number of the dialog path */
                 dialogPath.incrementCseq();
-
                 /* Create a second MESSAGE request with the right token */
                 if (sLogger.isActivated()) {
                     sLogger.info("Send second MESSAGE");
                 }
                 SipRequest msg = SipMessageFactory.createMessage(dialogPath,
                         FeatureTags.FEATURE_OMA_IM, CpimMessage.MIME_TYPE, cpim.getBytes(UTF8));
-
                 /* Set the Authorization header */
                 authenticationAgent.setProxyAuthorizationHeader(msg);
-
                 ctx = mImService.getImsModule().getSipManager().sendSipMessageAndWait(msg);
-
                 analyzeSipResponse(ctx, authenticationAgent, dialogPath, cpim);
                 break;
+
             case Response.OK:
             case Response.ACCEPTED:
                 if (sLogger.isActivated()) {
                     sLogger.info("20x OK response received");
                 }
                 break;
+
             default:
                 throw new NetworkException("Delivery report has failed: " + statusCode
                         + " response received");
@@ -262,7 +256,6 @@ public class ImdnManager extends Thread {
                 sLogger.debug("Send delivery status " + deliveryStatus.getStatus()
                         + " for message " + deliveryStatus.getMsgId());
             }
-
             // Create CPIM/IDMN document
             String from = ChatUtils.ANONYMOUS_URI;
             String to = ChatUtils.ANONYMOUS_URI;
@@ -272,7 +265,6 @@ public class ImdnManager extends Thread {
             /* Timestamp for CPIM DateTime */
             String cpim = ChatUtils.buildCpimDeliveryReport(from, to, imdn,
                     System.currentTimeMillis());
-
             // Create authentication agent
             SessionAuthenticationAgent authenticationAgent = new SessionAuthenticationAgent(
                     mImService.getImsModule());
@@ -285,18 +277,15 @@ public class ImdnManager extends Thread {
                     toUri, mImService.getImsModule().getSipManager().getSipStack()
                             .getServiceRoutePath(), mRcsSettings);
             dialogPath.setRemoteSipInstance(remoteInstanceId);
-
             // Create MESSAGE request
             if (sLogger.isActivated()) {
                 sLogger.info("Send first MESSAGE");
             }
             SipRequest msg = SipMessageFactory.createMessage(dialogPath,
                     FeatureTags.FEATURE_OMA_IM, CpimMessage.MIME_TYPE, cpim.getBytes(UTF8));
-
             // Send MESSAGE request
             SipTransactionContext ctx = mImService.getImsModule().getSipManager()
                     .sendSipMessageAndWait(msg);
-
             // Analyze received message
             analyzeSipResponse(ctx, authenticationAgent, dialogPath, cpim);
 
@@ -313,11 +302,11 @@ public class ImdnManager extends Thread {
         private final String mChatId;
         private final ContactId mRemote;
         private final String mMsgId;
-        private final String mStatus;
+        private final ImdnDocument.DeliveryStatus mStatus;
         private final long mTimestamp;
 
-        public DeliveryStatus(String chatId, ContactId remote, String msgId, String status,
-                long timestamp) {
+        public DeliveryStatus(String chatId, ContactId remote, String msgId,
+                ImdnDocument.DeliveryStatus status, long timestamp) {
             mChatId = chatId;
             mRemote = remote;
             mMsgId = msgId;
@@ -337,7 +326,7 @@ public class ImdnManager extends Thread {
             return mMsgId;
         }
 
-        public String getStatus() {
+        public ImdnDocument.DeliveryStatus getStatus() {
             return mStatus;
         }
 

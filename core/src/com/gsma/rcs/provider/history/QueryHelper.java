@@ -29,9 +29,9 @@ import java.util.Map;
 
 /* package private */class QueryHelper {
 
-    private final Map<String[], String> mUriQueryCache = new HashMap<String[], String>();
+    private final Map<String[], String> mUriQueryCache = new HashMap<>();
 
-    private final SparseArray<String> mSubQueries = new SparseArray<String>();
+    private final SparseArray<String> mSubQueries = new SparseArray<>();
 
     /* package private */String generateSubQuery(int providerId, Map<String, String> columnMapper,
             String tablename) {
@@ -43,7 +43,7 @@ import java.util.Map;
                 query.append(",");
             }
             String databaseField = columnMapper.get(providerField);
-            if (providerField == HistoryLogData.KEY_PROVIDER_ID) {
+            if (HistoryLogData.KEY_PROVIDER_ID.equals(providerField)) {
                 databaseField = Integer.toString(providerId);
             }
             query.append(databaseField).append(" AS ").append(providerField);
@@ -94,17 +94,17 @@ import java.util.Map;
     /**
      * Will return a unique key for a specific set of strings
      * 
-     * @param set
+     * @param providerIds the list of provider IDs
      * @return the generated key
      */
-    private static final String[] getKey(List<String> providerIds) {
+    private static String[] getKey(List<String> providerIds) {
         String[] key = new String[providerIds.size()];
         providerIds.toArray(key);
         Arrays.sort(key);
         return key;
     }
 
-    private static final boolean contains(String[] key, int providerId) {
+    private static boolean contains(String[] key, int providerId) {
         return Arrays.binarySearch(key, Integer.toString(providerId)) >= 0;
     }
 

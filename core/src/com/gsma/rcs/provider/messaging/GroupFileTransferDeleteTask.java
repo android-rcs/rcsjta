@@ -32,12 +32,12 @@ public class GroupFileTransferDeleteTask extends DeleteTask.GroupedByChatId {
     private static final Logger sLogger = Logger.getLogger(GroupFileTransferDeleteTask.class
             .getName());
 
-    private static final String SELECTION_ALL_GROUP_FILETRANSFERS = new StringBuilder(
-            FileTransferData.KEY_CHAT_ID).append("<>").append(FileTransferData.KEY_CONTACT)
-            .append(" OR ").append(FileTransferData.KEY_CONTACT).append(" IS NULL").toString();
+    private static final String SELECTION_ALL_GROUP_FILETRANSFERS = FileTransferData.KEY_CHAT_ID
+            + "<>" + FileTransferData.KEY_CONTACT + " OR " + FileTransferData.KEY_CONTACT
+            + " IS NULL";
 
-    private static final String SELECTION_FILETRANSFER_BY_CHATID = new StringBuilder(
-            FileTransferData.KEY_CHAT_ID).append("=?").toString();
+    private static final String SELECTION_FILETRANSFER_BY_CHATID = FileTransferData.KEY_CHAT_ID
+            + "=?";
 
     private final FileTransferServiceImpl mFileTransferService;
 
@@ -49,7 +49,6 @@ public class GroupFileTransferDeleteTask extends DeleteTask.GroupedByChatId {
      * @param fileTransferService the file transfer service impl
      * @param imService the IM service
      * @param contentResolver the content resolver
-     * @param imsLock the IMS operation lock
      */
     public GroupFileTransferDeleteTask(FileTransferServiceImpl fileTransferService,
             InstantMessagingService imService, LocalContentResolver contentResolver) {
@@ -65,12 +64,10 @@ public class GroupFileTransferDeleteTask extends DeleteTask.GroupedByChatId {
      * @param fileTransferService the file transfer service impl
      * @param imService the IM service
      * @param contentResolver the content resolver
-     * @param imsLock the IMS operation lock
      * @param chatId the chat id
      */
     public GroupFileTransferDeleteTask(FileTransferServiceImpl fileTransferService,
-            InstantMessagingService imService, LocalContentResolver contentResolver,
-            String chatId) {
+            InstantMessagingService imService, LocalContentResolver contentResolver, String chatId) {
         super(contentResolver, FileTransferData.CONTENT_URI, FileTransferData.KEY_FT_ID,
                 FileTransferData.KEY_CHAT_ID, SELECTION_FILETRANSFER_BY_CHATID, chatId);
         mFileTransferService = fileTransferService;
@@ -83,7 +80,6 @@ public class GroupFileTransferDeleteTask extends DeleteTask.GroupedByChatId {
      * @param fileTransferService the file transfer service impl
      * @param imService the IM service
      * @param contentResolver the content resolver
-     * @param imsLock the IMS operation lock
      * @param chatId the chat id
      * @param transferId the transfer id
      */

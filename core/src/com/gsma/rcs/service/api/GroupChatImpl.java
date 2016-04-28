@@ -156,9 +156,8 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
         } else if (ImdnDocument.DISPLAY_NOTIFICATION.equals(notificationType)) {
             return Content.ReasonCode.FAILED_DISPLAY;
         }
-        throw new IllegalArgumentException(new StringBuilder(
-                "Received invalid imdn notification type:'").append(notificationType).append("'")
-                .toString());
+        throw new IllegalArgumentException("Received invalid imdn notification type:'"
+                + notificationType + "'");
     }
 
     private void setStateAndReasonCode(State state, ReasonCode reasonCode) {
@@ -270,8 +269,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
             case REJECTED_BY_TIMEOUT:
             case REJECTED_BY_SYSTEM:
                 if (sLogger.isActivated()) {
-                    sLogger.debug(new StringBuilder("Group chat with chatId '").append(mChatId)
-                            .append("' is ").append(reasonCode).toString());
+                    sLogger.debug("Group chat with chatId '" + mChatId + "' is " + reasonCode);
                 }
                 return true;
             default:
@@ -290,19 +288,15 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
     private boolean isGroupChatCapableOfReceivingParticipantInvitations() {
         if (!mRcsSettings.isGroupChatActivated()) {
             if (sLogger.isActivated()) {
-                sLogger.debug(new StringBuilder(
-                        "Cannot add participants to on group chat with group chat Id '")
-                        .append(mChatId)
-                        .append("' as group chat feature has been disabled by the operator.")
-                        .toString());
+                sLogger.debug("Cannot add participants to on group chat with group chat Id '"
+                        + mChatId + "' as group chat feature has been disabled by the operator.");
             }
             return false;
         }
         if (isGroupChatAbandoned()) {
             if (sLogger.isActivated()) {
-                sLogger.debug(new StringBuilder(
-                        "Cannot invite participants to group chat with group chat Id '")
-                        .append(mChatId).append("'").toString());
+                sLogger.debug("Cannot invite participants to group chat with group chat Id '"
+                        + mChatId + "'");
             }
             return false;
         }
@@ -313,19 +307,17 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
         GroupChatInfo groupChat = mMessagingLog.getGroupChatInfo(mChatId);
         if (groupChat == null) {
             if (sLogger.isActivated()) {
-                sLogger.debug(new StringBuilder("Group chat with group chat Id '").append(mChatId)
-                        .append("' is not rejoinable as the group chat does not exist in DB.")
-                        .toString());
+                sLogger.debug("Group chat with group chat Id '" + mChatId
+                        + "' is not rejoinable as the group chat does not exist in DB.");
             }
             return false;
         }
         if (groupChat.getRejoinId() == null) {
             if (sLogger.isActivated()) {
-                sLogger.debug(new StringBuilder("Group chat with group chat Id '")
-                        .append(mChatId)
-                        .append("' is not rejoinable as there is no ongoing session with "
-                                + "corresponding chatId and there exists no rejoinId to "
-                                + "rejoin the group chat.").toString());
+                sLogger.debug("Group chat with group chat Id '" + mChatId
+                        + "' is not rejoinable as there is no ongoing session with "
+                        + "corresponding chatId and there exists no rejoinId to "
+                        + "rejoin the group chat.");
             }
             return false;
         }
@@ -346,10 +338,12 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                     case CONNECTED:
                     case DISCONNECTED:
                         if (sLogger.isActivated()) {
-                            sLogger.debug(new StringBuilder(
-                                    "Cannot invite participant to group chat with group chat Id '")
-                                    .append(mChatId).append("' as the participant '")
-                                    .append(participant).append("' is .").append(status).toString());
+                            sLogger.debug("Cannot invite participant to group chat with group chat Id '"
+                                    + mChatId
+                                    + "' as the participant '"
+                                    + participant
+                                    + "' is ."
+                                    + status);
                         }
                         return false;
                     default:
@@ -365,30 +359,25 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
         Capabilities remoteCapabilities = mContactManager.getContactCapabilities(participant);
         if (remoteCapabilities == null) {
             if (sLogger.isActivated()) {
-                sLogger.debug(new StringBuilder(
-                        "Cannot invite participant to group chat with group chat Id '")
-                        .append(mChatId).append("' as the capabilities of participant '")
-                        .append(participant).append("' are not known.").toString());
+                sLogger.debug("Cannot invite participant to group chat with group chat Id '"
+                        + mChatId + "' as the capabilities of participant '" + participant
+                        + "' are not known.");
             }
             return false;
         }
         if (!remoteCapabilities.isImSessionSupported()) {
             if (sLogger.isActivated()) {
-                sLogger.debug(new StringBuilder(
-                        "Cannot invite participant to group chat with group chat Id '")
-                        .append(mChatId).append("' as the participant '").append(participant)
-                        .append("' does not have IM capabilities.").toString());
+                sLogger.debug("Cannot invite participant to group chat with group chat Id '"
+                        + mChatId + "' as the participant '" + participant
+                        + "' does not have IM capabilities.");
             }
             return false;
         }
         if (inviteOnlyFullSF && !remoteCapabilities.isGroupChatStoreForwardSupported()) {
             if (sLogger.isActivated()) {
-                sLogger.debug(new StringBuilder(
-                        "Cannot invite participant to group chat with group chat Id '")
-                        .append(mChatId)
-                        .append("' as full store and forward is required and the participant '")
-                        .append(participant).append("' does not have that feature supported.")
-                        .toString());
+                sLogger.debug("Cannot invite participant to group chat with group chat Id '"
+                        + mChatId + "' as full store and forward is required and the participant '"
+                        + participant + "' does not have that feature supported.");
             }
             return false;
         }
@@ -641,8 +630,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
         try {
             if (isGroupChatAbandoned()) {
                 if (sLogger.isActivated()) {
-                    sLogger.debug(new StringBuilder("Cannot leave group chat with group chat Id '")
-                            .append(mChatId).append("'").toString());
+                    sLogger.debug("Cannot leave group chat with group chat Id '" + mChatId + "'");
                 }
                 return false;
             }
@@ -669,8 +657,8 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
     @Override
     public void leave() throws RemoteException {
         if (isGroupChatAbandoned()) {
-            throw new ServerApiUnsupportedOperationException(new StringBuilder(
-                    "Cannot leave group chat with group chat Id : ").append(mChatId).toString());
+            throw new ServerApiUnsupportedOperationException(
+                    "Cannot leave group chat with group chat Id : " + mChatId);
         }
         mImService.scheduleImOperation(new Runnable() {
             public void run() {
@@ -696,25 +684,12 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                     /* Terminate the session */
                     session.terminateSession(TerminationReason.TERMINATION_BY_USER);
 
-                } catch (PayloadException e) {
-                    sLogger.error(
-                            new StringBuilder("Failed to terminate session with sessionId : ")
-                                    .append(mChatId).toString(), e);
+                } catch (PayloadException | RuntimeException e) {
+                    sLogger.error("Failed to terminate session with sessionId : " + mChatId, e);
                 } catch (NetworkException e) {
                     if (sLogger.isActivated()) {
                         sLogger.debug(e.getMessage());
                     }
-                } catch (RuntimeException e) {
-                    /*
-                     * Normally we are not allowed to catch runtime exceptions as these are genuine
-                     * bugs which should be handled/fixed within the code. However the cases when we
-                     * are executing operations on a thread unhandling such exceptions will
-                     * eventually lead to exit the system and thus can bring the whole system down,
-                     * which is not intended.
-                     */
-                    sLogger.error(
-                            new StringBuilder("Failed to terminate session with sessionId : ")
-                                    .append(mChatId).toString(), e);
                 }
             }
         });
@@ -730,15 +705,15 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
     @Override
     public Map<ContactId, Integer> getParticipants() throws RemoteException {
         try {
-            Map<ContactId, Integer> apiParticipants = new HashMap<ContactId, Integer>();
+            Map<ContactId, Integer> apiParticipants = new HashMap<>();
             Map<ContactId, ParticipantStatus> participants;
 
             GroupChatSession session = mImService.getGroupChatSession(mChatId);
             if (session == null) {
                 participants = mPersistedStorage.getParticipants();
                 if (participants == null) {
-                    throw new ServerApiPersistentStorageException(new StringBuilder(
-                            "No participants found for chatId : ").append(mChatId).toString());
+                    throw new ServerApiPersistentStorageException(
+                            "No participants found for chatId : " + mChatId);
                 }
             } else {
                 participants = session.getParticipants();
@@ -805,11 +780,8 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
             }
             if (!isAllowedToInviteAdditionalParticipants(1)) {
                 if (sLogger.isActivated()) {
-                    sLogger.debug(new StringBuilder(
-                            "Cannot invite participants to group chat with group chat Id '")
-                            .append(mChatId)
-                            .append("' as max number of participants has been reached already.")
-                            .toString());
+                    sLogger.debug("Cannot invite participants to group chat with group chat Id '"
+                            + mChatId + "' as max number of participants has been reached already.");
                 }
                 return false;
             }
@@ -882,7 +854,6 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                             "Participant not eligible to be invited!");
                 }
             }
-
             mImService.scheduleImOperation(new Runnable() {
                 public void run() {
                     GroupChatSession session = mImService.getGroupChatSession(mChatId);
@@ -894,11 +865,9 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                         }
                         Map<ContactId, ParticipantStatus> participantsToStore = mMessagingLog
                                 .getParticipants(mChatId);
-
                         for (ContactId contact : participants) {
                             participantsToStore.put(contact, ParticipantStatus.INVITE_QUEUED);
                         }
-
                         if (session != null) {
                             session.updateParticipants(participantsToStore);
                         } else {
@@ -909,22 +878,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                                 rejoinGroupChat();
                             }
                         }
-
-                    } catch (PayloadException | NetworkException e) {
-                        if (session != null) {
-                            session.handleError(new ChatError(ChatError.SEND_RESPONSE_FAILED, e));
-                        } else {
-                            sLogger.error(ExceptionUtil.getFullStackTrace(e));
-                        }
-
-                    } catch (RuntimeException e) {
-                        /*
-                         * Normally we are not allowed to catch runtime exceptions as these are
-                         * genuine bugs which should be handled/fixed within the code. However the
-                         * cases when we are executing operations on a thread unhandling such
-                         * exceptions will eventually lead to exit the system and thus can bring the
-                         * whole system down, which is not intended.
-                         */
+                    } catch (PayloadException | NetworkException | RuntimeException e) {
                         if (session != null) {
                             session.handleError(new ChatError(ChatError.SEND_RESPONSE_FAILED, e));
                         } else {
@@ -933,7 +887,6 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                     }
                 }
             });
-
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
                 sLogger.error(ExceptionUtil.getFullStackTrace(e));
@@ -957,19 +910,14 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
     public void inviteParticipants(final GroupChatSession session, final Set<ContactId> participants)
             throws PayloadException, NetworkException {
         if (sLogger.isActivated()) {
-            sLogger.debug(new StringBuilder("Adding ")
-                    .append(Arrays.toString(participants.toArray())).append(" to the session.")
-                    .toString());
+            sLogger.debug("Adding " + Arrays.toString(participants.toArray()) + " to the session.");
         }
-
         int maxNumberOfAdditionalParticipants = session.getMaxNumberOfAdditionalParticipants();
         if (maxNumberOfAdditionalParticipants < participants.size()) {
-            throw new ServerApiPermissionDeniedException(new StringBuilder().append("Invite of ")
-                    .append(participants.size())
-                    .append(" participants failed, max number of additional participants: ")
-                    .append(maxNumberOfAdditionalParticipants).append("!").toString());
+            throw new ServerApiPermissionDeniedException("Invite of " + participants.size()
+                    + " participants failed, max number of additional participants: "
+                    + maxNumberOfAdditionalParticipants + "!");
         }
-
         session.inviteParticipants(participants);
     }
 
@@ -1015,15 +963,15 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
 
         } else if (session.isInitiatedByRemote()) {
             if (sLogger.isActivated()) {
-                sLogger.debug(new StringBuilder("Group chat session with chatId '").append(mChatId)
-                        .append("' is pending for acceptance, accept it.").toString());
+                sLogger.debug("Group chat session with chatId '" + mChatId
+                        + "' is pending for acceptance, accept it.");
             }
             session.acceptSession();
 
         } else {
-            throw new SessionNotEstablishedException(new StringBuilder(
-                    "The existing group chat session with chatId '").append(mChatId)
-                    .append("' is not established right now!").toString());
+            throw new SessionNotEstablishedException(
+                    "The existing group chat session with chatId '" + mChatId
+                            + "' is not established right now!");
         }
     }
 
@@ -1053,15 +1001,15 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
 
         } else if (session.isInitiatedByRemote()) {
             if (sLogger.isActivated()) {
-                sLogger.debug(new StringBuilder("Group chat session with chatId '").append(mChatId)
-                        .append("' is pending for acceptance, accept it.").toString());
+                sLogger.debug("Group chat session with chatId '" + mChatId
+                        + "' is pending for acceptance, accept it.");
             }
             session.acceptSession();
 
         } else {
-            throw new SessionNotEstablishedException(new StringBuilder(
-                    "The existing group chat session with chatId '").append(mChatId)
-                    .append("' is not established right now!").toString());
+            throw new SessionNotEstablishedException(
+                    "The existing group chat session with chatId '" + mChatId
+                            + "' is not established right now!");
         }
     }
 
@@ -1077,27 +1025,22 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
         try {
             if (!mRcsSettings.isGroupChatActivated()) {
                 if (sLogger.isActivated()) {
-                    sLogger.debug(new StringBuilder(
-                            "Cannot send message on group chat with group chat Id '")
-                            .append(mChatId).append("' as group chat feature is not supported.")
-                            .toString());
+                    sLogger.debug("Cannot send message on group chat with group chat Id '"
+                            + mChatId + "' as group chat feature is not supported.");
                 }
                 return false;
             }
             if (isGroupChatAbandoned()) {
                 if (sLogger.isActivated()) {
-                    sLogger.debug(new StringBuilder(
-                            "Cannot send message on group chat with group chat Id '")
-                            .append(mChatId).append("'").toString());
+                    sLogger.debug("Cannot send message on group chat with group chat Id '"
+                            + mChatId + "'");
                 }
                 return false;
             }
             if (!mRcsSettings.getMyCapabilities().isImSessionSupported()) {
                 if (sLogger.isActivated()) {
-                    sLogger.debug(new StringBuilder(
-                            "Cannot send message on group chat with group chat Id '")
-                            .append(mChatId)
-                            .append("' as IM capabilities are not supported for self.").toString());
+                    sLogger.debug("Cannot send message on group chat with group chat Id '"
+                            + mChatId + "' as IM capabilities are not supported for self.");
                 }
                 return false;
             }
@@ -1137,10 +1080,8 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
         int messageLength = text.length();
         int maxMessageLength = mRcsSettings.getMaxGroupChatMessageLength();
         if (messageLength > maxMessageLength) {
-            throw new ServerApiIllegalArgumentException(new StringBuilder()
-                    .append("chat message length: ").append(messageLength)
-                    .append(" exeeds max group chat message length: ").append(maxMessageLength)
-                    .append("!").toString());
+            throw new ServerApiIllegalArgumentException("chat message length: " + messageLength
+                    + " exceeds max group chat message length: " + maxMessageLength + "!");
         }
         if (!isAllowedToSendMessage()) {
             throw new ServerApiPermissionDeniedException(
@@ -1200,10 +1141,8 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
             int labelLength = label.length();
             int labelMaxLength = mRcsSettings.getMaxGeolocLabelLength();
             if (labelLength > labelMaxLength) {
-                throw new ServerApiIllegalArgumentException(new StringBuilder()
-                        .append("geoloc message label length: ").append(labelLength)
-                        .append(" exeeds max length: ").append(labelMaxLength).append("!")
-                        .toString());
+                throw new ServerApiIllegalArgumentException("geoloc message label length: "
+                        + labelLength + " exeeds max length: " + labelMaxLength + "!");
             }
         }
         try {
@@ -1312,9 +1251,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                      * eventually lead to exit the system and thus can bring the whole system down,
                      * which is not intended.
                      */
-                    sLogger.error(new StringBuilder(
-                            "Failed to send composing status in group chat : ").append(mChatId)
-                            .toString(), e);
+                    sLogger.error("Failed to send composing status in group chat : " + mChatId, e);
                 }
             }
         });
@@ -1475,15 +1412,13 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
              * as a whole which is of course not the intention here
              */
             if (sLogger.isActivated()) {
-                sLogger.info(new StringBuilder("Session marked pending for removal status ")
-                        .append(State.ABORTED).append(" terminationReason ").append(reason)
-                        .toString());
+                sLogger.info("Session marked pending for removal status " + State.ABORTED
+                        + " terminationReason " + reason);
             }
             return;
         }
         if (sLogger.isActivated()) {
-            sLogger.info(new StringBuilder("Session status ").append(State.ABORTED)
-                    .append(" terminationReason ").append(reason).toString());
+            sLogger.info("Session status " + State.ABORTED + " terminationReason " + reason);
         }
         setRejoinedAsPartOfSendOperation(false);
         synchronized (mLock) {
@@ -1513,9 +1448,8 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                     break;
                 default:
                     throw new IllegalArgumentException(
-                            new StringBuilder(
-                                    "Unknown reason in GroupChatImpl.handleSessionAborted; terminationReason=")
-                                    .append(reason).append("!").toString());
+                            "Unknown reason in GroupChatImpl.handleSessionAborted; terminationReason="
+                                    + reason + "!");
             }
         }
         /*
@@ -1534,8 +1468,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
             msgId = msg.getMessageId();
             remote = msg.getRemoteContact();
             if (sLogger.isActivated()) {
-                sLogger.info(new StringBuilder("New IM with Id '").append(msgId)
-                        .append("' received from ").append(remote).toString());
+                sLogger.info("New IM with Id '" + msgId + "' received from " + remote);
             }
             synchronized (mLock) {
                 if (deliverySuccess) {
@@ -1551,20 +1484,9 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                 }
                 mBroadcaster.broadcastMessageReceived(msg.getMimeType(), msgId);
             }
-
-        } catch (ContactManagerException | FileAccessException e) {
-            sLogger.error(new StringBuilder("Failed to handle new IM with Id '").append(msgId)
-                    .append("' received from ").append(remote).toString(), e);
-
-        } catch (RuntimeException e) {
-            /*
-             * Normally we are not allowed to catch runtime exceptions as these are genuine bugs
-             * which should be handled/fixed within the code. However the cases when we are
-             * executing operations on a thread unhandling such exceptions will eventually lead to
-             * exit the system and thus can bring the whole system down, which is not intended.
-             */
-            sLogger.error(new StringBuilder("Failed to handle new IM with Id '").append(msgId)
-                    .append("' received from ").append(remote).toString(), e);
+        } catch (ContactManagerException | FileAccessException | RuntimeException e) {
+            sLogger.error(
+                    "Failed to handle new IM with Id '" + msgId + "' received from " + remote, e);
         }
     }
 
@@ -1581,13 +1503,12 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                  * GroupChat as a whole which is of course not the intention here
                  */
                 if (sLogger.isActivated()) {
-                    sLogger.info(new StringBuilder("Session marked pending for removal - Error ")
-                            .append(chatErrorCode).toString());
+                    sLogger.info("Session marked pending for removal - Error " + chatErrorCode);
                 }
                 return;
             }
             if (sLogger.isActivated()) {
-                sLogger.info(new StringBuilder("IM error ").append(chatErrorCode).toString());
+                sLogger.info("IM error " + chatErrorCode);
             }
             synchronized (mLock) {
                 mChatService.removeGroupChat(mChatId);
@@ -1634,9 +1555,8 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                     case ChatError.MEDIA_SESSION_BROKEN:
                         break;
                     default:
-                        throw new IllegalArgumentException(new StringBuilder(
-                                "Unknown reason; chatError=").append(chatError).append("!")
-                                .toString());
+                        throw new IllegalArgumentException("Unknown reason; chatError=" + chatError
+                                + "!");
                 }
             }
             setRejoinedAsPartOfSendOperation(false);
@@ -1645,30 +1565,21 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
              * down now.
              */
             mImService.tryToDequeueAllOneToOneChatMessagesAndOneToOneFileTransfers();
-        } catch (PayloadException e) {
-            sLogger.error(new StringBuilder("Failed to handle error").append(error).append("!")
-                    .toString(), e);
+
+        } catch (PayloadException | RuntimeException e) {
+            sLogger.error("Failed to handle error" + error + "!", e);
+
         } catch (NetworkException e) {
             if (sLogger.isActivated()) {
                 sLogger.debug(e.getMessage());
             }
-        } catch (RuntimeException e) {
-            /*
-             * Normally we are not allowed to catch runtime exceptions as these are genuine bugs
-             * which should be handled/fixed within the code. However the cases when we are
-             * executing operations on a thread unhandling such exceptions will eventually lead to
-             * exit the system and thus can bring the whole system down, which is not intended.
-             */
-            sLogger.error(new StringBuilder("Failed to handle error").append(error).append("!")
-                    .toString(), e);
         }
     }
 
     @Override
     public void onIsComposingEventReceived(ContactId contact, boolean status) {
         if (sLogger.isActivated()) {
-            sLogger.info(new StringBuilder().append(contact).append(" is composing status set to ")
-                    .append(status).toString());
+            sLogger.info(String.valueOf(contact) + " is composing status set to " + status);
         }
         synchronized (mLock) {
             // Notify event listeners
@@ -1679,10 +1590,8 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
     @Override
     public void onMessageFailedSend(String msgId, String mimeType) {
         if (sLogger.isActivated()) {
-            sLogger.info(new StringBuilder("Message sending failed; msgId=").append(msgId)
-                    .append("mimeType=").append(mimeType).append(".").toString());
+            sLogger.info("Message sending failed; msgId=" + msgId + "mimeType=" + mimeType + ".");
         }
-
         synchronized (mLock) {
             if (mPersistedStorage.setMessageStatusAndReasonCode(msgId, Status.FAILED,
                     Content.ReasonCode.FAILED_SEND)) {
@@ -1695,10 +1604,8 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
     @Override
     public void onMessageSent(String msgId, String mimeType) {
         if (sLogger.isActivated()) {
-            sLogger.info(new StringBuilder("Text message sent; msgId=").append(msgId)
-                    .append("mimeType=").append(mimeType).append(".").toString());
+            sLogger.info("Text message sent; msgId=" + msgId + "mimeType=" + mimeType + ".");
         }
-
         synchronized (mLock) {
             if (mPersistedStorage.setMessageStatusAndReasonCode(msgId, Status.SENT,
                     Content.ReasonCode.UNSPECIFIED)) {
@@ -1728,25 +1635,24 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
 
     @Override
     public void onMessageDeliveryStatusReceived(ContactId contact, ImdnDocument imdn) {
-        String status = imdn.getStatus();
+        ImdnDocument.DeliveryStatus status = imdn.getStatus();
         String msgId = imdn.getMsgId();
         long timestamp = imdn.getDateTime();
         if (sLogger.isActivated()) {
-            sLogger.info(new StringBuilder("Handling message delivery status; contact=")
-                    .append(contact).append(", msgId=").append(msgId).append(", status=")
-                    .append(status).append(", notificationType=")
-                    .append(imdn.getNotificationType()).toString());
+            sLogger.info("Handling message delivery status; contact=" + contact + ", msgId="
+                    + msgId + ", status=" + status + ", notificationType="
+                    + imdn.getNotificationType());
         }
         switch (status) {
-            case ImdnDocument.DELIVERY_STATUS_DELIVERED:
+            case DELIVERED:
                 onMessageDeliveryStatusDelivered(contact, msgId, timestamp);
                 break;
-            case ImdnDocument.DELIVERY_STATUS_DISPLAYED:
+            case DISPLAYED:
                 onMessageDeliveryStatusDisplayed(contact, msgId, timestamp);
                 break;
-            case ImdnDocument.DELIVERY_STATUS_ERROR:
-            case ImdnDocument.DELIVERY_STATUS_FAILED:
-            case ImdnDocument.DELIVERY_STATUS_FORBIDDEN:
+            case ERROR:
+            case FAILED:
+            case FORBIDDEN:
                 Content.ReasonCode reasonCode = imdnToMessageFailedReasonCode(imdn);
                 onMessageDeliveryStatusFailed(contact, msgId, reasonCode);
                 break;
@@ -1756,7 +1662,6 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
     @Override
     public void onDeliveryStatusReceived(String contributionId, ContactId contact, ImdnDocument imdn) {
         String msgId = imdn.getMsgId();
-
         // TODO: Potential race condition, after we've checked that the message is persisted
         // it may be removed before the handle method executes.
         if (mMessagingLog.isMessagePersisted(msgId)) {
@@ -1767,10 +1672,8 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
             mImService.receiveGroupFileDeliveryStatus(contributionId, contact, imdn);
             return;
         }
-        sLogger.error(new StringBuilder(
-                "Imdn delivery report received referencing an entry that was ")
-                .append("not found in our database. Message id ").append(msgId)
-                .append(", ignoring.").toString());
+        sLogger.error("Imdn delivery report received referencing an entry that was "
+                + "not found in our database. Message id " + msgId + ", ignoring.");
     }
 
     /**
@@ -1815,8 +1718,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                 mImService.tryToMarkQueuedGroupChatMessagesAndGroupFileTransfersAsFailed(mChatId);
                 break;
             default:
-                throw new IllegalArgumentException(new StringBuilder(
-                        "Unknown reason RejectedReason=").append(reason).append("!").toString());
+                throw new IllegalArgumentException("Unknown reason RejectedReason=" + reason + "!");
         }
     }
 
@@ -1874,7 +1776,6 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
             if (sLogger.isActivated()) {
                 sLogger.info("ParticipantUpdate for: " + contact + " status: " + status);
             }
-
             mBroadcaster.broadcastParticipantStatusChanged(mChatId, contact, status);
         }
     }
@@ -1897,20 +1798,19 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
         ContactId remote = mHistoryLog.getRemoteContact(msgId);
         if (TypeMsrpChunk.MessageDeliveredReport.equals(typeMsrpChunk)) {
             if (sLogger.isActivated()) {
-                sLogger.debug(new StringBuilder(
-                        "Failed to send delivered message via MSRP, so try to send via SIP message to ")
-                        .append(remote).append("(msgId = ").append(msgId).toString());
+                sLogger.debug("Failed to send delivered message via MSRP, so try to send via SIP message to "
+                        + remote + "(msgId = " + msgId);
             }
             mImService.getImdnManager().sendMessageDeliveryStatus(chatId, remote, msgId,
-                    ImdnDocument.DELIVERY_STATUS_DELIVERED, System.currentTimeMillis());
+                    ImdnDocument.DeliveryStatus.DELIVERED, System.currentTimeMillis());
+
         } else if (TypeMsrpChunk.MessageDisplayedReport.equals(typeMsrpChunk)) {
             if (sLogger.isActivated()) {
-                sLogger.debug(new StringBuilder(
-                        "Failed to send displayed message via MSRP, so try to send via SIP message to ")
-                        .append(remote).append("(msgId = ").append(msgId).toString());
+                sLogger.debug("Failed to send displayed message via MSRP, so try to send via SIP message to "
+                        + remote + "(msgId = " + msgId);
             }
             mImService.getImdnManager().sendMessageDeliveryStatus(chatId, remote, msgId,
-                    ImdnDocument.DELIVERY_STATUS_DISPLAYED, System.currentTimeMillis());
+                    ImdnDocument.DeliveryStatus.DISPLAYED, System.currentTimeMillis());
         }
     }
 

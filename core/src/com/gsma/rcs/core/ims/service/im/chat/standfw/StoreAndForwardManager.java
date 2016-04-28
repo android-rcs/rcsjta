@@ -55,10 +55,10 @@ public class StoreAndForwardManager {
     /**
      * Constructor
      * 
-     * @param imsService IMS service
-     * @param rcsSettings
-     * @param contactManager
-     * @param messagingLog
+     * @param imService IMS service
+     * @param rcsSettings the RCS settings accessor
+     * @param contactManager the contact manager
+     * @param messagingLog the messaging log accessor
      */
     public StoreAndForwardManager(InstantMessagingService imService, RcsSettings rcsSettings,
             ContactManager contactManager, MessagingLog messagingLog) {

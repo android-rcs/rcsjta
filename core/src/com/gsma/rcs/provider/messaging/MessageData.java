@@ -22,6 +22,7 @@
 
 package com.gsma.rcs.provider.messaging;
 
+import com.gsma.services.rcs.RcsService;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content.ReasonCode;
@@ -98,7 +99,7 @@ public class MessageData {
     /**
      * This is set on the receiver side when the message has been displayed.
      * 
-     * @see com.gsma.services.rcs.RcsService.ReadStatus for the list of status.
+     * @see RcsService.ReadStatus for the list of status.
      */
     /* package private */static final String KEY_READ_STATUS = ChatLog.Message.READ_STATUS;
 

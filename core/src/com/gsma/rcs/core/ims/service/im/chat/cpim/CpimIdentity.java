@@ -24,32 +24,25 @@ import java.util.regex.Pattern;
 /**
  * Immutable class to decode the content of the CPIM identity header according to RFC3862
  * 
- * @author YPLO6403
+ * @author Philippe LEMORDANT
  */
 public class CpimIdentity {
     /**
-     * Regular expression of the CPIM 'From' header
+     * Pattern to extract display name and Uri from CPIM 'From' header using a regular expression of
+     * the CPIM 'From' header.
      * <p>
      * Extract of RFC3862 <b>Common Presence and Instant Messaging (CPIM): Message Format</b> <br>
      * From-header = "From" ": " [ Formal-name ] "<" URI ">" ; "From" is case-sensitive
      */
-    private final static String REGEXP_FROM_DISPLAY_NAME = "^\\s*?\"?([^\"<]*)\"?\\s*?<([^>]*)>$";
-
-    /**
-     * Pattern to extract display name and Uri from CPIM 'From' header
-     */
-    private final static Pattern PATTERN_FROM_DISPLAY_NAME = Pattern
-            .compile(REGEXP_FROM_DISPLAY_NAME);
+    private final static Pattern PATTERN_URI_WITH_OPTIONAL_DISPLAY_NAME = Pattern
+            .compile("^\\s*?\"?([^\"<]*)\"?\\s*?<([^>]*)>$");
 
     /**
      * The optional display name (may be null)
      */
-    private final String displayName;
+    private final String mDisplayName;
 
-    /**
-     * The URI
-     */
-    private final String uri;
+    private final String mUri;
 
     /**
      * Constructor
@@ -59,29 +52,29 @@ public class CpimIdentity {
     public CpimIdentity(final String identity) {
         if (identity == null)
             throw new IllegalArgumentException("Null argument");
-        Matcher matcher = PATTERN_FROM_DISPLAY_NAME.matcher(identity);
+        Matcher matcher = PATTERN_URI_WITH_OPTIONAL_DISPLAY_NAME.matcher(identity);
         if (matcher.find()) {
             if (matcher.groupCount() == 2) {
                 String result = matcher.group(1).trim();
-                displayName = (result.length() == 0) ? null : result;
-                uri = matcher.group(2);
+                mDisplayName = (result.length() == 0) ? null : result;
+                mUri = matcher.group(2);
                 return;
             }
         }
-        throw new IllegalArgumentException("Invalid argument: " + identity);
+        throw new IllegalArgumentException("Invalid uri: " + identity);
     }
 
     public String getDisplayName() {
-        return displayName;
+        return mDisplayName;
     }
 
     public String getUri() {
-        return uri;
+        return mUri;
     }
 
     @Override
     public String toString() {
-        return "CpimIdentity [displayName=" + displayName + ", uri=" + uri + "]";
+        return "CpimIdentity [displayName=" + mDisplayName + ", uri=" + mUri + "]";
     }
 
 }

@@ -56,10 +56,8 @@ public class OriginatingOneToOneChatSession extends OneToOneChatSession {
      */
     private final static String BOUNDARY_TAG = "boundary1";
 
-    /**
-     * The logger
-     */
-    private final Logger mLogger = Logger.getLogger(getClass().getName());
+    private final static Logger sLogger = Logger.getLogger(OriginatingOneToOneChatSession.class
+            .getName());
 
     /**
      * Constructor
@@ -70,7 +68,7 @@ public class OriginatingOneToOneChatSession extends OneToOneChatSession {
      * @param rcsSettings RCS settings
      * @param messagingLog Messaging log
      * @param timestamp Local timestamp for the session
-     * @param contactManager
+     * @param contactManager the contact manager
      */
     public OriginatingOneToOneChatSession(InstantMessagingService imService, ContactId contact,
             ChatMessage msg, RcsSettings rcsSettings, MessagingLog messagingLog, long timestamp,
@@ -89,16 +87,14 @@ public class OriginatingOneToOneChatSession extends OneToOneChatSession {
      */
     public void run() {
         try {
-            if (mLogger.isActivated()) {
-                mLogger.info("Initiate a new 1-1 chat session as originating");
+            if (sLogger.isActivated()) {
+                sLogger.info("Initiate a new 1-1 chat session as originating");
             }
-
             // Set setup mode
             String localSetup = createSetupOffer();
-            if (mLogger.isActivated()) {
-                mLogger.debug("Local setup attribute is " + localSetup);
+            if (sLogger.isActivated()) {
+                sLogger.debug("Local setup attribute is " + localSetup);
             }
-
             // Set local port
             int localMsrpPort;
             if ("active".equals(localSetup)) {
@@ -106,7 +102,6 @@ public class OriginatingOneToOneChatSession extends OneToOneChatSession {
             } else {
                 localMsrpPort = getMsrpMgr().getLocalMsrpPort();
             }
-
             // Build SDP part
             // String ntpTime =
             // SipUtils.constructNTPtime(System.currentTimeMillis());
@@ -114,7 +109,6 @@ public class OriginatingOneToOneChatSession extends OneToOneChatSession {
             String sdp = SdpUtils.buildChatSDP(ipAddress, localMsrpPort, getMsrpMgr()
                     .getLocalSocketProtocol(), getAcceptTypes(), getWrappedTypes(), localSetup,
                     getMsrpMgr().getLocalMsrpPath(), getSdpDirection());
-
             // If there is a first message then builds a multipart content else
             // builds a SDP content
             ChatMessage chatMessage = getFirstMessage();
@@ -143,50 +137,36 @@ public class OriginatingOneToOneChatSession extends OneToOneChatSession {
                     cpim = ChatUtils.buildCpimMessage(from, to, networkContent, networkMimeType,
                             timestampSent);
                 }
-
-                String multipart = new StringBuilder(Multipart.BOUNDARY_DELIMITER)
-                        .append(BOUNDARY_TAG).append(SipUtils.CRLF)
-                        .append("Content-Type: application/sdp").append(SipUtils.CRLF)
-                        .append("Content-Length: ").append(sdp.getBytes(UTF8).length)
-                        .append(SipUtils.CRLF).append(SipUtils.CRLF).append(sdp)
-                        .append(SipUtils.CRLF).append(Multipart.BOUNDARY_DELIMITER)
-                        .append(BOUNDARY_TAG).append(SipUtils.CRLF).append("Content-Type: ")
-                        .append(CpimMessage.MIME_TYPE).append(SipUtils.CRLF)
-                        .append("Content-Length: ").append(cpim.getBytes(UTF8).length)
-                        .append(SipUtils.CRLF).append(SipUtils.CRLF).append(cpim)
-                        .append(SipUtils.CRLF).append(Multipart.BOUNDARY_DELIMITER)
-                        .append(BOUNDARY_TAG).append(Multipart.BOUNDARY_DELIMITER).toString();
+                String multipart = Multipart.BOUNDARY_DELIMITER + BOUNDARY_TAG + SipUtils.CRLF
+                        + "Content-Type: application/sdp" + SipUtils.CRLF + "Content-Length: "
+                        + sdp.getBytes(UTF8).length + SipUtils.CRLF + SipUtils.CRLF + sdp
+                        + SipUtils.CRLF + Multipart.BOUNDARY_DELIMITER + BOUNDARY_TAG
+                        + SipUtils.CRLF + "Content-Type: " + CpimMessage.MIME_TYPE + SipUtils.CRLF
+                        + "Content-Length: " + cpim.getBytes(UTF8).length + SipUtils.CRLF
+                        + SipUtils.CRLF + cpim + SipUtils.CRLF + Multipart.BOUNDARY_DELIMITER
+                        + BOUNDARY_TAG + Multipart.BOUNDARY_DELIMITER;
 
                 // Set the local SDP part in the dialog path
                 getDialogPath().setLocalContent(multipart);
+
             } else {
                 // Set the local SDP part in the dialog path
                 getDialogPath().setLocalContent(sdp);
             }
             SipRequest invite = createInvite();
-
             // Set the Authorization header
             getAuthenticationAgent().setAuthorizationHeader(invite);
-
             // Set initial request in the dialog path
             getDialogPath().setInvite(invite);
-
             // Send INVITE request
             sendInvite(invite);
-        } catch (InvalidArgumentException e) {
-            mLogger.error("Unable to set authorization header for chat invite!", e);
+
+        } catch (InvalidArgumentException | ParseException e) {
+            sLogger.error("Unable to set authorization header for chat invite!", e);
             handleError(new ChatError(ChatError.SESSION_INITIATION_FAILED, e));
 
-        } catch (ParseException e) {
-            mLogger.error("Unable to set authorization header for chat invite!", e);
-            handleError(new ChatError(ChatError.SESSION_INITIATION_FAILED, e));
-
-        } catch (FileAccessException e) {
-            mLogger.error("Unable to send 200OK response!", e);
-            handleError(new ChatError(ChatError.SESSION_INITIATION_FAILED, e));
-
-        } catch (PayloadException e) {
-            mLogger.error("Unable to send 200OK response!", e);
+        } catch (FileAccessException | PayloadException e) {
+            sLogger.error("Unable to send 200OK response!", e);
             handleError(new ChatError(ChatError.SESSION_INITIATION_FAILED, e));
 
         } catch (NetworkException e) {
@@ -197,12 +177,11 @@ public class OriginatingOneToOneChatSession extends OneToOneChatSession {
              * Intentionally catch runtime exceptions as else it will abruptly end the thread and
              * eventually bring the whole system down, which is not intended.
              */
-            mLogger.error("Failed initiating chat session!", e);
+            sLogger.error("Failed initiating chat session!", e);
             handleError(new ChatError(ChatError.SESSION_INITIATION_FAILED, e));
         }
     }
 
-    // Changed by Deutsche Telekom
     @Override
     public String getSdpDirection() {
         return SdpUtils.DIRECTION_SENDRECV;

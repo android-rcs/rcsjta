@@ -34,8 +34,8 @@ public class OneToOneChatMessageDeleteTask extends DeleteTask.GroupedByContactId
     private static final Logger sLogger = Logger.getLogger(OneToOneChatMessageDeleteTask.class
             .getName());
 
-    private static final String SELECTION_ONETOONE_CHATMESSAGES = new StringBuilder(
-            MessageData.KEY_CHAT_ID).append("=").append(MessageData.KEY_CONTACT).toString();
+    private static final String SELECTION_ONETOONE_CHATMESSAGES = MessageData.KEY_CHAT_ID + "="
+            + MessageData.KEY_CONTACT;
 
     private final ChatServiceImpl mChatService;
 
@@ -47,7 +47,6 @@ public class OneToOneChatMessageDeleteTask extends DeleteTask.GroupedByContactId
      * @param chatService the chat service impl
      * @param imService the IM service
      * @param contentResolver the content resolver
-     * @param imsLock the ims operation lock
      */
     public OneToOneChatMessageDeleteTask(ChatServiceImpl chatService,
             InstantMessagingService imService, LocalContentResolver contentResolver) {
@@ -64,7 +63,6 @@ public class OneToOneChatMessageDeleteTask extends DeleteTask.GroupedByContactId
      * @param chatService the chat service impl
      * @param imService the IM service
      * @param contentResolver the content resolver
-     * @param imsLock the ims operation lock
      * @param messageId the message id
      */
     public OneToOneChatMessageDeleteTask(ChatServiceImpl chatService,
@@ -82,7 +80,6 @@ public class OneToOneChatMessageDeleteTask extends DeleteTask.GroupedByContactId
      * @param chatService the chat service impl
      * @param imService the IM service
      * @param contentResolver the content resolver
-     * @param imsLock the ims operation lock
      * @param contact the contact
      */
     public OneToOneChatMessageDeleteTask(ChatServiceImpl chatService,

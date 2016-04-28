@@ -30,7 +30,7 @@ public class HistoryMemberBaseIdCreator {
 
     private static final long RANGE_SIZE = Long.MAX_VALUE / HistoryProvider.MAX_ATTACHED_PROVIDERS;
 
-    private static SparseArray<AtomicLong> sNextIds = new SparseArray<AtomicLong>();
+    private static SparseArray<AtomicLong> sNextIds = new SparseArray<>();
 
     /**
      * Creates a unique ID for a specific content provider by incrementing the last generated id and
@@ -38,7 +38,6 @@ public class HistoryMemberBaseIdCreator {
      * reading the base column "_id" of that provider, or will return 1 if not found.
      * 
      * @param ctx the android context
-     * @param contentProviderUri the caller provider Uri
      * @return the generated id
      */
     public static long createUniqueId(Context ctx, int memberId) {

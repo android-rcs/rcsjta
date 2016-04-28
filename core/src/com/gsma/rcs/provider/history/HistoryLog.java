@@ -41,39 +41,34 @@ public class HistoryLog {
             HistoryLogData.CONTENT_URI).appendProvider(MessageData.HISTORYLOG_MEMBER_ID)
             .appendProvider(FileTransferData.HISTORYLOG_MEMBER_ID).build();
 
-    private static final String SELECTION_QUEUED_CHATMESSAGES_AND_FILETRANSFERS = new StringBuilder(
-            "(").append(HistoryLogData.KEY_STATUS).append("=").append(Status.QUEUED.toInt())
-            .append(" AND ").append(HistoryLogData.KEY_MIME_TYPE).append("<>'")
-            .append(MimeType.GROUPCHAT_EVENT).append("' AND ")
-            .append(HistoryLogData.KEY_PROVIDER_ID).append("=")
-            .append(MessageData.HISTORYLOG_MEMBER_ID).append(") OR (")
-            .append(HistoryLogData.KEY_STATUS).append("=")
-            .append(FileTransfer.State.QUEUED.toInt()).append(" AND ")
-            .append(HistoryLogData.KEY_PROVIDER_ID).append("=")
-            .append(FileTransferData.HISTORYLOG_MEMBER_ID).append(')').toString();
+    private static final String SELECTION_QUEUED_CHATMESSAGES_AND_FILETRANSFERS = "("
+            + HistoryLogData.KEY_STATUS + "=" + Status.QUEUED.toInt() + " AND "
+            + HistoryLogData.KEY_MIME_TYPE + "<>'" + MimeType.GROUPCHAT_EVENT + "' AND "
+            + HistoryLogData.KEY_PROVIDER_ID + "=" + MessageData.HISTORYLOG_MEMBER_ID + ") OR ("
+            + HistoryLogData.KEY_STATUS + "=" + FileTransfer.State.QUEUED.toInt() + " AND "
+            + HistoryLogData.KEY_PROVIDER_ID + "=" + FileTransferData.HISTORYLOG_MEMBER_ID + ')';
 
-    private static final String SELECTION_UPLOADED_BUT_NOT_TRANSFERRED_FILETRANSFERS = new StringBuilder(
-            "(").append(HistoryLogData.KEY_PROVIDER_ID).append("=")
-            .append(FileTransferData.HISTORYLOG_MEMBER_ID).append(" AND ")
-            .append(HistoryLogData.KEY_STATUS).append("=")
-            .append(FileTransfer.State.STARTED.toInt()).append(" AND ")
-            .append(HistoryLogData.KEY_DIRECTION).append("=").append(Direction.OUTGOING.toInt())
-            .append(" AND ").append(HistoryLogData.KEY_FILESIZE).append("=")
-            .append(HistoryLogData.KEY_TRANSFERRED).append(")").toString();
+    private static final String SELECTION_UPLOADED_BUT_NOT_TRANSFERRED_FILETRANSFERS = "("
+            + HistoryLogData.KEY_PROVIDER_ID + "=" + FileTransferData.HISTORYLOG_MEMBER_ID
+            + " AND " + HistoryLogData.KEY_STATUS + "=" + FileTransfer.State.STARTED.toInt()
+            + " AND " + HistoryLogData.KEY_DIRECTION + "=" + Direction.OUTGOING.toInt() + " AND "
+            + HistoryLogData.KEY_FILESIZE + "=" + HistoryLogData.KEY_TRANSFERRED + ")";
 
-    private static final String SELECTION_QUEUED_GROUPCHATMESSAGES_AND_GROUPFILETRANSFERS = new StringBuilder(
-            HistoryLogData.KEY_CHAT_ID).append("=? AND (")
-            .append(SELECTION_QUEUED_CHATMESSAGES_AND_FILETRANSFERS).append(" OR ")
-            .append(SELECTION_UPLOADED_BUT_NOT_TRANSFERRED_FILETRANSFERS).append(')').toString();
+    private static final String SELECTION_QUEUED_GROUPCHATMESSAGES_AND_GROUPFILETRANSFERS = HistoryLogData.KEY_CHAT_ID
+            + "=? AND ("
+            + SELECTION_QUEUED_CHATMESSAGES_AND_FILETRANSFERS
+            + " OR "
+            + SELECTION_UPLOADED_BUT_NOT_TRANSFERRED_FILETRANSFERS + ')';
 
-    private static final String SELECTION_QUEUED_ONETOONECHATMESSAGES_AND_ONETOONE_FILETRANSFERS = new StringBuilder(
-            HistoryLogData.KEY_CHAT_ID).append("=").append(HistoryLogData.KEY_CONTACT)
-            .append(" AND (").append(SELECTION_QUEUED_CHATMESSAGES_AND_FILETRANSFERS)
-            .append(" OR ").append(SELECTION_UPLOADED_BUT_NOT_TRANSFERRED_FILETRANSFERS)
-            .append(')').toString();
+    private static final String SELECTION_QUEUED_ONETOONECHATMESSAGES_AND_ONETOONE_FILETRANSFERS = HistoryLogData.KEY_CHAT_ID
+            + "="
+            + HistoryLogData.KEY_CONTACT
+            + " AND ("
+            + SELECTION_QUEUED_CHATMESSAGES_AND_FILETRANSFERS
+            + " OR "
+            + SELECTION_UPLOADED_BUT_NOT_TRANSFERRED_FILETRANSFERS + ')';
 
-    private static final String SELECTION_ID = new StringBuilder(HistoryLogData.KEY_ID)
-            .append("=?").toString();
+    private static final String SELECTION_ID = HistoryLogData.KEY_ID + "=?";
 
     private static final String[] PROJECTION_REMOTE_CONTACT = new String[] {
         HistoryLogData.KEY_CONTACT

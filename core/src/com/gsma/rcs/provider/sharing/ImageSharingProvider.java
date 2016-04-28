@@ -36,6 +36,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 /**
@@ -43,6 +44,7 @@ import android.text.TextUtils;
  * 
  * @author Jean-Marc AUFFRET
  */
+@SuppressWarnings("ConstantConditions")
 public class ImageSharingProvider extends ContentProvider {
 
     private static final int INVALID_ROW_ID = -1;
@@ -106,29 +108,27 @@ public class ImageSharingProvider extends ContentProvider {
 
         @Override
         public void onCreate(SQLiteDatabase db) {
-            db.execSQL(new StringBuilder("CREATE TABLE IF NOT EXISTS ").append(TABLE).append('(')
-                    .append(ImageSharingData.KEY_BASECOLUMN_ID).append(" INTEGER NOT NULL,")
-                    .append(ImageSharingData.KEY_SHARING_ID).append(" TEXT NOT NULL PRIMARY KEY,")
-                    .append(ImageSharingData.KEY_CONTACT).append(" TEXT NOT NULL,")
-                    .append(ImageSharingData.KEY_FILE).append(" TEXT NOT NULL,")
-                    .append(ImageSharingData.KEY_FILENAME).append(" TEXT NOT NULL,")
-                    .append(ImageSharingData.KEY_MIME_TYPE).append(" TEXT NOT NULL,")
-                    .append(ImageSharingData.KEY_STATE).append(" INTEGER NOT NULL,")
-                    .append(ImageSharingData.KEY_REASON_CODE).append(" INTEGER NOT NULL,")
-                    .append(ImageSharingData.KEY_DIRECTION).append(" INTEGER NOT NULL,")
-                    .append(ImageSharingData.KEY_TIMESTAMP).append(" INTEGER NOT NULL,")
-                    .append(ImageSharingData.KEY_TRANSFERRED).append(" INTEGER NOT NULL,")
-                    .append(ImageSharingData.KEY_FILESIZE).append(" INTEGER NOT NULL)").toString());
-            db.execSQL(new StringBuilder("CREATE INDEX ")
-                    .append(ImageSharingData.KEY_BASECOLUMN_ID).append("_idx").append(" ON ")
-                    .append(TABLE).append('(').append(ImageSharingData.KEY_BASECOLUMN_ID)
-                    .append(')').toString());
-            db.execSQL(new StringBuilder("CREATE INDEX ").append(ImageSharingData.KEY_CONTACT)
-                    .append("_idx").append(" ON ").append(TABLE).append('(')
-                    .append(ImageSharingData.KEY_CONTACT).append(')').toString());
-            db.execSQL(new StringBuilder("CREATE INDEX ").append(ImageSharingData.KEY_TIMESTAMP)
-                    .append("_idx").append(" ON ").append(TABLE).append('(')
-                    .append(ImageSharingData.KEY_TIMESTAMP).append(')').toString());
+            // @formatter:off
+            db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE + '('
+                    + ImageSharingData.KEY_BASECOLUMN_ID + " INTEGER NOT NULL,"
+                    + ImageSharingData.KEY_SHARING_ID + " TEXT NOT NULL PRIMARY KEY,"
+                    + ImageSharingData.KEY_CONTACT + " TEXT NOT NULL," 
+                    + ImageSharingData.KEY_FILE + " TEXT NOT NULL," 
+                    + ImageSharingData.KEY_FILENAME + " TEXT NOT NULL,"
+                    + ImageSharingData.KEY_MIME_TYPE + " TEXT NOT NULL,"
+                    + ImageSharingData.KEY_STATE + " INTEGER NOT NULL,"
+                    + ImageSharingData.KEY_REASON_CODE + " INTEGER NOT NULL,"
+                    + ImageSharingData.KEY_DIRECTION + " INTEGER NOT NULL,"
+                    + ImageSharingData.KEY_TIMESTAMP + " INTEGER NOT NULL,"
+                    + ImageSharingData.KEY_TRANSFERRED + " INTEGER NOT NULL,"
+                    + ImageSharingData.KEY_FILESIZE + " INTEGER NOT NULL)");
+            // @formatter:on
+            db.execSQL("CREATE INDEX " + ImageSharingData.KEY_BASECOLUMN_ID + "_idx" + " ON "
+                    + TABLE + '(' + ImageSharingData.KEY_BASECOLUMN_ID + ')');
+            db.execSQL("CREATE INDEX " + ImageSharingData.KEY_CONTACT + "_idx" + " ON " + TABLE
+                    + '(' + ImageSharingData.KEY_CONTACT + ')');
+            db.execSQL("CREATE INDEX " + ImageSharingData.KEY_TIMESTAMP + "_idx" + " ON " + TABLE
+                    + '(' + ImageSharingData.KEY_TIMESTAMP + ')');
         }
 
         @Override
@@ -144,8 +144,7 @@ public class ImageSharingProvider extends ContentProvider {
         if (TextUtils.isEmpty(selection)) {
             return SELECTION_WITH_SHARING_ID_ONLY;
         }
-        return new StringBuilder("(").append(SELECTION_WITH_SHARING_ID_ONLY).append(") AND (")
-                .append(selection).append(')').toString();
+        return "(" + SELECTION_WITH_SHARING_ID_ONLY + ") AND (" + selection + ')';
     }
 
     private String[] getSelectionArgsWithSharingId(String[] selectionArgs, String sharingId) {
@@ -165,7 +164,7 @@ public class ImageSharingProvider extends ContentProvider {
     }
 
     @Override
-    public String getType(Uri uri) {
+    public String getType(@NonNull Uri uri) {
         switch (sUriMatcher.match(uri)) {
             case UriType.InternalImageSharing.IMAGE_SHARING:
                 /* Intentional fall through */
@@ -178,14 +177,13 @@ public class ImageSharingProvider extends ContentProvider {
                 return CursorType.TYPE_ITEM;
 
             default:
-                throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
-                        .append(uri).append("!").toString());
+                throw new IllegalArgumentException("Unsupported URI " + uri + "!");
         }
     }
 
     @Override
-    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
-            String sort) {
+    public Cursor query(@NonNull Uri uri, String[] projection, String selection,
+            String[] selectionArgs, String sort) {
         Cursor cursor = null;
         try {
             switch (sUriMatcher.match(uri)) {
@@ -225,8 +223,7 @@ public class ImageSharingProvider extends ContentProvider {
                     return cursor;
 
                 default:
-                    throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
-                            .append(uri).append("!").toString());
+                    throw new IllegalArgumentException("Unsupported URI " + uri + "!");
             }
         }
         /*
@@ -242,7 +239,8 @@ public class ImageSharingProvider extends ContentProvider {
     }
 
     @Override
-    public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+    public int update(@NonNull Uri uri, ContentValues values, String selection,
+            String[] selectionArgs) {
         Uri notificationUri = ImageSharingLog.CONTENT_URI;
         switch (sUriMatcher.match(uri)) {
             case UriType.InternalImageSharing.IMAGE_SHARING_WITH_ID:
@@ -263,17 +261,16 @@ public class ImageSharingProvider extends ContentProvider {
             case UriType.ImageSharing.IMAGE_SHARING_WITH_ID:
                 /* Intentional fall through */
             case UriType.ImageSharing.IMAGE_SHARING:
-                throw new UnsupportedOperationException(new StringBuilder("This provider (URI=")
-                        .append(uri).append(") supports read only access!").toString());
+                throw new UnsupportedOperationException("This provider (URI=" + uri
+                        + ") supports read only access!");
 
             default:
-                throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
-                        .append(uri).append("!").toString());
+                throw new IllegalArgumentException("Unsupported URI " + uri + "!");
         }
     }
 
     @Override
-    public Uri insert(Uri uri, ContentValues initialValues) {
+    public Uri insert(@NonNull Uri uri, ContentValues initialValues) {
         switch (sUriMatcher.match(uri)) {
             case UriType.InternalImageSharing.IMAGE_SHARING:
                 /* Intentional fall through */
@@ -283,9 +280,8 @@ public class ImageSharingProvider extends ContentProvider {
                 initialValues.put(ImageSharingData.KEY_BASECOLUMN_ID, HistoryMemberBaseIdCreator
                         .createUniqueId(getContext(), ImageSharingData.HISTORYLOG_MEMBER_ID));
                 if (db.insert(TABLE, null, initialValues) == INVALID_ROW_ID) {
-                    throw new ServerApiPersistentStorageException(new StringBuilder(
-                            "Unable to insert row for URI ").append(uri.toString()).append('!')
-                            .toString());
+                    throw new ServerApiPersistentStorageException("Unable to insert row for URI "
+                            + uri.toString() + '!');
                 }
                 Uri notificationUri = Uri.withAppendedPath(ImageSharingLog.CONTENT_URI, sharingId);
                 getContext().getContentResolver().notifyChange(notificationUri, null);
@@ -294,17 +290,16 @@ public class ImageSharingProvider extends ContentProvider {
             case UriType.ImageSharing.IMAGE_SHARING_WITH_ID:
                 /* Intentional fall through */
             case UriType.ImageSharing.IMAGE_SHARING:
-                throw new UnsupportedOperationException(new StringBuilder("This provider (URI=")
-                        .append(uri).append(") supports read only access!").toString());
+                throw new UnsupportedOperationException("This provider (URI=" + uri
+                        + ") supports read only access!");
 
             default:
-                throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
-                        .append(uri).append("!").toString());
+                throw new IllegalArgumentException("Unsupported URI " + uri + "!");
         }
     }
 
     @Override
-    public int delete(Uri uri, String selection, String[] selectionArgs) {
+    public int delete(@NonNull Uri uri, String selection, String[] selectionArgs) {
         Uri notificationUri = ImageSharingLog.CONTENT_URI;
         switch (sUriMatcher.match(uri)) {
             case UriType.InternalImageSharing.IMAGE_SHARING_WITH_ID:
@@ -325,12 +320,11 @@ public class ImageSharingProvider extends ContentProvider {
             case UriType.ImageSharing.IMAGE_SHARING_WITH_ID:
                 /* Intentional fall through */
             case UriType.ImageSharing.IMAGE_SHARING:
-                throw new UnsupportedOperationException(new StringBuilder("This provider (URI=")
-                        .append(uri).append(") supports read only access!").toString());
+                throw new UnsupportedOperationException("This provider (URI=" + uri
+                        + ") supports read only access!");
 
             default:
-                throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
-                        .append(uri).append("!").toString());
+                throw new IllegalArgumentException("Unsupported URI " + uri + "!");
         }
     }
 

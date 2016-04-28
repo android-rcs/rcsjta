@@ -78,7 +78,6 @@ public interface MsrpEventListener {
      */
     void msrpTransferAborted();
 
-    // Changed by Deutsche Telekom
     /**
      * Data transfer error
      * 
