@@ -43,7 +43,6 @@ import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.ContributionIdGenerator;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingError;
-import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSessionListener;
 import com.gsma.rcs.core.ims.service.im.filetransfer.ImsFileSharingSession;
 import com.gsma.rcs.platform.AndroidFactory;
@@ -83,7 +82,7 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
      */
     private final static String BOUNDARY_TAG = "boundary1";
 
-    private MsrpManager msrpMgr;
+    private MsrpManager mMsrpMgr;
 
     private final InstantMessagingService mImService;
 
@@ -107,15 +106,13 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
             RcsSettings rcsSettings, long timestamp, ContactManager contactManager) {
         super(imService, content, contact, fileIcon, fileTransferId, rcsSettings, timestamp,
                 contactManager);
-
         if (sLogger.isActivated()) {
-            sLogger.debug(new StringBuilder("OriginatingFileSharingSession contact=")
-                    .append(contact).append(" filename=").append(content.getName()).toString());
+            sLogger.debug("OriginatingFileSharingSession contact=" + contact + " filename="
+                    + content.getName());
         }
         mImService = imService;
         // Create dialog path
         createOriginatingDialogPath();
-
         // Set contribution ID
         String id = ContributionIdGenerator.getContributionId(getDialogPath().getCallId());
         setContributionID(id);
@@ -128,14 +125,12 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
                     .getContentResolver().openInputStream(file);
             byte[] data = new byte[size];
             if (size != fileInputStream.read(data, 0, size)) {
-                throw new NetworkException(new StringBuilder("Unable to retrive data from ")
-                        .append(file).toString());
+                throw new NetworkException("Unable to retrive data from " + file);
             }
             return data;
 
         } catch (IOException e) {
-            throw new NetworkException(new StringBuilder("Failed to get file data for uri : ")
-                    .append(file).toString(), e);
+            throw new NetworkException("Failed to get file data for uri : " + file, e);
 
         } finally {
             CloseableUtils.tryToClose(fileInputStream);
@@ -148,13 +143,11 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
             if (sLogger.isActivated()) {
                 sLogger.info("Initiate a file transfer session as originating");
             }
-
             /* Set setup mode */
             String localSetup = createSetupOffer();
             if (sLogger.isActivated()) {
                 sLogger.debug("Local setup attribute is ".concat(localSetup));
             }
-
             /* Set local port */
             int localMsrpPort;
             if ("active".equals(localSetup)) {
@@ -162,35 +155,33 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
             } else {
                 localMsrpPort = NetworkRessourceManager.generateLocalMsrpPort(mRcsSettings);
             }
-
             /* Create the MSRP manager */
             String localIpAddress = getImsService().getImsModule().getCurrentNetworkInterface()
                     .getNetworkAccess().getIpAddress();
-            msrpMgr = new MsrpManager(localIpAddress, localMsrpPort, getImsService(), mRcsSettings);
+            mMsrpMgr = new MsrpManager(localIpAddress, localMsrpPort, getImsService(), mRcsSettings);
             if (getImsService().getImsModule().isConnectedToWifiAccess()) {
-                msrpMgr.setSecured(mRcsSettings.isSecureMsrpOverWifi());
+                mMsrpMgr.setSecured(mRcsSettings.isSecureMsrpOverWifi());
             }
-
             /* Build SDP part */
             String ipAddress = getDialogPath().getSipStack().getLocalIpAddress();
             String encoding = getContent().getEncoding();
             long maxSize = mRcsSettings.getMaxFileTransferSize();
+            /* Set File-selector attribute */
             String selector = getFileSelectorAttribute();
             StringBuilder sdp = new StringBuilder(SdpUtils.buildFileSDP(ipAddress, localMsrpPort,
-                    msrpMgr.getLocalSocketProtocol(), encoding, getFileTransferIdAttribute(),
-                    selector, getFileDisposition(), localSetup, msrpMgr.getLocalMsrpPath(),
+                    mMsrpMgr.getLocalSocketProtocol(), encoding, getFileTransferIdAttribute(),
+                    selector, getFileDisposition(), localSetup, mMsrpMgr.getLocalMsrpPath(),
                     SdpUtils.DIRECTION_SENDONLY, maxSize));
-
             /* Set File-location attribute */
             Uri location = getFileLocationAttribute();
             if (location != null) {
                 sdp.append("a=file-location:").append(location.toString()).append(SipUtils.CRLF);
             }
-
             MmContent fileIcon = getFileicon();
             if (fileIcon == null) {
                 /* Set the local SDP part in the dialog path */
                 getDialogPath().setLocalContent(sdp.toString());
+
             } else {
                 Capabilities remoteCapabilities = mContactManager
                         .getContactCapabilities(getRemoteContact());
@@ -203,45 +194,38 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
                     String imageEncoded = Base64.encodeBase64ToString(getFileData(
                             fileIcon.getUri(), (int) fileIcon.getSize()));
                     String sdpContent = sdp.toString();
-                    String multipart = new StringBuilder(Multipart.BOUNDARY_DELIMITER)
-                            .append(BOUNDARY_TAG).append(SipUtils.CRLF)
-                            .append(ContentTypeHeader.NAME).append(": application/sdp")
-                            .append(SipUtils.CRLF).append(ContentLengthHeader.NAME).append(": ")
-                            .append(sdpContent.getBytes(UTF8).length).append(SipUtils.CRLF)
-                            .append(SipUtils.CRLF).append(sdpContent).append(SipUtils.CRLF)
-                            .append(Multipart.BOUNDARY_DELIMITER).append(BOUNDARY_TAG)
-                            .append(SipUtils.CRLF).append(ContentTypeHeader.NAME).append(": ")
-                            .append(fileIcon.getEncoding()).append(SipUtils.CRLF)
-                            .append(SipUtils.HEADER_CONTENT_TRANSFER_ENCODING).append(": base64")
-                            .append(SipUtils.CRLF).append(SipUtils.HEADER_CONTENT_ID)
-                            .append(": <image@joyn.com>").append(SipUtils.CRLF)
-                            .append(ContentLengthHeader.NAME).append(": ")
-                            .append(imageEncoded.length()).append(SipUtils.CRLF)
-                            .append(ContentDispositionHeader.NAME).append(": icon")
-                            .append(SipUtils.CRLF).append(SipUtils.CRLF).append(imageEncoded)
-                            .append(SipUtils.CRLF).append(Multipart.BOUNDARY_DELIMITER)
-                            .append(BOUNDARY_TAG).append(Multipart.BOUNDARY_DELIMITER).toString();
+                    String multipart = Multipart.BOUNDARY_DELIMITER + BOUNDARY_TAG + SipUtils.CRLF
+                            + ContentTypeHeader.NAME + ": application/sdp" + SipUtils.CRLF
+                            + ContentLengthHeader.NAME + ": " + sdpContent.getBytes(UTF8).length
+                            + SipUtils.CRLF + SipUtils.CRLF + sdpContent + SipUtils.CRLF
+                            + Multipart.BOUNDARY_DELIMITER + BOUNDARY_TAG + SipUtils.CRLF
+                            + ContentTypeHeader.NAME + ": " + fileIcon.getEncoding()
+                            + SipUtils.CRLF + SipUtils.HEADER_CONTENT_TRANSFER_ENCODING
+                            + ": base64" + SipUtils.CRLF + SipUtils.HEADER_CONTENT_ID
+                            + ": <image@joyn.com>" + SipUtils.CRLF + ContentLengthHeader.NAME
+                            + ": " + imageEncoded.length() + SipUtils.CRLF
+                            + ContentDispositionHeader.NAME + ": icon" + SipUtils.CRLF
+                            + SipUtils.CRLF + imageEncoded + SipUtils.CRLF
+                            + Multipart.BOUNDARY_DELIMITER + BOUNDARY_TAG
+                            + Multipart.BOUNDARY_DELIMITER;
 
                     /* Set the local SDP part in the dialog path */
                     getDialogPath().setLocalContent(multipart);
+
                 } else {
                     /* Set the local SDP part in the dialog path */
                     getDialogPath().setLocalContent(sdp.toString());
                 }
             }
-
             /* Create an INVITE request */
             if (sLogger.isActivated()) {
                 sLogger.info("Send INVITE");
             }
             SipRequest invite = createInvite();
-
             /* Set the Authorization header */
             getAuthenticationAgent().setAuthorizationHeader(invite);
-
             /* Set initial request in the dialog path */
             getDialogPath().setInvite(invite);
-
             /* Send INVITE request */
             sendInvite(invite);
 
@@ -270,10 +254,8 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
     public void prepareMediaSession() {
         // Get the remote SDP part
         byte[] sdp = getDialogPath().getRemoteContent().getBytes(UTF8);
-
         // Create the MSRP session
-        MsrpSession session = msrpMgr.createMsrpSession(sdp, this);
-
+        MsrpSession session = mMsrpMgr.createMsrpSession(sdp, this);
         session.setFailureReportOption(true);
         session.setSuccessReportOption(false);
         // Do not use right now the mapping to do not increase memory and cpu consumption
@@ -282,7 +264,7 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
 
     @Override
     public void openMediaSession() throws PayloadException, NetworkException {
-        msrpMgr.openMsrpSession();
+        mMsrpMgr.openMsrpSession();
     }
 
     @Override
@@ -291,8 +273,8 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
             /* Start sending data chunks */
             InputStream stream = AndroidFactory.getApplicationContext().getContentResolver()
                     .openInputStream(getContent().getUri());
-            msrpMgr.sendChunks(stream, IdGenerator.generateMessageID(), getContent().getEncoding(),
-                    getContent().getSize(), TypeMsrpChunk.FileSharing);
+            mMsrpMgr.sendChunks(stream, IdGenerator.generateMessageID(),
+                    getContent().getEncoding(), getContent().getSize(), TypeMsrpChunk.FileSharing);
 
         } catch (FileNotFoundException e) {
             throw new FileAccessException("Failed to initiate media transfer!", e);
@@ -327,17 +309,15 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
             }
             mImService.receiveOneToOneFileDeliveryStatus(contact, new ImdnDocument(
                     getFileTransferId(), ImdnDocument.DISPLAY,
-                    ImdnDocument.DELIVERY_STATUS_DISPLAYED, timestamp));
+                    ImdnDocument.DeliveryStatus.DISPLAYED, timestamp));
 
         } catch (PayloadException e) {
-            sLogger.error(new StringBuilder("Failed to notify MSRP data transferred for msgId : ")
-                    .append(msgId).toString(), e);
+            sLogger.error("Failed to notify MSRP data transferred for msgId : " + msgId, e);
 
         } catch (NetworkException e) {
             if (sLogger.isActivated()) {
                 sLogger.debug(e.getMessage());
             }
-
         } catch (RuntimeException e) {
             /*
              * Normally we are not allowed to catch runtime exceptions as these are genuine bugs
@@ -345,8 +325,7 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
              * executing operations on a thread unhandling such exceptions will eventually lead to
              * exit the system and thus can bring the whole system down, which is not intended.
              */
-            sLogger.error(new StringBuilder("Failed to notify msrp data transfered for msgId : ")
-                    .append(msgId).toString(), e);
+            sLogger.error("Failed to notify msrp data transfered for msgId : " + msgId, e);
         }
     }
 
@@ -380,8 +359,8 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
     @Override
     public void closeMediaSession() {
         // Close MSRP session
-        if (msrpMgr != null) {
-            msrpMgr.closeSession();
+        if (mMsrpMgr != null) {
+            mMsrpMgr.closeSession();
         }
         if (sLogger.isActivated()) {
             sLogger.debug("MSRP session has been closed");
@@ -399,7 +378,7 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
         long timestamp = System.currentTimeMillis();
         mImService.receiveOneToOneFileDeliveryStatus(getRemoteContact(), new ImdnDocument(
                 getFileTransferId(), ImdnDocument.POSITIVE_DELIVERY,
-                ImdnDocument.DELIVERY_STATUS_DELIVERED, timestamp));
+                ImdnDocument.DeliveryStatus.DELIVERED, timestamp));
         super.handle200OK(resp);
     }
 }

@@ -80,14 +80,6 @@ public class MessageLog implements IMessageLog {
     private static final String SELECTION_QUEUED_ONETOONE_CHAT_MESSAGES = MessageData.KEY_CHAT_ID
             + "=? AND " + MessageData.KEY_STATUS + "=" + Status.QUEUED.toInt();
 
-    private static final String SELECTION_ALL_QUEUED_ONETOONE_CHAT_MESSAGES = MessageData.KEY_CHAT_ID
-            + "="
-            + MessageData.KEY_CONTACT
-            + " AND "
-            + MessageData.KEY_STATUS
-            + "="
-            + Status.QUEUED.toInt();
-
     private static final int CHAT_MESSAGE_DELIVERY_EXPIRED = 1;
 
     private static final int CHAT_MESSAGE_DELIVERY_EXPIRATION_NOT_APPLICABLE = 0;
@@ -154,14 +146,6 @@ public class MessageLog implements IMessageLog {
         mLocalContentResolver.insert(MessageData.CONTENT_URI, values);
     }
 
-    /**
-     * Add outgoing one-to-one chat message
-     * 
-     * @param msg Chat message
-     * @param status Status
-     * @param reasonCode Reason code
-     * @param deliveryExpiration the delivery expiration
-     */
     @Override
     public void addOutgoingOneToOneChatMessage(ChatMessage msg, Status status,
             ReasonCode reasonCode, long deliveryExpiration) {
@@ -200,12 +184,6 @@ public class MessageLog implements IMessageLog {
         addIncomingOneToOneMessage(msg, Status.FAILED, ReasonCode.FAILED_DELIVERY);
     }
 
-    /**
-     * Add incoming one-to-one chat message
-     * 
-     * @param msg Chat message
-     * @param imdnDisplayedRequested Indicates whether IMDN display was requested
-     */
     @Override
     public void addIncomingOneToOneChatMessage(ChatMessage msg, boolean imdnDisplayedRequested) {
         if (imdnDisplayedRequested) {
@@ -215,13 +193,6 @@ public class MessageLog implements IMessageLog {
         }
     }
 
-    /**
-     * Add incoming group chat message
-     * 
-     * @param chatId Chat ID
-     * @param msg Chat message
-     * @param imdnDisplayedRequested Indicates whether IMDN display was requested
-     */
     @Override
     public void addIncomingGroupChatMessage(String chatId, ChatMessage msg,
             boolean imdnDisplayedRequested) {
@@ -231,14 +202,6 @@ public class MessageLog implements IMessageLog {
                 ReasonCode.UNSPECIFIED);
     }
 
-    /**
-     * Add outgoing group chat message
-     * 
-     * @param chatId Chat ID
-     * @param msg Chat message
-     * @param status Status
-     * @param reasonCode Reason code
-     */
     @Override
     public void addOutgoingGroupChatMessage(String chatId, ChatMessage msg,
             Set<ContactId> recipients, Status status, ReasonCode reasonCode) {
@@ -281,7 +244,7 @@ public class MessageLog implements IMessageLog {
         values.put(MessageData.KEY_DELIVERY_EXPIRATION, 0);
         values.put(MessageData.KEY_EXPIRED_DELIVERY, 0);
         mLocalContentResolver.insert(MessageData.CONTENT_URI, values);
-        if (direction == Direction.OUTGOING) {
+        if (Direction.OUTGOING == direction) {
             try {
                 GroupDeliveryInfo.Status deliveryStatus = GroupDeliveryInfo.Status.NOT_DELIVERED;
                 if (mRcsSettings.isAlbatrosRelease()) {
@@ -345,16 +308,6 @@ public class MessageLog implements IMessageLog {
                 values, SELECTION_BY_NOT_READ, null);
     }
 
-    /**
-     * Set chat message status and reason code. Note that this method should not be used for
-     * Status.DELIVERED and Status.DISPLAYED. These states require timestamps and should be set
-     * through setChatMessageStatusDelivered and setChatMessageStatusDisplayed respectively.
-     * 
-     * @param msgId Message ID
-     * @param status Message status (See restriction above)
-     * @param reasonCode Message status reason code
-     * @return the number of updated rows
-     */
     @Override
     public boolean setChatMessageStatusAndReasonCode(String msgId, Status status,
             ReasonCode reasonCode) {
@@ -514,15 +467,6 @@ public class MessageLog implements IMessageLog {
     }
 
     @Override
-    public String getChatMessageContent(String msgId) {
-        Cursor cursor = getMessageData(MessageData.KEY_CONTENT, msgId);
-        if (cursor == null) {
-            return null;
-        }
-        return getDataAsString(cursor);
-    }
-
-    @Override
     public Boolean isChatMessageExpiredDelivery(String msgId) {
         Cursor cursor = getMessageData(MessageData.KEY_EXPIRED_DELIVERY, msgId);
         if (cursor == null) {
@@ -548,27 +492,6 @@ public class MessageLog implements IMessageLog {
                 SELECTION_QUEUED_ONETOONE_CHAT_MESSAGES, selectionArgs, ORDER_BY_TIMESTAMP_ASC);
         CursorUtil.assertCursorIsNotNull(cursor, MessageData.CONTENT_URI);
         return cursor;
-    }
-
-    @Override
-    public Cursor getAllQueuedOneToOneChatMessages() {
-        Cursor cursor = mLocalContentResolver.query(MessageData.CONTENT_URI, null,
-                SELECTION_ALL_QUEUED_ONETOONE_CHAT_MESSAGES, null, ORDER_BY_TIMESTAMP_ASC);
-        CursorUtil.assertCursorIsNotNull(cursor, MessageData.CONTENT_URI);
-        return cursor;
-    }
-
-    @Override
-    public boolean setChatMessageTimestamp(String msgId, long timestamp, long timestampSent) {
-        if (sLogger.isActivated()) {
-            sLogger.debug("Set chat message timestamp msgId=" + msgId + ", timestamp=" + timestamp
-                    + ", timestampSent=" + timestampSent);
-        }
-        ContentValues values = new ContentValues();
-        values.put(MessageData.KEY_TIMESTAMP, timestamp);
-        values.put(MessageData.KEY_TIMESTAMP_SENT, timestampSent);
-        return mLocalContentResolver.update(Uri.withAppendedPath(MessageData.CONTENT_URI, msgId),
-                values, null, null) > 0;
     }
 
     @Override

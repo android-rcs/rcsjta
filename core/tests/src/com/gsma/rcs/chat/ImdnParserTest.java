@@ -54,7 +54,7 @@ public class ImdnParserTest extends AndroidTestCase {
             sLogger.info("MsgId=" + imdnDoc.getMsgId() + "  status=" + imdnDoc.getStatus());
         }
         assertEquals("34jk324j", imdnDoc.getMsgId());
-        assertEquals("displayed", imdnDoc.getStatus());
+        assertEquals("displayed", imdnDoc.getStatus().toString());
         assertEquals("display-notification", imdnDoc.getNotificationType());
         assertEquals(DateUtils.decodeDate("2008-04-04T12:16:49-05:00"), imdnDoc.getDateTime());
     }

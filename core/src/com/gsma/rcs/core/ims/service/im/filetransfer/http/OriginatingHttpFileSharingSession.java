@@ -111,28 +111,13 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
             if (mUploadManager.isCancelled() || mUploadManager.isPaused()) {
                 return;
             }
-            sLogger.error(
-                    new StringBuilder("Failed to initiate file transfer session for sessionId : ")
-                            .append(getSessionID()).append(" with fileTransferId : ")
-                            .append(getFileTransferId()).toString(), e);
+            sLogger.error("Failed to initiate file transfer session for sessionId : "
+                    + getSessionID() + " with fileTransferId : " + getFileTransferId(), e);
             handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
 
-        } catch (PayloadException e) {
-            sLogger.error(
-                    new StringBuilder("Failed to initiate file transfer session for sessionId : ")
-                            .append(getSessionID()).append(" with fileTransferId : ")
-                            .append(getFileTransferId()).toString(), e);
-            handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
-
-        } catch (RuntimeException e) {
-            /*
-             * Intentionally catch runtime exceptions as else it will abruptly end the thread and
-             * eventually bring the whole system down, which is not intended.
-             */
-            sLogger.error(
-                    new StringBuilder("Failed to initiate file transfer session for sessionId : ")
-                            .append(getSessionID()).append(" with fileTransferId : ")
-                            .append(getFileTransferId()).toString(), e);
+        } catch (PayloadException | RuntimeException e) {
+            sLogger.error("Failed to initiate file transfer session for sessionId : "
+                    + getSessionID() + " with fileTransferId : " + getFileTransferId(), e);
             handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
         }
     }
@@ -182,10 +167,8 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
                      * Intentionally catch runtime exceptions as else it will abruptly end the
                      * thread and eventually bring the whole system down, which is not intended.
                      */
-                    sLogger.error(
-                            new StringBuilder("Failed to pause upload for sessionId : ")
-                                    .append(getSessionID()).append(" with fileTransferId : ")
-                                    .append(getFileTransferId()).toString(), e);
+                    sLogger.error("Failed to pause upload for sessionId : " + getSessionID()
+                            + " with fileTransferId : " + getFileTransferId(), e);
                     handleError(new FileSharingError(FileSharingError.MEDIA_UPLOAD_FAILED, e));
                 }
             }
@@ -215,22 +198,9 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
                 } catch (NetworkException e) {
                     handleError(new FileSharingError(FileSharingError.MEDIA_UPLOAD_FAILED, e));
 
-                } catch (IOException | PayloadException e) {
-                    sLogger.error(
-                            new StringBuilder("Failed to resume upload for sessionId : ")
-                                    .append(getSessionID()).append(" with fileTransferId : ")
-                                    .append(getFileTransferId()).toString(), e);
-                    handleError(new FileSharingError(FileSharingError.MEDIA_UPLOAD_FAILED, e));
-
-                } catch (RuntimeException e) {
-                    /*
-                     * Intentionally catch runtime exceptions as else it will abruptly end the
-                     * thread and eventually bring the whole system down, which is not intended.
-                     */
-                    sLogger.error(
-                            new StringBuilder("Failed to resume upload for sessionId : ")
-                                    .append(getSessionID()).append(" with fileTransferId : ")
-                                    .append(getFileTransferId()).toString(), e);
+                } catch (IOException | PayloadException | RuntimeException e) {
+                    sLogger.error("Failed to resume upload for sessionId : " + getSessionID()
+                            + " with fileTransferId : " + getFileTransferId(), e);
                     handleError(new FileSharingError(FileSharingError.MEDIA_UPLOAD_FAILED, e));
                 }
             }
@@ -242,27 +212,9 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
         mMessagingLog.setFileUploadTId(getFileTransferId(), mUploadManager.getTId());
     }
 
-    /**
-     * Gets upload manager
-     * 
-     * @return upload manager
-     */
-    public HttpUploadManager getUploadManager() {
-        return mUploadManager;
-    }
-
     @Override
     public boolean isInitiatedByRemote() {
         return false;
-    }
-
-    /**
-     * Sets the timestamp when file icon on the content server is no longer valid to download.
-     * 
-     * @param timestamp The timestamp
-     */
-    public void setIconExpiration(long timestamp) {
-        mIconExpiration = timestamp;
     }
 
     /**

@@ -324,12 +324,6 @@ public abstract class GroupChatSession extends ChatSession {
         super.receiveCancel(cancel);
     }
 
-    /**
-     * Send a text message
-     * 
-     * @param msg Chat message
-     * @throws NetworkException
-     */
     @Override
     public void sendChatMessage(ChatMessage msg) throws NetworkException {
         String from = ImsModule.getImsUserProfile().getPublicAddress();
@@ -347,14 +341,15 @@ public abstract class GroupChatSession extends ChatSession {
         if (mImdnManager.isRequestGroupDeliveryDisplayedReportsEnabled()) {
             data = ChatUtils.buildCpimMessageWithImdn(from, to, msgId, networkContent,
                     networkMimeType, timestampSent);
+
         } else if (mImdnManager.isDeliveryDeliveredReportsEnabled()) {
             data = ChatUtils.buildCpimMessageWithoutDisplayedImdn(from, to, msgId, networkContent,
                     networkMimeType, timestampSent);
+
         } else {
             data = ChatUtils.buildCpimMessage(from, to, networkContent, networkMimeType,
                     timestampSent);
         }
-
         if (ChatUtils.isGeolocType(networkMimeType)) {
             sendDataChunks(IdGenerator.generateMessageID(), data, CpimMessage.MIME_TYPE,
                     TypeMsrpChunk.GeoLocation);
@@ -379,15 +374,9 @@ public abstract class GroupChatSession extends ChatSession {
     }
 
     @Override
-    public void sendMsrpMessageDeliveryStatus(ContactId remote, String msgId, String status,
-            long timestamp) throws NetworkException {
-        sendMsrpMessageDeliveryStatus(ImsModule.getImsUserProfile().getPublicUri(),
-                remote.toString(), msgId, status, timestamp);
-    }
-
-    @Override
-    public void sendMsrpMessageDeliveryStatus(String fromUri, String toUri, String msgId,
-            String status, long timestamp) throws NetworkException {
+    public void sendMsrpMessageDeliveryStatus(ContactId remote, String msgId,
+            ImdnDocument.DeliveryStatus status, long timestamp) throws NetworkException {
+        String fromUri = ImsModule.getImsUserProfile().getPublicUri();
         if (sLogger.isActivated()) {
             sLogger.debug("Send delivery status " + status + " for message " + msgId);
         }
@@ -395,19 +384,18 @@ public abstract class GroupChatSession extends ChatSession {
         /* Timestamp for IMDN datetime */
         String imdn = ChatUtils.buildImdnDeliveryReport(msgId, status, timestamp);
         /* Timestamp for CPIM DateTime */
-        String content = ChatUtils.buildCpimDeliveryReport(fromUri, toUri, imdn,
+        String content = ChatUtils.buildCpimDeliveryReport(fromUri, remote.toString(), imdn,
                 System.currentTimeMillis());
 
-        // Send data
         TypeMsrpChunk typeMsrpChunk = TypeMsrpChunk.OtherMessageDeliveredReportStatus;
-        if (ImdnDocument.DELIVERY_STATUS_DISPLAYED.equalsIgnoreCase(status)) {
+        if (ImdnDocument.DeliveryStatus.DISPLAYED == status) {
             typeMsrpChunk = TypeMsrpChunk.MessageDisplayedReport;
-        } else if (ImdnDocument.DELIVERY_STATUS_DELIVERED.equalsIgnoreCase(status)) {
+        } else if (ImdnDocument.DeliveryStatus.DELIVERED == status) {
             typeMsrpChunk = TypeMsrpChunk.MessageDeliveredReport;
         }
         sendDataChunks(IdGenerator.generateMessageID(), content, CpimMessage.MIME_TYPE,
                 typeMsrpChunk);
-        if (ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(status)) {
+        if (ImdnDocument.DeliveryStatus.DISPLAYED == status) {
             if (mMessagingLog.getMessageChatId(msgId) != null) {
                 for (ImsSessionListener listener : getListeners()) {
                     ((ChatSessionListener) listener).onChatMessageDisplayReportSent(msgId);
@@ -439,10 +427,12 @@ public abstract class GroupChatSession extends ChatSession {
             networkContent = ChatUtils
                     .buildCpimMessageWithImdn(from, ChatUtils.ANONYMOUS_URI, fileTransferId,
                             fileInfo, FileTransferHttpInfoDocument.MIME_TYPE, timestampSent);
+
         } else if (deliveredReportEnabled) {
             networkContent = ChatUtils.buildCpimMessageWithoutDisplayedImdn(from,
                     ChatUtils.ANONYMOUS_URI, fileTransferId, fileInfo,
                     FileTransferHttpInfoDocument.MIME_TYPE, timestampSent);
+
         } else {
             networkContent = ChatUtils.buildCpimMessage(from, ChatUtils.ANONYMOUS_URI, fileInfo,
                     FileTransferHttpInfoDocument.MIME_TYPE, timestampSent);
@@ -587,7 +577,7 @@ public abstract class GroupChatSession extends ChatSession {
             throws PayloadException, NetworkException, ContactManagerException {
         boolean logActivated = sLogger.isActivated();
         if (logActivated) {
-            sLogger.info("Data received (type " + mimeType + ")");
+            sLogger.info("MSRP data received (type " + mimeType + ")");
         }
         if (data == null || data.length == 0) {
             // By-pass empty data
@@ -632,19 +622,21 @@ public abstract class GroupChatSession extends ChatSession {
         }
         String contentType = cpimMsg.getContentType();
         ContactId remoteId = getRemoteContact();
-        // In GC, the MSRP 'FROM' header of the SEND message is set to the remote URI
-        // Extract URI and optional display name to get pseudo and remoteId
+        /*
+         * In GC, the MSRP 'FROM' header of the SEND message is set to the remote URI. Extract URI
+         * and optional display name to get pseudo and remoteId.
+         */
         CpimIdentity cpimIdentity = new CpimIdentity(cpimMsg.getHeader(CpimMessage.HEADER_FROM));
         String pseudo = cpimIdentity.getDisplayName();
         PhoneNumber remoteNumber = ContactUtil.getValidPhoneNumberFromUri(cpimIdentity.getUri());
         if (remoteNumber == null) {
             if (logActivated) {
-                sLogger.warn("Cannot parse FROM Cpim Identity: ".concat(cpimIdentity.toString()));
+                sLogger.warn("Cannot parse FROM CPIM Identity: ".concat(cpimIdentity.toString()));
             }
         } else {
             remoteId = ContactUtil.createContactIdFromValidatedData(remoteNumber);
             if (logActivated) {
-                sLogger.info("Cpim FROM Identity: ".concat(cpimIdentity.toString()));
+                sLogger.info("CPIM FROM Identity: ".concat(cpimIdentity.toString()));
             }
         }
         // Extract local contactId from "TO" header
@@ -656,7 +648,7 @@ public abstract class GroupChatSession extends ChatSession {
         } else {
             localId = ContactUtil.createContactIdFromValidatedData(localNumber);
             if (logActivated) {
-                sLogger.info("Cpim TO Identity: ".concat(cpimIdentity.toString()));
+                sLogger.info("CPIM TO Identity: ".concat(cpimIdentity.toString()));
             }
         }
         String dispositionNotification = cpimMsg.getHeader(ImdnUtils.HEADER_IMDN_DISPO_NOTIF);
@@ -690,6 +682,7 @@ public abstract class GroupChatSession extends ChatSession {
                 if (ChatUtils.isApplicationIsComposingType(contentType)) {
                     // Is composing event
                     receiveIsComposing(remoteId, cpimMsg.getMessageContent().getBytes(UTF8));
+
                 } else {
                     if (ChatUtils.isMessageImdnType(contentType)) {
                         // Delivery report
@@ -772,16 +765,12 @@ public abstract class GroupChatSession extends ChatSession {
                 return;
             }
             if (sLogger.isActivated()) {
-                sLogger.info("Data transfer error " + error + " for message " + msgId + " (MSRP chunk type: " + typeMsrpChunk + ")");
+                sLogger.info("Data transfer error " + error + " for message " + msgId
+                        + " (MSRP chunk type: " + typeMsrpChunk + ")");
             }
-
             String chatId = getContributionID();
-            if (TypeMsrpChunk.MessageDeliveredReport.equals(typeMsrpChunk)) {
-                for (ImsSessionListener listener : getListeners()) {
-                    ((GroupChatSessionListener) listener).onDeliveryReportSendViaMsrpFailure(msgId,
-                            chatId, typeMsrpChunk);
-                }
-            } else if (TypeMsrpChunk.MessageDisplayedReport.equals(typeMsrpChunk)) {
+            if (TypeMsrpChunk.MessageDeliveredReport.equals(typeMsrpChunk)
+                    || TypeMsrpChunk.MessageDisplayedReport.equals(typeMsrpChunk)) {
                 for (ImsSessionListener listener : getListeners()) {
                     ((GroupChatSessionListener) listener).onDeliveryReportSendViaMsrpFailure(msgId,
                             chatId, typeMsrpChunk);
@@ -789,12 +778,13 @@ public abstract class GroupChatSession extends ChatSession {
             } else if ((msgId != null) && TypeMsrpChunk.TextMessage.equals(typeMsrpChunk)) {
                 for (ImsSessionListener listener : getListeners()) {
                     ImdnDocument imdn = new ImdnDocument(msgId, ImdnDocument.DELIVERY_NOTIFICATION,
-                            ImdnDocument.DELIVERY_STATUS_FAILED, ImdnDocument.IMDN_DATETIME_NOT_SET);
+                            ImdnDocument.DeliveryStatus.FAILED, ImdnDocument.IMDN_DATETIME_NOT_SET);
                     ((ChatSessionListener) listener).onMessageDeliveryStatusReceived(null, imdn);
                 }
             } else {
                 // do nothing
-                sLogger.error("MSRP transfer error not handled for message '" + msgId + "' and chunk type : '" + typeMsrpChunk + "'!");
+                sLogger.error("MSRP transfer error not handled for message '" + msgId
+                        + "' and chunk type : '" + typeMsrpChunk + "'!");
             }
             int errorCode;
             if ((error != null)
@@ -811,6 +801,7 @@ public abstract class GroupChatSession extends ChatSession {
                  * sender MUST interrupt it.
                  */
                 errorCode = ChatError.MEDIA_SESSION_BROKEN;
+
             } else {
                 /*
                  * Default error; used e.g. for 481 or any other error RFC 4975 481: A 481 response
@@ -824,7 +815,6 @@ public abstract class GroupChatSession extends ChatSession {
             for (ImsSessionListener listener : getListeners()) {
                 ((GroupChatSessionListener) listener).onImError(chatError);
             }
-
         } catch (RuntimeException e) {
             /*
              * Normally we are not allowed to catch runtime exceptions as these are genuine bugs
@@ -832,8 +822,7 @@ public abstract class GroupChatSession extends ChatSession {
              * executing operations on a thread unhandling such exceptions will eventually lead to
              * exit the system and thus can bring the whole system down, which is not intended.
              */
-            sLogger.error(
-                    "Failed to handle msrp error" + error + " for message " + msgId, e);
+            sLogger.error("Failed to handle msrp error" + error + " for message " + msgId, e);
         }
     }
 
@@ -844,7 +833,8 @@ public abstract class GroupChatSession extends ChatSession {
                 return;
             }
             if (sLogger.isActivated()) {
-                sLogger.info("Session error: " + error.getErrorCode() + ", reason=" + error.getMessage());
+                sLogger.info("Session error: " + error.getErrorCode() + ", reason="
+                        + error.getMessage());
             }
             closeMediaSession();
             removeSession();
@@ -852,7 +842,6 @@ public abstract class GroupChatSession extends ChatSession {
             for (ImsSessionListener listener : getListeners()) {
                 ((GroupChatSessionListener) listener).onImError(chatError);
             }
-
         } catch (RuntimeException e) {
             /*
              * Normally we are not allowed to catch runtime exceptions as these are genuine bugs

@@ -42,14 +42,15 @@ import java.util.Set;
  * Mother class for the History Provider that embeds generic functions for the
  * registration/unregistration of external providers and its related database operations.
  */
-/* package private */abstract class MultiDbProvider extends ContentProvider {
+/* package private */
+@SuppressWarnings("ConstantConditions")
+abstract class MultiDbProvider extends ContentProvider {
 
-    private static final String MAX_PROJECTION = new StringBuilder().append("MAX(")
-            .append(BaseColumns._ID).append(")").toString();
+    private static final String MAX_PROJECTION = "MAX(" + BaseColumns._ID + ")";
 
-    private final SparseArray<HistoryMemberDatabase> mHistoryMemberDatabases = new SparseArray<HistoryMemberDatabase>();
+    private final SparseArray<HistoryMemberDatabase> mHistoryMemberDatabases = new SparseArray<>();
 
-    private final Set<String> mForbiddenCanonicalPaths = new HashSet<String>();
+    private final Set<String> mForbiddenCanonicalPaths = new HashSet<>();
 
     /**
      * This is a flag put to true each time a member is registered so to execute refresh on query.
@@ -73,9 +74,7 @@ import java.util.Set;
         }
 
         private void detach(int providerId) {
-            getWritableDatabase().execSQL(
-                    new StringBuilder("DETACH DATABASE ").append(getDatabaseAlias(providerId))
-                            .toString());
+            getWritableDatabase().execSQL("DETACH DATABASE " + getDatabaseAlias(providerId));
             mHistoryMemberDatabases.get(providerId).setAttached(false);
         }
 
@@ -91,9 +90,8 @@ import java.util.Set;
         private void attach(int providerId) {
             HistoryMemberDatabase memberDatabase = mHistoryMemberDatabases.get(providerId);
             Uri database = memberDatabase.getDatabaseUri();
-            String attachCommand = new StringBuilder("ATTACH DATABASE '")
-                    .append(database.getPath()).append("' AS ")
-                    .append(getDatabaseAlias(providerId)).toString();
+            String attachCommand = "ATTACH DATABASE '" + database.getPath() + "' AS "
+                    + getDatabaseAlias(providerId);
             SQLiteDatabase db = getWritableDatabase();
             db.execSQL(attachCommand);
             mHistoryMemberDatabases.get(providerId).setAttached(true);
@@ -220,15 +218,15 @@ import java.util.Set;
     public void registerDatabase(int providerId, Uri contentProviderUri, Uri databaseUri,
             String tableName, Map<String, String> columnMapping) throws IOException {
         if (mHistoryMemberDatabases.get(providerId) != null) {
-            throw new IllegalArgumentException(new StringBuilder(
-                    "Cannot register external database for already registered provider id ")
-                    .append(providerId).append("!").toString());
+            throw new IllegalArgumentException(
+                    "Cannot register external database for already registered provider id "
+                            + providerId + "!");
         }
 
         String canonicalPath = new File(databaseUri.getPath()).getCanonicalPath();
         if (mForbiddenCanonicalPaths.contains(canonicalPath)) {
-            throw new IllegalArgumentException(new StringBuilder("Forbidden to add '")
-                    .append(databaseUri).append("'").append(" as a history log member!").toString());
+            throw new IllegalArgumentException("Forbidden to add '" + databaseUri + "'"
+                    + " as a history log member!");
         }
         registerDatabase(new HistoryMemberDatabase(providerId, contentProviderUri, null,
                 databaseUri, tableName, columnMapping));
@@ -236,9 +234,9 @@ import java.util.Set;
 
     public void unregisterDatabaseByProviderId(int providerId) {
         if (INTERNAL_MEMBER_IDS.contains(providerId)) {
-            throw new ServerApiIllegalArgumentException(new StringBuilder(
-                    "Trying to access history log member with invalid external id:")
-                    .append(providerId).append("!").toString());
+            throw new ServerApiIllegalArgumentException(
+                    "Trying to access history log member with invalid external id:" + providerId
+                            + "!");
         }
 
         HistoryMemberDatabase memberDatabase = mHistoryMemberDatabases.get(providerId);

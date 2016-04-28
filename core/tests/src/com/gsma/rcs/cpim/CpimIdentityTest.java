@@ -24,29 +24,48 @@ import android.test.InstrumentationTestCase;
 
 public class CpimIdentityTest extends InstrumentationTestCase {
 
-    public void testCpimIdentity() {
-        String test1 = "<sip:user@domain.com>";
-        String test2 = "\"Winnie the Pooh\" <tel:+33674538159>";
-        String test3 = "Winnie the Pooh <im:pooh@100akerwood.com>";
-        String test4 = "im:pooh@100akerwood.com";
-
-        CpimIdentity id;
-        id = new CpimIdentity(test1);
-        assertTrue("test failed with " + test1, id.getDisplayName() == null
-                && "sip:user@domain.com".equals(id.getUri()));
-        id = new CpimIdentity(test2);
-        assertTrue("test failed with " + test2, "Winnie the Pooh".equals(id.getDisplayName())
-                && "tel:+33674538159".equals(id.getUri()));
-        id = new CpimIdentity(test3);
-        assertTrue("test failed with " + test3, "Winnie the Pooh".equals(id.getDisplayName())
-                && "im:pooh@100akerwood.com".equals(id.getUri()));
-        Throwable exception = null;
+    public void testInvalidUri() {
+        String uri = "im:pooh@100akerwood.com";
         try {
-            new CpimIdentity(test4);
+            new CpimIdentity(uri);
+            fail("Failed to detect unknown URI (" + uri + ")");
+
         } catch (Exception e) {
-            exception = e;
+            assertTrue(e instanceof IllegalArgumentException);
         }
-        assertTrue("test failed with " + test4, exception instanceof IllegalArgumentException);
+    }
+
+    public void testSipUri() {
+        String uri = "sip:user@domain.com";
+        CpimIdentity id = new CpimIdentity("<" + uri + ">");
+        assertNull(id.getDisplayName());
+        assertEquals(uri, id.getUri());
+    }
+
+    public void testTelUriWithDisplayName() {
+        String displayName = "\"Winnie the Pooh\"";
+        String uri = "tel:+33674538159";
+        CpimIdentity id = new CpimIdentity(displayName + " <" + uri + ">");
+        assertEquals("Winnie the Pooh", id.getDisplayName());
+        assertEquals(uri, id.getUri());
+    }
+
+    public void testTelUriWithDisplayNameBis() {
+        String displayName = "Winnie the Pooh";
+        String uri = "tel:+33674538159";
+        CpimIdentity id = new CpimIdentity(displayName + " <" + uri + ">");
+        assertEquals(displayName, id.getDisplayName());
+        assertEquals(uri, id.getUri());
+    }
+
+    public void testTelUriWithAcceptContact() {
+        String displayName = "Winnie the Pooh";
+        String uri = "tel:+33674538159";
+        String acceptContact = "%2Bsip.instance%3D%22%3Curn%3Agsma%3Aimei%3A35824005-944763-1%3E%22";
+        CpimIdentity id = new CpimIdentity(displayName + " <" + uri + "?Accept-Contact="
+                + acceptContact + ">");
+        assertEquals("Winnie the Pooh", id.getDisplayName());
+        assertEquals("tel:+33674538159?Accept-Contact=" + acceptContact, id.getUri());
     }
 
 }

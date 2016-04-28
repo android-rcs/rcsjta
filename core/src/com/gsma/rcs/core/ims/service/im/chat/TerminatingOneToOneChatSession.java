@@ -71,7 +71,7 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession {
      * @param rcsSettings RCS settings
      * @param messagingLog Messaging log
      * @param timestamp Local timestamp for the session
-     * @param contactManager
+     * @param contactManager the contact manager
      * @throws PayloadException
      */
     public TerminatingOneToOneChatSession(InstantMessagingService imService, SipRequest invite,
@@ -80,14 +80,11 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession {
         super(imService, contact, PhoneUtils.formatContactIdToUri(contact), ChatUtils
                 .getFirstMessage(invite, timestamp), rcsSettings, messagingLog, timestamp,
                 contactManager);
-
         // Create dialog path
         createTerminatingDialogPath(invite);
-
         // Set contribution ID
         String id = ChatUtils.getContributionId(invite);
         setContributionID(id);
-
         if (shouldBeAutoAccepted()) {
             setSessionAccepted();
         }
@@ -104,10 +101,8 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession {
          * In case the invite contains a http file transfer info the chat session should be
          * auto-accepted so that the file transfer session can be started.
          */
-        if (FileTransferUtils.getHttpFTInfo(getDialogPath().getInvite(), mRcsSettings) != null) {
-            return true;
-        }
-        return mRcsSettings.isChatAutoAccepted();
+        return FileTransferUtils.getHttpFTInfo(getDialogPath().getInvite(), mRcsSettings) != null
+                || mRcsSettings.isChatAutoAccepted();
     }
 
     /**
@@ -127,19 +122,16 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession {
                 if (msgId != null) {
                     /* Send message delivery status via a SIP MESSAGE */
                     mImdnManager.sendMessageDeliveryStatusImmediately(remote.toString(), remote,
-                            msgId, ImdnDocument.DELIVERY_STATUS_DELIVERED,
-                            SipUtils.getRemoteInstanceID(dialogPath.getInvite()), getTimestamp());
+                            msgId, ImdnDocument.DeliveryStatus.DELIVERED,
+                            SipUtils.getRemoteInstanceId(dialogPath.getInvite()), getTimestamp());
                 }
             }
-
             Collection<ImsSessionListener> listeners = getListeners();
-
             /* Check if session should be auto-accepted once */
             if (isSessionAccepted()) {
                 if (logActivated) {
                     sLogger.debug("Received one-to-one chat invitation marked for auto-accept");
                 }
-
                 for (ImsSessionListener listener : listeners) {
                     ((OneToOneChatSessionListener) listener).onSessionAutoAccepted(remote);
                 }
@@ -147,13 +139,10 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession {
                 if (logActivated) {
                     sLogger.debug("Received one-to-one chat invitation marked for manual accept");
                 }
-
                 for (ImsSessionListener listener : listeners) {
                     ((OneToOneChatSessionListener) listener).onSessionInvited(remote);
                 }
-
                 send180Ringing(dialogPath.getInvite(), dialogPath.getLocalTag());
-
                 InvitationStatus answer = waitInvitationAnswer();
                 switch (answer) {
                     case INVITATION_REJECTED_DECLINE:
@@ -198,9 +187,7 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession {
                         if (logActivated) {
                             sLogger.debug("Session has been rejected by remote");
                         }
-
                         removeSession();
-
                         for (ImsSessionListener listener : listeners) {
                             listener.onSessionRejected(remote,
                                     TerminationReason.TERMINATION_BY_REMOTE);
@@ -209,7 +196,6 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession {
 
                     case INVITATION_ACCEPTED:
                         setSessionAccepted();
-
                         for (ImsSessionListener listener : listeners) {
                             listener.onSessionAccepting(remote);
                         }
@@ -230,7 +216,6 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession {
                         break;
                 }
             }
-
             /* Parse the remote SDP part */
             final SipRequest invite = dialogPath.getInvite();
             String remoteSdp = invite.getSdpContent();
@@ -243,7 +228,6 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession {
             String remoteHost = SdpUtils.extractRemoteHost(parser.sessionDescription, mediaDesc);
             int remotePort = mediaDesc.mPort;
 
-            /* Changed by Deutsche Telekom */
             String fingerprint = SdpUtils.extractFingerprint(parser, mediaDesc);
 
             /* Extract the "setup" parameter */
@@ -255,13 +239,11 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession {
             if (logActivated) {
                 sLogger.debug("Remote setup attribute is ".concat(remoteSetup));
             }
-
             /* Set setup mode */
             String localSetup = createSetupAnswer(remoteSetup);
             if (logActivated) {
                 sLogger.debug("Local setup attribute is ".concat(localSetup));
             }
-
             /* Set local port */
             int localMsrpPort;
             if (localSetup.equals("active")) {
@@ -269,16 +251,13 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession {
             } else {
                 localMsrpPort = getMsrpMgr().getLocalMsrpPort();
             }
-
             /* Build SDP part */
             String ipAddress = dialogPath.getSipStack().getLocalIpAddress();
             String sdp = SdpUtils.buildChatSDP(ipAddress, localMsrpPort, getMsrpMgr()
                     .getLocalSocketProtocol(), getAcceptTypes(), getWrappedTypes(), localSetup,
                     getMsrpMgr().getLocalMsrpPath(), getSdpDirection());
-
             /* Set the local SDP part in the dialog path */
             dialogPath.setLocalContent(sdp);
-
             /* Test if the session should be interrupted */
             if (isInterrupted()) {
                 if (logActivated) {
@@ -286,20 +265,16 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession {
                 }
                 return;
             }
-
             /* Create a 200 OK response */
             if (logActivated) {
                 sLogger.info("Send 200 OK");
             }
             SipResponse resp = SipMessageFactory.create200OkInviteResponse(dialogPath,
                     getFeatureTags(), sdp);
-
             dialogPath.setSigEstablished();
-
             /* Send response */
             SipTransactionContext ctx = getImsService().getImsModule().getSipManager()
                     .sendSipMessage(resp);
-
             /* Create the MSRP server session */
             if (localSetup.equals("passive")) {
                 /* Passive mode: client wait a connection */
@@ -313,10 +288,8 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession {
                  */
                 sendEmptyDataChunk();
             }
-
             /* wait a response */
             getImsService().getImsModule().getSipManager().waitResponse(ctx);
-
             /* Test if the session should be interrupted */
             if (isInterrupted()) {
                 if (logActivated) {
@@ -324,7 +297,6 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession {
                 }
                 return;
             }
-
             /* Analyze the received response */
             if (ctx.isSipAck()) {
                 if (logActivated) {
@@ -393,8 +365,7 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession {
         final boolean logActivated = sLogger.isActivated();
         ContactId remote = getRemoteContact();
         if (logActivated) {
-            sLogger.debug(new StringBuilder("Start OneToOneChatSession with '").append(remote)
-                    .append("'").toString());
+            sLogger.debug("Start OneToOneChatSession with '" + remote + "'");
         }
         InstantMessagingService imService = getImsService().getImsModule()
                 .getInstantMessagingService();
@@ -409,9 +380,8 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession {
                  * that was locally originated with the same contact.
                  */
                 if (logActivated) {
-                    sLogger.warn(new StringBuilder("Rejecting OneToOneChatSession (session id '")
-                            .append(getSessionID()).append("') with '").append(remote).append("'")
-                            .toString());
+                    sLogger.warn("Rejecting OneToOneChatSession (session id '" + getSessionID()
+                            + "') with '" + remote + "'");
                 }
                 rejectSession();
                 return;
@@ -422,10 +392,8 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession {
              * CURRENT rcs chat session if there is one and replace it with the new one.
              */
             if (logActivated) {
-                sLogger.warn(new StringBuilder(
-                        "Rejecting/Aborting existing OneToOneChatSession (session id '")
-                        .append(getSessionID()).append("') with '").append(remote).append("'")
-                        .toString());
+                sLogger.warn("Rejecting/Aborting existing OneToOneChatSession (session id '"
+                        + getSessionID() + "') with '" + remote + "'");
             }
             if (currentSessionInitiatedByRemote) {
                 if (currentSessionEstablished) {

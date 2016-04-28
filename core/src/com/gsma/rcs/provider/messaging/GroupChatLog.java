@@ -54,15 +54,13 @@ public class GroupChatLog implements IGroupChatLog {
 
     private final LocalContentResolver mLocalContentResolver;
 
-    private final static String SELECT_CHAT_ID_STATUS_REJECTED = new StringBuilder(
-            GroupChatData.KEY_STATE).append("=").append(State.ABORTED.toInt()).append(" AND ")
-            .append(GroupChatData.KEY_REASON_CODE).append("=")
-            .append(ReasonCode.ABORTED_BY_USER.toInt()).append(" AND ")
-            .append(GroupChatData.KEY_USER_ABORTION).append("=")
-            .append(UserAbortion.SERVER_NOT_NOTIFIED.toInt()).toString();
+    private final static String SELECT_CHAT_ID_STATUS_REJECTED = GroupChatData.KEY_STATE + "="
+            + State.ABORTED.toInt() + " AND " + GroupChatData.KEY_REASON_CODE + "="
+            + ReasonCode.ABORTED_BY_USER.toInt() + " AND " + GroupChatData.KEY_USER_ABORTION + "="
+            + UserAbortion.SERVER_NOT_NOTIFIED.toInt();
 
-    private static final String SELECT_ACTIVE_GROUP_CHATS = new StringBuilder(
-            GroupChatData.KEY_STATE).append("=").append(State.STARTED.toInt()).toString();
+    private static final String SELECT_ACTIVE_GROUP_CHATS = GroupChatData.KEY_STATE + "="
+            + State.STARTED.toInt();
 
     // @formatter:off
     private static final String[] PROJECTION_GC_INFO = new String[] {
@@ -82,20 +80,20 @@ public class GroupChatLog implements IGroupChatLog {
 
     private static final int FIRST_COLUMN_IDX = 0;
 
-    private static enum UserAbortion {
+    private enum UserAbortion {
 
         SERVER_NOTIFIED(0), SERVER_NOT_NOTIFIED(1);
 
         private final int mValue;
 
-        private static SparseArray<UserAbortion> mValueToEnum = new SparseArray<UserAbortion>();
+        private static SparseArray<UserAbortion> mValueToEnum = new SparseArray<>();
         static {
             for (UserAbortion entry : UserAbortion.values()) {
                 mValueToEnum.put(entry.toInt(), entry);
             }
         }
 
-        private UserAbortion(int value) {
+        UserAbortion(int value) {
             mValue = value;
         }
 
@@ -142,7 +140,7 @@ public class GroupChatLog implements IGroupChatLog {
     private Map<ContactId, ParticipantStatus> parseEncodedParticipantInfos(String participants) {
         String[] encodedParticipantInfos = participants
                 .split(PARTICIPANT_INFO_PARTICIPANT_SEPARATOR);
-        Map<ContactId, ParticipantStatus> participantInfos = new HashMap<ContactId, ParticipantStatus>();
+        Map<ContactId, ParticipantStatus> participantInfos = new HashMap<>();
         for (String encodedParticipantInfo : encodedParticipantInfos) {
             String[] participantInfo = encodedParticipantInfo
                     .split(PARTICIPANT_INFO_STATUS_SEPARATOR);
@@ -160,11 +158,9 @@ public class GroupChatLog implements IGroupChatLog {
             Direction direction, long timestamp) {
         String encodedParticipants = generateEncodedParticipantInfos(participants);
         if (sLogger.isActivated()) {
-            sLogger.debug(new StringBuilder("addGroupChat; chatID=").append(chatId)
-                    .append(", subject=").append(subject).append(", state=").append(state)
-                    .append(" reasonCode=").append(reasonCode).append(", direction=")
-                    .append(direction).append(", timestamp=").append(timestamp)
-                    .append(", participants=").append(encodedParticipants).toString());
+            sLogger.debug("addGroupChat; chatID=" + chatId + ", subject=" + subject + ", state="
+                    + state + " reasonCode=" + reasonCode + ", direction=" + direction
+                    + ", timestamp=" + timestamp + ", participants=" + encodedParticipants);
         }
         ContentValues values = new ContentValues();
         values.put(GroupChatData.KEY_CHAT_ID, chatId);
@@ -294,7 +290,7 @@ public class GroupChatLog implements IGroupChatLog {
         if (participants == null) {
             return null;
         }
-        Map<ContactId, ParticipantStatus> matchingParticipants = new HashMap<ContactId, ParticipantStatus>();
+        Map<ContactId, ParticipantStatus> matchingParticipants = new HashMap<>();
         for (Map.Entry<ContactId, ParticipantStatus> participant : participants.entrySet()) {
             ParticipantStatus status = participant.getValue();
             if (statuses.contains(status)) {
@@ -386,7 +382,7 @@ public class GroupChatLog implements IGroupChatLog {
             cursor = mLocalContentResolver.query(GroupChatData.CONTENT_URI, PROJECTION_GC_CHAT_ID,
                     SELECT_ACTIVE_GROUP_CHATS, null, null);
             CursorUtil.assertCursorIsNotNull(cursor, GroupChatData.CONTENT_URI);
-            Set<String> activeGroupChats = new HashSet<String>();
+            Set<String> activeGroupChats = new HashSet<>();
             while (cursor.moveToNext()) {
                 String chatId = cursor.getString(FIRST_COLUMN_IDX);
                 activeGroupChats.add(chatId);

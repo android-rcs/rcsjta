@@ -47,14 +47,13 @@ public class DownloadFromAcceptFileSharingSession extends TerminatingHttpFileSha
      * @param imService InstantMessagingService
      * @param content the content to be transferred
      * @param resume the Data Object to access FT HTTP table in DB
-     * @param rcsSettings
-     * @param messagingLog
-     * @param contactManager
+     * @param rcsSettings the RCS settings accessor
+     * @param messagingLog the messaging log accessor
+     * @param contactManager the contact manager
      */
     public DownloadFromAcceptFileSharingSession(InstantMessagingService imService,
             MmContent content, FtHttpResumeDownload resume, RcsSettings rcsSettings,
             MessagingLog messagingLog, ContactManager contactManager) {
-
         // @formatter:off
         super(imService,
                 content,
@@ -82,15 +81,14 @@ public class DownloadFromAcceptFileSharingSession extends TerminatingHttpFileSha
         }
         try {
             onHttpTransferStarted();
+
         } catch (RuntimeException e) {
             /*
              * Intentionally catch runtime exceptions as else it will abruptly end the thread and
              * eventually bring the whole system down, which is not intended.
              */
-            sLogger.error(
-                    new StringBuilder("Download failed for a file sessionId : ")
-                            .append(getSessionID()).append(" with transferId : ")
-                            .append(getFileTransferId()).toString(), e);
+            sLogger.error("Download failed for a file sessionId : " + getSessionID()
+                    + " with transferId : " + getFileTransferId(), e);
             handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED, e));
             return;
         }

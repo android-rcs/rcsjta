@@ -22,12 +22,11 @@
 
 package com.gsma.rcs.provider.messaging;
 
+import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsService.ReadStatus;
 import com.gsma.services.rcs.filetransfer.FileTransferLog;
 
 import android.net.Uri;
-
-import com.gsma.services.rcs.RcsService.Direction;
 
 /**
  * File transfer data constants
@@ -180,8 +179,8 @@ public class FileTransferData {
     /* package private */static final String KEY_DOWNLOAD_URI = "download_uri";
 
     /**
-     * The remote SIP instance ID to fill the accept contact header of the SIP delivery
-     * notification (hidden field from client applications).<br>
+     * The remote SIP instance ID to fill the accept contact header of the SIP delivery notification
+     * (hidden field from client applications).<br>
      * Only application for incoming HTTP file transfers.
      */
     /* package private */static final String KEY_REMOTE_SIP_ID = "remote_sip_id";

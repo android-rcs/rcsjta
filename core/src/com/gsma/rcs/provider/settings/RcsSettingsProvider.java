@@ -34,6 +34,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 import java.util.ArrayList;
@@ -44,6 +45,7 @@ import java.util.ArrayList;
  * @author jexa7410
  * @author yplo6403
  */
+@SuppressWarnings("ConstantConditions")
 public class RcsSettingsProvider extends ContentProvider {
 
     private static final String TABLE = "setting";
@@ -496,7 +498,7 @@ public class RcsSettingsProvider extends ContentProvider {
     }
 
     @Override
-    public String getType(Uri uri) {
+    public String getType(@NonNull Uri uri) {
         switch (sUriMatcher.match(uri)) {
             case UriType.SETTINGS:
                 return CursorType.TYPE_DIRECTORY;
@@ -510,8 +512,8 @@ public class RcsSettingsProvider extends ContentProvider {
     }
 
     @Override
-    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
-            String sort) {
+    public Cursor query(@NonNull Uri uri, String[] projection, String selection,
+            String[] selectionArgs, String sort) {
         Cursor cursor = null;
         try {
             switch (sUriMatcher.match(uri)) {
@@ -546,7 +548,8 @@ public class RcsSettingsProvider extends ContentProvider {
     }
 
     @Override
-    public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+    public int update(@NonNull Uri uri, ContentValues values, String selection,
+            String[] selectionArgs) {
         switch (sUriMatcher.match(uri)) {
             case UriType.SETTINGS_WITH_KEY:
                 String key = uri.getLastPathSegment();
@@ -568,12 +571,12 @@ public class RcsSettingsProvider extends ContentProvider {
     }
 
     @Override
-    public Uri insert(Uri uri, ContentValues initialValues) {
+    public Uri insert(@NonNull Uri uri, ContentValues initialValues) {
         throw new UnsupportedOperationException("Cannot insert URI " + uri + "!");
     }
 
     @Override
-    public int delete(Uri uri, String where, String[] whereArgs) {
+    public int delete(@NonNull Uri uri, String where, String[] whereArgs) {
         throw new UnsupportedOperationException("Cannot delete URI " + uri + "!");
     }
 }

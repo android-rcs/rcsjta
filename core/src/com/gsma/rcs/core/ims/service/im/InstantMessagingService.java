@@ -405,9 +405,6 @@ public class InstantMessagingService extends ImsService {
     }
 
     public OneToOneChatSession getOneToOneChatSession(ContactId contact) {
-        if (sLogger.isActivated()) {
-            sLogger.debug("Get OneToOneChatSession with contact '" + contact + "'");
-        }
         synchronized (getImsServiceSessionOperationLock()) {
             return mOneToOneChatSessionCache.get(contact);
         }
@@ -437,9 +434,6 @@ public class InstantMessagingService extends ImsService {
 
     public TerminatingStoreAndForwardOneToOneChatMessageSession getStoreAndForwardMsgSession(
             ContactId contact) {
-        if (sLogger.isActivated()) {
-            sLogger.debug("Get StoreAndForwardMsgSession with contact '" + contact + "'");
-        }
         synchronized (getImsServiceSessionOperationLock()) {
             return mStoreAndForwardMsgSessionCache.get(contact);
         }
@@ -495,9 +489,6 @@ public class InstantMessagingService extends ImsService {
     }
 
     public GroupChatSession getGroupChatSession(String chatId) {
-        if (sLogger.isActivated()) {
-            sLogger.debug("Get GroupChatSession with chatId '" + chatId + "'");
-        }
         synchronized (getImsServiceSessionOperationLock()) {
             return mGroupChatSessionCache.get(chatId);
         }
@@ -522,9 +513,6 @@ public class InstantMessagingService extends ImsService {
     }
 
     public GroupChatSession getGroupChatSessionOfConferenceSubscriber(String callId) {
-        if (sLogger.isActivated()) {
-            sLogger.debug("Get GroupChatSession with ConferenceSunscriber '" + callId + "'");
-        }
         synchronized (getImsServiceSessionOperationLock()) {
             return mGroupChatConferenceSubscriberCache.get(callId);
         }
@@ -595,9 +583,6 @@ public class InstantMessagingService extends ImsService {
     }
 
     public FileSharingSession getFileSharingSession(String fileTransferId) {
-        if (sLogger.isActivated()) {
-            sLogger.debug("Get FileSharingSession with fileTransfer ID '" + fileTransferId + "'");
-        }
         synchronized (getImsServiceSessionOperationLock()) {
             return mFileTransferSessionCache.get(fileTransferId);
         }
@@ -624,9 +609,6 @@ public class InstantMessagingService extends ImsService {
     }
 
     public FileUploadSession getFileUploadSession(String uploadId) {
-        if (sLogger.isActivated()) {
-            sLogger.debug("Get FileUploadSession with upload ID '" + uploadId + "'");
-        }
         synchronized (getImsServiceSessionOperationLock()) {
             return mFileUploadSessionCache.get(uploadId);
         }
@@ -953,7 +935,6 @@ public class InstantMessagingService extends ImsService {
                                 return;
                         }
                     }
-
                     String referredId = ChatUtils.getReferredIdentityAsContactUri(invite);
                     ContactId remote = ChatUtils.getReferredIdentityAsContactId(invite);
                     String displayName = SipUtils.getDisplayNameFromUri(invite.getFrom());
@@ -1004,7 +985,7 @@ public class InstantMessagingService extends ImsService {
                                 }
                                 mImdnManager.sendMessageDeliveryStatusImmediately(
                                         remote.toString(), remote, msgId,
-                                        ImdnDocument.DELIVERY_STATUS_DELIVERED, remoteInstanceId,
+                                        ImdnDocument.DeliveryStatus.DELIVERED, remoteInstanceId,
                                         timestamp);
                             }
                         }
@@ -1636,7 +1617,6 @@ public class InstantMessagingService extends ImsService {
                         }
                         return;
                     }
-
                     DownloadFromInviteFileSharingSession fileSharingSession = new DownloadFromInviteFileSharingSession(
                             imService, oneToOneChatSession, ftinfo, fileTransferId,
                             oneToOneChatSession.getRemoteContact(),
@@ -1781,7 +1761,6 @@ public class InstantMessagingService extends ImsService {
                         }
                         return;
                     }
-
                     if (isFileSizeExceeded(ftinfo.getSize())) {
                         if (logActivated) {
                             sLogger.debug("File is too big, reject file transfer invitation from "
@@ -1796,7 +1775,6 @@ public class InstantMessagingService extends ImsService {
                                 FileSharingError.MEDIA_SIZE_TOO_BIG));
                         return;
                     }
-
                     DownloadFromInviteFileSharingSession filetransferSession = new DownloadFromInviteFileSharingSession(
                             imService, oneToOneChatSession, ftinfo, fileTransferId,
                             oneToOneChatSession.getRemoteContact(),

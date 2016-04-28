@@ -34,8 +34,8 @@ public class GroupChatDeleteTask extends DeleteTask.NotGrouped {
 
     private static final Logger sLogger = Logger.getLogger(GroupChatDeleteTask.class.getName());
 
-    private static final String SELECTION_GROUPDELIVERY_BY_CHATID = new StringBuilder(
-            GroupDeliveryInfoData.KEY_CHAT_ID).append("=?").toString();
+    private static final String SELECTION_GROUPDELIVERY_BY_CHATID = GroupDeliveryInfoData.KEY_CHAT_ID
+            + "=?";
 
     private final ChatServiceImpl mChatService;
 
@@ -47,7 +47,6 @@ public class GroupChatDeleteTask extends DeleteTask.NotGrouped {
      * @param chatService the chat service impl
      * @param imService the IM service
      * @param contentResolver the content resolver
-     * @param imsLock the ims operation lock
      */
     public GroupChatDeleteTask(ChatServiceImpl chatService, InstantMessagingService imService,
             LocalContentResolver contentResolver) {
@@ -62,13 +61,11 @@ public class GroupChatDeleteTask extends DeleteTask.NotGrouped {
      * @param chatService the chat service impl
      * @param imService the IM service
      * @param contentResolver the content resolver
-     * @param imsLock the ims operation lock
      * @param chatId the group chat id
      */
     public GroupChatDeleteTask(ChatServiceImpl chatService, InstantMessagingService imService,
             LocalContentResolver contentResolver, String chatId) {
-        super(contentResolver, GroupChatData.CONTENT_URI, GroupChatData.KEY_CHAT_ID, null,
-                chatId);
+        super(contentResolver, GroupChatData.CONTENT_URI, GroupChatData.KEY_CHAT_ID, null, chatId);
         mChatService = chatService;
         mImService = imService;
     }

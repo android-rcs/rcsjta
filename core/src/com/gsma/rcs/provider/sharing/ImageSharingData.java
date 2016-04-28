@@ -22,6 +22,7 @@
 
 package com.gsma.rcs.provider.sharing;
 
+import com.gsma.services.rcs.RcsService;
 import com.gsma.services.rcs.sharing.image.ImageSharing;
 import com.gsma.services.rcs.sharing.image.ImageSharingLog;
 
@@ -105,7 +106,7 @@ public class ImageSharingData {
     /**
      * Incoming sharing or outgoing sharing.
      * 
-     * @see Direction
+     * @see RcsService.Direction
      */
     /* package private */static final String KEY_DIRECTION = ImageSharingLog.DIRECTION;
 }

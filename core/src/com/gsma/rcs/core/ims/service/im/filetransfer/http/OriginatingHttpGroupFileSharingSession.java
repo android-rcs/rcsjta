@@ -88,7 +88,7 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
                 FileTransferData.UNKNOWN_EXPIRATION, 
                 FileTransferData.UNKNOWN_EXPIRATION,
                 contactManager);
-        // @formatter:ofn
+        // @formatter:on
         mUploadManager = new HttpUploadManager(getContent(), fileIcon, this, tId, rcsSettings);
     }
 
@@ -108,28 +108,13 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
             if (mUploadManager.isCancelled() || mUploadManager.isPaused()) {
                 return;
             }
-            sLogger.error(
-                    new StringBuilder("Failed to initiate file transfer session for sessionId : ")
-                             .append(getSessionID()).append(" with fileTransferId : ")
-                           .append(getFileTransferId()).toString(), e);
+            sLogger.error("Failed to initiate file transfer session for sessionId : "
+                    + getSessionID() + " with fileTransferId : " + getFileTransferId(), e);
             handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
 
-        } catch (PayloadException e) {
-            sLogger.error(
-                    new StringBuilder("Failed to initiate file transfer session for sessionId : ")
-                             .append(getSessionID()).append(" with fileTransferId : ")
-                           .append(getFileTransferId()).toString(), e);
-            handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
-
-        } catch (RuntimeException e) {
-            /*
-             * Intentionally catch runtime exceptions as else it will abruptly end the thread and
-             * eventually bring the whole system down, which is not intended.
-             */
-            sLogger.error(
-                    new StringBuilder("Failed to initiate file transfer session for sessionId : ")
-                             .append(getSessionID()).append(" with fileTransferId : ")
-                           .append(getFileTransferId()).toString(), e);
+        } catch (PayloadException | RuntimeException e) {
+            sLogger.error("Failed to initiate file transfer session for sessionId : "
+                    + getSessionID() + " with fileTransferId : " + getFileTransferId(), e);
             handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
         }
     }
@@ -147,7 +132,8 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
      * @throws PayloadException
      * @throws NetworkException
      */
-    protected void processHttpUploadResponse(byte[] response) throws PayloadException, NetworkException {
+    protected void processHttpUploadResponse(byte[] response) throws PayloadException,
+            NetworkException {
         if (mUploadManager.isCancelled()) {
             return;
         }
@@ -177,10 +163,8 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
                      * Intentionally catch runtime exceptions as else it will abruptly end the
                      * thread and eventually bring the whole system down, which is not intended.
                      */
-                    sLogger.error(
-                            new StringBuilder("Failed to pause upload for sessionId : ")
-                                     .append(getSessionID()).append(" with fileTransferId : ")
-                                    .append(getFileTransferId()).toString(), e);
+                    sLogger.error("Failed to pause upload for sessionId : " + getSessionID()
+                            + " with fileTransferId : " + getFileTransferId(), e);
                     handleError(new FileSharingError(FileSharingError.MEDIA_UPLOAD_FAILED, e));
                 }
             }
@@ -200,26 +184,12 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
                     } else {
                         processHttpUploadResponse(null);
                     }
-
                 } catch (NetworkException e) {
                     handleError(new FileSharingError(FileSharingError.MEDIA_UPLOAD_FAILED, e));
 
-                } catch (IOException | PayloadException e) {
-                    sLogger.error(
-                            new StringBuilder("Failed to resume upload for sessionId : ")
-                                     .append(getSessionID()).append(" with fileTransferId : ")
-                                    .append(getFileTransferId()).toString(), e);
-                    handleError(new FileSharingError(FileSharingError.MEDIA_UPLOAD_FAILED, e));
-
-                } catch (RuntimeException e) {
-                    /*
-                     * Intentionally catch runtime exceptions as else it will abruptly end the
-                     * thread and eventually bring the whole system down, which is not intended.
-                     */
-                    sLogger.error(
-                            new StringBuilder("Failed to resume upload for sessionId : ")
-                                     .append(getSessionID()).append(" with fileTransferId : ")
-                                    .append(getFileTransferId()).toString(), e);
+                } catch (IOException | PayloadException | RuntimeException e) {
+                    sLogger.error("Failed to resume upload for sessionId : " + getSessionID()
+                            + " with fileTransferId : " + getFileTransferId(), e);
                     handleError(new FileSharingError(FileSharingError.MEDIA_UPLOAD_FAILED, e));
                 }
             }
@@ -234,15 +204,6 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
     @Override
     public boolean isInitiatedByRemote() {
         return false;
-    }
-
-    /**
-     * Sets the timestamp when file icon on the content server is no longer valid to download.
-     * 
-     * @param timestamp The timestamp
-     */
-    public void setIconExpiration(long timestamp) {
-        mIconExpiration = timestamp;
     }
 
     /**

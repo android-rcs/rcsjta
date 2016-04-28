@@ -41,29 +41,28 @@ public interface GroupChatSessionListener extends ChatSessionListener {
      * @param status ParticipantStatus for the contact
      * @param timestamp Local timestamp when got notification
      */
-    public void onConferenceEventReceived(ContactId contact, ParticipantStatus status,
-            long timestamp);
+    void onConferenceEventReceived(ContactId contact, ParticipantStatus status, long timestamp);
 
     /**
      * A session invitation has been received
      * 
      * @param contact Remote contact
-     * @param subject
+     * @param subject the subject
      * @param participants Participants
      * @param timestamp Local timestamp when got invitation
      */
-    public void onSessionInvited(ContactId contact, String subject,
+    void onSessionInvited(ContactId contact, String subject,
             Map<ContactId, GroupChat.ParticipantStatus> participants, long timestamp);
 
     /**
      * Chat is auto-accepted and the session is in the process of being started
      * 
      * @param contact Remote contact
-     * @param subject
+     * @param subject the subject
      * @param participants Participants
      * @param timestamp Local timestamp when got invitation
      */
-    public void onSessionAutoAccepted(ContactId contact, String subject,
+    void onSessionAutoAccepted(ContactId contact, String subject,
             Map<ContactId, GroupChat.ParticipantStatus> participants, long timestamp);
 
     /**
@@ -72,23 +71,22 @@ public interface GroupChatSessionListener extends ChatSessionListener {
      * @param updatedParticipants Updated participants
      * @param allParticipants All group participants
      */
-    public void onParticipantsUpdated(Map<ContactId, ParticipantStatus> updatedParticipants,
+    void onParticipantsUpdated(Map<ContactId, ParticipantStatus> updatedParticipants,
             Map<ContactId, ParticipantStatus> allParticipants);
 
     /**
      * Handle Delivery report send via MSRP Failure
      * 
-     * @param msgId
-     * @param chatId
-     * @param chunktype
+     * @param msgId the message ID
+     * @param chatId the chat ID
+     * @param chunktype the chunk type
      */
-    public void onDeliveryReportSendViaMsrpFailure(String msgId, String chatId,
-            TypeMsrpChunk chunktype);
+    void onDeliveryReportSendViaMsrpFailure(String msgId, String chatId, TypeMsrpChunk chunktype);
 
     /**
      * Handle IM error
      * 
      * @param error Error
      */
-    public void onImError(ChatError error);
+    void onImError(ChatError error);
 }

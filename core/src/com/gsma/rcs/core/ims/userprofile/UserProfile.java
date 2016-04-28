@@ -71,7 +71,7 @@ public class UserProfile {
     /**
      * XDM server address
      */
-    private Uri mXdmServerAddr;
+    private final Uri mXdmServerAddr;
 
     /**
      * XDM server login
@@ -81,7 +81,7 @@ public class UserProfile {
     /**
      * XDM server password
      */
-    private String mXdmServerPassword;
+    private final String mXdmServerPassword;
 
     /**
      * IM conference URI
@@ -106,8 +106,7 @@ public class UserProfile {
      * @param xdmServerAddr XDM server address
      * @param xdmServerLogin Outbound proxy address
      * @param xdmServerPassword Outbound proxy address
-     * @param imConferenceUri IM conference factory URI
-     * @param rcsSettings
+     * @param rcsSettings the RCS settings accessor
      */
     public UserProfile(ContactId contact, String homeDomain, String privateID, String password,
             String realm, Uri xdmServerAddr, String xdmServerLogin, String xdmServerPassword,
@@ -166,13 +165,11 @@ public class UserProfile {
     }
 
     private String formatAddressWithDisplayName(String displayName, String address) {
-        return new StringBuilder("\"").append(displayName).append("\" <").append(address)
-                .append(">").toString();
+        return "\"" + displayName + "\" <" + address + ">";
     }
 
     private String formatAddressWithDisplayName(String displayName, ContactId contact) {
-        return new StringBuilder("\"").append(displayName).append("\" <")
-                .append(PhoneUtils.formatContactIdToUri(contact)).append(">").toString();
+        return "\"" + displayName + "\" <" + PhoneUtils.formatContactIdToUri(contact) + ">";
     }
 
     /**
@@ -207,7 +204,6 @@ public class UserProfile {
         if (uris == null) {
             return;
         }
-
         String sipUri = null;
         String telUri = null;
         while (uris.hasNext()) {
@@ -221,7 +217,6 @@ public class UserProfile {
                 telUri = value;
             }
         }
-
         if ((sipUri != null) && (telUri != null)) {
             mPreferred = Uri.parse(telUri);
         } else if (telUri != null) {
@@ -277,15 +272,6 @@ public class UserProfile {
     }
 
     /**
-     * Set the XDM server address
-     * 
-     * @param addr Server address
-     */
-    public void setXdmServerAddr(Uri addr) {
-        mXdmServerAddr = addr;
-    }
-
-    /**
      * Returns the XDM server address
      * 
      * @return Server address
@@ -313,15 +299,6 @@ public class UserProfile {
     }
 
     /**
-     * Set the XDM server password
-     * 
-     * @param pwd Password
-     */
-    public void setXdmServerPassword(String pwd) {
-        mXdmServerPassword = pwd;
-    }
-
-    /**
      * Returns the XDM server password
      * 
      * @return Password
@@ -345,12 +322,10 @@ public class UserProfile {
      * @return String
      */
     public String toString() {
-        return new StringBuilder("IMS username=").append(mContact).append(", ")
-                .append("IMS private ID=").append(mPrivateID).append(", ").append("IMS password=")
-                .append(mPassword).append(", ").append("IMS home domain=").append(mHomeDomain)
-                .append(", ").append("XDM server=").append(mXdmServerAddr).append(", ")
-                .append("XDM login=").append(mXdmServerLogin).append(", ").append("XDM password=")
-                .append(mXdmServerPassword).append(", ").append("IM Conference URI=")
-                .append(mImConference).toString();
+        return "IMS username=" + mContact + ", " + "IMS private ID=" + mPrivateID + ", "
+                + "IMS password=" + mPassword + ", " + "IMS home domain=" + mHomeDomain + ", "
+                + "XDM server=" + mXdmServerAddr + ", " + "XDM login=" + mXdmServerLogin + ", "
+                + "XDM password=" + mXdmServerPassword + ", " + "IM Conference URI="
+                + mImConference;
     }
 }

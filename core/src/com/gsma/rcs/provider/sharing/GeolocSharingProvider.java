@@ -32,8 +32,10 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
+@SuppressWarnings("ConstantConditions")
 public class GeolocSharingProvider extends ContentProvider {
 
     private static final int INVALID_ROW_ID = -1;
@@ -98,26 +100,24 @@ public class GeolocSharingProvider extends ContentProvider {
 
         @Override
         public void onCreate(SQLiteDatabase db) {
-            db.execSQL(new StringBuilder("CREATE TABLE IF NOT EXISTS ").append(TABLE).append(" (")
-                    .append(GeolocSharingData.KEY_SHARING_ID).append(" TEXT NOT NULL PRIMARY KEY,")
-                    .append(GeolocSharingData.KEY_BASECOLUMN_ID).append(" INTEGER NOT NULL,")
-                    .append(GeolocSharingData.KEY_CONTACT).append(" TEXT NOT NULL,")
-                    .append(GeolocSharingData.KEY_CONTENT).append(" TEXT,")
-                    .append(GeolocSharingData.KEY_MIME_TYPE).append(" TEXT NOT NULL,")
-                    .append(GeolocSharingData.KEY_DIRECTION).append(" INTEGER NOT NULL,")
-                    .append(GeolocSharingData.KEY_STATE).append(" INTEGER NOT NULL,")
-                    .append(GeolocSharingData.KEY_REASON_CODE).append(" INTEGER NOT NULL,")
-                    .append(GeolocSharingData.KEY_TIMESTAMP).append(" INTEGER NOT NULL)")
-                    .toString());
-            db.execSQL(new StringBuilder("CREATE INDEX ")
-                    .append(GeolocSharingData.KEY_BASECOLUMN_ID).append("_idx ON ").append(TABLE)
-                    .append('(').append(GeolocSharingData.KEY_BASECOLUMN_ID).append(')').toString());
-            db.execSQL(new StringBuilder("CREATE INDEX ").append(GeolocSharingData.KEY_CONTACT)
-                    .append("_idx ON ").append(TABLE).append('(')
-                    .append(GeolocSharingData.KEY_CONTACT).append(')').toString());
-            db.execSQL(new StringBuilder("CREATE INDEX ").append(GeolocSharingData.KEY_TIMESTAMP)
-                    .append("_idx ON ").append(TABLE).append('(')
-                    .append(GeolocSharingData.KEY_TIMESTAMP).append(')').toString());
+            // @formatter:off
+            db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE + " ("
+                    + GeolocSharingData.KEY_SHARING_ID + " TEXT NOT NULL PRIMARY KEY,"
+                    + GeolocSharingData.KEY_BASECOLUMN_ID + " INTEGER NOT NULL,"
+                    + GeolocSharingData.KEY_CONTACT + " TEXT NOT NULL,"
+                    + GeolocSharingData.KEY_CONTENT + " TEXT," 
+                    + GeolocSharingData.KEY_MIME_TYPE + " TEXT NOT NULL," 
+                    + GeolocSharingData.KEY_DIRECTION + " INTEGER NOT NULL,"
+                    + GeolocSharingData.KEY_STATE + " INTEGER NOT NULL,"
+                    + GeolocSharingData.KEY_REASON_CODE + " INTEGER NOT NULL,"
+                    + GeolocSharingData.KEY_TIMESTAMP + " INTEGER NOT NULL)");
+            // @formatter:on
+            db.execSQL("CREATE INDEX " + GeolocSharingData.KEY_BASECOLUMN_ID + "_idx ON " + TABLE
+                    + '(' + GeolocSharingData.KEY_BASECOLUMN_ID + ')');
+            db.execSQL("CREATE INDEX " + GeolocSharingData.KEY_CONTACT + "_idx ON " + TABLE + '('
+                    + GeolocSharingData.KEY_CONTACT + ')');
+            db.execSQL("CREATE INDEX " + GeolocSharingData.KEY_TIMESTAMP + "_idx ON " + TABLE + '('
+                    + GeolocSharingData.KEY_TIMESTAMP + ')');
         }
 
         @Override
@@ -133,8 +133,7 @@ public class GeolocSharingProvider extends ContentProvider {
         if (TextUtils.isEmpty(selection)) {
             return SELECTION_WITH_SHARING_ID_ONLY;
         }
-        return new StringBuilder("(").append(SELECTION_WITH_SHARING_ID_ONLY).append(") AND (")
-                .append(selection).append(')').toString();
+        return "(" + SELECTION_WITH_SHARING_ID_ONLY + ") AND (" + selection + ')';
     }
 
     private String[] getSelectionArgsWithSharingId(String[] selectionArgs, String sharingId) {
@@ -154,7 +153,7 @@ public class GeolocSharingProvider extends ContentProvider {
     }
 
     @Override
-    public String getType(Uri uri) {
+    public String getType(@NonNull Uri uri) {
         switch (sUriMatcher.match(uri)) {
             case UriType.InternalGeolocSharing.BASE:
                 /* Intentional fall through */
@@ -167,14 +166,13 @@ public class GeolocSharingProvider extends ContentProvider {
                 return CursorType.TYPE_ITEM;
 
             default:
-                throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
-                        .append(uri).append("!").toString());
+                throw new IllegalArgumentException("Unsupported URI " + uri + "!");
         }
     }
 
     @Override
-    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
-            String sort) {
+    public Cursor query(@NonNull Uri uri, String[] projection, String selection,
+            String[] selectionArgs, String sort) {
         Cursor cursor = null;
         try {
             switch (sUriMatcher.match(uri)) {
@@ -214,8 +212,7 @@ public class GeolocSharingProvider extends ContentProvider {
                     return cursor;
 
                 default:
-                    throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
-                            .append(uri).append("!").toString());
+                    throw new IllegalArgumentException("Unsupported URI " + uri + "!");
             }
         }
         /*
@@ -231,7 +228,8 @@ public class GeolocSharingProvider extends ContentProvider {
     }
 
     @Override
-    public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+    public int update(@NonNull Uri uri, ContentValues values, String selection,
+            String[] selectionArgs) {
         Uri notificationUri = GeolocSharingLog.CONTENT_URI;
         switch (sUriMatcher.match(uri)) {
             case UriType.InternalGeolocSharing.WITH_SHARING_ID:
@@ -254,17 +252,16 @@ public class GeolocSharingProvider extends ContentProvider {
             case UriType.GeolocSharing.WITH_SHARING_ID:
                 /* Intentional fall through */
             case UriType.GeolocSharing.BASE:
-                throw new UnsupportedOperationException(new StringBuilder("This provider (URI=")
-                        .append(uri).append(") supports read only access!").toString());
+                throw new UnsupportedOperationException("This provider (URI=" + uri
+                        + ") supports read only access!");
 
             default:
-                throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
-                        .append(uri).append("!").toString());
+                throw new IllegalArgumentException("Unsupported URI " + uri + "!");
         }
     }
 
     @Override
-    public Uri insert(Uri uri, ContentValues initialValues) {
+    public Uri insert(@NonNull Uri uri, ContentValues initialValues) {
         switch (sUriMatcher.match(uri)) {
             case UriType.InternalGeolocSharing.WITH_SHARING_ID:
                 /* Intentional fall through */
@@ -274,9 +271,8 @@ public class GeolocSharingProvider extends ContentProvider {
                 initialValues.put(GeolocSharingData.KEY_BASECOLUMN_ID, HistoryMemberBaseIdCreator
                         .createUniqueId(getContext(), GeolocSharingData.HISTORYLOG_MEMBER_ID));
                 if (db.insert(TABLE, null, initialValues) == INVALID_ROW_ID) {
-                    throw new ServerApiPersistentStorageException(new StringBuilder(
-                            "Unable to insert row for URI ").append(uri.toString()).append('!')
-                            .toString());
+                    throw new ServerApiPersistentStorageException("Unable to insert row for URI "
+                            + uri.toString() + '!');
                 }
                 Uri notificationUri = GeolocSharingLog.CONTENT_URI.buildUpon()
                         .appendPath(sharingId).build();
@@ -288,17 +284,16 @@ public class GeolocSharingProvider extends ContentProvider {
             case UriType.GeolocSharing.WITH_SHARING_ID:
                 /* Intentional fall through */
             case UriType.GeolocSharing.BASE:
-                throw new UnsupportedOperationException(new StringBuilder("This provider (URI=")
-                        .append(uri).append(") supports read only access!").toString());
+                throw new UnsupportedOperationException("This provider (URI=" + uri
+                        + ") supports read only access!");
 
             default:
-                throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
-                        .append(uri).append("!").toString());
+                throw new IllegalArgumentException("Unsupported URI " + uri + "!");
         }
     }
 
     @Override
-    public int delete(Uri uri, String selection, String[] selectionArgs) {
+    public int delete(@NonNull Uri uri, String selection, String[] selectionArgs) {
         Uri notificationUri = GeolocSharingLog.CONTENT_URI;
         switch (sUriMatcher.match(uri)) {
             case UriType.InternalGeolocSharing.WITH_SHARING_ID:
@@ -321,12 +316,11 @@ public class GeolocSharingProvider extends ContentProvider {
             case UriType.GeolocSharing.WITH_SHARING_ID:
                 /* Intentional fall through */
             case UriType.GeolocSharing.BASE:
-                throw new UnsupportedOperationException(new StringBuilder("This provider (URI=")
-                        .append(uri).append(") supports read only access!").toString());
+                throw new UnsupportedOperationException("This provider (URI=" + uri
+                        + ") supports read only access!");
 
             default:
-                throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
-                        .append(uri).append("!").toString());
+                throw new IllegalArgumentException("Unsupported URI " + uri + "!");
         }
     }
 

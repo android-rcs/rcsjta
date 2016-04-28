@@ -81,6 +81,7 @@ public interface IMessageLog {
      * 
      * @param chatId Chat ID
      * @param msg Chat message
+     * @param recipients the set of recipients
      * @param status Message status
      * @param reasonCode Status reason code
      */
@@ -102,7 +103,7 @@ public interface IMessageLog {
     /**
      * Update chat message read status
      * 
-     * @param msgId Message ID
+     * @param msgId message ID
      * @return the number of rows affected.
      */
     int markMessageAsRead(String msgId);
@@ -112,22 +113,12 @@ public interface IMessageLog {
      * Status.DELIVERED and Status.DISPLAYED. These states require timestamps and should be set
      * through setChatMessageStatusDelivered and setChatMessageStatusDisplayed respectively.
      * 
-     * @param msgId Message ID
+     * @param msgId message ID
      * @param status Message status (See restriction above)
      * @param reasonCode Message status reason code
      * @return True if an entry was updated, otherwise false
      */
     boolean setChatMessageStatusAndReasonCode(String msgId, Status status, ReasonCode reasonCode);
-
-    /**
-     * Set chat message timestamp and timestampSent
-     * 
-     * @param msgId Message ID
-     * @param timestamp New local timestamp
-     * @param timestampSent New timestamp sent in payload
-     * @return True if an entry was updated, otherwise false
-     */
-    boolean setChatMessageTimestamp(String msgId, long timestamp, long timestampSent);
 
     /**
      * Check if the message is already persisted in db
@@ -194,14 +185,6 @@ public interface IMessageLog {
     Cursor getChatMessageData(String msgId);
 
     /**
-     * Get chat message content
-     * 
-     * @param msgId message ID
-     * @return Content of chat message
-     */
-    String getChatMessageContent(String msgId);
-
-    /**
      * Get all one-to-one chat messages for specific contact that are in queued state in ascending
      * order of timestamp
      * 
@@ -209,13 +192,6 @@ public interface IMessageLog {
      * @return Cursor
      */
     Cursor getQueuedOneToOneChatMessages(ContactId contact);
-
-    /**
-     * Get all one-to-one chat messages that are in queued state in ascending order of timestamp
-     * 
-     * @return Cursor
-     */
-    Cursor getAllQueuedOneToOneChatMessages();
 
     /**
      * Gets group chat events per contacts for chat ID
@@ -236,7 +212,7 @@ public interface IMessageLog {
     /**
      * Set chat message delivered
      * 
-     * @param msgId Message ID
+     * @param msgId message ID
      * @param timestampDelivered Delivered time
      * @return True if an entry was updated, otherwise false
      */
@@ -245,7 +221,7 @@ public interface IMessageLog {
     /**
      * Set chat message displayed
      * 
-     * @param msgId Message ID
+     * @param msgId message ID
      * @param timestampDisplayed Displayed time
      * @return True if an entry was updated, otherwise false
      */
@@ -254,7 +230,7 @@ public interface IMessageLog {
     /**
      * Marks undelivered chat messages to indicate that messages have been processed.
      * 
-     * @param msgIds the message IDs
+     * @param msgIds List of message IDs
      */
     void clearMessageDeliveryExpiration(List<String> msgIds);
 
@@ -287,7 +263,7 @@ public interface IMessageLog {
     /**
      * Get chat id for chat message
      * 
-     * @param msgId Message ID
+     * @param msgId message ID
      * @return ChatId
      */
     String getMessageChatId(String msgId);
@@ -298,8 +274,8 @@ public interface IMessageLog {
      * @param msgId message ID
      * @param status Message status
      * @param reasonCode Message status reason code
-     * @param timestamp timestamp
-     * @param timestampSent timestamp sent
+     * @param timestamp New local timestamp
+     * @param timestampSent New timestamp sent in payload
      * @return boolean
      */
     boolean setChatMessageStatusAndTimestamp(String msgId, Status status, ReasonCode reasonCode,

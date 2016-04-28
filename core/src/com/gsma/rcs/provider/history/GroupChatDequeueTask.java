@@ -240,10 +240,8 @@ public class GroupChatDequeueTask extends DequeueTask {
              * failed to dequeue as FAILED.
              */
             mLogger.error(
-                    new StringBuilder(
-                            "Exception occurred while dequeueing group chat message and group file transfer with id '")
-                            .append(id).append("' and chatId '").append(mChatId).append("'")
-                            .toString(), e);
+                    "Exception occurred while dequeueing group chat message and group file transfer with id '"
+                            + id + "' and chatId '" + mChatId + "'", e);
             if (id == null) {
                 return;
             }

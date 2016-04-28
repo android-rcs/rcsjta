@@ -567,13 +567,13 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
                         + msgId);
             }
             session.sendMsrpMessageDeliveryStatus(remote, msgId,
-                    ImdnDocument.DELIVERY_STATUS_DISPLAYED, timestamp);
+                    ImdnDocument.DeliveryStatus.DISPLAYED, timestamp);
         } else {
             if (sLogger.isActivated()) {
                 sLogger.info("Use SIP message to send the delivery display status for " + msgId);
             }
             mImService.getImdnManager().sendMessageDeliveryStatus(remote.toString(), remote, msgId,
-                    ImdnDocument.DELIVERY_STATUS_DISPLAYED, timestamp);
+                    ImdnDocument.DeliveryStatus.DISPLAYED, timestamp);
         }
     }
 
@@ -1036,7 +1036,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
             /* Send the delivered notification by SIP */
             ContactId remote = getRemoteContact();
             mImService.getImdnManager().sendMessageDeliveryStatus(remote.toString(), remote, msgId,
-                    ImdnDocument.DELIVERY_STATUS_DELIVERED, System.currentTimeMillis());
+                    ImdnDocument.DeliveryStatus.DELIVERED, System.currentTimeMillis());
 
         } else if (TypeMsrpChunk.MessageDisplayedReport.equals(typeMsrpChunk)) {
             if (sLogger.isActivated()) {
@@ -1046,7 +1046,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
             /* Send the displayed notification by SIP */
             ContactId remote = getRemoteContact();
             mImService.getImdnManager().sendMessageDeliveryStatus(remote.toString(), remote, msgId,
-                    ImdnDocument.DELIVERY_STATUS_DISPLAYED, System.currentTimeMillis());
+                    ImdnDocument.DeliveryStatus.DISPLAYED, System.currentTimeMillis());
         }
     }
 
