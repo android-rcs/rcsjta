@@ -23,6 +23,7 @@ package com.gsma.rcs.im.filetransfer;
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
 import com.gsma.rcs.core.ParseFailureException;
+import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpThumbnail;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.FileTransferXmlParser;
@@ -52,37 +53,48 @@ public class FileTransferXmlParserTest extends AndroidTestCase {
             + "  <file-size>1234567890</file-size>" + "  <file-name>audio.mp4</file-name>"
             + "  <content-type>audio/mp4</content-type>"
             + "  <am:playing-length>1000</am:playing-length>" + "  <data url = \"" + sUri
-            + "\" until = \"1234\"/>" + "</file-info>" + "</file>";
+            + "\" until = \"2016-04-29T16:02:23.000Z\"/>" + "</file-info>" + "</file>";
 
     private static final String sXmlContentToParse2 = "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
             + "<file>" + "<file-info type=\"file\" file-disposition=\"attach\">"
             + "  <file-size>1234567890</file-size>" + "  <file-name>image.jpg</file-name>"
             + "  <content-type>image/jpeg</content-type>" + "  <data url = \"" + sUri
-            + "\" until = \"1234\"/>" + "</file-info>" + "</file>";
+            + "\" until = \"2016-04-29T16:02:23.000Z\"/>" + "</file-info>" + "</file>";
 
     private static final String sXmlContentToParse3 = "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
             + "<file>" + "<file-info type=\"thumbnail\">" + "  <file-size>12345</file-size>"
             + "  <content-type>image/png</content-type>" + "  <data url = \"" + sUriThumbnail
-            + "\" until = \"56789\"/>" + "</file-info>" + "</file>" + "<file>"
+            + "\" until = \"2016-04-29T16:02:23.000Z\"/>" + "</file-info>" + "</file>" + "<file>"
             + "<file-info type=\"file\" file-disposition=\"attach\">"
             + "  <file-size>1234567890</file-size>" + "  <file-name>image.jpg</file-name>"
             + "  <content-type>image/jpeg</content-type>" + "  <data url = \"" + sUri
-            + "\" until = \"1234\"/>" + "</file-info>" + "</file>";
+            + "\" until = \"2016-04-29T16:02:23.000Z\"/>" + "</file-info>" + "</file>";
 
-    private RcsSettings mRrcsSettings;
+    private RcsSettings mRcsSettings;
+
+    private static final String sXmlContentToEncoded = "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
+            + "<file><file-info type=\"file\" file-disposition=\"attachment\"><file-size>100000</file-size>"
+            + "<file-name>gsma.jpg</file-name><content-type>image/jpeg</content-type>"
+            + "<data url = \"https://host/path/download?id=12345\"  until=\"2016-04-29T16:02:23.000Z\"/>"
+            + "</file-info></file>";
+
+    private final static String sFilename = "gsma.jpg";
+    private final static int sSize = 100000;
+    private final static String sMimeType = "image/jpeg";
+    private final static long sExpiration = 1461945743000L;
 
     protected void setUp() throws Exception {
         super.setUp();
         Context context = getContext();
         ContentResolver contentResolver = context.getContentResolver();
         LocalContentResolver localContentResolver = new LocalContentResolver(contentResolver);
-        mRrcsSettings = RcsSettings.getInstance(localContentResolver);
+        mRcsSettings = RcsSettings.getInstance(localContentResolver);
     }
 
     public void testFileTransferXmlParserAudioMessage() throws ParseFailureException, SAXException,
             ParserConfigurationException {
         FileTransferXmlParser parser = new FileTransferXmlParser(
-                sXmlContentToParse1.getBytes(UTF8), mRrcsSettings);
+                sXmlContentToParse1.getBytes(UTF8), mRcsSettings);
         sLogger.debug(sXmlContentToParse1);
         parser.parse();
         FileTransferHttpInfoDocument info = parser.getFileTransferInfo();
@@ -90,7 +102,7 @@ public class FileTransferXmlParserTest extends AndroidTestCase {
         assertEquals("audio.mp4", info.getFilename());
         assertEquals("audio/mp4", info.getMimeType());
         assertEquals("render", info.getFileDisposition());
-        assertEquals(1234, info.getExpiration());
+        assertEquals(1461945743000L, info.getExpiration());
         assertNull(info.getFileThumbnail());
         assertEquals(1000, info.getPlayingLength());
         assertEquals(sUri, info.getUri());
@@ -99,7 +111,7 @@ public class FileTransferXmlParserTest extends AndroidTestCase {
     public void testFileTransferXmlParserFileImageWithoutIcon() throws ParseFailureException,
             SAXException, ParserConfigurationException {
         FileTransferXmlParser parser = new FileTransferXmlParser(
-                sXmlContentToParse2.getBytes(UTF8), mRrcsSettings);
+                sXmlContentToParse2.getBytes(UTF8), mRcsSettings);
         sLogger.debug(sXmlContentToParse1);
         parser.parse();
         FileTransferHttpInfoDocument info = parser.getFileTransferInfo();
@@ -107,7 +119,7 @@ public class FileTransferXmlParserTest extends AndroidTestCase {
         assertEquals("image.jpg", info.getFilename());
         assertEquals("image/jpeg", info.getMimeType());
         assertEquals("attach", info.getFileDisposition());
-        assertEquals(1234, info.getExpiration());
+        assertEquals(1461945743000L, info.getExpiration());
         assertNull(info.getFileThumbnail());
         assertEquals(-1, info.getPlayingLength());
         assertEquals(sUri, info.getUri());
@@ -116,7 +128,7 @@ public class FileTransferXmlParserTest extends AndroidTestCase {
     public void testFileTransferXmlParserFileImageWithIcon() throws ParseFailureException,
             SAXException, ParserConfigurationException {
         FileTransferXmlParser parser = new FileTransferXmlParser(
-                sXmlContentToParse3.getBytes(UTF8), mRrcsSettings);
+                sXmlContentToParse3.getBytes(UTF8), mRcsSettings);
         sLogger.debug(sXmlContentToParse1);
         parser.parse();
         FileTransferHttpInfoDocument info = parser.getFileTransferInfo();
@@ -124,14 +136,21 @@ public class FileTransferXmlParserTest extends AndroidTestCase {
         assertEquals("image.jpg", info.getFilename());
         assertEquals("image/jpeg", info.getMimeType());
         assertEquals("attach", info.getFileDisposition());
-        assertEquals(1234, info.getExpiration());
+        assertEquals(1461945743000L, info.getExpiration());
         FileTransferHttpThumbnail icon = info.getFileThumbnail();
         assertNotNull(icon);
-        assertEquals(56789, icon.getExpiration());
+        assertEquals(1461945743000L, icon.getExpiration());
         assertEquals("image/png", icon.getMimeType());
         assertEquals(sUriThumbnail, icon.getUri());
         assertEquals(12345, icon.getSize());
         assertEquals(-1, info.getPlayingLength());
         assertEquals(sUri, info.getUri());
+    }
+
+    public void testCreateHttpFileTransferXml() {
+        FileTransferHttpInfoDocument doc1 = new FileTransferHttpInfoDocument(mRcsSettings, sUri,
+                sFilename, sSize, sMimeType, sExpiration, null);
+        String xml = FileTransferUtils.createHttpFileTransferXml(doc1);
+        assertEquals(sXmlContentToEncoded, xml);
     }
 }
