@@ -63,64 +63,51 @@ public class CapabilityUtils {
         List<String> tags = new ArrayList<>();
         List<String> icsiTags = new ArrayList<>();
         List<String> iariTags = new ArrayList<>();
-
         // Video share support
         if (rcsSettings.isVideoSharingSupported() && richcall
                 && (NetworkUtils.getNetworkAccessType() >= NetworkUtils.NETWORK_ACCESS_3G)) {
             tags.add(FeatureTags.FEATURE_3GPP_VIDEO_SHARE);
         }
-
         // Chat support
         if (rcsSettings.isImSessionSupported()) {
             iariTags.add(FeatureTags.FEATURE_RCSE_CHAT);
-            tags.add(FeatureTags.FEATURE_OMA_IM);
         }
-
         // FT support
         if (rcsSettings.isFileTransferSupported()) {
             iariTags.add(FeatureTags.FEATURE_RCSE_FT);
         }
-
         // FT over HTTP support
         if (rcsSettings.isFileTransferHttpSupported()) {
             iariTags.add(FeatureTags.FEATURE_RCSE_FT_HTTP);
         }
-
         // Image share support
         if (rcsSettings.isImageSharingSupported() && richcall) {
             iariTags.add(FeatureTags.FEATURE_RCSE_IMAGE_SHARE);
         }
-
         // Presence discovery support
         if (rcsSettings.isPresenceDiscoverySupported()) {
             iariTags.add(FeatureTags.FEATURE_RCSE_PRESENCE_DISCOVERY);
         }
-
         // Social presence support
         if (rcsSettings.isSocialPresenceSupported()) {
             iariTags.add(FeatureTags.FEATURE_RCSE_SOCIAL_PRESENCE);
         }
-
         // Geolocation push support
         if (rcsSettings.isGeoLocationPushSupported()) {
             iariTags.add(FeatureTags.FEATURE_RCSE_GEOLOCATION_PUSH);
         }
-
         // FT thumbnail support
         if (rcsSettings.isFileTransferThumbnailSupported()) {
             iariTags.add(FeatureTags.FEATURE_RCSE_FT_THUMBNAIL);
         }
-
         // FT S&F support
         if (rcsSettings.isFileTransferStoreForwardSupported()) {
             iariTags.add(FeatureTags.FEATURE_RCSE_FT_SF);
         }
-
         // Group chat S&F support
         if (rcsSettings.isGroupChatStoreForwardSupported()) {
             iariTags.add(FeatureTags.FEATURE_RCSE_GC_SF);
         }
-
         // IP call support
         if (rcsSettings.isIPVoiceCallSupported()) {
             tags.add(FeatureTags.FEATURE_RCSE_IP_VOICE_CALL);
@@ -131,12 +118,10 @@ public class CapabilityUtils {
         if (rcsSettings.isIPVoiceCallSupported() || rcsSettings.isIPVideoCallSupported()) {
             icsiTags.add(FeatureTags.FEATURE_3GPP_IP_VOICE_CALL);
         }
-
         // Automata flag
         if (rcsSettings.isSipAutomata()) {
             tags.add(FeatureTags.FEATURE_SIP_AUTOMATA);
         }
-
         // Extensions
         if (rcsSettings.isExtensionsAllowed()) {
             for (String extension : rcsSettings.getSupportedRcsExtensions()) {
@@ -148,17 +133,14 @@ public class CapabilityUtils {
             }
             icsiTags.add(FeatureTags.FEATURE_3GPP_EXTENSION);
         }
-
         // Add IARI prefix
         if (!iariTags.isEmpty()) {
             tags.add(FeatureTags.FEATURE_RCSE + "=\"" + TextUtils.join(",", iariTags) + "\"");
         }
-
         // Add ICSI prefix
         if (!icsiTags.isEmpty()) {
             tags.add(FeatureTags.FEATURE_3GPP + "=\"" + TextUtils.join(",", icsiTags) + "\"");
         }
-
         return tags.toArray(new String[tags.size()]);
     }
 
@@ -174,7 +156,6 @@ public class CapabilityUtils {
         Set<String> tags = msg.getFeatureTags();
         boolean ipCall_RCSE = false;
         boolean ipCall_3GPP = false;
-
         for (String tag : tags) {
             if (tag.contains(FeatureTags.FEATURE_3GPP_VIDEO_SHARE)) {
                 capaBuilder.setVideoSharing(true);
@@ -213,7 +194,6 @@ public class CapabilityUtils {
                 } else {
                     ipCall_RCSE = true;
                 }
-
             } else if (tag.contains(FeatureTags.FEATURE_3GPP_IP_VOICE_CALL)) {
                 if (ipCall_RCSE) {
                     capaBuilder.setIpVoiceCall(true);
@@ -241,12 +221,10 @@ public class CapabilityUtils {
                 capaBuilder.setSipAutomata(true);
             }
         }
-
         /* Analyze SDP part */
         byte[] content = msg.getContentBytes();
         if (content != null) {
             SdpParser parser = new SdpParser(content);
-
             /* Get supported video codecs */
             Vector<MediaDescription> mediaVideo = parser.getMediaDescriptions("video");
             Vector<String> videoCodecs = new Vector<>();
@@ -271,7 +249,6 @@ public class CapabilityUtils {
                 /* No video codec supported between me and the remote contact */
                 capaBuilder.setVideoSharing(false);
             }
-
             // Check supported image formats
             Vector<MediaDescription> mediaImage = parser.getMediaDescriptions("message");
             Vector<String> imgFormats = new Vector<>();
@@ -319,7 +296,6 @@ public class CapabilityUtils {
                 String selector = null;
                 long maxSize = 0;
                 String media = null;
-
                 // Add video config
                 if (video) {
                     // Get supported video formats
@@ -331,25 +307,21 @@ public class CapabilityUtils {
                         videoSharingConfig.append("a=rtpmap:").append(videoFormat.getPayload())
                                 .append(" ").append(videoFormat.getCodec()).append(SipUtils.CRLF);
                     }
-
                     media = videoSharingConfig.toString();
                 }
                 // Add image and geoloc config
                 if (image || geoloc) {
                     StringBuilder supportedTransferFormats = new StringBuilder();
-
                     // Get supported image formats
                     Set<String> imageMimeTypes = MimeManager.getInstance()
                             .getSupportedImageMimeTypes();
                     for (String imageMimeType : imageMimeTypes) {
                         supportedTransferFormats.append(imageMimeType).append(" ");
                     }
-
                     // Get supported geoloc
                     if (geoloc) {
                         supportedTransferFormats.append(GeolocContent.ENCODING);
                     }
-
                     mimeTypes = supportedTransferFormats.toString().trim();
                     protocol = SdpUtils.MSRP_PROTOCOL;
                     selector = "";
