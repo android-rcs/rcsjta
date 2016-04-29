@@ -138,36 +138,32 @@ public class RcsContactUtil {
         if (contact == null) {
             return mDefaultDisplayName;
         }
+        String displayName = getDisplayNameFromAddressBook(contact);
+        if (displayName != null) {
+            /*
+             * Contact exists in Android Address Book: returns the AB display name.
+             */
+            return displayName;
+        }
         try {
             if (mService == null) {
                 mService = ConnectionManager.getInstance().getContactApi();
             }
             RcsContact rcsContact = mService.getRcsContact(contact);
             if (rcsContact == null) {
-                String displayName = getDisplayNameFromAddressBook(contact);
-                if (displayName != null) {
-                    return displayName;
-                }
                 /*
-                 * Contact exists but is not RCS: returns the phone number.
+                 * Contact is not RCS: returns the phone number.
                  */
                 return contact.toString();
             }
-            String displayName = rcsContact.getDisplayName();
+            displayName = rcsContact.getDisplayName();
             if (displayName == null) {
-                displayName = getDisplayNameFromAddressBook(contact);
-                if (displayName != null) {
-                    return displayName;
-                }
                 return contact.toString();
             } else {
                 return displayName;
             }
         } catch (RcsServiceNotAvailableException ignore) {
-            String displayName = getDisplayNameFromAddressBook(contact);
-            if (displayName != null) {
-                return displayName;
-            }
+
         } catch (RcsServiceException e) {
             Log.w(LOGTAG, ExceptionUtil.getFullStackTrace(e));
         }
