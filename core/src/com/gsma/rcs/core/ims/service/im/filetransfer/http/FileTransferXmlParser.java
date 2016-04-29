@@ -25,10 +25,8 @@ package com.gsma.rcs.core.ims.service.im.filetransfer.http;
 import com.gsma.rcs.core.ParseFailureException;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.DateUtils;
-import com.gsma.rcs.utils.logger.Logger;
 
 import android.net.Uri;
-import android.util.TimeFormatException;
 
 import org.xml.sax.SAXException;
 import org.xmlpull.v1.XmlPullParser;
@@ -42,7 +40,9 @@ import java.nio.charset.Charset;
 import javax.xml.parsers.ParserConfigurationException;
 
 /**
- * Created by yplo6403 on 24/02/2016.
+ * A class to parse the XML descriptor containing the HTTP file transfer information.
+ *
+ * @author Philippe LEMORDANT
  */
 public class FileTransferXmlParser {
     // @formatter:off
@@ -73,7 +73,6 @@ public class FileTransferXmlParser {
 
     private final RcsSettings mRcsSettings;
     private final String mXmlSource;
-    private static final Logger sLogger = Logger.getLogger(FileTransferXmlParser.class.getName());
     private FileTransferHttpInfoDocument mFtInfo;
     private FileTransferHttpThumbnail mThumbnailInfo;
     private boolean mThumbnailProcessed;
@@ -86,7 +85,7 @@ public class FileTransferXmlParser {
      */
     public FileTransferXmlParser(byte[] xml, RcsSettings rcsSettings) {
         mRcsSettings = rcsSettings;
-        mXmlSource =  new String(xml, Charset.forName("UTF8"));;
+        mXmlSource = new String(xml, Charset.forName("UTF8"));
     }
 
     /**
@@ -104,9 +103,7 @@ public class FileTransferXmlParser {
             XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
             factory.setNamespaceAware(false);
             XmlPullParser xpp = factory.newPullParser();
-
             xpp.setInput(new StringReader(mXmlSource));
-
             int eventType = xpp.getEventType();
             String text = null;
             while (eventType != XmlPullParser.END_DOCUMENT) {
@@ -132,22 +129,20 @@ public class FileTransferXmlParser {
                                     mFtInfo.setFileDisposition(typeDispo);
                                 }
                             }
-
                         } else if ("data".equalsIgnoreCase(tagName)) {
                             if (mFtInfo == null) {
                                 break;
                             }
                             String url = xpp.getAttributeValue(null, "url");
                             String expiration = xpp.getAttributeValue(null, "until");
-
                             if (mThumbnailProcessed) {
                                 mFtInfo.setUri(Uri.parse(url));
-                                mFtInfo.setExpiration(parseExpirationDate(expiration));
+                                mFtInfo.setExpiration(DateUtils.decodeDate(expiration));
 
                             } else if (mThumbnailInfo != null) {
                                 mThumbnailProcessed = true;
                                 mThumbnailInfo.setUri(Uri.parse(url));
-                                mThumbnailInfo.setExpiration(parseExpirationDate(expiration));
+                                mThumbnailInfo.setExpiration(DateUtils.decodeDate(expiration));
                                 mFtInfo.setFileThumbnail(mThumbnailInfo);
                             }
                         }
@@ -160,6 +155,10 @@ public class FileTransferXmlParser {
                     case XmlPullParser.END_TAG:
                         if (mFtInfo == null) {
                             break;
+                        }
+                        if (text == null) {
+                            throw new ParseFailureException("Bad HTTP file transfer information "
+                                    + mXmlSource);
                         }
                         if ("file-name".equalsIgnoreCase(tagName)) {
                             if (mThumbnailProcessed) {
@@ -191,23 +190,6 @@ public class FileTransferXmlParser {
 
         } catch (XmlPullParserException | IOException e) {
             throw new ParseFailureException("Failed to parse input source!", e);
-        }
-    }
-
-    private long parseExpirationDate(String expiration) {
-        try {
-            return DateUtils.decodeDate(expiration);
-        } catch (TimeFormatException tfe) // expiration is not in the expected date format
-        {
-            try {
-                return Long.decode(expiration); // expiration may be already the long value
-
-            } catch (NumberFormatException nfe) {
-                if (sLogger.isActivated()) {
-                    sLogger.error("Could not parse transfer expiration:" + expiration);
-                }
-                return System.currentTimeMillis() + 300000; // TODO default validity ?
-            }
         }
     }
 

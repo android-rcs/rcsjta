@@ -43,6 +43,7 @@ import com.gsma.rcs.platform.file.FileFactory;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.Base64;
 import com.gsma.rcs.utils.CloseableUtils;
+import com.gsma.rcs.utils.DateUtils;
 import com.gsma.rcs.utils.FileUtils;
 import com.gsma.rcs.utils.MimeManager;
 import com.gsma.rcs.utils.logger.Logger;
@@ -70,7 +71,7 @@ import javax.xml.parsers.ParserConfigurationException;
  */
 public class FileTransferUtils {
 
-    private static final Logger logger = Logger.getLogger(FileTransferUtils.class.getName());
+    private static final Logger sLogger = Logger.getLogger(FileTransferUtils.class.getName());
 
     private static final String FILEICON_INFO = "thumbnail";
 
@@ -107,8 +108,8 @@ public class FileTransferUtils {
             in = AndroidFactory.getApplicationContext().getContentResolver().openInputStream(file);
             Bitmap bitmap = BitmapFactory.decodeStream(in);
             if (bitmap == null) {
-                if (logger.isActivated()) {
-                    logger.warn("Cannot decode image " + file);
+                if (sLogger.isActivated()) {
+                    sLogger.warn("Cannot decode image " + file);
                 }
                 return null;
             }
@@ -147,8 +148,8 @@ public class FileTransferUtils {
                     fileIconData.length, fileIconName);
             // persist the fileIcon content
             fileIcon.writeData2File(fileIconData);
-            if (logger.isActivated()) {
-                logger.debug("Generate Icon " + fileIconName + " for image " + file);
+            if (sLogger.isActivated()) {
+                sLogger.debug("Generate Icon " + fileIconName + " for image " + file);
             }
             return fileIcon;
 
@@ -295,46 +296,43 @@ public class FileTransferUtils {
         return ContentManager.createMmContent(uri, mime, desc.getSize(), desc.getName());
     }
 
-    private static String getInfo(String fileType, Uri downloadUri, String name, String mimeType,
-            long size, long expiration, String disposition, int playingLength) {
+    private static String createHttpFileInfoXml(String fileType, Uri downloadUri, String name,
+            String mimeType, long size, long expiration, String disposition, int playingLength) {
+        String expirationAsIso = DateUtils.encodeDate(expiration);
         StringBuilder info = new StringBuilder("<file-info type=\"").append(fileType).append("\"");
         if (disposition != null) {
             info.append(" file-disposition=\"").append(disposition).append("\"");
         }
         info.append(">");
-        if (size != 0) {
-            info.append("<file-size>").append(size).append("</file-size>");
-        }
+        info.append("<file-size>").append(size).append("</file-size>");
         if (name != null) {
             info.append("<file-name>").append(name).append("</file-name>");
         }
-        if (mimeType != null) {
-            info.append("<content-type>").append(mimeType).append("</content-type>");
-        }
+        info.append("<content-type>").append(mimeType).append("</content-type>");
         if (playingLength != -1) {
             info.append("<am:playing-length>").append(playingLength).append("</am:playing-length>");
         }
         info.append("<data url = \"").append(downloadUri.toString()).append("\"  until=\"")
-                .append(expiration).append("\"/></file-info>");
+                .append(expirationAsIso).append("\"/></file-info>");
         return info.toString();
     }
 
     /**
-     * Create HTTP file transfer info xml
+     * Create HTTP file transfer xml descriptor
      * 
-     * @param fileTransferData File transfer info
-     * @return String
+     * @param fileTransferData File transfer information
+     * @return a string representing the HTTP file transfer xml descriptor
      */
     public static String createHttpFileTransferXml(FileTransferHttpInfoDocument fileTransferData) {
         FileTransferHttpThumbnail fileIcon = fileTransferData.getFileThumbnail();
         StringBuilder info = new StringBuilder("<?xml version=\"1.0\" encoding=\"")
                 .append(UTF8_STR).append("\"?><file>");
         if (fileIcon != null) {
-            String fileIconInfo = getInfo(FILEICON_INFO, fileIcon.getUri(), null,
+            String fileIconInfo = createHttpFileInfoXml(FILEICON_INFO, fileIcon.getUri(), null,
                     fileIcon.getMimeType(), fileIcon.getSize(), fileIcon.getExpiration(), null, -1);
             info.append(fileIconInfo);
         }
-        String fileInfo = getInfo(FILE_INFO, fileTransferData.getUri(),
+        String fileInfo = createHttpFileInfoXml(FILE_INFO, fileTransferData.getUri(),
                 fileTransferData.getFilename(), fileTransferData.getMimeType(),
                 fileTransferData.getSize(), fileTransferData.getExpiration(),
                 fileTransferData.getFileDisposition(), fileTransferData.getPlayingLength());
