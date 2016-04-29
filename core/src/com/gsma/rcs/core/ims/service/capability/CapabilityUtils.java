@@ -60,67 +60,54 @@ public class CapabilityUtils {
      * @return List of tags
      */
     public static String[] getSupportedFeatureTags(boolean richcall, RcsSettings rcsSettings) {
-        List<String> tags = new ArrayList<String>();
-        List<String> icsiTags = new ArrayList<String>();
-        List<String> iariTags = new ArrayList<String>();
-
+        List<String> tags = new ArrayList<>();
+        List<String> icsiTags = new ArrayList<>();
+        List<String> iariTags = new ArrayList<>();
         // Video share support
         if (rcsSettings.isVideoSharingSupported() && richcall
                 && (NetworkUtils.getNetworkAccessType() >= NetworkUtils.NETWORK_ACCESS_3G)) {
             tags.add(FeatureTags.FEATURE_3GPP_VIDEO_SHARE);
         }
-
         // Chat support
         if (rcsSettings.isImSessionSupported()) {
             iariTags.add(FeatureTags.FEATURE_RCSE_CHAT);
-            tags.add(FeatureTags.FEATURE_OMA_IM);
         }
-
         // FT support
         if (rcsSettings.isFileTransferSupported()) {
             iariTags.add(FeatureTags.FEATURE_RCSE_FT);
         }
-
         // FT over HTTP support
         if (rcsSettings.isFileTransferHttpSupported()) {
             iariTags.add(FeatureTags.FEATURE_RCSE_FT_HTTP);
         }
-
         // Image share support
         if (rcsSettings.isImageSharingSupported() && richcall) {
             iariTags.add(FeatureTags.FEATURE_RCSE_IMAGE_SHARE);
         }
-
         // Presence discovery support
         if (rcsSettings.isPresenceDiscoverySupported()) {
             iariTags.add(FeatureTags.FEATURE_RCSE_PRESENCE_DISCOVERY);
         }
-
         // Social presence support
         if (rcsSettings.isSocialPresenceSupported()) {
             iariTags.add(FeatureTags.FEATURE_RCSE_SOCIAL_PRESENCE);
         }
-
         // Geolocation push support
         if (rcsSettings.isGeoLocationPushSupported()) {
             iariTags.add(FeatureTags.FEATURE_RCSE_GEOLOCATION_PUSH);
         }
-
         // FT thumbnail support
         if (rcsSettings.isFileTransferThumbnailSupported()) {
             iariTags.add(FeatureTags.FEATURE_RCSE_FT_THUMBNAIL);
         }
-
         // FT S&F support
         if (rcsSettings.isFileTransferStoreForwardSupported()) {
             iariTags.add(FeatureTags.FEATURE_RCSE_FT_SF);
         }
-
         // Group chat S&F support
         if (rcsSettings.isGroupChatStoreForwardSupported()) {
             iariTags.add(FeatureTags.FEATURE_RCSE_GC_SF);
         }
-
         // IP call support
         if (rcsSettings.isIPVoiceCallSupported()) {
             tags.add(FeatureTags.FEATURE_RCSE_IP_VOICE_CALL);
@@ -131,32 +118,25 @@ public class CapabilityUtils {
         if (rcsSettings.isIPVoiceCallSupported() || rcsSettings.isIPVideoCallSupported()) {
             icsiTags.add(FeatureTags.FEATURE_3GPP_IP_VOICE_CALL);
         }
-
         // Automata flag
         if (rcsSettings.isSipAutomata()) {
             tags.add(FeatureTags.FEATURE_SIP_AUTOMATA);
         }
-
         // Extensions
         if (rcsSettings.isExtensionsAllowed()) {
             for (String extension : rcsSettings.getSupportedRcsExtensions()) {
-                StringBuilder sb = new StringBuilder(FeatureTags.FEATURE_RCSE_EXTENSION)
-                        .append(".").append(extension);
-                iariTags.add(sb.toString());
+                iariTags.add(FeatureTags.FEATURE_RCSE_EXTENSION + "." + extension);
             }
             icsiTags.add(FeatureTags.FEATURE_3GPP_EXTENSION);
         }
-
         // Add IARI prefix
         if (!iariTags.isEmpty()) {
             tags.add(FeatureTags.FEATURE_RCSE + "=\"" + TextUtils.join(",", iariTags) + "\"");
         }
-
         // Add ICSI prefix
         if (!icsiTags.isEmpty()) {
             tags.add(FeatureTags.FEATURE_3GPP + "=\"" + TextUtils.join(",", icsiTags) + "\"");
         }
-
         return tags.toArray(new String[tags.size()]);
     }
 
@@ -172,7 +152,6 @@ public class CapabilityUtils {
         Set<String> tags = msg.getFeatureTags();
         boolean ipCall_RCSE = false;
         boolean ipCall_3GPP = false;
-
         for (String tag : tags) {
             if (tag.contains(FeatureTags.FEATURE_3GPP_VIDEO_SHARE)) {
                 capaBuilder.setVideoSharing(true);
@@ -238,15 +217,13 @@ public class CapabilityUtils {
                 capaBuilder.setSipAutomata(true);
             }
         }
-
         /* Analyze SDP part */
         byte[] content = msg.getContentBytes();
         if (content != null) {
             SdpParser parser = new SdpParser(content);
-
             /* Get supported video codecs */
             Vector<MediaDescription> mediaVideo = parser.getMediaDescriptions("video");
-            Vector<String> videoCodecs = new Vector<String>();
+            Vector<String> videoCodecs = new Vector<>();
             for (int i = 0; i < mediaVideo.size(); i++) {
                 MediaDescription desc = mediaVideo.get(i);
                 MediaAttribute attr = desc.getMediaAttribute("rtpmap");
@@ -268,17 +245,15 @@ public class CapabilityUtils {
                 /* No video codec supported between me and the remote contact */
                 capaBuilder.setVideoSharing(false);
             }
-
             // Check supported image formats
             Vector<MediaDescription> mediaImage = parser.getMediaDescriptions("message");
-            Vector<String> imgFormats = new Vector<String>();
+            Vector<String> imgFormats = new Vector<>();
             for (int i = 0; i < mediaImage.size(); i++) {
                 MediaDescription desc = mediaImage.get(i);
                 MediaAttribute attr = desc.getMediaAttribute("accept-types");
                 if (attr != null) {
                     String[] types = attr.getValue().split(" ");
-                    for (int j = 0; j < types.length; j++) {
-                        String fmt = types[j];
+                    for (String fmt : types) {
                         if ((fmt != null) && MimeManager.getInstance().isMimeTypeSupported(fmt)) {
                             imgFormats.addElement(fmt);
                         }
@@ -312,54 +287,42 @@ public class CapabilityUtils {
             boolean image = rcsSettings.isImageSharingSupported();
             boolean geoloc = rcsSettings.isGeoLocationPushSupported();
             if (video | image) {
-                // Changed by Deutsche Telekom
                 String mimeTypes = null;
                 String protocol = null;
                 String selector = null;
                 long maxSize = 0;
                 String media = null;
-
                 // Add video config
                 if (video) {
                     // Get supported video formats
                     Vector<VideoFormat> videoFormats = MediaRegistry.getSupportedVideoFormats();
                     StringBuilder videoSharingConfig = new StringBuilder();
                     for (VideoFormat videoFormat : videoFormats) {
-                        videoSharingConfig.append("m=video 0 RTP/AVP " + videoFormat.getPayload()
-                                + SipUtils.CRLF);
-                        videoSharingConfig.append("a=rtpmap:" + videoFormat.getPayload() + " "
-                                + videoFormat.getCodec() + SipUtils.CRLF);
+                        videoSharingConfig.append("m=video 0 RTP/AVP ")
+                                .append(videoFormat.getPayload()).append(SipUtils.CRLF);
+                        videoSharingConfig.append("a=rtpmap:").append(videoFormat.getPayload())
+                                .append(" ").append(videoFormat.getCodec()).append(SipUtils.CRLF);
                     }
-
-                    // Changed by Deutsche Telekom
                     media = videoSharingConfig.toString();
                 }
-
                 // Add image and geoloc config
                 if (image || geoloc) {
                     StringBuilder supportedTransferFormats = new StringBuilder();
-
                     // Get supported image formats
-                    // Changed by Deutsche Telekom
                     Set<String> imageMimeTypes = MimeManager.getInstance()
                             .getSupportedImageMimeTypes();
                     for (String imageMimeType : imageMimeTypes) {
-                        supportedTransferFormats.append(imageMimeType + " ");
+                        supportedTransferFormats.append(imageMimeType).append(" ");
                     }
-
                     // Get supported geoloc
                     if (geoloc) {
                         supportedTransferFormats.append(GeolocContent.ENCODING);
                     }
-
-                    // Changed by Deutsche Telekom
                     mimeTypes = supportedTransferFormats.toString().trim();
                     protocol = SdpUtils.MSRP_PROTOCOL;
                     selector = "";
                     maxSize = ImageTransferSession.getMaxImageSharingSize(rcsSettings);
                 }
-
-                // Changed by Deutsche Telekom
                 sdp = SdpUtils.buildCapabilitySDP(ipAddress, protocol, mimeTypes, selector, media,
                         maxSize);
             }
