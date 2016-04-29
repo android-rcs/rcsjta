@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
  *
- * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2010-2016 Orange.
  * Copyright (C) 2014 Sony Mobile Communications AB.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -35,14 +35,15 @@ import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
-import com.gsma.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoParser;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpThumbnail;
+import com.gsma.rcs.core.ims.service.im.filetransfer.http.FileTransferXmlParser;
 import com.gsma.rcs.platform.AndroidFactory;
 import com.gsma.rcs.platform.file.FileDescription;
 import com.gsma.rcs.platform.file.FileFactory;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.Base64;
 import com.gsma.rcs.utils.CloseableUtils;
+import com.gsma.rcs.utils.DateUtils;
 import com.gsma.rcs.utils.FileUtils;
 import com.gsma.rcs.utils.MimeManager;
 import com.gsma.rcs.utils.logger.Logger;
@@ -53,10 +54,8 @@ import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.net.Uri;
 
-import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -67,14 +66,11 @@ import javax.xml.parsers.ParserConfigurationException;
 /**
  * Utility class to manage File Transfer
  * 
- * @author YPLO6403
+ * @author Philippe LEMORDANT
  */
 public class FileTransferUtils {
 
-    /**
-     * The logger
-     */
-    private static final Logger logger = Logger.getLogger(FileTransferUtils.class.getName());
+    private static final Logger sLogger = Logger.getLogger(FileTransferUtils.class.getName());
 
     private static final String FILEICON_INFO = "thumbnail";
 
@@ -96,7 +92,7 @@ public class FileTransferUtils {
      * 
      * @param file Uri of the image
      * @param fileIconId the identifier of the file icon
-     * @param rcsSettings
+     * @param rcsSettings the RCS settings accessor
      * @return the content of the file icon
      * @throws FileAccessException
      */
@@ -109,8 +105,8 @@ public class FileTransferUtils {
             in = AndroidFactory.getApplicationContext().getContentResolver().openInputStream(file);
             Bitmap bitmap = BitmapFactory.decodeStream(in);
             if (bitmap == null) {
-                if (logger.isActivated()) {
-                    logger.warn("Cannot decode image " + file);
+                if (sLogger.isActivated()) {
+                    sLogger.warn("Cannot decode image " + file);
                 }
                 return null;
             }
@@ -149,14 +145,13 @@ public class FileTransferUtils {
                     fileIconName);
             // persist the fileIcon content
             fileIcon.writeData2File(fileIconData);
-            if (logger.isActivated()) {
-                logger.debug("Generate Icon " + fileIconName + " for image " + file);
+            if (sLogger.isActivated()) {
+                sLogger.debug("Generate Icon " + fileIconName + " for image " + file);
             }
             return fileIcon;
 
         } catch (IOException e) {
-            throw new FileAccessException(new StringBuilder("Failed to create icon for uri : ")
-                    .append(file).toString(), e);
+            throw new FileAccessException("Failed to create icon for uri : " + file, e);
 
         } finally {
             CloseableUtils.tryToClose(in);
@@ -189,7 +184,7 @@ public class FileTransferUtils {
      * Extract file icon from incoming INVITE request
      * 
      * @param request Request
-     * @param rcsSettings
+     * @param rcsSettings the RCS settings accessor
      * @return fileIcon the file icon content persisted on disk
      * @throws FileAccessException
      */
@@ -239,20 +234,12 @@ public class FileTransferUtils {
     public static FileTransferHttpInfoDocument parseFileTransferHttpDocument(byte[] xml,
             RcsSettings rcsSettings) throws PayloadException {
         try {
-            InputSource ftHttpInput = new InputSource(new ByteArrayInputStream(xml));
-            FileTransferHttpInfoParser ftHttpParser = new FileTransferHttpInfoParser(ftHttpInput,
-                    rcsSettings).parse();
-            return ftHttpParser.getFtInfo();
+            FileTransferXmlParser ftHttpParser = new FileTransferXmlParser(xml, rcsSettings);
+            ftHttpParser.parse();
+            return ftHttpParser.getFileTransferInfo();
 
-        } catch (ParserConfigurationException e) {
+        } catch (ParserConfigurationException | ParseFailureException | SAXException e) {
             throw new PayloadException("Can't parse FT HTTP document!", e);
-
-        } catch (SAXException e) {
-            throw new PayloadException("Can't parse FT HTTP document!", e);
-
-        } catch (ParseFailureException e) {
-            throw new PayloadException("Can't parse FT HTTP document!", e);
-
         }
     }
 
@@ -287,39 +274,36 @@ public class FileTransferUtils {
         return ContentManager.createMmContent(uri, desc.getSize(), desc.getName());
     }
 
-    private static String getInfo(String fileType, Uri downloadUri, String name, String mimeType,
-            long size, long expiration) {
+    private static String createHttpFileInfoXml(String fileType, Uri downloadUri, String name,
+            String mimeType, long size, long expiration) {
+        String expirationAsIso = DateUtils.encodeDate(expiration);
         StringBuilder info = new StringBuilder("<file-info type=\"").append(fileType).append("\">");
-        if (size != 0) {
-            info.append("<file-size>").append(size).append("</file-size>");
-        }
+        info.append("<file-size>").append(size).append("</file-size>");
         if (name != null) {
             info.append("<file-name>").append(name).append("</file-name>");
         }
-        if (mimeType != null) {
-            info.append("<content-type>").append(mimeType).append("</content-type>");
-        }
+        info.append("<content-type>").append(mimeType).append("</content-type>");
         info.append("<data url = \"").append(downloadUri.toString()).append("\"  until=\"")
-                .append(expiration).append("\"/></file-info>");
+                .append(expirationAsIso).append("\"/></file-info>");
         return info.toString();
     }
 
     /**
-     * Create HTTP file transfer info xml
+     * Create HTTP file transfer xml descriptor
      * 
-     * @param fileTransferData
-     * @return String
+     * @param fileTransferData File transfer information
+     * @return a string representing the HTTP file transfer xml descriptor
      */
     public static String createHttpFileTransferXml(FileTransferHttpInfoDocument fileTransferData) {
         FileTransferHttpThumbnail fileIcon = fileTransferData.getFileThumbnail();
         StringBuilder info = new StringBuilder("<?xml version=\"1.0\" encoding=\"")
                 .append(UTF8_STR).append("\"?><file>");
         if (fileIcon != null) {
-            String fileIconInfo = getInfo(FILEICON_INFO, fileIcon.getUri(), null,
+            String fileIconInfo = createHttpFileInfoXml(FILEICON_INFO, fileIcon.getUri(), null,
                     fileIcon.getMimeType(), fileIcon.getSize(), fileIcon.getExpiration());
             info.append(fileIconInfo);
         }
-        String fileInfo = getInfo(FILE_INFO, fileTransferData.getUri(),
+        String fileInfo = createHttpFileInfoXml(FILE_INFO, fileTransferData.getUri(),
                 fileTransferData.getFilename(), fileTransferData.getMimeType(),
                 fileTransferData.getSize(), fileTransferData.getExpiration());
         info.append(fileInfo);
