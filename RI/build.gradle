@@ -28,9 +28,7 @@ android {
 		disable 'IconDensities'
     }
 
-    //Google maps
-    //compileSdkVersion rootProject.compileSdkVersion
-    compileSdkVersion "Google Inc.:Google APIs:23"
+    compileSdkVersion rootProject.compileSdkVersion
     buildToolsVersion rootProject.buildToolsVersion
 
     defaultConfig {
