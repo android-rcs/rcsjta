@@ -346,12 +346,13 @@ public class FileTransferLog implements IFileTransferLog {
     }
 
     @Override
-    public int markFileTransferAsRead(String fileTransferId) {
+    public int markFileTransferAsRead(String fileTransferId, long timestampDisplayed) {
         if (sLogger.isActivated()) {
             sLogger.debug("Mark file transfer as read ID=" + fileTransferId);
         }
         ContentValues values = new ContentValues();
         values.put(FileTransferData.KEY_READ_STATUS, ReadStatus.READ.toInt());
+        values.put(FileTransferData.KEY_TIMESTAMP_DISPLAYED, timestampDisplayed);
         return mLocalContentResolver.update(
                 Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), values,
                 SELECTION_BY_NOT_READ, null);
