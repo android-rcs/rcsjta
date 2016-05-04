@@ -107,14 +107,14 @@ public class ChatServiceImpl extends IChatService.Stub {
     /**
      * Constructor
      *
-     * @param imService      InstantMessagingService
-     * @param messagingLog   MessagingLog
-     * @param historyLog     HistoryLog
-     * @param rcsSettings    RcsSettings
+     * @param imService InstantMessagingService
+     * @param messagingLog MessagingLog
+     * @param historyLog HistoryLog
+     * @param rcsSettings RcsSettings
      * @param contactManager ContactManager
      */
     public ChatServiceImpl(InstantMessagingService imService, MessagingLog messagingLog,
-                           HistoryLog historyLog, RcsSettings rcsSettings, ContactManager contactManager) {
+            HistoryLog historyLog, RcsSettings rcsSettings, ContactManager contactManager) {
         if (sLogger.isActivated()) {
             sLogger.info("Chat service API is loaded");
         }
@@ -141,8 +141,8 @@ public class ChatServiceImpl extends IChatService.Stub {
     /**
      * Tries to send a displayed delivery report for a one to one chat
      *
-     * @param msgId     Message ID
-     * @param remote    the remote contact
+     * @param msgId Message ID
+     * @param remote the remote contact
      * @param timestamp Timestamp sent in payload for IMDN datetime
      * @throws NetworkException
      */
@@ -154,14 +154,14 @@ public class ChatServiceImpl extends IChatService.Stub {
     /**
      * Tries to send a displayed delivery report for a group chat
      *
-     * @param msgId     Message ID
-     * @param contact   the remote contact
+     * @param msgId Message ID
+     * @param contact the remote contact
      * @param timestamp Timestamp sent in payload for IMDN datetime
-     * @param chatId    the chat ID
+     * @param chatId the chat ID
      * @throws NetworkException
      */
     public void sendGroupChatDisplayedDeliveryReport(final String msgId, final ContactId contact,
-                                                     final long timestamp, String chatId) throws NetworkException {
+            final long timestamp, String chatId) throws NetworkException {
         final GroupChatSession session = mImService.getGroupChatSession(chatId);
         if (session == null || !session.isMediaEstablished()) {
             if (sLogger.isActivated()) {
@@ -281,7 +281,7 @@ public class ChatServiceImpl extends IChatService.Stub {
      * Receive message delivery status
      *
      * @param contact Contact ID
-     * @param imdn    Imdn document
+     * @param imdn Imdn document
      */
     public void onOneToOneMessageDeliveryStatusReceived(ContactId contact, ImdnDocument imdn) {
         ImdnDocument.DeliveryStatus status = imdn.getStatus();
@@ -424,11 +424,11 @@ public class ChatServiceImpl extends IChatService.Stub {
      * is optional and may be null.
      *
      * @param contacts List of contact IDs
-     * @param subject  Subject
+     * @param subject Subject
      * @return instance of IGroupChat
      * @throws RemoteException <p>
-     *                         Note: List is used instead of Set because AIDL does only support List
-     *                         </p>
+     *             Note: List is used instead of Set because AIDL does only support List
+     *             </p>
      */
     @Override
     public IGroupChat initiateGroupChat(List<ContactId> contacts, String subject)
@@ -858,7 +858,7 @@ public class ChatServiceImpl extends IChatService.Stub {
          * to avoid multiple mark as read requests.
          */
         try {
-            if (mMessagingLog.markMessageAsRead(msgId) == 0) {
+            if (mMessagingLog.markMessageAsRead(msgId, System.currentTimeMillis()) == 0) {
                 /* no reporting towards the network if message is already marked as read */
                 if (sLogger.isActivated()) {
                     sLogger.info("Message with ID " + msgId + " is already marked as read!");
@@ -922,16 +922,16 @@ public class ChatServiceImpl extends IChatService.Stub {
     /**
      * Add and broadcast group chat invitation rejections.
      *
-     * @param chatId       Chat ID
-     * @param contact      Contact ID
-     * @param subject      Subject
+     * @param chatId Chat ID
+     * @param contact Contact ID
+     * @param subject Subject
      * @param participants Participants
-     * @param reasonCode   Reason code
-     * @param timestamp    Local timestamp when got invitation
+     * @param reasonCode Reason code
+     * @param timestamp Local timestamp when got invitation
      */
     public void addGroupChatInvitationRejected(String chatId, ContactId contact, String subject,
-                                               Map<ContactId, ParticipantStatus> participants, GroupChat.ReasonCode reasonCode,
-                                               long timestamp) {
+            Map<ContactId, ParticipantStatus> participants, GroupChat.ReasonCode reasonCode,
+            long timestamp) {
 
         mMessagingLog.addGroupChat(chatId, contact, subject, participants,
                 GroupChat.State.REJECTED, reasonCode, Direction.INCOMING, timestamp);
@@ -1016,14 +1016,14 @@ public class ChatServiceImpl extends IChatService.Stub {
     /**
      * Set one-one chat message status and reason code
      *
-     * @param msgId      Message Id
-     * @param mimeType   Mime type
-     * @param contact    Remote contact
-     * @param status     Status
+     * @param msgId Message Id
+     * @param mimeType Mime type
+     * @param contact Remote contact
+     * @param status Status
      * @param reasonCode Reason code
      */
     public void setOneToOneChatMessageStatusAndReasonCode(String msgId, String mimeType,
-                                                          ContactId contact, Status status, ReasonCode reasonCode) {
+            ContactId contact, Status status, ReasonCode reasonCode) {
         if (mMessagingLog.setChatMessageStatusAndReasonCode(msgId, status, reasonCode)) {
             mOneToOneChatEventBroadcaster.broadcastMessageStatusChanged(contact, mimeType, msgId,
                     status, reasonCode);
@@ -1033,14 +1033,14 @@ public class ChatServiceImpl extends IChatService.Stub {
     /**
      * Set group chat message status and reason code
      *
-     * @param msgId      Message Id
-     * @param mimeType   Mime type
-     * @param chatId     Chat id
-     * @param status     Status
+     * @param msgId Message Id
+     * @param mimeType Mime type
+     * @param chatId Chat id
+     * @param status Status
      * @param reasonCode Reason code
      */
     public void setGroupChatMessageStatusAndReasonCode(String msgId, String mimeType,
-                                                       String chatId, Status status, ReasonCode reasonCode) {
+            String chatId, Status status, ReasonCode reasonCode) {
         if (mMessagingLog.setChatMessageStatusAndReasonCode(msgId, status, reasonCode)) {
             mGroupChatEventBroadcaster.broadcastMessageStatusChanged(chatId, mimeType, msgId,
                     status, reasonCode);
@@ -1062,12 +1062,12 @@ public class ChatServiceImpl extends IChatService.Stub {
     /**
      * Set group chat state and reason code
      *
-     * @param chatId     Chat id
-     * @param state      State
+     * @param chatId Chat id
+     * @param state State
      * @param reasonCode Reason code
      */
     public void setGroupChatStateAndReasonCode(String chatId, State state,
-                                               GroupChat.ReasonCode reasonCode) {
+            GroupChat.ReasonCode reasonCode) {
         if (mMessagingLog.setGroupChatStateAndReasonCode(chatId, state, reasonCode)) {
             mGroupChatEventBroadcaster.broadcastStateChanged(chatId, state, reasonCode);
         }
@@ -1076,12 +1076,12 @@ public class ChatServiceImpl extends IChatService.Stub {
     /**
      * Broadcasts Group Chat state change
      *
-     * @param chatId     Chat id
-     * @param state      State
+     * @param chatId Chat id
+     * @param state State
      * @param reasonCode Reason code
      */
     public void broadcastGroupChatStateChange(String chatId, State state,
-                                              GroupChat.ReasonCode reasonCode) {
+            GroupChat.ReasonCode reasonCode) {
         mGroupChatEventBroadcaster.broadcastStateChanged(chatId, state, reasonCode);
     }
 
