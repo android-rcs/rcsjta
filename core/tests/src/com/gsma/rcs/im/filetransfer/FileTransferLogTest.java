@@ -424,17 +424,18 @@ public class FileTransferLogTest extends AndroidTestCase {
     }
 
     public void testMarkFileTransferAsRead() {
+        long now = System.currentTimeMillis();
         long fileIconExpiration = mRandom.nextLong();
-        assertEquals(0, mMessagingLog.markFileTransferAsRead(mFileTransferId));
+        assertEquals(0, mMessagingLog.markFileTransferAsRead(mFileTransferId, now));
         // Add entry
         mMessagingLog.addIncomingGroupFileTransfer(mFileTransferId, mChatId, mContact, mContent,
                 ICON_CONTENT, State.ACCEPTING, ReasonCode.UNSPECIFIED, mTimestamp, mTimestampSent,
                 mFileExpiration, fileIconExpiration);
         assertFalse(isFileTransferRead(mFileTransferId));
-        int count = mMessagingLog.markFileTransferAsRead(mFileTransferId);
+        int count = mMessagingLog.markFileTransferAsRead(mFileTransferId, now);
         assertEquals(1, count);
         assertTrue(isFileTransferRead(mFileTransferId));
-        count = mMessagingLog.markFileTransferAsRead(mFileTransferId);
+        count = mMessagingLog.markFileTransferAsRead(mFileTransferId, now);
         assertEquals(0, count);
         mLocalContentResolver.delete(
                 Uri.withAppendedPath(FileTransferData.CONTENT_URI, mFileTransferId), null, null);
