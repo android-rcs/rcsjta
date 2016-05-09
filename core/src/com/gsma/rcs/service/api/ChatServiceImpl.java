@@ -879,7 +879,7 @@ public class ChatServiceImpl extends IChatService.Stub {
          * to avoid multiple mark as read requests.
          */
         try {
-            if (mMessagingLog.markMessageAsRead(msgId) == 0) {
+            if (mMessagingLog.markMessageAsRead(msgId, System.currentTimeMillis()) == 0) {
                 /* no reporting towards the network if message is already marked as read */
                 if (sLogger.isActivated()) {
                     sLogger.info("Message with ID " + msgId + " is already marked as read!");

@@ -1235,7 +1235,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         }
         try {
             /* No notification type corresponds currently to mark as read */
-            mMessagingLog.markFileTransferAsRead(transferId);
+            mMessagingLog.markFileTransferAsRead(transferId, System.currentTimeMillis());
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {

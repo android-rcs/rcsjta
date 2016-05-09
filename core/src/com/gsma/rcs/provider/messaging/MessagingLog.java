@@ -176,8 +176,8 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
     }
 
     @Override
-    public int markMessageAsRead(String msgId) {
-        return mMessageLog.markMessageAsRead(msgId);
+    public int markMessageAsRead(String msgId, long timestampDisplayed) {
+        return mMessageLog.markMessageAsRead(msgId, timestampDisplayed);
     }
 
     public boolean setChatMessageStatusAndReasonCode(String msgId, Status status,
@@ -245,8 +245,8 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
     }
 
     @Override
-    public int markFileTransferAsRead(String fileTransferId) {
-        return mFileTransferLog.markFileTransferAsRead(fileTransferId);
+    public int markFileTransferAsRead(String fileTransferId, long timestampDisplayed) {
+        return mFileTransferLog.markFileTransferAsRead(fileTransferId, timestampDisplayed);
     }
 
     @Override
