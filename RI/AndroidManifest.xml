@@ -1,32 +1,32 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.gsma.rcs.ri">
+<manifest package="com.gsma.rcs.ri"
+          xmlns:android="http://schemas.android.com/apk/res/android">
 
     <permission
         android:name="com.gsma.rcs.ri.permission.MAPS_RECEIVE"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signature"/>
 
-    <uses-permission android:name="com.gsma.rcs.ri.permission.MAPS_RECEIVE" />
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.READ_CONTACTS" />
-    <uses-permission android:name="android.permission.WRITE_CONTACTS" />
-    <uses-permission android:name="android.permission.CALL_PHONE" />
-    <uses-permission android:name="android.permission.RECORD_AUDIO" />
-    <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.VIBRATE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.READ_CALL_LOG" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="com.gsma.rcs.ri.permission.MAPS_RECEIVE"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.READ_CONTACTS"/>
+    <uses-permission android:name="android.permission.WRITE_CONTACTS"/>
+    <uses-permission android:name="android.permission.CALL_PHONE"/>
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:name="android.permission.VIBRATE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_CALL_LOG"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <!-- Required to show current location -->
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    <uses-permission android:name="com.gsma.services.permission.RCS" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="com.gsma.services.permission.RCS"/>
 
     <!-- Required OpenGL ES 2.0. for Maps V2 -->
     <uses-feature
         android:glEsVersion="0x00020000"
-        android:required="true" />
+        android:required="true"/>
 
     <application
         android:name="com.gsma.rcs.ri.RiApplication"
@@ -35,117 +35,110 @@
         android:label="@string/app_name">
         <meta-data
             android:name="com.gsma.services.rcs.capability.EXTENSION"
-            android:value="ext.messaging;ext.streaming" />
+            android:value="ext.messaging;ext.streaming"/>
 
-        <uses-library android:name="com.google.android.maps" />
+        <uses-library android:name="com.google.android.maps"/>
 
         <!-- Insert here your own key for accessing the Google Maps Android API -->
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
-            android:value="AIzaSyBzry65BIdSaSjXk3dsT1XMPyksclNCnVo" />
+            android:value="AIzaSyBzry65BIdSaSjXk3dsT1XMPyksclNCnVo"/>
         <meta-data
             android:name="com.google.android.gms.version"
-            android:value="@integer/google_play_services_version" />
+            android:value="@integer/google_play_services_version"/>
 
         <!-- Main -->
         <activity
             android:name="com.gsma.rcs.ri.RI"
-            android:label="@string/app_name">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+            android:label="@string/app_name"/>
         <activity
             android:name="com.gsma.rcs.ri.AboutRI"
-            android:label="@string/menu_about" />
+            android:label="@string/menu_about"/>
 
         <receiver android:name="com.gsma.rcs.ri.DeviceBoot">
             <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
             </intent-filter>
         </receiver>
 
         <service
             android:name="com.gsma.rcs.ri.RcsServiceNotifManager"
-            android:exported="false" />
+            android:exported="false"/>
 
         <!-- Intents API -->
 
         <activity
             android:name="com.gsma.rcs.ri.intents.TestIntentApps"
-            android:label="@string/menu_apps" />
+            android:label="@string/menu_apps"/>
 
         <!-- Service API -->
 
-        <activity android:name="com.gsma.rcs.ri.service.TestServiceApi" />
+        <activity android:name="com.gsma.rcs.ri.service.TestServiceApi"/>
         <activity
             android:name="com.gsma.rcs.ri.service.ServiceStatus"
-            android:label="@string/menu_service" />
+            android:label="@string/menu_service"/>
         <activity
             android:name="com.gsma.rcs.ri.service.RegistrationStatus"
-            android:label="@string/menu_registration_status" />
+            android:label="@string/menu_registration_status"/>
         <activity
             android:name="com.gsma.rcs.ri.service.ServiceConfigurationActivity"
-            android:label="@string/menu_service_configuration" />
+            android:label="@string/menu_service_configuration"/>
 
         <!-- Contacts API -->
 
-        <activity android:name="com.gsma.rcs.ri.contacts.TestContactsApi" />
+        <activity android:name="com.gsma.rcs.ri.contacts.TestContactsApi"/>
         <activity
             android:name="com.gsma.rcs.ri.contacts.RcsContactsList"
-            android:label="@string/menu_list_rcs_contacts" />
+            android:label="@string/menu_list_rcs_contacts"/>
         <activity
             android:name="com.gsma.rcs.ri.contacts.ContactVCard"
-            android:label="@string/menu_contact_vcard" />
+            android:label="@string/menu_contact_vcard"/>
         <activity
             android:name="com.gsma.rcs.ri.contacts.BlockingContact"
-            android:label="@string/menu_blocking_contact" />
+            android:label="@string/menu_blocking_contact"/>
 
         <!-- Capabilities API -->
 
-        <activity android:name="com.gsma.rcs.ri.capabilities.TestCapabilitiesApi" />
+        <activity android:name="com.gsma.rcs.ri.capabilities.TestCapabilitiesApi"/>
         <activity
             android:name="com.gsma.rcs.ri.capabilities.RequestCapabilities"
-            android:label="@string/menu_capabilities" />
+            android:label="@string/menu_capabilities"/>
         <activity
             android:name="com.gsma.rcs.ri.capabilities.MyCapabilities"
-            android:label="@string/menu_my_capabilities" />
+            android:label="@string/menu_my_capabilities"/>
         <activity
             android:name="com.gsma.rcs.ri.capabilities.RequestAllCapabilities"
-            android:label="@string/menu_refresh_capabilities" />
+            android:label="@string/menu_refresh_capabilities"/>
         <activity
             android:name="com.gsma.rcs.ri.capabilities.CapabilitiesList"
-            android:label="@string/menu_capabilities_log" />
+            android:label="@string/menu_capabilities_log"/>
 
         <!-- Messaging API -->
 
-        <activity android:name="com.gsma.rcs.ri.messaging.TestMessagingApi" />
+        <activity android:name="com.gsma.rcs.ri.messaging.TestMessagingApi"/>
         <activity
             android:name="com.gsma.rcs.ri.messaging.OneToOneTalkView"
             android:label="@string/title_talk_1to1_view"
-            android:launchMode="singleTop" />
+            android:launchMode="singleTop"/>
 
         <!-- File transfer API -->
 
-        <activity android:name="com.gsma.rcs.ri.messaging.filetransfer.TestFileTransferApi">
+        <activity android:name="com.gsma.rcs.ri.messaging.filetransfer.TestFileTransferApi"/>
 
-        </activity>
         <activity
             android:name="com.gsma.rcs.ri.messaging.filetransfer.InitiateFileTransfer"
             android:icon="@drawable/ri_quick_ft_icon"
             android:label="@string/menu_transfer_file">
             <intent-filter>
-                <category android:name="android.intent.category.LAUNCHER" />
-                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.LAUNCHER"/>
+                <category android:name="android.intent.category.DEFAULT"/>
 
-                <action android:name="com.gsma.services.rcs.action.INITIATE_ONE_TO_ONE_FILE_TRANSFER" />
+                <action android:name="com.gsma.services.rcs.action.INITIATE_ONE_TO_ONE_FILE_TRANSFER"/>
             </intent-filter>
             <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="vnd.android.cursor.item/com.gsma.services.rcs.file-transfer" />
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:mimeType="vnd.android.cursor.item/com.gsma.services.rcs.file-transfer"/>
             </intent-filter>
         </activity>
 
@@ -153,58 +146,58 @@
             android:name="com.gsma.rcs.ri.messaging.filetransfer.FileTransferInvitationReceiver"
             android:exported="true">
             <intent-filter>
-                <action android:name="com.gsma.services.rcs.filetransfer.action.NEW_FILE_TRANSFER" />
+                <action android:name="com.gsma.services.rcs.filetransfer.action.NEW_FILE_TRANSFER"/>
             </intent-filter>
         </receiver>
         <receiver
             android:name="com.gsma.rcs.ri.messaging.filetransfer.FileTransferResumeReceiver"
             android:exported="true">
             <intent-filter>
-                <action android:name="com.gsma.services.rcs.filetransfer.action.RESUME_FILE_TRANSFER" />
+                <action android:name="com.gsma.services.rcs.filetransfer.action.RESUME_FILE_TRANSFER"/>
             </intent-filter>
         </receiver>
 
         <activity
             android:name="com.gsma.rcs.ri.messaging.filetransfer.ReceiveFileTransfer"
             android:label="@string/title_file_transfer"
-            android:launchMode="singleTop" />
+            android:launchMode="singleTop"/>
         <activity
             android:name="com.gsma.rcs.ri.messaging.filetransfer.FileTransferServiceConfigActivity"
             android:icon="@drawable/ri_quick_ft_icon"
-            android:label="@string/menu_ft_config" />
+            android:label="@string/menu_ft_config"/>
 
         <service
             android:name="com.gsma.rcs.ri.messaging.filetransfer.FileTransferIntentService"
-            android:exported="false" />
+            android:exported="false"/>
 
         <!-- Multiple files transfer -->
         <activity
             android:name="com.gsma.rcs.ri.messaging.filetransfer.multi.SendMultiFileGroupChat"
-            android:label="@string/title_multi_file_transfer" />
+            android:label="@string/title_multi_file_transfer"/>
         <activity
             android:name="com.gsma.rcs.ri.messaging.filetransfer.multi.SendMultiFileSingleChat"
-            android:label="@string/title_multi_file_transfer" />
+            android:label="@string/title_multi_file_transfer"/>
 
         <!-- Chat API -->
 
         <activity
             android:name="com.gsma.rcs.ri.messaging.chat.TestChatApi"
-            android:icon="@drawable/ri_quick_chat_icon" />
+            android:icon="@drawable/ri_quick_chat_icon"/>
         <activity
             android:name="com.gsma.rcs.ri.messaging.chat.single.InitiateSingleChat"
             android:icon="@drawable/ri_quick_chat_icon"
             android:label="@string/menu_initiate_chat">
             <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.VIEW"/>
 
-                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.DEFAULT"/>
 
-                <data android:mimeType="vnd.android.cursor.item/com.gsma.services.rcs.im-session" />
+                <data android:mimeType="vnd.android.cursor.item/com.gsma.services.rcs.im-session"/>
             </intent-filter>
             <intent-filter>
-                <action android:name="com.gsma.services.rcs.action.SEND_ONE_TO_ONE_CHAT_MESSAGE" />
+                <action android:name="com.gsma.services.rcs.action.SEND_ONE_TO_ONE_CHAT_MESSAGE"/>
 
-                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
         </activity>
 
@@ -212,27 +205,27 @@
             android:name="com.gsma.rcs.ri.messaging.chat.single.SingleChatInvitationReceiver"
             android:exported="true">
             <intent-filter>
-                <action android:name="com.gsma.services.rcs.chat.action.NEW_ONE_TO_ONE_CHAT_MESSAGE" />
+                <action android:name="com.gsma.services.rcs.chat.action.NEW_ONE_TO_ONE_CHAT_MESSAGE"/>
             </intent-filter>
         </receiver>
 
         <activity
             android:name="com.gsma.rcs.ri.messaging.chat.ChatServiceConfigActivity"
             android:icon="@drawable/ri_quick_chat_icon"
-            android:label="@string/menu_chat_config" />
+            android:label="@string/menu_chat_config"/>
         <activity
             android:name="com.gsma.rcs.ri.messaging.chat.group.InitiateGroupChat"
             android:icon="@drawable/ri_quick_chat_icon"
             android:label="@string/menu_initiate_group_chat">
             <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.VIEW"/>
 
-                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
             <intent-filter>
-                <action android:name="com.gsma.services.rcs.action.INITIATE_GROUP_CHAT" />
+                <action android:name="com.gsma.services.rcs.action.INITIATE_GROUP_CHAT"/>
 
-                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
         </activity>
 
@@ -240,14 +233,14 @@
             android:name="com.gsma.rcs.ri.messaging.chat.group.GroupChatMessageReceiver"
             android:exported="true">
             <intent-filter>
-                <action android:name="com.gsma.services.rcs.chat.action.NEW_GROUP_CHAT_MESSAGE" />
+                <action android:name="com.gsma.services.rcs.chat.action.NEW_GROUP_CHAT_MESSAGE"/>
             </intent-filter>
         </receiver>
         <receiver
             android:name="com.gsma.rcs.ri.messaging.chat.group.GroupChatInvitationReceiver"
             android:exported="true">
             <intent-filter>
-                <action android:name="com.gsma.services.rcs.chat.action.NEW_GROUP_CHAT" />
+                <action android:name="com.gsma.services.rcs.chat.action.NEW_GROUP_CHAT"/>
             </intent-filter>
         </receiver>
 
@@ -255,54 +248,53 @@
             android:name="com.gsma.rcs.ri.messaging.GroupTalkView"
             android:icon="@drawable/ri_quick_chat_icon"
             android:label="@string/title_group_chat"
-            android:launchMode="singleTop" />
+            android:launchMode="singleTop"/>
         <activity
             android:name="com.gsma.rcs.ri.messaging.GroupDeliveryInfoList"
-            android:label="@string/title_group_delivery_info" />
-
+            android:label="@string/title_group_delivery_info"/>
         <activity
             android:name="com.gsma.rcs.ri.messaging.geoloc.EditGeoloc"
             android:label="@string/menu_send_geoloc"
-            android:windowSoftInputMode="stateHidden" />
+            android:windowSoftInputMode="stateHidden"/>
         <activity
             android:name="com.gsma.rcs.ri.messaging.geoloc.ShowGeoloc"
-            android:label="@string/title_display_geoloc" />
+            android:label="@string/title_display_geoloc"/>
         <activity
             android:name="com.gsma.rcs.ri.messaging.geoloc.SelectGeoloc"
-            android:label="@string/label_select_geoloc" />
+            android:label="@string/label_select_geoloc"/>
         <activity
             android:name="com.gsma.rcs.ri.messaging.geoloc.DisplayGeoloc"
-            android:label="@string/title_display_geoloc" />
+            android:label="@string/title_display_geoloc"/>
         <activity
             android:name="com.gsma.rcs.ri.messaging.chat.group.SendGroupFile"
             android:icon="@drawable/ri_quick_ft_icon"
-            android:label="@string/menu_transfer_file" />
+            android:label="@string/menu_transfer_file"/>
         <activity
             android:name="com.gsma.rcs.ri.messaging.chat.single.SendSingleFile"
             android:icon="@drawable/ri_quick_ft_icon"
-            android:label="@string/menu_transfer_file" />
+            android:label="@string/menu_transfer_file"/>
 
         <service
             android:name="com.gsma.rcs.ri.messaging.chat.single.SingleChatIntentService"
-            android:exported="false" />
+            android:exported="false"/>
         <service
             android:name="com.gsma.rcs.ri.messaging.chat.group.GroupChatIntentService"
-            android:exported="false" />
+            android:exported="false"/>
 
         <!-- Sharing API -->
 
-        <activity android:name="com.gsma.rcs.ri.sharing.TestSharingApi" />
+        <activity android:name="com.gsma.rcs.ri.sharing.TestSharingApi"/>
 
         <!-- Image sharing API -->
         <activity
             android:name="com.gsma.rcs.ri.sharing.image.InitiateImageSharing"
             android:label="@string/menu_initiate_image_sharing">
             <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.VIEW"/>
 
-                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.DEFAULT"/>
 
-                <data android:mimeType="vnd.android.cursor.item/com.gsma.services.rcs.image-share" />
+                <data android:mimeType="vnd.android.cursor.item/com.gsma.services.rcs.image-share"/>
             </intent-filter>
         </activity>
 
@@ -310,51 +302,53 @@
             android:name="com.gsma.rcs.ri.sharing.image.ImageSharingInvitationReceiver"
             android:exported="true">
             <intent-filter>
-                <action android:name="com.gsma.services.rcs.sharing.image.action.NEW_IMAGE_SHARING" />
+                <action android:name="com.gsma.services.rcs.sharing.image.action.NEW_IMAGE_SHARING"/>
             </intent-filter>
         </receiver>
 
         <activity
             android:name="com.gsma.rcs.ri.sharing.image.ReceiveImageSharing"
             android:label="@string/title_image_sharing"
-            android:launchMode="singleTop" />
+            android:launchMode="singleTop"/>
 
         <service
             android:name="com.gsma.rcs.ri.sharing.image.ImageSharingIntentService"
-            android:exported="false" />
+            android:exported="false"/>
 
         <!-- Geoloc sharing API -->
+
         <activity
             android:name="com.gsma.rcs.ri.sharing.geoloc.InitiateGeolocSharing"
-            android:label="@string/menu_initiate_geoloc_sharing" />
+            android:label="@string/menu_initiate_geoloc_sharing"/>
 
         <receiver
             android:name="com.gsma.rcs.ri.sharing.geoloc.GeolocSharingInvitationReceiver"
             android:exported="true">
             <intent-filter>
-                <action android:name="com.gsma.services.rcs.sharing.geoloc.action.NEW_GEOLOC_SHARING" />
+                <action android:name="com.gsma.services.rcs.sharing.geoloc.action.NEW_GEOLOC_SHARING"/>
             </intent-filter>
         </receiver>
 
         <activity
             android:name="com.gsma.rcs.ri.sharing.geoloc.ReceiveGeolocSharing"
             android:label="@string/title_geoloc_sharing"
-            android:launchMode="singleTop" />
+            android:launchMode="singleTop"/>
 
         <service
             android:name="com.gsma.rcs.ri.sharing.geoloc.GeolocSharingIntentService"
-            android:exported="false" />
+            android:exported="false"/>
 
         <!-- Video sharing API -->
+
         <activity
             android:name="com.gsma.rcs.ri.sharing.video.OutgoingVideoSharing"
             android:label="@string/menu_video_sharing">
             <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.VIEW"/>
 
-                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.DEFAULT"/>
 
-                <data android:mimeType="vnd.android.cursor.item/com.gsma.services.rcs.video-share" />
+                <data android:mimeType="vnd.android.cursor.item/com.gsma.services.rcs.video-share"/>
             </intent-filter>
         </activity>
 
@@ -362,68 +356,68 @@
             android:name="com.gsma.rcs.ri.sharing.video.VideoSharingInvitationReceiver"
             android:exported="true">
             <intent-filter>
-                <action android:name="com.gsma.services.rcs.sharing.video.action.NEW_VIDEO_SHARING" />
+                <action android:name="com.gsma.services.rcs.sharing.video.action.NEW_VIDEO_SHARING"/>
             </intent-filter>
         </receiver>
 
         <activity
             android:name="com.gsma.rcs.ri.sharing.video.IncomingVideoSharing"
             android:exported="true"
-            android:label="@string/menu_video_sharing" />
+            android:label="@string/menu_video_sharing"/>
 
         <service
             android:name="com.gsma.rcs.ri.sharing.video.VideoSharingIntentService"
-            android:exported="false" />
+            android:exported="false"/>
 
         <!-- MM session API -->
 
-        <activity android:name="com.gsma.rcs.ri.extension.TestMultimediaSessionApi" />
+        <activity android:name="com.gsma.rcs.ri.extension.TestMultimediaSessionApi"/>
         <activity
             android:name="com.gsma.rcs.ri.extension.messaging.InitiateMessagingSession"
             android:label="@string/menu_initiate_messaging_session">
             <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.VIEW"/>
 
-                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.DEFAULT"/>
 
-                <data android:mimeType="vnd.android.cursor.item/com.gsma.services.rcs.extensions" />
+                <data android:mimeType="vnd.android.cursor.item/com.gsma.services.rcs.extensions"/>
             </intent-filter>
         </activity>
         <activity
             android:name="com.gsma.rcs.ri.extension.messaging.MessagingSessionView"
-            android:label="@string/title_messaging_session" />
+            android:label="@string/title_messaging_session"/>
         <activity
             android:name="com.gsma.rcs.ri.extension.messaging.MessagingSessionList"
-            android:label="@string/menu_messaging_sessions_list" />
+            android:label="@string/menu_messaging_sessions_list"/>
         <activity
             android:name="com.gsma.rcs.ri.extension.streaming.InitiateStreamingSession"
-            android:label="@string/menu_initiate_streaming_session" />
+            android:label="@string/menu_initiate_streaming_session"/>
         <activity
             android:name="com.gsma.rcs.ri.extension.streaming.StreamingSessionView"
-            android:label="@string/title_streaming_session" />
+            android:label="@string/title_streaming_session"/>
         <activity
             android:name="com.gsma.rcs.ri.extension.SendInstantMessage"
-            android:label="@string/title_instant_session" />
+            android:label="@string/title_instant_session"/>
         <activity
             android:name="com.gsma.rcs.ri.extension.streaming.StreamingSessionList"
-            android:label="@string/menu_streaming_sessions_list" />
+            android:label="@string/menu_streaming_sessions_list"/>
 
         <receiver
             android:name="com.gsma.rcs.ri.extension.SessionInvitationReceiver"
             android:exported="true">
             <intent-filter>
-                <action android:name="com.gsma.services.rcs.extension.action.NEW_MESSAGING_SESSION" />
-                <data android:mimeType="com.gsma.services.rcs/ext.messaging" />
+                <action android:name="com.gsma.services.rcs.extension.action.NEW_MESSAGING_SESSION"/>
+                <data android:mimeType="com.gsma.services.rcs/ext.messaging"/>
 
-                <category android:name="android.intent.category.LAUNCHER" />
-                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.LAUNCHER"/>
+                <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
             <intent-filter>
-                <action android:name="com.gsma.services.rcs.extension.action.NEW_STREAMING_SESSION" />
-                <data android:mimeType="com.gsma.services.rcs/ext.streaming" />
+                <action android:name="com.gsma.services.rcs.extension.action.NEW_STREAMING_SESSION"/>
+                <data android:mimeType="com.gsma.services.rcs/ext.streaming"/>
 
-                <category android:name="android.intent.category.LAUNCHER" />
-                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.LAUNCHER"/>
+                <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
         </receiver>
 
@@ -431,23 +425,23 @@
             android:name="com.gsma.rcs.ri.extension.InstantMessageReceiver"
             android:exported="true">
             <intent-filter>
-                <action android:name="com.gsma.services.rcs.extension.action.NEW_INSTANT_MESSAGE" />
-                <data android:mimeType="com.gsma.services.rcs/ext.messaging" />
+                <action android:name="com.gsma.services.rcs.extension.action.NEW_INSTANT_MESSAGE"/>
+                <data android:mimeType="com.gsma.services.rcs/ext.messaging"/>
 
-                <category android:name="android.intent.category.LAUNCHER" />
-                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.LAUNCHER"/>
+                <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
         </receiver>
 
         <service
             android:name="com.gsma.rcs.ri.extension.MultiMediaSessionIntentService"
-            android:exported="false" />
+            android:exported="false"/>
 
         <!-- File Upload API -->
 
         <activity
             android:name="com.gsma.rcs.ri.upload.InitiateFileUpload"
-            android:label="@string/title_initiate_upload" />
+            android:label="@string/title_initiate_upload"/>
 
         <!-- Log API -->
         <activity
@@ -455,75 +449,84 @@
             android:label="@string/title_history_log_messaging"
             android:launchMode="singleTop">
             <intent-filter>
-                <action android:name="android.intent.action.SEND" />
-                <action android:name="android.intent.action.SEND_MULTIPLE" />
+                <action android:name="android.intent.action.SEND"/>
+                <action android:name="android.intent.action.SEND_MULTIPLE"/>
 
-                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.DEFAULT"/>
 
-                <data android:mimeType="application/*" />
-                <data android:mimeType="audio/*" />
-                <data android:mimeType="image/*" />
-                <data android:mimeType="message/*" />
-                <data android:mimeType="multipart/*" />
-                <data android:mimeType="text/*" />
-                <data android:mimeType="video/*" />
+                <data android:mimeType="application/*"/>
+                <data android:mimeType="audio/*"/>
+                <data android:mimeType="image/*"/>
+                <data android:mimeType="message/*"/>
+                <data android:mimeType="multipart/*"/>
+                <data android:mimeType="text/*"/>
+                <data android:mimeType="video/*"/>
             </intent-filter>
             <intent-filter>
-                <category android:name="android.intent.category.LAUNCHER" />
-                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.LAUNCHER"/>
+                <category android:name="android.intent.category.DEFAULT"/>
 
-                <action android:name="com.gsma.services.rcs.action.VIEW_ONE_TO_ONE_CHAT" />
+                <action android:name="com.gsma.services.rcs.action.VIEW_ONE_TO_ONE_CHAT"/>
             </intent-filter>
             <intent-filter>
-                <category android:name="android.intent.category.LAUNCHER" />
-                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.LAUNCHER"/>
+                <category android:name="android.intent.category.DEFAULT"/>
 
-                <action android:name="com.gsma.services.rcs.action.VIEW_GROUP_CHAT" />
+                <action android:name="com.gsma.services.rcs.action.VIEW_GROUP_CHAT"/>
             </intent-filter>
             <intent-filter>
-                <category android:name="android.intent.category.LAUNCHER" />
-                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.LAUNCHER"/>
+                <category android:name="android.intent.category.DEFAULT"/>
 
-                <action android:name="com.gsma.services.rcs.action.VIEW_FILE_TRANSFER" />
+                <action android:name="com.gsma.services.rcs.action.VIEW_FILE_TRANSFER"/>
             </intent-filter>
 
         </activity>
         <activity
             android:name="com.gsma.rcs.ri.sharing.geoloc.GeolocSharingLogView"
-            android:label="@string/title_sharing_log_item" />
+            android:label="@string/title_sharing_log_item"/>
         <activity
             android:name="com.gsma.rcs.ri.sharing.image.ImageSharingLogView"
-            android:label="@string/title_sharing_log_item" />
+            android:label="@string/title_sharing_log_item"/>
         <activity
             android:name="com.gsma.rcs.ri.sharing.video.VideoSharingLogView"
-            android:label="@string/title_sharing_log_item" />
+            android:label="@string/title_sharing_log_item"/>
         <activity
             android:name="com.gsma.rcs.ri.messaging.filetransfer.FileTransferLogView"
-            android:label="@string/title_sharing_log_item" />
+            android:label="@string/title_sharing_log_item"/>
         <activity
             android:name="com.gsma.rcs.ri.messaging.chat.ChatMessageLogView"
-            android:label="@string/title_sharing_log_item" />
+            android:label="@string/title_sharing_log_item"/>
         <activity
             android:name="com.gsma.rcs.ri.messaging.filetransfer.AudioMessageRecordActivity"
-            android:label="@string/menu_transfer_file" />
+            android:label="@string/menu_transfer_file"/>
         <activity
             android:name="com.gsma.rcs.ri.sharing.SharingListView"
-            android:label="@string/title_sharing_log" />
+            android:label="@string/title_sharing_log"/>
 
         <receiver
             android:name="com.gsma.rcs.ri.messaging.chat.single.UndeliveredMessageReceiver"
             android:exported="true">
             <intent-filter>
-                <action android:name="com.gsma.services.rcs.chat.action.MESSAGE_DELIVERY_EXPIRED" />
+                <action android:name="com.gsma.services.rcs.chat.action.MESSAGE_DELIVERY_EXPIRED"/>
             </intent-filter>
         </receiver>
         <receiver
             android:name="com.gsma.rcs.ri.messaging.filetransfer.UndeliveredFileReceiver"
             android:exported="true">
             <intent-filter>
-                <action android:name="com.gsma.services.rcs.filetransfer.action.FILE_TRANSFER_DELIVERY_EXPIRED" />
+                <action android:name="com.gsma.services.rcs.filetransfer.action.FILE_TRANSFER_DELIVERY_EXPIRED"/>
             </intent-filter>
         </receiver>
+
+        <activity
+            android:name=".permissions.PermissionsActivity"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>
