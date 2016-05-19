@@ -1,0 +1,494 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:background="@color/material_blue_grey_800"
+            android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dip"
+            android:text="@string/Max_photo_icon_size"/>
+
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/MaxPhotoIconSize"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:inputType="number"
+            android:lines="1"/>
+
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dip"
+            android:text="@string/Max_length_of_the_freetext"/>
+
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/MaxFreetextLength"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:inputType="number"
+            android:lines="1"
+            android:maxLength="5"/>
+
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dip"
+            android:text="@string/Max_number_of_participants_in_a_group_chat"/>
+
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/MaxChatParticipants"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:inputType="number"
+            android:lines="1"
+            android:maxLength="2"/>
+
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dip"
+            android:text="@string/Max_length_of_a_chat_message"/>
+
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/MaxChatMessageLength"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:inputType="number"
+            android:lines="1"
+            android:maxLength="5"/>
+
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dip"
+            android:text="@string/Max_length_of_a_group_chat_message"/>
+
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/MaxGroupChatMessageLength"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:inputType="number"
+            android:lines="1"
+            android:maxLength="5"/>
+
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dip"
+            android:text="@string/Idle_duration_of_a_chat_session_milliseconds"/>
+
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/ChatIdleDuration"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:inputType="number"
+            android:lines="1"
+            android:maxLength="13"/>
+
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dip"
+            android:text="@string/Max_size_of_a_file_transfer"/>
+
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/MaxFileTransferSize"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:inputType="number"
+            android:lines="1"/>
+
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dip"
+            android:text="@string/Threshold_warning_on_file_transfer_size"/>
+
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/WarnFileTransferSize"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:inputType="number"
+            android:lines="1"/>
+
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dip"
+            android:text="@string/Max_size_of_an_image_share"/>
+
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/MaxImageShareSize"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:inputType="number"
+            android:lines="1"/>
+
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dip"
+            android:text="@string/Max_duration_of_a_video_share_milliseconds"/>
+
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/MaxVideoShareDuration"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:inputType="number"
+            android:lines="1"
+            android:maxLength="13"/>
+
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dip"
+            android:text="@string/Max_duration_of_audio_message_milliseconds"/>
+
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/MaxAudioMessageDuration"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:inputType="number"
+            android:lines="1"
+            android:maxLength="13"/>
+
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dip"
+
+            android:text="@string/Max_number_of_simultaneous_chat_sessions"/>
+
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/MaxChatSessions"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:inputType="number"
+            android:lines="1"
+            android:maxLength="2"/>
+
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dip"
+            android:text="@string/Max_number_of_simultaneous_file_transfer_sessions"/>
+
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/MaxFileTransferSessions"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:inputType="number"
+            android:lines="1"
+            android:maxLength="2"/>
+
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dip"
+            android:text="@string/Max_number_of_concurrent_outgoing_file_transfer_sessions"/>
+
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/MaxConcurrentOutgoingFileTransferSessions"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:inputType="number"
+            android:lines="1"
+            android:maxLength="2"/>
+
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dip"
+            android:text="@string/Max_number_of_simultaneous_IP_call_sessions"/>
+
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/MaxIpCallSessions"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:inputType="number"
+            android:lines="1"
+            android:maxLength="2"/>
+
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dip"
+            android:text="@string/IM_session_start_mode"/>
+
+        <android.support.v7.widget.AppCompatSpinner
+            android:id="@+id/ImSessionStart"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:drawSelectorOnTop="true"/>
+
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dip"
+            android:text="@string/Max_entries_per_contact_for_chat_history"/>
+
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/MaxChatLogEntries"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:inputType="numberSigned"
+            android:lines="1"
+            android:maxLength="4"/>
+
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dip"
+            android:text="@string/Max_entries_per_contact_for_richcall_history"/>
+
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/MaxRichcallLogEntries"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:inputType="numberSigned"
+            android:lines="1"
+            android:maxLength="4"/>
+
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dip"
+            android:text="@string/Max_entries_per_contact_for_IP_call_history"/>
+
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/MaxIpcallLogEntries"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:inputType="numberSigned"
+            android:lines="1"
+            android:maxLength="4"/>
+
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dip"
+            android:text="@string/Max_length_of_a_geolocation_label"/>
+
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/MaxGeolocLabelLength"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:inputType="number"
+            android:lines="1"
+            android:maxLength="5"/>
+
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dip"
+            android:text="@string/Expiration_time_of_a_geolocation_milliseconds"/>
+
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/GeolocExpirationTime"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:inputType="number"
+            android:lines="1"
+            android:maxLength="13"/>
+
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dip"
+            android:text="@string/Idle_duration_of_a_callcomposer_session_milliseconds"/>
+
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/CallComposerIdleDuration"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:inputType="number"
+            android:lines="1"
+            android:maxLength="13"/>
+
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dip"
+            android:text="@string/Directory_path_to_store_photos"/>
+
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/DirectoryPathPhotos"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:inputType="textUri"/>
+
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dip"
+            android:text="@string/Directory_path_to_store_videos"/>
+
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/DirectoryPathVideos"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:inputType="textUri"/>
+
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dip"
+            android:text="@string/Directory_path_to_store_audios"/>
+
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/DirectoryPathAudios"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:inputType="textUri"/>
+
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dip"
+            android:text="@string/Directory_path_to_store_files"/>
+
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/DirectoryPathFileIcons"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:inputType="textUri"/>
+
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dip"
+            android:text="@string/Directory_path_to_store_fileicons"/>
+
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/DirectoryPathFiles"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:inputType="textUri"/>
+
+        <android.support.v7.widget.AppCompatCheckBox
+            android:id="@+id/SmsFallbackService"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:text="@string/SMS_fallback_service"/>
+
+        <android.support.v7.widget.AppCompatCheckBox
+            android:id="@+id/StoreForwardServiceWarning"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:text="@string/Store_and_Forward_service_warning"/>
+
+        <android.support.v7.widget.AppCompatCheckBox
+            android:id="@+id/AutoAcceptFileTransfer"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:text="@string/Auto_accept_file_transfer"/>
+
+        <android.support.v7.widget.AppCompatCheckBox
+            android:id="@+id/AutoAcceptFileTransferInRoaming"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:text="@string/Auto_accept_file_transfer_in_roaming"/>
+
+        <android.support.v7.widget.AppCompatCheckBox
+            android:id="@+id/AutoAcceptFileTransferChangeable"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:text="@string/Auto_accept_file_transfer_changeable"/>
+
+        <android.support.v7.widget.AppCompatCheckBox
+            android:id="@+id/AutoAcceptChat"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:text="@string/Auto_accept_chat_invitation"/>
+
+        <android.support.v7.widget.AppCompatCheckBox
+            android:id="@+id/AutoAcceptGroupChat"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:text="@string/Auto_accept_group_chat_invitation"/>
+
+        <android.support.v7.widget.AppCompatCheckBox
+            android:id="@+id/EnrichCalling"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:text="@string/EnrichCalling_support"/>
+    </LinearLayout>
+</ScrollView>

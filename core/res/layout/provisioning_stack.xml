@@ -1,0 +1,702 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:background="@color/material_blue_grey_800"
+            android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dip"
+            android:text="@string/config_mode"/>
+
+        <android.support.v7.widget.AppCompatSpinner
+            android:id="@+id/Autoconfig"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:drawSelectorOnTop="true"/>
+
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dip"
+            android:text="@string/Vendor"/>
+
+        <android.support.v7.widget.AppCompatTextView
+            android:id="@+id/client_vendor"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:enabled="false"/>
+
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dip"
+            android:text="@string/enable_rcs_switch"/>
+
+        <android.support.v7.widget.AppCompatSpinner
+            android:id="@+id/EnableRcsSwitch"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:drawSelectorOnTop="true"/>
+
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dip"
+            android:text="@string/Secondary_provisioning_server"/>
+
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/SecondaryProvisioningAddress"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:inputType="text"
+            android:lines="1"
+            android:maxLength="100"
+            android:singleLine="true"/>
+
+        <android.support.v7.widget.AppCompatCheckBox
+            android:id="@+id/SecondaryProvisioningAddressOnly"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:text="@string/Use_only_the_secondary_provisioning_server"/>
+
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dip"
+            android:text="@string/Network_access"/>
+
+        <android.support.v7.widget.AppCompatSpinner
+            android:id="@+id/NetworkAccess"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:drawSelectorOnTop="true"/>
+
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dip"
+            android:text="@string/IMS_service_polling_period_milliseconds"/>
+
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/ImsServicePollingPeriod"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:inputType="number"
+            android:lines="1"
+            android:maxLength="13"
+            android:singleLine="true"/>
+
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dip"
+            android:text="@string/Default_protocol_for_file_transfer"/>
+
+        <android.support.v7.widget.AppCompatSpinner
+            android:id="@+id/FtProtocol"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:drawSelectorOnTop="true"/>
+
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dip"
+            android:text="@string/Default_SIP_protocol_for_Mobile_access"/>
+
+        <android.support.v7.widget.AppCompatSpinner
+            android:id="@+id/SipDefaultProtocolForMobile"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:drawSelectorOnTop="true"/>
+
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dip"
+            android:text="@string/Default_SIP_protocol_for_Wi_Fi_access"/>
+
+        <android.support.v7.widget.AppCompatSpinner
+            android:id="@+id/SipDefaultProtocolForWifi"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:drawSelectorOnTop="true"/>
+
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dip"
+            android:text="@string/TLS_root_or_self_signed_certificate_from_sdcard"/>
+
+        <android.support.v7.widget.AppCompatSpinner
+            android:id="@+id/TlsCertificateRoot"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:drawSelectorOnTop="true"/>
+
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dip"
+            android:text="@string/TLS_intermediate_certificate_from_sdcard"/>
+
+        <android.support.v7.widget.AppCompatSpinner
+            android:id="@+id/TlsCertificateIntermediate"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:drawSelectorOnTop="true"/>
+
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dip"
+            android:text="@string/Default_SIP_port"/>
+
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/SipListeningPort"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:inputType="number"
+            android:lines="1"
+            android:maxLength="5"
+            android:singleLine="true"/>
+
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dip"
+            android:text="@string/SIP_timer_base_T1_milliseconds"/>
+
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/SipTimerT1"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:inputType="number"
+            android:lines="1"
+            android:maxLength="5"
+            android:singleLine="true"/>
+
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dip"
+            android:text="@string/SIP_timer_T2_milliseconds"/>
+
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/SipTimerT2"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:inputType="number"
+            android:lines="1"
+            android:maxLength="5"
+            android:singleLine="true"/>
+
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dip"
+            android:text="@string/SIP_timer_T4_milliseconds"/>
+
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/SipTimerT4"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:inputType="number"
+            android:lines="1"
+            android:maxLength="5"
+            android:singleLine="true"/>
+
+        <android.support.v7.widget.AppCompatEditText
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dip"
+            android:text="@string/SIP_keep_alive_period_milliseconds"/>
+
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/SipKeepAlivePeriod"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:inputType="number"
+            android:lines="1"
+            android:maxLength="8"
+            android:singleLine="true"/>
+
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dip"
+            android:text="@string/SIP_transaction_timeout"/>
+
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/SipTransactionTimeout"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:inputType="number"
+            android:lines="1"
+            android:maxLength="6"
+            android:singleLine="true"/>
+
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dip"
+            android:text="@string/Default_TCP_port_for_MSRP_session"/>
+
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/DefaultMsrpPort"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:inputType="number"
+            android:lines="1"
+            android:maxLength="5"
+            android:singleLine="true"/>
+
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dip"
+            android:text="@string/Default_UDP_port_for_RTP_session"/>
+
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/DefaultRtpPort"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:inputType="number"
+            android:lines="1"
+            android:maxLength="5"
+            android:singleLine="true"/>
+
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dip"
+            android:text="@string/MSRP_transaction_timeout_milliseconds"/>
+
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/MsrpTransactionTimeout"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:inputType="number"
+            android:lines="1"
+            android:maxLength="8"
+            android:singleLine="true"/>
+
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dip"
+            android:text="@string/Registration_expire_period_milliseconds"/>
+
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/RegisterExpirePeriod"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:inputType="number"
+            android:lines="1"
+            android:maxLength="13"
+            android:singleLine="true"/>
+
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dip"
+            android:text="@string/Registration_retry_base_time_milliseconds"/>
+
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/RegisterRetryBaseTime"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:inputType="number"
+            android:lines="1"
+            android:maxLength="13"
+            android:singleLine="true"/>
+
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dip"
+            android:text="@string/Registration_retry_max_time_milliseconds"/>
+
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/RegisterRetryMaxTime"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:inputType="number"
+            android:lines="1"
+            android:maxLength="13"
+            android:singleLine="true"/>
+
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dip"
+            android:text="@string/Publish_expire_period_milliseconds"/>
+
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/PublishExpirePeriod"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:inputType="number"
+            android:lines="1"
+            android:maxLength="13"
+            android:singleLine="true"/>
+
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dip"
+            android:text="@string/Revoke_timeout_milliseconds"/>
+
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/RevokeTimeout"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:inputType="number"
+            android:lines="1"
+            android:maxLength="13"
+            android:singleLine="true"/>
+
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dip"
+            android:text="@string/Ringing_session_period"/>
+
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/RingingPeriod"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:inputType="number"
+            android:lines="1"
+            android:maxLength="10"
+            android:singleLine="true"/>
+
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dip"
+            android:text="@string/Subscribe_expiration_timeout_milliseconds"/>
+
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/SubscribeExpirePeriod"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:inputType="number"
+            android:lines="1"
+            android:maxLength="13"
+            android:singleLine="true"/>
+
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dip"
+            android:text="@string/Is_composing_timeout_for_chat_ms"/>
+
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/IsComposingTimeout"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:inputType="number"
+            android:lines="1"
+            android:maxLength="5"
+            android:singleLine="true"/>
+
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dip"
+            android:text="@string/Session_refresh_expire_period_milliseconds"/>
+
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/SessionRefreshExpirePeriod"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:inputType="number"
+            android:lines="1"
+            android:maxLength="13"
+            android:singleLine="true"/>
+
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dip"
+            android:text="@string/Capability_refresh_timeout_milliseconds"/>
+
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/CapabilityRefreshTimeout"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:inputType="numberSigned"
+            android:lines="1"
+            android:maxLength="13"
+            android:singleLine="true"/>
+
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dip"
+            android:text="@string/Capability_expiry_timeout_milliseconds"/>
+
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/CapabilityExpiryTimeout"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:inputType="numberSigned"
+            android:lines="1"
+            android:maxLength="13"
+            android:singleLine="true"/>
+
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dip"
+            android:text="@string/Capability_polling_period_milliseconds"/>
+
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/CapabilityPollingPeriod"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:inputType="numberSigned"
+            android:lines="1"
+            android:maxLength="13"
+            android:singleLine="true"/>
+
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dip"
+            android:text="@string/Max_MSRP_length_for_extensions_bytes"/>
+
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/MaxMsrpLengthExtensions"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:inputType="numberSigned"
+            android:lines="1"
+            android:maxLength="6"
+            android:singleLine="true"/>
+
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dip"
+            android:text="@string/Messaging_capabilities_validity"/>
+
+        <android.support.v7.widget.AppCompatEditText
+            android:id="@+id/MessagingCapabilitiesValidity"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:inputType="numberSigned"
+            android:lines="1"
+            android:maxLength="6"
+            android:singleLine="true"/>
+
+        <android.support.v7.widget.AppCompatCheckBox
+            android:id="@+id/TcpFallback"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:paddingTop="5dip"
+            android:text="@string/Enable_SIP_TCP_fallback"/>
+
+        <android.support.v7.widget.AppCompatCheckBox
+            android:id="@+id/SipKeepAlive"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:text="@string/Enable_SIP_keep_alive"/>
+
+        <android.support.v7.widget.AppCompatCheckBox
+            android:id="@+id/TelUriFormat"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:text="@string/Tel_URI_format"/>
+
+        <android.support.v7.widget.AppCompatCheckBox
+            android:id="@+id/ImAlwaysOn"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:text="@string/IM_always_on"/>
+
+        <android.support.v7.widget.AppCompatCheckBox
+            android:id="@+id/FtAlwaysOn"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:text="@string/FT_always_on"/>
+
+        <android.support.v7.widget.AppCompatCheckBox
+            android:id="@+id/FtHttpAlwaysOn"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:text="@string/FT_HTTP_always_on"/>
+
+        <android.support.v7.widget.AppCompatCheckBox
+            android:id="@+id/InviteOnlyGroupchatSF"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:text="@string/Invite_Only_Groupchat_SF"/>
+
+        <android.support.v7.widget.AppCompatCheckBox
+            android:id="@+id/ImUseReports"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:text="@string/IM_delivery_reports"/>
+
+        <android.support.v7.widget.AppCompatCheckBox
+            android:id="@+id/PermanentState"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:text="@string/Permanent_state_mode"/>
+
+        <android.support.v7.widget.AppCompatCheckBox
+            android:id="@+id/Gruu"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:text="@string/GRUU"/>
+
+        <android.support.v7.widget.AppCompatCheckBox
+            android:id="@+id/CpuAlwaysOn"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:text="@string/CPU_Always_on"/>
+
+        <android.support.v7.widget.AppCompatCheckBox
+            android:id="@+id/SecureMsrpOverWifi"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:text="@string/Secure_MSRP_over_Wi_Fi_access"/>
+
+        <android.support.v7.widget.AppCompatCheckBox
+            android:id="@+id/SecureRtpOverWifi"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:enabled="false"
+            android:text="@string/Secure_RTP_over_Wi_Fi_access"/>
+
+        <android.support.v7.widget.AppCompatCheckBox
+            android:id="@+id/ImeiAsDeviceId"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:text="@string/IMEI_as_device_ID"/>
+
+        <android.support.v7.widget.AppCompatCheckBox
+            android:id="@+id/ControlExtensions"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:text="@string/Control_extensions"/>
+
+        <android.support.v7.widget.AppCompatCheckBox
+            android:id="@+id/AllowExtensions"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:text="@string/Allow_extensions"/>
+    </LinearLayout>
+</ScrollView>

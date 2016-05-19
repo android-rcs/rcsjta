@@ -8,7 +8,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,313 +22,316 @@
 
 package com.gsma.rcs.provisioning.local;
 
+import com.gsma.rcs.R;
 import com.gsma.rcs.platform.AndroidFactory;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.provider.settings.RcsSettingsData;
+import com.gsma.rcs.provisioning.ProvisioningParser;
+import com.gsma.rcs.utils.CloseableUtils;
 import com.gsma.rcs.utils.ContactUtil;
-import com.gsma.rcs.utils.ContactUtil.PhoneNumber;
+import com.gsma.rcs.utils.logger.Logger;
+import com.gsma.services.rcs.CommonServiceConfiguration;
 import com.gsma.services.rcs.contact.ContactId;
 
-import android.app.TabActivity;
-import android.content.Intent;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.graphics.Color;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.widget.CheckBox;
+import android.os.Environment;
+import android.support.v4.view.ViewPager;
+import android.support.v7.app.AppCompatActivity;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
-import android.widget.TabHost;
+import android.widget.Toast;
 
-/**
- * Main
- * 
- * @author jexa7410
- * @author Philippe LEMORDANT
- */
-@SuppressWarnings("deprecation")
-public class Provisioning extends TabActivity {
+import org.xml.sax.SAXException;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FilenameFilter;
+import java.io.IOException;
+
+public class Provisioning extends AppCompatActivity {
+
+    private static final String PROVISIONING_EXTENSION = ".xml";
+
+    /**
+     * The XML provisioning file loaded manually contains a MSISDN token which must be replaced by
+     * the actual value
+     */
+    private static final String TOKEN_MSISDN = "__s__MSISDN__e__";
+
+    /**
+     * Folder path for provisioning file
+     */
+    private static final String PROVISIONING_FOLDER_PATH = Environment
+            .getExternalStorageDirectory().getPath();
+    private String[] titles = new String[] {
+            "Profile", "Stack", "Service", "Capabilities", "Logger"
+    };
+
+    private static final Logger sLogger = Logger.getLogger(Provisioning.class.getName());
+    private ViewPagerAdapter mAdapter;
+    private RcsSettings mRcsSettings;
+    private Provisioning mActivity;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mActivity = this;
+        setContentView(R.layout.provisioning);
+
         LocalContentResolver localContentResolver = new LocalContentResolver(
                 getApplicationContext());
-        AndroidFactory
-                .setApplicationContext(this, RcsSettings.getInstance(localContentResolver));
+        mRcsSettings = RcsSettings.getInstance(localContentResolver);
+        AndroidFactory.setApplicationContext(this, mRcsSettings);
 
-        // Set tabs
-        final TabHost tabHost = getTabHost();
-        tabHost.addTab(tabHost.newTabSpec("profile").setIndicator("Profile", null)
-                .setContent(new Intent(this, ProfileProvisioning.class)));
-        tabHost.addTab(tabHost.newTabSpec("stack").setIndicator("Stack", null)
-                .setContent(new Intent(this, StackProvisioning.class)));
-        tabHost.addTab(tabHost.newTabSpec("ui").setIndicator("Service", null)
-                .setContent(new Intent(this, ServiceProvisioning.class)));
-        tabHost.addTab(tabHost.newTabSpec("logger").setIndicator("Logger", null)
-                .setContent(new Intent(this, LoggerProvisioning.class)));
+        ViewPager pager = (ViewPager) findViewById(R.id.viewpager);
+        SlidingTabLayout slidingTabLayout = (SlidingTabLayout) findViewById(R.id.sliding_tabs);
+        mAdapter = new ViewPagerAdapter(getSupportFragmentManager(), titles, mRcsSettings);
+        pager.setAdapter(mAdapter);
+
+        slidingTabLayout.setViewPager(pager);
+        slidingTabLayout.setCustomTabColorizer(new SlidingTabLayout.TabColorizer() {
+            @Override
+            public int getIndicatorColor(int position) {
+                return Color.WHITE;
+            }
+        });
     }
 
-    /**
-     * Set edit text either from bundle or from RCS settings if bundle is null
-     * 
-     * @param viewID the view ID for the text edit
-     * @param settingsKey the key of the RCS parameter
-     * @param helper the provisioning helper
-     */
-    /* package private */static void setStringEditTextParam(int viewID, String settingsKey,
-            ProvisioningHelper helper) {
-        String parameter;
-        Bundle bundle = helper.getBundle();
-        if (bundle != null && bundle.containsKey(settingsKey)) {
-            parameter = bundle.getString(settingsKey);
-        } else {
-            parameter = helper.getRcsSettings().readString((settingsKey));
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_provisioning, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.save:
+                if (sLogger.isActivated()) {
+                    sLogger.debug("Save provisioning");
+                }
+                for (IProvisioningFragment fragment : mAdapter.getFragments()) {
+                    fragment.persistRcsSettings();
+                }
+                Toast.makeText(this, getString(R.string.label_reboot_service), Toast.LENGTH_LONG)
+                        .show();
+                return true;
+
+            case R.id.load:
+                if (sLogger.isActivated()) {
+                    sLogger.debug("Load provisioning");
+                }
+                loadXmlFile();
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
         }
-        EditText editText = (EditText) helper.getActivity().findViewById(viewID);
-        editText.setText(parameter == null ? "" : parameter);
     }
 
-    /**
-     * Set edit text either from bundle or from RCS settings if bundle is null
-     * 
-     * @param viewID the view ID for the text edit
-     * @param settingsKey the key of the RCS parameter
-     * @param helper the provisioning helper
-     */
-    /* package private */static void setIntegerEditTextParam(int viewID, String settingsKey,
-            ProvisioningHelper helper) {
-        String parameter;
-        Bundle bundle = helper.getBundle();
-        if (bundle != null && bundle.containsKey(settingsKey)) {
-            parameter = bundle.getString(settingsKey);
-        } else {
-            parameter = Integer.toString(helper.getRcsSettings().readInteger((settingsKey)));
+    private void loadXmlFile() {
+        final boolean logActivated = sLogger.isActivated();
+        if (logActivated) {
+            sLogger.debug("load XML provisioning File");
         }
-        EditText editText = (EditText) helper.getActivity().findViewById(viewID);
-        editText.setText(parameter);
+        LayoutInflater factory = LayoutInflater.from(this);
+        final View view = factory.inflate(R.layout.rcs_provisioning_generate_profile, null);
+        final EditText textEdit = (EditText) view.findViewById(R.id.msisdn);
+        ContactId me = mRcsSettings.getUserProfileImsUserName();
+        textEdit.setText(me == null ? "" : me.toString());
+
+        String[] xmlFiles = getProvisioningFiles();
+        final Spinner spinner = (Spinner) view.findViewById(R.id.XmlProvisioningFile);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_item, xmlFiles);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(adapter);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this)
+                .setTitle(R.string.label_generate_profile).setView(view)
+                .setNegativeButton(R.string.label_cancel, null)
+                .setPositiveButton(R.string.label_ok, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        ContactUtil.PhoneNumber number = ContactUtil
+                                .getValidPhoneNumberFromAndroid(textEdit.getText().toString());
+                        if (number == null) {
+                            Toast.makeText(mActivity, getString(R.string.label_load_failed),
+                                    Toast.LENGTH_LONG).show();
+                            return;
+                        }
+                        ContactId contact = ContactUtil.createContactIdFromValidatedData(number);
+                        String selectedProvisioningFile = (String) spinner.getSelectedItem();
+                        if (selectedProvisioningFile == null
+                                || selectedProvisioningFile
+                                        .equals(getString(R.string.label_no_xml_file))) {
+                            Toast.makeText(mActivity, getString(R.string.label_load_failed),
+                                    Toast.LENGTH_LONG).show();
+                            return;
+                        }
+                        loadProfile(contact, Uri.fromFile(new File(PROVISIONING_FOLDER_PATH,
+                                selectedProvisioningFile)));
+                    }
+                });
+        AlertDialog dialog = builder.create();
+        dialog.setCanceledOnTouchOutside(false);
+        dialog.show();
     }
 
-    /**
-     * Set edit text either from bundle or from RCS settings if bundle is null
-     * 
-     * @param viewID the view ID for the text edit
-     * @param settingsKey the key of the RCS parameter
-     * @param helper the provisioning helper
-     */
-    /* package private */static void setLongEditTextParam(int viewID, String settingsKey,
-            ProvisioningHelper helper) {
-        String parameter;
-        Bundle bundle = helper.getBundle();
-        if (bundle != null && bundle.containsKey(settingsKey)) {
-            parameter = bundle.getString(settingsKey);
-        } else {
-            parameter = Long.toString(helper.getRcsSettings().readLong((settingsKey)));
+    private String[] getProvisioningFiles() {
+        String[] files = null;
+        File folder = new File(PROVISIONING_FOLDER_PATH);
+        try {
+            // noinspection ResultOfMethodCallIgnored
+            folder.mkdirs();
+            if (folder.exists()) {
+                // filter
+                FilenameFilter filter = new FilenameFilter() {
+                    public boolean accept(File dir, String filename) {
+                        return filename.endsWith(PROVISIONING_EXTENSION);
+                    }
+                };
+                files = folder.list(filter);
+            }
+        } catch (SecurityException e) {
+            // intentionally blank
         }
-        EditText editText = (EditText) helper.getActivity().findViewById(viewID);
-        editText.setText(parameter);
-    }
-
-    /**
-     * Set edit text either from bundle or from RCS settings if bundle is null
-     * 
-     * @param viewID the view ID for the text edit
-     * @param settingsKey the key of the RCS parameter
-     * @param helper the provisioning helper
-     */
-    /* package private */static void setUriEditTextParam(int viewID, String settingsKey,
-            ProvisioningHelper helper) {
-        String parameter;
-        Bundle bundle = helper.getBundle();
-        if (bundle != null && bundle.containsKey(settingsKey)) {
-            parameter = bundle.getString(settingsKey);
-        } else {
-            Uri dbValue = helper.getRcsSettings().readUri(settingsKey);
-            parameter = (dbValue == null ? "" : dbValue.toString());
+        if ((files == null) || (files.length == 0)) {
+            // No provisioning file
+            return new String[] {
+                getString(R.string.label_no_xml_file)
+            };
         }
-        EditText editText = (EditText) helper.getActivity().findViewById(viewID);
-        editText.setText(parameter);
+        return files;
     }
 
-    /**
-     * Set edit text either from bundle or from RCS settings if bundle is null
-     * 
-     * @param viewID the view ID for the text edit
-     * @param settingsKey the key of the RCS parameter
-     * @param helper the provisioning helper
-     */
-    /* package private */static void setContactIdEditTextParam(int viewID, String settingsKey,
-            ProvisioningHelper helper) {
-        String parameter;
-        Bundle bundle = helper.getBundle();
-        if (bundle != null && bundle.containsKey(settingsKey)) {
-            parameter = bundle.getString(settingsKey);
-        } else {
-            ContactId dbValue = helper.getRcsSettings().readContactId(settingsKey);
-            parameter = (dbValue == null ? "" : dbValue.toString());
+    private void loadProfile(ContactId contact, Uri provisioningFile) {
+        final boolean logActivated = sLogger.isActivated();
+        try {
+            if (logActivated) {
+                sLogger.debug("Selection of provisioning file: ".concat(provisioningFile.getPath()));
+            }
+            String xMLFileContent = getFileContent(provisioningFile);
+            LoadXmlPovisioningTask mProvisionTask = new LoadXmlPovisioningTask();
+            mProvisionTask.execute(xMLFileContent, contact.toString());
+
+        } catch (IOException e) {
+            if (logActivated) {
+                sLogger.debug("Loading of provisioning failed: invalid XML file '"
+                        + provisioningFile + "', Message=" + e.getMessage());
+            }
+            Toast.makeText(mActivity, getString(R.string.label_load_failed), Toast.LENGTH_LONG)
+                    .show();
         }
-        EditText editText = (EditText) helper.getActivity().findViewById(viewID);
-        editText.setText(parameter);
     }
 
     /**
-     * Set check box either from bundle or from RCS settings if bundle is null
-     * 
-     * @param viewID the view ID for the check box
-     * @param settingsKey the key of the RCS parameter
-     * @param helper the provisioning helper
+     * Read a text file and convert it into a string
+     *
+     * @param provisioningFile Uri for the file
+     * @return the result string
+     * @throws IOException
      */
-    /* package private */static void setCheckBoxParam(int viewID, String settingsKey,
-            ProvisioningHelper helper) {
-        Boolean parameter;
-        Bundle bundle = helper.getBundle();
-        if (bundle != null && bundle.containsKey(settingsKey)) {
-            parameter = bundle.getBoolean(settingsKey);
-        } else {
-            parameter = helper.getRcsSettings().readBoolean((settingsKey));
+    private String getFileContent(Uri provisioningFile) throws IOException {
+        File file = new File(provisioningFile.getPath());
+        StringBuilder text = new StringBuilder();
+        BufferedReader br = null;
+        try {
+            br = new BufferedReader(new FileReader(file));
+            String line;
+
+            while ((line = br.readLine()) != null) {
+                text.append(line);
+                text.append('\n');
+            }
+            return text.toString();
+
+        } finally {
+            // noinspection ThrowableResultOfMethodCallIgnored
+            CloseableUtils.tryToClose(br);
         }
-        CheckBox box = (CheckBox) helper.getActivity().findViewById(viewID);
-        box.setChecked(parameter);
     }
 
     /**
-     * Set spinner selection from bundle or from RCS settings if bundle is null
-     * 
-     * @param spinner the spinner
-     * @param settingsKey the key of the RCS parameter
-     * @param isSettingInteger True is setting value is of integer type
-     * @param selection table of string representing choice selection
-     * @param helper the provisioning helper
-     * @return the index of the spinner selection
+     * Asynchronous Tasks that loads the provisioning file.
      */
-    /* package private */static int setSpinnerParameter(final Spinner spinner, String settingsKey,
-            boolean isSettingInteger, final String[] selection, ProvisioningHelper helper) {
-        Integer parameter;
-        Bundle bundle = helper.getBundle();
-        if (bundle != null && bundle.containsKey(settingsKey)) {
-            parameter = bundle.getInt(settingsKey);
-        } else {
-            if (isSettingInteger) {
-                parameter = helper.getRcsSettings().readInteger(settingsKey);
-            } else {
-                String selected = helper.getRcsSettings().readString(settingsKey);
-                parameter = java.util.Arrays.asList(selection).indexOf(selected);
+    private class LoadXmlPovisioningTask extends AsyncTask<String, Void, Boolean> {
+
+        @Override
+        protected Boolean doInBackground(String... params) {
+            ContactId UserPhoneNumber = ContactUtil.createContactIdFromTrustedData(params[1]);
+            String mXMLFileContent = params[0];
+            return createProvisioning(mXMLFileContent, UserPhoneNumber);
+        }
+
+        /**
+         * Parse the provisioning data then save it into RCS settings provider
+         *
+         * @param xmlFileContent the XML file containing provisioning data
+         * @param myContact the user phone number
+         * @return true if loading the provisioning is successful
+         */
+        private boolean createProvisioning(String xmlFileContent, ContactId myContact) {
+            String phoneNumber = myContact.toString();
+            String configToParse = xmlFileContent
+                    .replaceAll(TOKEN_MSISDN, phoneNumber.substring(1));
+            ProvisioningParser parser = new ProvisioningParser(configToParse, mRcsSettings);
+            // Save GSMA release set into the provider
+            RcsSettingsData.GsmaRelease release = mRcsSettings.getGsmaRelease();
+            // Save client Messaging Mode set into the provider
+            CommonServiceConfiguration.MessagingMode messagingMode = mRcsSettings
+                    .getMessagingMode();
+            // Before parsing the provisioning, the GSMA release is set to Albatros
+            mRcsSettings.setGsmaRelease(RcsSettingsData.GsmaRelease.ALBATROS);
+            // Before parsing the provisioning, the client Messaging mode is set to NONE
+            mRcsSettings.setMessagingMode(CommonServiceConfiguration.MessagingMode.NONE);
+            try {
+                parser.parse(release, messagingMode, true);
+                /* Customize display name with user phone number */
+                mRcsSettings.setUserProfileImsDisplayName(phoneNumber);
+                mRcsSettings.setFileTransferHttpSupported(mRcsSettings.getFtHttpServer() != null
+                        && mRcsSettings.getFtHttpLogin() != null
+                        && mRcsSettings.getFtHttpPassword() != null);
+                return true;
+
+            } catch (SAXException e) {
+                if (sLogger.isActivated()) {
+                    sLogger.debug(e.getMessage());
+                }
+                // Restore GSMA release saved before parsing of the provisioning
+                mRcsSettings.setGsmaRelease(release);
+                // Restore the client messaging mode saved before parsing of the provisioning
+                mRcsSettings.setMessagingMode(messagingMode);
+                return false;
             }
         }
-        spinner.setSelection(parameter % selection.length);
-        return parameter;
-    }
 
-    /**
-     * Save string either in bundle or in RCS settings if bundle is null
-     * 
-     * @param viewID the view ID
-     * @param settingsKey the key of the RCS parameter
-     * @param helper the provisioning helper
-     */
-    /* package private */static void saveStringEditTextParam(int viewID, String settingsKey,
-            ProvisioningHelper helper) {
-        EditText editText = (EditText) helper.getActivity().findViewById(viewID);
-        Bundle bundle = helper.getBundle();
-        String text = editText.getText().toString().trim();
-        if (bundle != null) {
-            bundle.putString(settingsKey, text);
-        } else {
-            helper.getRcsSettings().writeString(settingsKey, "".equals(text) ? null : text);
-        }
-    }
-
-    /**
-     * Save string either in bundle or in RCS settings if bundle is null
-     * 
-     * @param viewID the view ID
-     * @param settingsKey the key of the RCS parameter
-     * @param helper the provisioning helper
-     */
-    /* package private */static void saveContactIdEditTextParam(int viewID, String settingsKey,
-            ProvisioningHelper helper) {
-        EditText txt = (EditText) helper.getActivity().findViewById(viewID);
-        Bundle bundle = helper.getBundle();
-        if (bundle != null) {
-            bundle.putString(settingsKey, txt.getText().toString());
-        } else {
-            String text = txt.getText().toString();
-            PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(text);
-            helper.getRcsSettings().writeContactId(settingsKey,
-                    "".equals(text) ? null : ContactUtil.createContactIdFromValidatedData(number));
-        }
-    }
-
-    /**
-     * Save integer either in bundle or in RCS settings if bundle is null
-     * 
-     * @param viewID the view ID
-     * @param settingsKey the key of the RCS parameter
-     * @param helper the provisioning helper
-     */
-    /* package private */static void saveIntegerEditTextParam(int viewID, String settingsKey,
-            ProvisioningHelper helper) {
-        EditText txt = (EditText) helper.getActivity().findViewById(viewID);
-        Bundle bundle = helper.getBundle();
-        if (bundle != null) {
-            bundle.putString(settingsKey, txt.getText().toString());
-        } else {
-            helper.getRcsSettings().writeInteger(settingsKey,
-                    Integer.parseInt(txt.getText().toString()));
-        }
-    }
-
-    /**
-     * Save long either in bundle or in RCS settings if bundle is null
-     * 
-     * @param viewID the view ID
-     * @param settingsKey the key of the RCS parameter
-     * @param helper the provisioning helper
-     */
-    /* package private */static void saveLongEditTextParam(int viewID, String settingsKey,
-            ProvisioningHelper helper) {
-        EditText txt = (EditText) helper.getActivity().findViewById(viewID);
-        Bundle bundle = helper.getBundle();
-        if (bundle != null) {
-            bundle.putString(settingsKey, txt.getText().toString());
-        } else {
-            helper.getRcsSettings()
-                    .writeLong(settingsKey, Long.parseLong(txt.getText().toString()));
-        }
-    }
-
-    /**
-     * Save uri either in bundle or in RCS settings if bundle is null
-     * 
-     * @param viewID the view ID
-     * @param settingsKey the key of the RCS parameter
-     * @param helper the provisioning helper
-     */
-    /* package private */static void saveUriEditTextParam(int viewID, String settingsKey,
-            ProvisioningHelper helper) {
-        EditText txt = (EditText) helper.getActivity().findViewById(viewID);
-        Bundle bundle = helper.getBundle();
-        if (bundle != null) {
-            bundle.putString(settingsKey, txt.getText().toString());
-        } else {
-            String text = txt.getText().toString();
-            helper.getRcsSettings().writeUri(settingsKey, "".equals(text) ? null : Uri.parse(text));
-        }
-    }
-
-    /**
-     * Save boolean either in bundle or in RCS settings if bundle is null
-     * 
-     * @param viewID the view ID
-     * @param settingsKey the key of the RCS parameter
-     * @param helper the provisioning helper
-     */
-    /* package private */static void saveCheckBoxParam(int viewID, String settingsKey,
-            ProvisioningHelper helper) {
-        CheckBox box = (CheckBox) helper.getActivity().findViewById(viewID);
-        Bundle bundle = helper.getBundle();
-        if (bundle != null) {
-            bundle.putBoolean(settingsKey, box.isChecked());
-        } else {
-            helper.getRcsSettings().writeBoolean(settingsKey, box.isChecked());
+        @Override
+        protected void onPostExecute(Boolean result) {
+            super.onPostExecute(result);
+            // set configuration mode to manual
+            mRcsSettings.setConfigurationMode(RcsSettingsData.ConfigurationMode.MANUAL);
+            for (IProvisioningFragment fragment : mAdapter.getFragments()) {
+                fragment.displayRcsSettings();
+            }
+            if (result)
+                Toast.makeText(mActivity, getString(R.string.label_reboot_service),
+                        Toast.LENGTH_LONG).show();
+            else
+                Toast.makeText(mActivity, getString(R.string.label_parse_failed), Toast.LENGTH_LONG)
+                        .show();
         }
     }
 }

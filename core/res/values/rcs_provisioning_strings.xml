@@ -150,5 +150,7 @@
     <string name="Control_extensions">Control extensions</string>
     <string name="Allow_extensions">Allow extensions</string>
     <string name="label_ungranted_permission">Below permissions are not granted!</string>
-
+    <string name="load">Load</string>
+    <string name="save">Save</string>
+    <string name="Directory_path_to_store_audios">Directory path to store audios</string>
 </resources>

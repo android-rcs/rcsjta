@@ -213,12 +213,9 @@
 
         <activity
             android:name=".provisioning.local.Provisioning"
-            android:label="@string/provisioning_app_name">
+            android:label="@string/provisioning_app_name"
+            android:theme="@style/Theme.AppCompat">
         </activity>
-        <activity android:name=".provisioning.local.ProfileProvisioning"/>
-        <activity android:name=".provisioning.local.StackProvisioning"/>
-        <activity android:name=".provisioning.local.ServiceProvisioning"/>
-        <activity android:name=".provisioning.local.LoggerProvisioning"/>
 
         <service
             android:name="com.gsma.rcs.service.api.OneToOneDeliveryExpirationService"

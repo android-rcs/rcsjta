@@ -22,137 +22,87 @@
 
 package com.gsma.rcs.provisioning.local;
 
-import static com.gsma.rcs.provisioning.local.Provisioning.saveCheckBoxParam;
-import static com.gsma.rcs.provisioning.local.Provisioning.saveStringEditTextParam;
-import static com.gsma.rcs.provisioning.local.Provisioning.setCheckBoxParam;
-import static com.gsma.rcs.provisioning.local.Provisioning.setStringEditTextParam;
-
 import com.gsma.rcs.R;
-import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provider.settings.RcsSettingsData;
+import com.gsma.rcs.utils.logger.Logger;
 
-import android.app.Activity;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.Spinner;
-import android.widget.Toast;
 
 /**
- * End user profile parameters provisioning
+ * Logger provisioning fragment
  * 
  * @author jexa7410
  */
-public class LoggerProvisioning extends Activity {
-    /**
-     * Trace level
-     */
+public class LoggerProvisioning extends Fragment implements IProvisioningFragment {
+
+    private static final Logger sLogger = Logger.getLogger(LoggerProvisioning.class
+            .getName());
+
     private static final String[] TRACE_LEVEL = {
             "DEBUG", "INFO", "WARN", "ERROR", "FATAL"
     };
-    private boolean mInFront;
+    private static RcsSettings sRcsSettings;
+    private View mRootView;
+    private ProvisioningHelper mHelper;
 
-    private RcsSettings mRcsSettings;
-
-    @Override
-    public void onCreate(Bundle bundle) {
-        super.onCreate(bundle);
-        // Set layout
-        setContentView(R.layout.rcs_provisioning_logger);
-        // Set buttons callback
-        Button btn = (Button) findViewById(R.id.save_btn);
-        btn.setOnClickListener(saveBtnListener);
-        mRcsSettings = RcsSettings.getInstance(new LocalContentResolver(this));
-        updateView(bundle);
-        mInFront = true;
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (!mInFront) {
-            mInFront = true;
-            // Update UI (from DB)
-            updateView(null);
+    public static LoggerProvisioning newInstance(RcsSettings rcsSettings) {
+        if (sLogger.isActivated()) {
+            sLogger.debug("new instance");
         }
+        LoggerProvisioning f = new LoggerProvisioning();
+        /*
+         * If Android decides to recreate your Fragment later, it's going to call the no-argument
+         * constructor of your fragment. So overloading the constructor is not a solution. A way to
+         * pass argument to new fragment is to store it as static.
+         */
+        sRcsSettings = rcsSettings;
+        return f;
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
-        mInFront = false;
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        mRootView = inflater.inflate(R.layout.provisioning_logger, container, false);
+        mHelper = new ProvisioningHelper(mRootView, sRcsSettings);
+        displayRcsSettings();
+        return mRootView;
     }
 
-    /**
-     * Update view
-     * 
-     * @param bundle The bundle to save settings
-     */
-    private void updateView(Bundle bundle) {
-        // Display parameters
-        ProvisioningHelper helper = new ProvisioningHelper(this, mRcsSettings, bundle);
+    @Override
+    public void displayRcsSettings() {
+        if (sLogger.isActivated()) {
+            sLogger.debug("displayRcsSettings");
+        }
+        mHelper.setBoolCheckBox(R.id.TraceActivated, RcsSettingsData.TRACE_ACTIVATED);
+        mHelper.setBoolCheckBox(R.id.SipTraceActivated, RcsSettingsData.SIP_TRACE_ACTIVATED);
+        mHelper.setBoolCheckBox(R.id.MediaTraceActivated, RcsSettingsData.MEDIA_TRACE_ACTIVATED);
+        mHelper.setStringEditText(R.id.SipTraceFile, RcsSettingsData.SIP_TRACE_FILE);
 
-        setCheckBoxParam(R.id.TraceActivated, RcsSettingsData.TRACE_ACTIVATED, helper);
-        setCheckBoxParam(R.id.SipTraceActivated, RcsSettingsData.SIP_TRACE_ACTIVATED, helper);
-        setCheckBoxParam(R.id.MediaTraceActivated, RcsSettingsData.MEDIA_TRACE_ACTIVATED, helper);
-        setStringEditTextParam(R.id.SipTraceFile, RcsSettingsData.SIP_TRACE_FILE, helper);
-
-        Spinner spinner = (Spinner) findViewById(R.id.TraceLevel);
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
+        Spinner spinner = (Spinner) mRootView.findViewById(R.id.TraceLevel);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(),
                 android.R.layout.simple_spinner_item, TRACE_LEVEL);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
-        Integer parameter;
-        if (bundle != null && bundle.containsKey(RcsSettingsData.TRACE_LEVEL)) {
-            parameter = bundle.getInt(RcsSettingsData.TRACE_LEVEL);
-        } else {
-            parameter = mRcsSettings.getTraceLevel();
-        }
-        spinner.setSelection(parameter);
+        spinner.setSelection(sRcsSettings.getTraceLevel());
     }
-
-    /**
-     * Save button listener
-     */
-    private OnClickListener saveBtnListener = new OnClickListener() {
-        public void onClick(View v) {
-            // Save parameters
-            save();
-        }
-    };
 
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        saveInstanceState(outState);
-    }
-
-    /**
-     * Save parameters either in bundle or in RCS settings
-     */
-    private void saveInstanceState(Bundle bundle) {
-        ProvisioningHelper helper = new ProvisioningHelper(this, mRcsSettings, bundle);
-        saveCheckBoxParam(R.id.TraceActivated, RcsSettingsData.TRACE_ACTIVATED, helper);
-        saveCheckBoxParam(R.id.SipTraceActivated, RcsSettingsData.SIP_TRACE_ACTIVATED, helper);
-        saveCheckBoxParam(R.id.MediaTraceActivated, RcsSettingsData.MEDIA_TRACE_ACTIVATED, helper);
-        saveStringEditTextParam(R.id.SipTraceFile, RcsSettingsData.SIP_TRACE_FILE, helper);
-        Spinner spinner = (Spinner) findViewById(R.id.TraceLevel);
-        if (bundle != null) {
-            bundle.putInt(RcsSettingsData.TRACE_LEVEL, spinner.getSelectedItemPosition());
-        } else {
-            Integer value = spinner.getSelectedItemPosition();
-            mRcsSettings.writeInteger(RcsSettingsData.TRACE_LEVEL, value);
+    public void persistRcsSettings() {
+        if (sLogger.isActivated()) {
+            sLogger.debug("persistRcsSettings");
         }
+        mHelper.saveBoolCheckBox(R.id.TraceActivated, RcsSettingsData.TRACE_ACTIVATED);
+        mHelper.saveBoolCheckBox(R.id.SipTraceActivated, RcsSettingsData.SIP_TRACE_ACTIVATED);
+        mHelper.saveBoolCheckBox(R.id.MediaTraceActivated, RcsSettingsData.MEDIA_TRACE_ACTIVATED);
+        mHelper.saveStringEditText(R.id.SipTraceFile, RcsSettingsData.SIP_TRACE_FILE);
+        Spinner spinner = (Spinner) mRootView.findViewById(R.id.TraceLevel);
+        sRcsSettings.writeInteger(RcsSettingsData.TRACE_LEVEL, spinner.getSelectedItemPosition());
     }
 
-    /**
-     * Save parameters
-     */
-    private void save() {
-        saveInstanceState(null);
-        Toast.makeText(this, getString(R.string.label_reboot_service), Toast.LENGTH_LONG).show();
-    }
 }

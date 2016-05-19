@@ -82,11 +82,46 @@ public class RcsSettingsData {
         /**
          * GIBA authentication
          */
-        GIBA,
+        GIBA(0),
         /**
          * Digest authentication
          */
-        DIGEST
+        DIGEST(1);
+
+        private final int mValue;
+
+        private static SparseArray<AuthenticationProcedure> mValueToEnum = new SparseArray<>();
+
+        static {
+            for (AuthenticationProcedure entry : AuthenticationProcedure.values()) {
+                mValueToEnum.put(entry.toInt(), entry);
+            }
+        }
+
+        AuthenticationProcedure(int value) {
+            mValue = value;
+        }
+
+        /**
+         * @return value
+         */
+        public final int toInt() {
+            return mValue;
+        }
+
+        /**
+         * @param value the value representing the authentication procedure
+         * @return AuthenticationProcedure
+         */
+        public static AuthenticationProcedure valueOf(int value) {
+            AuthenticationProcedure entry = mValueToEnum.get(value);
+            if (entry != null) {
+                return entry;
+            }
+            throw new IllegalArgumentException("No enum const class "
+                    + AuthenticationProcedure.class.getName() + "." + value);
+        }
+
     }
 
     /**
