@@ -53,8 +53,7 @@ public class MobileNetworkAccess extends NetworkAccess {
         mTelephonyManager = (TelephonyManager) AndroidFactory.getApplicationContext()
                 .getSystemService(Context.TELEPHONY_SERVICE);
         if (sLogger.isActivated()) {
-            sLogger.info(new StringBuilder("Mobile access has been created (interface ")
-                    .append(getNetworkName()).append(")").toString());
+            sLogger.info("Mobile access has been created (interface " + getNetworkName() + ")");
         }
     }
 
@@ -71,11 +70,8 @@ public class MobileNetworkAccess extends NetworkAccess {
         if (mRcsSettings.isSecureMsrpOverMobile()) {
             try {
                 KeyStoreManager.updateClientCertificate(ipAddress);
-            } catch (CertificateException e) {
-                if (sLogger.isActivated()) {
-                    sLogger.error(e.getMessage());
-                }
-            } catch (IOException e) {
+
+            } catch (CertificateException | IOException e) {
                 if (sLogger.isActivated()) {
                     sLogger.error(e.getMessage());
                 }

@@ -53,8 +53,7 @@ public class WifiNetworkAccess extends NetworkAccess {
         mWifiManager = (WifiManager) AndroidFactory.getApplicationContext().getSystemService(
                 Context.WIFI_SERVICE);
         if (sLogger.isActivated()) {
-            sLogger.info(new StringBuilder("Wi-Fi access has been created (interface ")
-                    .append(getType()).append(")").toString());
+            sLogger.info("Wi-Fi access has been created (interface " + getType() + ")");
         }
     }
 
@@ -70,9 +69,16 @@ public class WifiNetworkAccess extends NetworkAccess {
             sLogger.info("Network access connected (" + ipAddress + ")");
         }
         mIpAddress = ipAddress;
+        if (mRcsSettings.isSecureMsrpOverWifi()) {
+            try {
+                KeyStoreManager.updateClientCertificate(ipAddress);
 
-        // Changed by Deutsche Telekom
-        KeyStoreManager.updateClientCertificate(ipAddress);
+            } catch (CertificateException | IOException e) {
+                if (sLogger.isActivated()) {
+                    sLogger.error(e.getMessage());
+                }
+            }
+        }
     }
 
     /**

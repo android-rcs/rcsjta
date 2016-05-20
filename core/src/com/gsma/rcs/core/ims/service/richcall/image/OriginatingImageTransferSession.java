@@ -106,8 +106,7 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
                     .getContentResolver().openInputStream(file);
             byte[] data = new byte[size];
             if (size != fileInputStream.read(data, 0, size)) {
-                throw new IOException(new StringBuilder("Unable to retrive data from ")
-                        .append(file).toString());
+                throw new IOException("Unable to retrive data from " + file);
             }
             return data;
         } finally {
@@ -126,7 +125,6 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
             if (sLogger.isActivated()) {
                 sLogger.debug("Local setup attribute is " + localSetup);
             }
-
             // Set local port
             int localMsrpPort;
             if ("active".equals(localSetup)) {
@@ -134,15 +132,10 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
             } else {
                 localMsrpPort = NetworkRessourceManager.generateLocalMsrpPort(mRcsSettings);
             }
-
             // Create the MSRP manager
             String localIpAddress = getImsService().getImsModule().getCurrentNetworkInterface()
                     .getNetworkAccess().getIpAddress();
             msrpMgr = new MsrpManager(localIpAddress, localMsrpPort, getImsService(), mRcsSettings);
-            if (getImsService().getImsModule().isConnectedToWifiAccess()) {
-                msrpMgr.setSecured(mRcsSettings.isSecureMsrpOverWifi());
-            }
-
             // Build SDP part
             String ipAddress = getDialogPath().getSipStack().getLocalIpAddress();
             String encoding = getContent().getEncoding();
@@ -153,17 +146,16 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
                     msrpMgr.getLocalSocketProtocol(), encoding, getFileTransferId(), selector,
                     "render", localSetup, msrpMgr.getLocalMsrpPath(), SdpUtils.DIRECTION_SENDONLY,
                     maxSize));
-
             // Set File-location attribute
             Uri location = getFileLocationAttribute();
             if (location != null) {
                 sdp.append("a=file-location:").append(location.toString()).append(SipUtils.CRLF);
             }
-
             MmContent fileIcon = getThumbnail();
             if (fileIcon == null) {
                 /* Set the local SDP part in the dialog path */
                 getDialogPath().setLocalContent(sdp.toString());
+
             } else {
                 Capabilities remoteCapabilities = mContactManager
                         .getContactCapabilities(getRemoteContact());
@@ -171,32 +163,27 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
                         && remoteCapabilities.isFileTransferThumbnailSupported();
                 if (fileIconSupported) {
                     sdp.append("a=file-icon:cid:image@joyn.com").append(SipUtils.CRLF);
-
                     // Encode the thumbnail file
                     String imageEncoded = Base64.encodeBase64ToString(getFileData(
                             fileIcon.getUri(), (int) fileIcon.getSize()));
                     String sdpContent = sdp.toString();
-                    String multipart = new StringBuilder(Multipart.BOUNDARY_DELIMITER)
-                            .append(BOUNDARY_TAG).append(SipUtils.CRLF)
-                            .append(ContentTypeHeader.NAME).append(": application/sdp")
-                            .append(SipUtils.CRLF).append(ContentLengthHeader.NAME).append(": ")
-                            .append(sdpContent.getBytes(UTF8).length).append(SipUtils.CRLF)
-                            .append(SipUtils.CRLF).append(sdpContent).append(SipUtils.CRLF)
-                            .append(Multipart.BOUNDARY_DELIMITER).append(BOUNDARY_TAG)
-                            .append(SipUtils.CRLF).append(ContentTypeHeader.NAME).append(": ")
-                            .append(getContent().getEncoding()).append(SipUtils.CRLF)
-                            .append(SipUtils.HEADER_CONTENT_TRANSFER_ENCODING).append(": base64")
-                            .append(SipUtils.CRLF).append(SipUtils.HEADER_CONTENT_ID)
-                            .append(": <image@joyn.com>").append(SipUtils.CRLF)
-                            .append(ContentLengthHeader.NAME).append(": ")
-                            .append(imageEncoded.length()).append(SipUtils.CRLF)
-                            .append(ContentDispositionHeader.NAME).append(": icon")
-                            .append(SipUtils.CRLF).append(SipUtils.CRLF).append(imageEncoded)
-                            .append(SipUtils.CRLF).append(Multipart.BOUNDARY_DELIMITER)
-                            .append(BOUNDARY_TAG).append(Multipart.BOUNDARY_DELIMITER).toString();
-
+                    String multipart = Multipart.BOUNDARY_DELIMITER + BOUNDARY_TAG + SipUtils.CRLF
+                            + ContentTypeHeader.NAME + ": application/sdp" + SipUtils.CRLF
+                            + ContentLengthHeader.NAME + ": " + sdpContent.getBytes(UTF8).length
+                            + SipUtils.CRLF + SipUtils.CRLF + sdpContent + SipUtils.CRLF
+                            + Multipart.BOUNDARY_DELIMITER + BOUNDARY_TAG + SipUtils.CRLF
+                            + ContentTypeHeader.NAME + ": " + getContent().getEncoding()
+                            + SipUtils.CRLF + SipUtils.HEADER_CONTENT_TRANSFER_ENCODING
+                            + ": base64" + SipUtils.CRLF + SipUtils.HEADER_CONTENT_ID
+                            + ": <image@joyn.com>" + SipUtils.CRLF + ContentLengthHeader.NAME
+                            + ": " + imageEncoded.length() + SipUtils.CRLF
+                            + ContentDispositionHeader.NAME + ": icon" + SipUtils.CRLF
+                            + SipUtils.CRLF + imageEncoded + SipUtils.CRLF
+                            + Multipart.BOUNDARY_DELIMITER + BOUNDARY_TAG
+                            + Multipart.BOUNDARY_DELIMITER;
                     // Set the local SDP part in the dialog path
                     getDialogPath().setLocalContent(multipart);
+
                 } else {
                     // Set the local SDP part in the dialog path
                     getDialogPath().setLocalContent(sdp.toString());
@@ -207,13 +194,10 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
                 sLogger.info("Send INVITE");
             }
             SipRequest invite = createInvite();
-
             // Set the Authorization header
             getAuthenticationAgent().setAuthorizationHeader(invite);
-
             // Set initial request in the dialog path
             getDialogPath().setInvite(invite);
-
             // Send INVITE request
             sendInvite(invite);
 
@@ -232,7 +216,6 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
             sLogger.error("Failed to initiate a new sharing session as originating!", e);
             handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
         }
-
         if (sLogger.isActivated()) {
             sLogger.debug("End of thread");
         }
@@ -240,16 +223,11 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
 
     @Override
     public void prepareMediaSession() {
-        // Changed by Deutsche Telekom
         /* Get the remote SDP part */
         byte[] sdp = getDialogPath().getRemoteContent().getBytes(UTF8);
-
-        // Changed by Deutsche Telekom
         MsrpSession session = msrpMgr.createMsrpSession(sdp, this);
-
         session.setFailureReportOption(true);
         session.setSuccessReportOption(false);
-        // Changed by Deutsche Telekom
         /* Do not use right now the mapping to do not increase memory and cpu consumption */
         session.setMapMsgIdFromTransationId(false);
     }
@@ -267,6 +245,7 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
                     .openInputStream(getContent().getUri());
             msrpMgr.sendChunks(stream, getFileTransferId(), getContent().getEncoding(),
                     getContent().getSize(), TypeMsrpChunk.FileSharing);
+
         } catch (FileNotFoundException e) {
             throw new FileAccessException("Failed to initiate media transfer!", e);
         }
@@ -297,24 +276,13 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
             for (ImsSessionListener listener : getListeners()) {
                 ((ImageTransferSessionListener) listener).onContentTransferred(contact, image);
             }
+        } catch (PayloadException | RuntimeException e) {
+            sLogger.error("Failed to notify msrp data transfered for msgId : " + msgId, e);
 
-        } catch (PayloadException e) {
-            sLogger.error(new StringBuilder("Failed to notify msrp data transfered for msgId : ")
-                    .append(msgId).toString(), e);
         } catch (NetworkException e) {
             if (sLogger.isActivated()) {
                 sLogger.debug(e.getMessage());
             }
-
-        } catch (RuntimeException e) {
-            /*
-             * Normally we are not allowed to catch runtime exceptions as these are genuine bugs
-             * which should be handled/fixed within the code. However the cases when we are
-             * executing operations on a thread unhandling such exceptions will eventually lead to
-             * exit the system and thus can bring the whole system down, which is not intended.
-             */
-            sLogger.error(new StringBuilder("Failed to notify msrp data transfered for msgId : ")
-                    .append(msgId).toString(), e);
         }
     }
 
@@ -363,26 +331,13 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
                 ((ImageTransferSessionListener) listener).onSharingError(contact,
                         new ContentSharingError(ContentSharingError.MEDIA_TRANSFER_FAILED));
             }
-        } catch (PayloadException e) {
-            sLogger.error(
-                    new StringBuilder("Failed to handle msrp error").append(error)
-                            .append(" for message ").append(msgId).toString(), e);
+        } catch (PayloadException | RuntimeException e) {
+            sLogger.error("Failed to handle msrp error" + error + " for message " + msgId, e);
 
         } catch (NetworkException e) {
             if (sLogger.isActivated()) {
                 sLogger.debug(e.getMessage());
             }
-
-        } catch (RuntimeException e) {
-            /*
-             * Normally we are not allowed to catch runtime exceptions as these are genuine bugs
-             * which should be handled/fixed within the code. However the cases when we are
-             * executing operations on a thread unhandling such exceptions will eventually lead to
-             * exit the system and thus can bring the whole system down, which is not intended.
-             */
-            sLogger.error(
-                    new StringBuilder("Failed to handle msrp error").append(error)
-                            .append(" for message ").append(msgId).toString(), e);
         }
     }
 

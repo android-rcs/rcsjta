@@ -139,6 +139,8 @@
     <string name="CPU_Always_on">CPU Always on</string>
     <string name="Secure_MSRP_over_Wi_Fi_access">Secure MSRP over Wi-Fi access</string>
     <string name="Secure_RTP_over_Wi_Fi_access">Secure RTP over Wi-Fi access</string>
+    <string name="Secure_MSRP_over_Mobile_access">Secure MSRP over mobile access</string>
+    <string name="Secure_RTP_over_Mobile_access">Secure RTP over mobile access</string>
     <string name="IMEI_as_device_ID">IMEI as device ID</string>
     <string name="Control_extensions">Control extensions</string>
     <string name="Allow_extensions">Allow extensions</string>

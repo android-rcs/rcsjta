@@ -155,22 +155,15 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
             RcsSettings rcsSettings, MessagingLog messagingLog, ChatMessage firstMsg,
             long timestamp, ContactManager contactManager) {
         super(imService, contact, remoteContact, rcsSettings, timestamp, contactManager);
-
         mImService = imService;
         mImdnManager = imService.getImdnManager();
         mMessagingLog = messagingLog;
         mActivityMgr = new SessionActivityManager(this, rcsSettings);
-
         // Create the MSRP manager
         int localMsrpPort = NetworkRessourceManager.generateLocalMsrpPort(rcsSettings);
         String localIpAddress = mImService.getImsModule().getCurrentNetworkInterface()
                 .getNetworkAccess().getIpAddress();
         mMsrpMgr = new MsrpManager(localIpAddress, localMsrpPort, imService, rcsSettings);
-        if (imService.getImsModule().isConnectedToWifiAccess()) {
-            mMsrpMgr.setSecured(rcsSettings.isSecureMsrpOverWifi());
-        } else if (imService.getImsModule().isConnectedToMobileAccess()) {
-            mMsrpMgr.setSecured(rcsSettings.isSecureMsrpOverMobile());
-        }
         mFirstMsg = firstMsg;
     }
 

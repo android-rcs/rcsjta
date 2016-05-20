@@ -331,6 +331,8 @@ public class StackProvisioning extends Activity {
         saveCheckBoxParam(R.id.CpuAlwaysOn, RcsSettingsData.CPU_ALWAYS_ON, helper);
         saveCheckBoxParam(R.id.SecureMsrpOverWifi, RcsSettingsData.SECURE_MSRP_OVER_WIFI, helper);
         saveCheckBoxParam(R.id.SecureRtpOverWifi, RcsSettingsData.SECURE_RTP_OVER_WIFI, helper);
+        saveCheckBoxParam(R.id.SecureMsrpOverMobile, RcsSettingsData.SECURE_MSRP_OVER_MOBILE, helper);
+        saveCheckBoxParam(R.id.SecureRtpOverMobile, RcsSettingsData.SECURE_RTP_OVER_MOBILE, helper);
         saveCheckBoxParam(R.id.ImeiAsDeviceId, RcsSettingsData.USE_IMEI_AS_DEVICE_ID, helper);
         saveCheckBoxParam(R.id.ControlExtensions, RcsSettingsData.CONTROL_EXTENSIONS, helper);
         saveCheckBoxParam(R.id.AllowExtensions, RcsSettingsData.ALLOW_EXTENSIONS, helper);
@@ -566,6 +568,8 @@ public class StackProvisioning extends Activity {
         setCheckBoxParam(R.id.CpuAlwaysOn, RcsSettingsData.CPU_ALWAYS_ON, helper);
         setCheckBoxParam(R.id.SecureMsrpOverWifi, RcsSettingsData.SECURE_MSRP_OVER_WIFI, helper);
         setCheckBoxParam(R.id.SecureRtpOverWifi, RcsSettingsData.SECURE_RTP_OVER_WIFI, helper);
+        setCheckBoxParam(R.id.SecureMsrpOverMobile, RcsSettingsData.SECURE_MSRP_OVER_MOBILE, helper);
+        setCheckBoxParam(R.id.SecureRtpOverMobile, RcsSettingsData.SECURE_RTP_OVER_MOBILE, helper);
         setCheckBoxParam(R.id.ImeiAsDeviceId, RcsSettingsData.USE_IMEI_AS_DEVICE_ID, helper);
         setCheckBoxParam(R.id.ControlExtensions, RcsSettingsData.CONTROL_EXTENSIONS, helper);
         setCheckBoxParam(R.id.AllowExtensions, RcsSettingsData.ALLOW_EXTENSIONS, helper);

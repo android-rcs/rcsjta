@@ -47,7 +47,7 @@ public abstract class NetworkAccess {
     /**
      * rcs settings
      */
-    protected RcsSettings mRcsSettings;
+    protected final RcsSettings mRcsSettings;
 
     /**
      * Constructor
