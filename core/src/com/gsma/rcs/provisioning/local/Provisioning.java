@@ -32,10 +32,15 @@ import com.gsma.rcs.utils.CloseableUtils;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.CommonServiceConfiguration;
+import com.gsma.services.rcs.RcsService;
 import com.gsma.services.rcs.contact.ContactId;
 
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -60,6 +65,11 @@ import java.io.FileReader;
 import java.io.FilenameFilter;
 import java.io.IOException;
 
+/**
+ * A tool to handle the provisioning locally
+ *
+ * @author Philippe LEMORDANT
+ */
 public class Provisioning extends AppCompatActivity {
 
     private static final String PROVISIONING_EXTENSION = ".xml";
@@ -107,6 +117,17 @@ public class Provisioning extends AppCompatActivity {
                 return Color.WHITE;
             }
         });
+
+        IntentFilter filter = new IntentFilter(RcsService.ACTION_SERVICE_UP);
+        BroadcastReceiver receiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                for (IProvisioningFragment fragment : mAdapter.getFragments()) {
+                    fragment.displayRcsSettings();
+                }
+            }
+        };
+        registerReceiver(receiver, filter);
     }
 
     @Override
