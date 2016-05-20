@@ -1,20 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:paddingBottom="5dp"
-    android:paddingEnd="12dp"
-    android:paddingLeft="0dp"
-    android:paddingRight="12dp"
-    android:paddingStart="0dp"
-    android:paddingTop="5dp">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical"
+              android:padding="2dp">
 
     <LinearLayout
         android:id="@+id/conv_item_file_transfer_in"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
+        android:layout_gravity="start"
         android:background="@drawable/talk_item_rcs_in"
         android:orientation="vertical"
         android:padding="5dp">
@@ -23,41 +18,40 @@
             android:id="@+id/file_image"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/ri_filetransfer_off" />
+            android:src="@drawable/ri_filetransfer_off"/>
 
         <TextView
             android:id="@+id/progress_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/text_dummy"
-            android:textColor="@android:color/black" />
+            android:textColor="@android:color/black"/>
 
         <TextView
             android:id="@+id/contact_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/contact_dummy"
-            android:textColor="@android:color/darker_gray" />
+            android:textColor="@android:color/darker_gray"/>
     </LinearLayout>
 
     <TextView
         android:id="@+id/status_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_below="@id/conv_item_file_transfer_in"
+        android:layout_gravity="start"
+        android:layout_marginLeft="12dip"
+        android:layout_marginStart="12dip"
         android:text="@string/label_state_unknown"
-        android:textColor="@android:color/darker_gray" />
+        android:textColor="@android:color/darker_gray"/>
 
     <TextView
         android:id="@+id/timestamp_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
+        android:layout_gravity="start"
+        android:layout_marginLeft="12dip"
+        android:layout_marginStart="12dip"
         android:singleLine="true"
-        android:text="@string/timestamp_dummy" />
-</RelativeLayout>
+        android:text="@string/timestamp_dummy"/>
+</LinearLayout>

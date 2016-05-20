@@ -1,17 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:paddingBottom="5dp"
-    android:paddingTop="5dp">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical"
+              android:padding="2dip">
 
     <RelativeLayout
         android:id="@+id/conv_item_chat_text_in"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:background="@drawable/msg_item_right"
+        android:layout_gravity="start"
+        android:background="@drawable/msg_item_left"
         android:orientation="vertical">
 
         <TextView
@@ -19,7 +18,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/text_dummy"
-            android:textColor="@android:color/black" />
+            android:textColor="@android:color/black"/>
 
         <TextView
             android:id="@+id/timestamp_text"
@@ -27,17 +26,17 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/content_text"
             android:text="@string/timestamp_dummy"
-            android:textColor="@android:color/darker_gray" />
+            android:textColor="@android:color/darker_gray"/>
     </RelativeLayout>
 
     <TextView
         android:id="@+id/status_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:layout_below="@id/conv_item_chat_text_in"
+        android:layout_gravity="start"
+        android:layout_marginLeft="12dip"
+        android:layout_marginStart="12dip"
         android:text="@string/label_state_unknown"
-        android:textColor="@android:color/darker_gray" />
+        android:textColor="@android:color/darker_gray"/>
 
-</RelativeLayout>
+</LinearLayout>
