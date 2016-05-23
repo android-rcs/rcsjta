@@ -35,17 +35,22 @@ import com.gsma.services.rcs.CommonServiceConfiguration;
 import com.gsma.services.rcs.RcsService;
 import com.gsma.services.rcs.contact.ContactId;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
@@ -73,6 +78,7 @@ import java.io.IOException;
 public class Provisioning extends AppCompatActivity {
 
     private static final String PROVISIONING_EXTENSION = ".xml";
+    private static final int MY_PERMISSION_REQUEST_ALL = 5428;
 
     /**
      * The XML provisioning file loaded manually contains a MSISDN token which must be replaced by
@@ -93,6 +99,7 @@ public class Provisioning extends AppCompatActivity {
     private ViewPagerAdapter mAdapter;
     private RcsSettings mRcsSettings;
     private Provisioning mActivity;
+    private BroadcastReceiver mReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -119,7 +126,7 @@ public class Provisioning extends AppCompatActivity {
         });
 
         IntentFilter filter = new IntentFilter(RcsService.ACTION_SERVICE_UP);
-        BroadcastReceiver receiver = new BroadcastReceiver() {
+        mReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 for (IProvisioningFragment fragment : mAdapter.getFragments()) {
@@ -127,7 +134,7 @@ public class Provisioning extends AppCompatActivity {
                 }
             }
         };
-        registerReceiver(receiver, filter);
+        registerReceiver(mReceiver, filter);
     }
 
     @Override
@@ -135,6 +142,17 @@ public class Provisioning extends AppCompatActivity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_provisioning, menu);
         return true;
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        try {
+            if (mReceiver != null) {
+                unregisterReceiver(mReceiver);
+            }
+        } catch (Exception ignored) {
+        }
     }
 
     @Override
@@ -163,73 +181,106 @@ public class Provisioning extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+            @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (MY_PERMISSION_REQUEST_ALL == requestCode) {
+            // Check if the only required permission has been granted
+            if (grantResults.length == 1 && PackageManager.PERMISSION_GRANTED == grantResults[0]) {
+                // SDCARD permission has been granted, preview can be displayed
+                if (sLogger.isActivated()) {
+                    sLogger.debug("SDCARD permission has now been granted");
+                }
+                loadXmlFile();
+
+            } else {
+                if (sLogger.isActivated()) {
+                    sLogger.info("SDCARD read permission was not granted!");
+                }
+                Toast.makeText(mActivity, getString(R.string.label_sdcard_permission_not_granted),
+                        Toast.LENGTH_LONG).show();
+            }
+        }
+    }
+
     private void loadXmlFile() {
         final boolean logActivated = sLogger.isActivated();
         if (logActivated) {
             sLogger.debug("load XML provisioning File");
         }
-        LayoutInflater factory = LayoutInflater.from(this);
-        final View view = factory.inflate(R.layout.rcs_provisioning_generate_profile, null);
-        final EditText textEdit = (EditText) view.findViewById(R.id.msisdn);
-        ContactId me = mRcsSettings.getUserProfileImsUserName();
-        textEdit.setText(me == null ? "" : me.toString());
+        try {
+            String[] xmlFiles = getProvisioningFiles();
+            LayoutInflater factory = LayoutInflater.from(this);
+            final View view = factory.inflate(R.layout.rcs_provisioning_generate_profile, null);
+            final EditText textEdit = (EditText) view.findViewById(R.id.msisdn);
+            ContactId me = mRcsSettings.getUserProfileImsUserName();
+            textEdit.setText(me == null ? "" : me.toString());
+            final Spinner spinner = (Spinner) view.findViewById(R.id.XmlProvisioningFile);
+            ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
+                    android.R.layout.simple_spinner_item, xmlFiles);
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            spinner.setAdapter(adapter);
 
-        String[] xmlFiles = getProvisioningFiles();
-        final Spinner spinner = (Spinner) view.findViewById(R.id.XmlProvisioningFile);
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
-                android.R.layout.simple_spinner_item, xmlFiles);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner.setAdapter(adapter);
+            AlertDialog.Builder builder = new AlertDialog.Builder(this)
+                    .setTitle(R.string.label_generate_profile).setView(view)
+                    .setNegativeButton(R.string.label_cancel, null)
+                    .setPositiveButton(R.string.label_ok, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                            ContactUtil.PhoneNumber number = ContactUtil
+                                    .getValidPhoneNumberFromAndroid(textEdit.getText().toString());
+                            if (number == null) {
+                                Toast.makeText(mActivity, getString(R.string.label_load_failed),
+                                        Toast.LENGTH_LONG).show();
+                                return;
+                            }
+                            ContactId contact = ContactUtil
+                                    .createContactIdFromValidatedData(number);
+                            String selectedProvisioningFile = (String) spinner.getSelectedItem();
+                            if (selectedProvisioningFile == null
+                                    || selectedProvisioningFile
+                                            .equals(getString(R.string.label_no_xml_file))) {
+                                Toast.makeText(mActivity, getString(R.string.label_load_failed),
+                                        Toast.LENGTH_LONG).show();
+                                return;
+                            }
+                            loadProfile(contact, Uri.fromFile(new File(PROVISIONING_FOLDER_PATH,
+                                    selectedProvisioningFile)));
+                        }
+                    });
+            AlertDialog dialog = builder.create();
+            dialog.setCanceledOnTouchOutside(false);
+            dialog.show();
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(this)
-                .setTitle(R.string.label_generate_profile).setView(view)
-                .setNegativeButton(R.string.label_cancel, null)
-                .setPositiveButton(R.string.label_ok, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        ContactUtil.PhoneNumber number = ContactUtil
-                                .getValidPhoneNumberFromAndroid(textEdit.getText().toString());
-                        if (number == null) {
-                            Toast.makeText(mActivity, getString(R.string.label_load_failed),
-                                    Toast.LENGTH_LONG).show();
-                            return;
-                        }
-                        ContactId contact = ContactUtil.createContactIdFromValidatedData(number);
-                        String selectedProvisioningFile = (String) spinner.getSelectedItem();
-                        if (selectedProvisioningFile == null
-                                || selectedProvisioningFile
-                                        .equals(getString(R.string.label_no_xml_file))) {
-                            Toast.makeText(mActivity, getString(R.string.label_load_failed),
-                                    Toast.LENGTH_LONG).show();
-                            return;
-                        }
-                        loadProfile(contact, Uri.fromFile(new File(PROVISIONING_FOLDER_PATH,
-                                selectedProvisioningFile)));
-                    }
-                });
-        AlertDialog dialog = builder.create();
-        dialog.setCanceledOnTouchOutside(false);
-        dialog.show();
+        } catch (SecurityException e) {
+            if (logActivated) {
+                sLogger.warn("Failed to load provisioning file!", e);
+            }
+        }
     }
 
     private String[] getProvisioningFiles() {
+        if (PackageManager.PERMISSION_GRANTED != ContextCompat.checkSelfPermission(this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+            ActivityCompat.requestPermissions(this, new String[] {
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            }, MY_PERMISSION_REQUEST_ALL);
+            throw new SecurityException("Permission not granted to access SD card!");
+        }
         String[] files = null;
         File folder = new File(PROVISIONING_FOLDER_PATH);
-        try {
-            // noinspection ResultOfMethodCallIgnored
-            folder.mkdirs();
-            if (folder.exists()) {
-                // filter
-                FilenameFilter filter = new FilenameFilter() {
-                    public boolean accept(File dir, String filename) {
-                        return filename.endsWith(PROVISIONING_EXTENSION);
-                    }
-                };
-                files = folder.list(filter);
-            }
-        } catch (SecurityException e) {
-            // intentionally blank
+        // noinspection ResultOfMethodCallIgnored
+        folder.mkdirs();
+        if (folder.exists()) {
+            // filter
+            FilenameFilter filter = new FilenameFilter() {
+                public boolean accept(File dir, String filename) {
+                    return filename.endsWith(PROVISIONING_EXTENSION);
+                }
+            };
+            files = folder.list(filter);
         }
-        if ((files == null) || (files.length == 0)) {
+        if (files == null || files.length == 0) {
             // No provisioning file
             return new String[] {
                 getString(R.string.label_no_xml_file)

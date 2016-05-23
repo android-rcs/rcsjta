@@ -213,8 +213,13 @@
 
         <activity
             android:name=".provisioning.local.Provisioning"
+            android:icon="@drawable/rcs_icon"
             android:label="@string/provisioning_app_name"
             android:theme="@style/Theme.AppCompat">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
         </activity>
 
         <service
@@ -225,14 +230,6 @@
             android:name=".service.permissions.PermissionsAlertDialog"
             android:theme="@style/Theme.Transparent"/>
 
-        <activity
-            android:name=".service.permissions.PermissionsActivity"
-            android:icon="@drawable/rcs_icon">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
-            </intent-filter>
-        </activity>
     </application>
 
 </manifest>

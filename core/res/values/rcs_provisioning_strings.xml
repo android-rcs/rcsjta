@@ -9,6 +9,7 @@
     <string name="label_no_certificate">No certificate</string>
     <string name="label_parse_failed">Cannot parse provisioning</string>
     <string name="label_load_failed">Cannot load provisioning</string>
+    <string name="label_sdcard_permission_not_granted">SDCARD read permission not granted!</string>
     <string name="label_no_xml_file">No provisioning file</string>
     <!-- rcs_provisioning_logger.xml -->
     <string name="Application_traces">Application traces</string>
@@ -21,7 +22,6 @@
     <string name="user_msg_content">User message content:</string>
     <string name="GSMA_release">GSMA release:</string>
     <string name="IMS_authentication_procedure_for_Mobile_access">IMS authentication procedure for Mobile access:</string>
-    <string name="IMS_authentication_procedure_for_Wi_Fi_access">IMS authentication procedure for Wi-Fi access:</string>
     <string name="IMS_username">IMS username:</string>
     <string name="IMS_display_name">IMS display name:</string>
     <string name="IMS_home_domain">IMS home domain:</string>
@@ -41,7 +41,6 @@
     <string name="IM_conference_URI">IM conference URI:</string>
     <string name="End_user_confirmation_URI">End user confirmation URI:</string>
     <string name="APN">APN:</string>
-    <string name="Capabilities">Capabilities:</string>
     <string name="Image_sharing">Image sharing</string>
     <string name="Video_sharing">Video sharing</string>
     <string name="File_transfer_MSRP">File transfer MSRP</string>
@@ -151,7 +150,6 @@
     <string name="IMEI_as_device_ID">IMEI as device ID</string>
     <string name="Control_extensions">Control extensions</string>
     <string name="Allow_extensions">Allow extensions</string>
-    <string name="label_ungranted_permission">Below permissions are not granted!</string>
     <string name="load">Load</string>
     <string name="save">Save</string>
     <string name="Directory_path_to_store_audios">Directory path to store audios</string>

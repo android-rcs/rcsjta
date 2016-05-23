@@ -40,7 +40,6 @@
     <string name="rcs_core_terms_title">RCS Nutzungsbedingungen</string>
     <string name="label_ok">OK</string>
     <string name="label_cancel">Abbrechen</string>
-    <string name="label_save">Speichern</string>  
     <string name="label_edit_msisdn">Bitte Telefonnummer eingeben:</string>
     <string name="label_invalid_phone_number">Ungültige Telefonnummer</string>
     
