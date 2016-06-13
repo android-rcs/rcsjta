@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2014 Sony Mobile Communications Inc.
- *
+ * Copyright (C) 2010-2016 Orange.
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -58,6 +59,7 @@ public class GroupChatEventBroadcaster implements IGroupChatEventBroadcaster {
         mGroupChatListeners.unregister(listener);
     }
 
+    @Override
     public void broadcastMessageStatusChanged(String chatId, String mimeType, String msgId,
             Status status, Content.ReasonCode reasonCode) {
         int rcsStatus = status.toInt();
@@ -76,6 +78,7 @@ public class GroupChatEventBroadcaster implements IGroupChatEventBroadcaster {
         mGroupChatListeners.finishBroadcast();
     }
 
+    @Override
     public void broadcastMessageGroupDeliveryInfoChanged(String chatId, ContactId contact,
             String apiMimeType, String msgId, GroupDeliveryInfo.Status status,
             GroupDeliveryInfo.ReasonCode reasonCode) {
@@ -93,6 +96,7 @@ public class GroupChatEventBroadcaster implements IGroupChatEventBroadcaster {
         mGroupChatListeners.finishBroadcast();
     }
 
+    @Override
     public void broadcastParticipantStatusChanged(String chatId, ContactId contact,
             ParticipantStatus status) {
         final int N = mGroupChatListeners.beginBroadcast();
@@ -109,6 +113,7 @@ public class GroupChatEventBroadcaster implements IGroupChatEventBroadcaster {
         mGroupChatListeners.finishBroadcast();
     }
 
+    @Override
     public void broadcastStateChanged(String chatId, State state, ReasonCode reasonCode) {
         final int N = mGroupChatListeners.beginBroadcast();
         int rcsState = state.toInt();
@@ -126,6 +131,7 @@ public class GroupChatEventBroadcaster implements IGroupChatEventBroadcaster {
         mGroupChatListeners.finishBroadcast();
     }
 
+    @Override
     public void broadcastComposingEvent(String chatId, ContactId contact, boolean status) {
         final int N = mGroupChatListeners.beginBroadcast();
         for (int i = 0; i < N; i++) {
@@ -140,6 +146,7 @@ public class GroupChatEventBroadcaster implements IGroupChatEventBroadcaster {
         mGroupChatListeners.finishBroadcast();
     }
 
+    @Override
     public void broadcastInvitation(String chatId) {
         Intent invitation = new Intent(GroupChatIntent.ACTION_NEW_INVITATION);
         invitation.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
@@ -148,6 +155,7 @@ public class GroupChatEventBroadcaster implements IGroupChatEventBroadcaster {
         AndroidFactory.getApplicationContext().sendBroadcast(invitation);
     }
 
+    @Override
     public void broadcastMessageReceived(String apiMimeType, String msgId) {
         Intent newGroupChatMessage = new Intent(GroupChatIntent.ACTION_NEW_GROUP_CHAT_MESSAGE);
         newGroupChatMessage.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
@@ -157,6 +165,7 @@ public class GroupChatEventBroadcaster implements IGroupChatEventBroadcaster {
         AndroidFactory.getApplicationContext().sendBroadcast(newGroupChatMessage);
     }
 
+    @Override
     public void broadcastMessagesDeleted(String chatId, Set<String> msgIds) {
         List<String> msgIds2 = new ArrayList<>(msgIds);
         final int N = mGroupChatListeners.beginBroadcast();
@@ -172,6 +181,7 @@ public class GroupChatEventBroadcaster implements IGroupChatEventBroadcaster {
         mGroupChatListeners.finishBroadcast();
     }
 
+    @Override
     public void broadcastGroupChatsDeleted(Set<String> chatIds) {
         List<String> ids = new ArrayList<>(chatIds);
         final int N = mGroupChatListeners.beginBroadcast();

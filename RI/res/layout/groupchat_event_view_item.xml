@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:padding="2dip"
-    android:textAppearance="?android:attr/textAppearanceSmall">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:orientation="vertical"
+              android:padding="2dip">
 
     <RelativeLayout
         android:id="@+id/msg_item"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
+        android:layout_gravity="center"
         android:orientation="vertical">
 
         <TextView
@@ -18,7 +18,7 @@
             android:layout_height="wrap_content"
             android:singleLine="true"
             android:text="@string/label_state_unknown"
-            android:textColor="@android:color/white" />
+            android:textColor="@android:color/white"/>
 
         <TextView
             android:id="@+id/contact_text"
@@ -26,17 +26,14 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/status_text"
             android:singleLine="true"
-            android:text="@string/contact_dummy" />
+            android:text="@string/contact_dummy"/>
     </RelativeLayout>
 
     <TextView
         android:id="@+id/timestamp_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:layout_below="@id/msg_item"
         android:singleLine="true"
-        android:text="@string/timestamp_dummy" />
+        android:text="@string/timestamp_dummy"/>
 
-</RelativeLayout>
+</LinearLayout>

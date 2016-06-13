@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2014 Sony Mobile Communications Inc.
+ * Copyright (C) 2010-2016 Orange.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -21,21 +22,21 @@ import com.gsma.services.rcs.filetransfer.FileTransfer.ReasonCode;
 import com.gsma.services.rcs.filetransfer.FileTransfer.State;
 import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo;
 
+import java.util.Set;
+
 /**
  * Interface to perform broadcast events on GroupFileTransferListeners
  */
 public interface IGroupFileTransferBroadcaster {
 
-    public void broadcastStateChanged(String chatId, String transferId, State status,
-            ReasonCode reasonCode);
+    void broadcastStateChanged(String chatId, String transferId, State status, ReasonCode reasonCode);
 
-    public void broadcastProgressUpdate(String chatId, String transferId, long currentSize,
-            long totalSize);
+    void broadcastProgressUpdate(String chatId, String transferId, long currentSize, long totalSize);
 
-    public void broadcastDeliveryInfoChanged(String chatId, ContactId contact, String transferId,
+    void broadcastDeliveryInfoChanged(String chatId, ContactId contact, String transferId,
             GroupDeliveryInfo.Status status, GroupDeliveryInfo.ReasonCode reasonCode);
 
-    public void broadcastInvitation(String fileTransferId);
+    void broadcastInvitation(String fileTransferId);
 
-    public void broadcastResumeFileTransfer(String filetransferId);
+    void broadcastFileTransfersDeleted(String chatId, Set<String> transferIds);
 }

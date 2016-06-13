@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2014 Sony Mobile Communications Inc.
+ * Copyright (C) 2010-2016 Orange.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -20,18 +21,20 @@ import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer.ReasonCode;
 import com.gsma.services.rcs.filetransfer.FileTransfer.State;
 
+import java.util.Set;
+
 /**
  * Interface to perform broadcast events on FileTransferListeners
  */
 public interface IOneToOneFileTransferBroadcaster {
 
-    public void broadcastStateChanged(ContactId contact, String transferId, State status,
+    void broadcastStateChanged(ContactId contact, String transferId, State status,
             ReasonCode reasonCode);
 
-    public void broadcastProgressUpdate(ContactId contact, String transferId, long currentSize,
+    void broadcastProgressUpdate(ContactId contact, String transferId, long currentSize,
             long totalSize);
 
-    public void broadcastInvitation(String fileTransferId);
+    void broadcastInvitation(String fileTransferId);
 
-    public void broadcastResumeFileTransfer(String filetransferId);
+    void broadcastFileTransferDeleted(ContactId contact, Set<String> filetransferIds);
 }

@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2014 Sony Mobile Communications Inc.
- *
+ * Copyright (C) 2010-2016 Orange.
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -24,26 +25,32 @@ import com.gsma.services.rcs.chat.GroupChat.State;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo;
 
+import java.util.Set;
+
 /**
  * Interface to perform broadcast events on GroupChatListener
  */
 public interface IGroupChatEventBroadcaster {
 
-    public void broadcastMessageStatusChanged(String chatId, String mimeType, String msgId,
-            Status status, ReasonCode reasonCode);
+    void broadcastMessageStatusChanged(String chatId, String mimeType, String msgId, Status status,
+            ReasonCode reasonCode);
 
-    public void broadcastMessageGroupDeliveryInfoChanged(String chatId, ContactId contact,
+    void broadcastMessageGroupDeliveryInfoChanged(String chatId, ContactId contact,
             String mimeType, String msgId, GroupDeliveryInfo.Status status,
             GroupDeliveryInfo.ReasonCode reasonCode);
 
-    public void broadcastParticipantStatusChanged(String chatId, ContactId contact,
+    void broadcastParticipantStatusChanged(String chatId, ContactId contact,
             ParticipantStatus status);
 
-    public void broadcastStateChanged(String chatId, State state, GroupChat.ReasonCode reasonCode);
+    void broadcastStateChanged(String chatId, State state, GroupChat.ReasonCode reasonCode);
 
-    public void broadcastComposingEvent(String chatId, ContactId contact, boolean status);
+    void broadcastComposingEvent(String chatId, ContactId contact, boolean status);
 
-    public void broadcastInvitation(String chatId);
+    void broadcastInvitation(String chatId);
 
-    public void broadcastMessageReceived(String mimeType, String msgId);
+    void broadcastMessageReceived(String mimeType, String msgId);
+
+    void broadcastMessagesDeleted(String chatId, Set<String> msgIds);
+
+    void broadcastGroupChatsDeleted(Set<String> chatIds);
 }

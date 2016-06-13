@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2014 Sony Mobile Communications Inc.
+ * Copyright (C) 2010-2016 Orange.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -23,7 +24,7 @@ import java.util.Map;
 
 public class DatabaseUtils {
 
-    private static final Map<String, Integer> sModeBits = new HashMap<String, Integer>();
+    private static final Map<String, Integer> sModeBits = new HashMap<>();
 
     static {
         sModeBits.put("r", ParcelFileDescriptor.MODE_READ_ONLY);
@@ -39,7 +40,17 @@ public class DatabaseUtils {
                 | ParcelFileDescriptor.MODE_CREATE | ParcelFileDescriptor.MODE_TRUNCATE);
     }
 
-    public static String[] appendSelectionArgs(String[] selectionArgs,
+    public static String[] appendIdWithSelectionArgs(String id, String[] selectionArgs) {
+        String[] idSelectionArg = new String[] {
+            id
+        };
+        if (selectionArgs == null) {
+            return idSelectionArg;
+        }
+        return DatabaseUtils.appendSelectionArgs(idSelectionArg, selectionArgs);
+    }
+
+    private static String[] appendSelectionArgs(String[] selectionArgs,
             String[] selectionArgsToAppend) {
         String[] resultingSelectionArgs = new String[selectionArgs.length
                 + selectionArgsToAppend.length];

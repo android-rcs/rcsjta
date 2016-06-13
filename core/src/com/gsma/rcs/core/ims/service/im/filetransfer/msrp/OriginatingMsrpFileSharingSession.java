@@ -159,9 +159,6 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
             String localIpAddress = getImsService().getImsModule().getCurrentNetworkInterface()
                     .getNetworkAccess().getIpAddress();
             mMsrpMgr = new MsrpManager(localIpAddress, localMsrpPort, getImsService(), mRcsSettings);
-            if (getImsService().getImsModule().isConnectedToWifiAccess()) {
-                mMsrpMgr.setSecured(mRcsSettings.isSecureMsrpOverWifi());
-            }
             /* Build SDP part */
             String ipAddress = getDialogPath().getSipStack().getLocalIpAddress();
             String encoding = getContent().getEncoding();

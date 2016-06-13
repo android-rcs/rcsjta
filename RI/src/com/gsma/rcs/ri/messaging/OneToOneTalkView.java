@@ -311,7 +311,7 @@ public class OneToOneTalkView extends RcsFragmentActivity implements
             @Override
             public void onComposingEvent(ContactId contact, boolean status) {
                 /* Discard event if not for current contact */
-                if (!mContact.equals(contact)) {
+                if (!contact.equals(mContact)) {
                     return;
                 }
                 if (LogUtils.isActive) {

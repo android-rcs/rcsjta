@@ -65,14 +65,11 @@ public abstract class SipMessage {
      * Rate to convert from seconds to milliseconds
      */
     protected static final long SECONDS_TO_MILLISECONDS_CONVERSION_RATE = 1000;
-
-    private final String HEADER_OF_NON_BASED_FTAG = "+";
-
-    private final String FTAG_VALUE_LIST_EQUAL = "=";
-    private final String FTAG_VALUE_LIST_QUOT = "\"";
-    private final String FTAG_VALUE_LIST_COMA = ",";
-
-    private final String ACCEPT_CONTACT_PARAMS_SEMI = ";";
+    private static final String HEADER_OF_NON_BASED_FTAG = "+";
+    private static final String FTAG_VALUE_LIST_EQUAL = "=";
+    private static final String FTAG_VALUE_LIST_QUOT = "\"";
+    private static final String FTAG_VALUE_LIST_COMA = ",";
+    private static final String ACCEPT_CONTACT_PARAMS_SEMI = ";";
 
     /**
      * SIP stack API object
@@ -123,7 +120,7 @@ public abstract class SipMessage {
      * @throws ParseException
      */
     public void addHeader(String name, String value) throws ParseException {
-            Header header = SipUtils.HEADER_FACTORY.createHeader(name, value);
+        Header header = SipUtils.HEADER_FACTORY.createHeader(name, value);
         mStackMessage.setHeader(header);
     }
 
@@ -224,6 +221,19 @@ public abstract class SipMessage {
     public long getCSeq() {
         CSeqHeader header = (CSeqHeader) mStackMessage.getHeader(CSeqHeader.NAME);
         return header.getSeqNumber();
+    }
+
+    /**
+     * Return the ContactAddress
+     *
+     * @return String
+     */
+    public String getContactAddress() {
+        ContactHeader header = (ContactHeader) mStackMessage.getHeader(ContactHeader.NAME);
+        if (header != null) {
+            return header.getAddress().toString();
+        }
+        return null;
     }
 
     /**
@@ -445,25 +455,22 @@ public abstract class SipMessage {
      * @return Set of feature tags
      */
     public Set<String> getFeatureTags() {
-        Set<String> tags = new HashSet<String>();
+        Set<String> tags = new HashSet<>();
         /* Read Contact header */
         ContactHeader contactHeader = (ContactHeader) mStackMessage.getHeader(ContactHeader.NAME);
         if (contactHeader != null) {
             addContactFeatureTags(tags, contactHeader);
         }
-
         /* Read Accept-Contact header */
         ListIterator<Header> acceptHeaders = getHeaders(SipUtils.HEADER_ACCEPT_CONTACT);
         if (acceptHeaders == null || !acceptHeaders.hasNext()) {
             /* Check contracted form */
             acceptHeaders = getHeaders(SipUtils.HEADER_ACCEPT_CONTACT_C);
         }
-
         if (acceptHeaders != null) {
             addAcceptContactFeatureTags(tags, acceptHeaders);
         }
-
-        Set<String> result = new HashSet<String>();
+        Set<String> result = new HashSet<>();
         /* Filter irrelevant feature tags */
         for (String tag : tags) {
             /* Reject sip.instance parameter */

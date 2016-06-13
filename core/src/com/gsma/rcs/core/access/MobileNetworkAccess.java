@@ -22,11 +22,16 @@
 
 package com.gsma.rcs.core.access;
 
+import com.gsma.rcs.core.ims.security.cert.KeyStoreManager;
 import com.gsma.rcs.platform.AndroidFactory;
+import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
 
 import android.content.Context;
 import android.telephony.TelephonyManager;
+
+import java.io.IOException;
+import java.security.cert.CertificateException;
 
 /**
  * Mobile access network
@@ -43,13 +48,12 @@ public class MobileNetworkAccess extends NetworkAccess {
     /**
      * Constructor
      */
-    public MobileNetworkAccess() {
-        super();
+    public MobileNetworkAccess(RcsSettings rcsSettings) {
+        super(rcsSettings);
         mTelephonyManager = (TelephonyManager) AndroidFactory.getApplicationContext()
                 .getSystemService(Context.TELEPHONY_SERVICE);
         if (sLogger.isActivated()) {
-            sLogger.info(new StringBuilder("Mobile access has been created (interface ")
-                    .append(getNetworkName()).append(")").toString());
+            sLogger.info("Mobile access has been created (interface " + getNetworkName() + ")");
         }
     }
 
@@ -63,6 +67,16 @@ public class MobileNetworkAccess extends NetworkAccess {
             sLogger.info("Network access connected (" + ipAddress + ")");
         }
         mIpAddress = ipAddress;
+        if (mRcsSettings.isSecureMsrpOverMobile()) {
+            try {
+                KeyStoreManager.updateClientCertificate(ipAddress);
+
+            } catch (CertificateException | IOException e) {
+                if (sLogger.isActivated()) {
+                    sLogger.error(e.getMessage());
+                }
+            }
+        }
     }
 
     /**

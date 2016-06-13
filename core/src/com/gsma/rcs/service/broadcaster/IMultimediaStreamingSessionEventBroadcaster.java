@@ -27,10 +27,10 @@ import android.content.Intent;
  */
 public interface IMultimediaStreamingSessionEventBroadcaster {
 
-    public void broadcastPayloadReceived(ContactId contact, String sessionId, byte[] content);
+    void broadcastPayloadReceived(ContactId contact, String sessionId, byte[] content);
 
-    public void broadcastStateChanged(ContactId contact, String sessionId, State state,
+    void broadcastStateChanged(ContactId contact, String sessionId, State state,
             ReasonCode reasonCode);
 
-    public void broadcastInvitation(String sessionId, Intent rtpSessionInvite);
+    void broadcastInvitation(String sessionId, Intent rtpSessionInvite);
 }

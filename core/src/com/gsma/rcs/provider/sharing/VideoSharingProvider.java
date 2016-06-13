@@ -150,13 +150,7 @@ public class VideoSharingProvider extends ContentProvider {
     }
 
     private String[] getSelectionArgsWithSharingId(String[] selectionArgs, String sharingId) {
-        String[] sharingSelectionArg = new String[] {
-            sharingId
-        };
-        if (selectionArgs == null) {
-            return sharingSelectionArg;
-        }
-        return DatabaseUtils.appendSelectionArgs(sharingSelectionArg, selectionArgs);
+        return DatabaseUtils.appendIdWithSelectionArgs(sharingId, selectionArgs);
     }
 
     @Override

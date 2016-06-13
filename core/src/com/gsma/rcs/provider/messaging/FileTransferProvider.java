@@ -191,13 +191,7 @@ public class FileTransferProvider extends ContentProvider {
     }
 
     private String[] getSelectionArgsWithFtId(String[] selectionArgs, String ftId) {
-        String[] ftSelectionArg = new String[] {
-            ftId
-        };
-        if (selectionArgs == null) {
-            return ftSelectionArg;
-        }
-        return DatabaseUtils.appendSelectionArgs(ftSelectionArg, selectionArgs);
+        return DatabaseUtils.appendIdWithSelectionArgs(ftId, selectionArgs);
     }
 
     private String[] restrictProjectionToExternallyDefinedColumns(String[] projection)

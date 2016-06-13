@@ -144,8 +144,6 @@
     <string name="title_multi_file_transfer">Multiple file transfer</string>
     <string name="label_pause_ft_not_allowed">Cannot pause HTTP file transfer</string>
     <string name="label_resume_ft_not_allowed">Cannot resume HTTP file transfer</string>
-    <string name="label_delete_file_transfer_success">File transfers with contact %1$s deleted</string>
-
 
     <!-- Chat menu -->
     <string name="menu_initiate_chat">Initiate single chat</string>
@@ -168,8 +166,6 @@
     <string name="label_select_contacts">Select contacts</string>
     <string name="label_select_quicktext">Quick text</string>
     <string name="menu_quicktext">Quick text</string>
-    <string name="label_delete_chat_success">Chat with contact %1$s is deleted</string>
-    <string name="label_delete_gchat_success">Group chat successfully deleted</string>
     <string name="label_subject">Subject: </string>
     <string name="label_subject_notif">Subject: %s</string>
     <string name="label_max_participants">Can\'t add participants: max number of participants is reached (max=%d)</string>
@@ -382,8 +378,7 @@
     <string name="label_history_log_menu_filter">Change filter</string>
     <string name="label_history_log_empty">Log is empty</string>
     <string name="label_history_log_contact_spinner_default_value">No contact filter</string>
-    <string name="LabelPermissionsError">You must accept permissions to use RSC RI</string>
-    <string name="LabelTitlePermissionsError">ALERT</string>
+    <string name="label_ungranted_permission">Below permissions are not granted!</string>
     <string name="menu_record_audio">Record audio</string>
     <string name="label_play_record">Play record</string>
     <string name="label_start_record">Start audio record</string>

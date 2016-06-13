@@ -226,7 +226,7 @@ public class GroupTalkView extends RcsFragmentActivity implements
             // Callback called when an Is-composing event has been received
             public void onComposingEvent(String chatId, ContactId contact, boolean status) {
                 // Discard event if not for current chatId
-                if (!mChatId.equals(chatId)) {
+                if (!chatId.equals(mChatId)) {
                     return;
                 }
                 displayComposingEvent(contact, status);

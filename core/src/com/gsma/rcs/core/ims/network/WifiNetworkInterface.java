@@ -44,13 +44,13 @@ public class WifiNetworkInterface extends ImsNetworkInterface {
      * Constructor
      * 
      * @param imsModule IMS module
-     * @param rcsSettings
+     * @param rcsSettings the RCS settings accessor
      */
     public WifiNetworkInterface(ImsModule imsModule, RcsSettings rcsSettings) {
-        super(imsModule, ConnectivityManager.TYPE_WIFI, new WifiNetworkAccess(), rcsSettings
-                .getImsProxyAddrForWifi(), rcsSettings.getImsProxyPortForWifi(), rcsSettings
-                .getSipDefaultProtocolForWifi(),
-                rcsSettings.getImsAuthenticationProcedureForWifi(), rcsSettings);
+        super(imsModule, ConnectivityManager.TYPE_WIFI, new WifiNetworkAccess(rcsSettings),
+                rcsSettings.getImsProxyAddrForWifi(), rcsSettings.getImsProxyPortForWifi(),
+                rcsSettings.getSipDefaultProtocolForWifi(), rcsSettings
+                        .getImsAuthenticationProcedureForWifi(), rcsSettings);
 
         if (logger.isActivated()) {
             logger.info("Wi-Fi network interface has been loaded");

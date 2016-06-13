@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010-2016 Orange.
+ * Copyright (C) 2016 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * 
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.provisioning.https;
@@ -22,6 +26,7 @@ import com.gsma.rcs.R;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.rcs.utils.ContactUtil.PhoneNumber;
 import com.gsma.rcs.utils.logger.Logger;
+import com.gsma.services.rcs.contact.ContactId;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -48,13 +53,16 @@ public class HttpsProvisioningAlertDialog extends Activity {
     private Boolean normalCase = true;
 
     private static final Logger sLogger = Logger.getLogger(HttpsProvisioningAlertDialog.class
-            .getSimpleName());
+            .getName());
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.rcs_wifi_provisioning);
         setFinishOnTouchOutside(false);
+
+        ContactId contact = getIntent().getParcelableExtra(
+                HttpsProvisioningMsisdnInput.EXTRA_CONTACT);
 
         mErrorLayout = (LinearLayout) findViewById(R.id.error_layout);
 
@@ -82,7 +90,7 @@ public class HttpsProvisioningAlertDialog extends Activity {
                 if (sLogger.isActivated()) {
                     sLogger.warn("MSISDN dialog has expired!");
                 }
-                HttpsProvisioningMSISDNInput.getInstance().responseReceived(null);
+                HttpsProvisioningMsisdnInput.getInstance().responseReceived(null);
                 mCountDownTimer = null;
                 finish();
             }
@@ -95,6 +103,9 @@ public class HttpsProvisioningAlertDialog extends Activity {
             showNormalCase();
         } else {
             showErrorCase();
+        }
+        if (contact != null) {
+            mMsisdn.setText(contact.toString());
         }
     }
 
@@ -115,7 +126,7 @@ public class HttpsProvisioningAlertDialog extends Activity {
         if (sLogger.isActivated()) {
             sLogger.warn("User exited the MSISDN dialog!");
         }
-        HttpsProvisioningMSISDNInput.getInstance().responseReceived(null);
+        HttpsProvisioningMsisdnInput.getInstance().responseReceived(null);
         super.onBackPressed();
     }
 
@@ -147,7 +158,7 @@ public class HttpsProvisioningAlertDialog extends Activity {
                 if (sLogger.isActivated()) {
                     sLogger.debug("User entered MSISDN ".concat(phoneNumber.getNumber()));
                 }
-                HttpsProvisioningMSISDNInput.getInstance().responseReceived(
+                HttpsProvisioningMsisdnInput.getInstance().responseReceived(
                         ContactUtil.createContactIdFromValidatedData(phoneNumber));
                 finish();
             }
@@ -160,7 +171,7 @@ public class HttpsProvisioningAlertDialog extends Activity {
             if (sLogger.isActivated()) {
                 sLogger.warn("User cancelled the MSISDN dialog!");
             }
-            HttpsProvisioningMSISDNInput.getInstance().responseReceived(null);
+            HttpsProvisioningMsisdnInput.getInstance().responseReceived(null);
             finish();
         }
     };

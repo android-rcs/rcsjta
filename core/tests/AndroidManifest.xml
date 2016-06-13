@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <!-- package name must be unique so suffix with "tests" so package loader doesn't ignore us -->
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.gsma.rcs.tests" >
+<manifest package="com.gsma.rcs.tests"
+          xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!--
       We add an application tag here just so that we can indicate that
@@ -10,18 +10,7 @@
          which is needed when building test cases.
     -->
     <application>
-        <uses-library android:name="android.test.runner" />
+        <uses-library android:name="android.test.runner"/>
     </application>
-
-    <!--
-    This declares that this application uses the instrumentation test runner targeting
-    the package of com.gsma.rcs.  To run the tests use the command:
-    "adb shell am instrument -w com.gsma.rcs.tests/android.test.InstrumentationTestRunner"
-    -->
-
-    <instrumentation
-        android:name="com.zutubi.android.junitreport.JUnitReportTestRunner"
-        android:label="Unitary tests for RCS core"
-        android:targetPackage="com.gsma.rcs" />
 
 </manifest>

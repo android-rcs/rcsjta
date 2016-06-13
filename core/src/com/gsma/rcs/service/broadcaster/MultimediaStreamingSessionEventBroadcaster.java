@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2014 Sony Mobile Communications Inc.
+ * Copyright (C) 2010-2016 Orange.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -52,6 +53,7 @@ public class MultimediaStreamingSessionEventBroadcaster implements
         mMultimediaStreamingListeners.unregister(listener);
     }
 
+    @Override
     public void broadcastPayloadReceived(ContactId contact, String sessionId, byte[] content) {
         final int N = mMultimediaStreamingListeners.beginBroadcast();
         for (int i = 0; i < N; i++) {
@@ -67,6 +69,7 @@ public class MultimediaStreamingSessionEventBroadcaster implements
         mMultimediaStreamingListeners.finishBroadcast();
     }
 
+    @Override
     public void broadcastStateChanged(ContactId contact, String sessionId, State state,
             ReasonCode reasonCode) {
         int rcsState = state.toInt();
@@ -85,6 +88,7 @@ public class MultimediaStreamingSessionEventBroadcaster implements
         mMultimediaStreamingListeners.finishBroadcast();
     }
 
+    @Override
     public void broadcastInvitation(String sessionId, Intent rtpSessionInvite) {
         rtpSessionInvite.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
         IntentUtils.tryToSetReceiverForegroundFlag(rtpSessionInvite);

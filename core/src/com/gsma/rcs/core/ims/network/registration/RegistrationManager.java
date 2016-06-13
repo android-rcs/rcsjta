@@ -37,12 +37,16 @@ import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
 import com.gsma.rcs.platform.AndroidFactory;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.provisioning.https.HttpsProvisioningService;
+import com.gsma.rcs.service.LauncherUtils;
 import com.gsma.rcs.utils.DeviceUtils;
 import com.gsma.rcs.utils.PeriodicRefresher;
 import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsServiceRegistration;
 import com.gsma.services.rcs.RcsServiceRegistration.ReasonCode;
+
+import android.content.Context;
 
 import java.util.ListIterator;
 
@@ -61,6 +65,11 @@ import javax2.sip.message.Response;
 public class RegistrationManager extends PeriodicRefresher {
 
     private static final int MAX_REGISTRATION_FAILURES = 3;
+
+    /**
+     * maximum number of 403 failure attempts to register after provisioning success
+     */
+    private static final int MAX_403_REGISTRATION_FAILURES = 5;
 
     /**
      * Rate to convert from seconds to milliseconds
@@ -345,28 +354,43 @@ public class RegistrationManager extends PeriodicRefresher {
                      */
                     if (register.getExpires() != 0) {
                         handle200OK(ctx);
+                        Context appContext = AndroidFactory.getApplicationContext();
+                        /* Reset registration forbidden failure count to default value */
+                        LauncherUtils.setRegForbiddenCount(appContext, 0);
+
                     } else {
                         handle200OkUnregister();
                     }
                     break;
+
                 case Response.MOVED_TEMPORARILY:
                     /**
                      * 302 Moved Temporarily
                      */
                     handle302MovedTemporarily(ctx);
                     break;
+
                 case Response.UNAUTHORIZED:
                     /**
                      * 401 Unauthorized
                      */
                     handle401Unauthorized(ctx);
                     break;
+
+                case Response.FORBIDDEN:
+                    /**
+                     * 403 Forbidden
+                     */
+                    handle403Forbidden();
+                    break;
+
                 case Response.INTERVAL_TOO_BRIEF:
                     /**
                      * 423 Interval Too Brief
                      */
                     handle423IntervalTooBrief(ctx);
                     break;
+
                 case Response.NOT_FOUND:
                 case Response.REQUEST_TIMEOUT:
                 case Response.TEMPORARILY_UNAVAILABLE:
@@ -379,6 +403,7 @@ public class RegistrationManager extends PeriodicRefresher {
                      */
                     handle4xx5xx6xxNoRetryAfterHeader(ctx);
                     break;
+
                 default:
                     /**
                      * Other error response
@@ -390,6 +415,35 @@ public class RegistrationManager extends PeriodicRefresher {
         } else {
             // No response received: timeout
             handleError(new ImsError(ImsError.REGISTRATION_FAILED, "timeout"));
+        }
+    }
+
+    /**
+     * Handle 403 forbidden response
+     */
+    private void handle403Forbidden() {
+        Context appContext = AndroidFactory.getApplicationContext();
+        int regForbiddenCount = LauncherUtils.getRegForbiddenCount(appContext);
+        if (regForbiddenCount < MAX_403_REGISTRATION_FAILURES) {
+            if (sLogger.isActivated()) {
+                sLogger.debug("Received 403 Forbidden : Retry count " + regForbiddenCount);
+            }
+            regForbiddenCount++;
+            LauncherUtils.setRegForbiddenCount(appContext, regForbiddenCount);
+            LauncherUtils.stopRcsCoreService(appContext);
+            HttpsProvisioningService.startHttpsProvisioningService(appContext, true, false);
+
+        } else {
+            if (sLogger.isActivated()) {
+                sLogger.debug("Received 403 Forbidden & Reached max retry count");
+            }
+            LauncherUtils.stopRcsService(appContext);
+            /* As registration is not successful with current configuration, reset to default */
+            mRcsSettings.resetConfigParameters();
+            /* Set the configuration validity flag to false */
+            mRcsSettings.setConfigurationValid(false);
+            /* Reset to default value */
+            LauncherUtils.setRegForbiddenCount(appContext, 0);
         }
     }
 

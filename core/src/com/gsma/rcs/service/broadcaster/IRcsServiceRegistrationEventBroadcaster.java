@@ -24,7 +24,7 @@ import com.gsma.services.rcs.RcsServiceRegistration.ReasonCode;
  */
 public interface IRcsServiceRegistrationEventBroadcaster {
 
-    public void broadcastServiceRegistered();
+    void broadcastServiceRegistered();
 
-    public void broadcastServiceUnRegistered(ReasonCode reasonCode);
+    void broadcastServiceUnRegistered(ReasonCode reasonCode);
 }

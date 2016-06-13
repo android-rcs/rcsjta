@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2014 Sony Mobile Communications Inc.
+ * Copyright (C) 2010-2016 Orange.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -56,6 +57,7 @@ public class GroupFileTransferBroadcaster implements IGroupFileTransferBroadcast
         mGroupFileTransferListeners.unregister(listener);
     }
 
+    @Override
     public void broadcastStateChanged(String chatId, String transferId, State state,
             ReasonCode reasonCode) {
         final int N = mGroupFileTransferListeners.beginBroadcast();
@@ -74,6 +76,7 @@ public class GroupFileTransferBroadcaster implements IGroupFileTransferBroadcast
         mGroupFileTransferListeners.finishBroadcast();
     }
 
+    @Override
     public void broadcastProgressUpdate(String chatId, String transferId, long currentSize,
             long totalSize) {
         final int N = mGroupFileTransferListeners.beginBroadcast();
@@ -90,6 +93,7 @@ public class GroupFileTransferBroadcaster implements IGroupFileTransferBroadcast
         mGroupFileTransferListeners.finishBroadcast();
     }
 
+    @Override
     public void broadcastDeliveryInfoChanged(String chatId, ContactId contact, String transferId,
             GroupDeliveryInfo.Status status, GroupDeliveryInfo.ReasonCode reasonCode) {
         int rcsStatus = status.toInt();
@@ -108,6 +112,7 @@ public class GroupFileTransferBroadcaster implements IGroupFileTransferBroadcast
         mGroupFileTransferListeners.finishBroadcast();
     }
 
+    @Override
     public void broadcastInvitation(String fileTransferId) {
         Intent invitation = new Intent(FileTransferIntent.ACTION_NEW_INVITATION);
         invitation.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
@@ -116,14 +121,7 @@ public class GroupFileTransferBroadcaster implements IGroupFileTransferBroadcast
         AndroidFactory.getApplicationContext().sendBroadcast(invitation);
     }
 
-    public void broadcastResumeFileTransfer(String filetransferId) {
-        Intent resumeFileTransfer = new Intent(FileTransferIntent.ACTION_RESUME);
-        resumeFileTransfer.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
-        IntentUtils.tryToSetReceiverForegroundFlag(resumeFileTransfer);
-        resumeFileTransfer.putExtra(FileTransferIntent.EXTRA_TRANSFER_ID, filetransferId);
-        AndroidFactory.getApplicationContext().sendBroadcast(resumeFileTransfer);
-    }
-
+    @Override
     public void broadcastFileTransfersDeleted(String chatId, Set<String> transferIds) {
         List<String> ids = new ArrayList<>(transferIds);
         final int N = mGroupFileTransferListeners.beginBroadcast();

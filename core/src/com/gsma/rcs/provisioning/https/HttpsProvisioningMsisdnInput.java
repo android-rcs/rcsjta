@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010-2016 Orange.
+ * Copyright (C) 2016 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.provisioning.https;
@@ -22,28 +26,28 @@ import com.gsma.services.rcs.contact.ContactId;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Parcelable;
 
 /**
  * HTTPS provisioning - Input of MSISDN
  * 
  * @author Orange
  */
-public final class HttpsProvisioningMSISDNInput {
+public final class HttpsProvisioningMsisdnInput {
+
+    /* package private */static final String EXTRA_CONTACT = "contact";
 
     /**
-     * HttpsProvisioningMSISDNInput instance
+     * Singleton instance
      */
-    private static volatile HttpsProvisioningMSISDNInput sInstance;
+    private static volatile HttpsProvisioningMsisdnInput sInstance;
 
-    /**
-     * MSISDN
-     */
     private ContactId mMsisdn;
 
     /**
-     * Constructor
+     * Private constructor to prevent instantiation
      */
-    private HttpsProvisioningMSISDNInput() {
+    private HttpsProvisioningMsisdnInput() {
         super();
     }
 
@@ -61,13 +65,13 @@ public final class HttpsProvisioningMSISDNInput {
      * 
      * @return Instance of HttpsProvisioningMSISDNDialog
      */
-    public final static HttpsProvisioningMSISDNInput getInstance() {
+    public static HttpsProvisioningMsisdnInput getInstance() {
         if (sInstance != null) {
             return sInstance;
         }
-        synchronized (HttpsProvisioningMSISDNInput.class) {
+        synchronized (HttpsProvisioningMsisdnInput.class) {
             if (sInstance == null) {
-                sInstance = new HttpsProvisioningMSISDNInput();
+                sInstance = new HttpsProvisioningMsisdnInput();
             }
             return sInstance;
         }
@@ -75,12 +79,13 @@ public final class HttpsProvisioningMSISDNInput {
 
     /**
      * Display the MSISDN popup
-     * 
-     * @param context
-     * @return
+     *
+     * @param contact the contact ID to display/edit or null
+     * @return ContactId
      */
-    protected ContactId displayPopupAndWaitResponse(Context context) {
+    protected ContactId displayPopupAndWaitResponse(Context context, ContactId contact) {
         Intent intent = new Intent(context, HttpsProvisioningAlertDialog.class);
+        intent.putExtra(EXTRA_CONTACT, (Parcelable) contact);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(intent);
         try {
@@ -96,7 +101,7 @@ public final class HttpsProvisioningMSISDNInput {
     /**
      * Callback of the MSISDN
      * 
-     * @param contact
+     * @param contact the contact ID
      */
     protected void responseReceived(ContactId contact) {
         synchronized (sInstance) {

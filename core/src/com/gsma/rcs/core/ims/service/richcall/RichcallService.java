@@ -556,7 +556,7 @@ public class RichcallService extends ImsService {
                     }
                     ContactId contact = ContactUtil.createContactIdFromValidatedData(number);
                     mContactManager.setContactDisplayName(contact,
-                            SipUtils.getDisplayNameFromUri(invite.getFrom()));
+                            SipUtils.getDisplayNameFromInvite(invite));
 
                     /* Test if call is established */
                     if (!isCallConnectedWith(contact)) {
@@ -652,7 +652,7 @@ public class RichcallService extends ImsService {
 
                     session.startSession();
 
-                } catch (FileAccessException e) {
+                } catch (FileAccessException | RuntimeException | PayloadException e) {
                     sLogger.error("Failed to receive image share invitation!", e);
                     tryToSendErrorResponse(invite, Response.DECLINE);
 
@@ -662,21 +662,6 @@ public class RichcallService extends ImsService {
                                 + e.getMessage() + ")");
                     }
                     tryToSendErrorResponse(invite, Response.BUSY_HERE);
-
-                } catch (PayloadException e) {
-                    sLogger.error("Failed to receive image share invitation!", e);
-                    tryToSendErrorResponse(invite, Response.DECLINE);
-
-                } catch (RuntimeException e) {
-                    /*
-                     * Normally we are not allowed to catch runtime exceptions as these are genuine
-                     * bugs which should be handled/fixed within the code. However the cases when we
-                     * are executing operations on a thread unhandling such exceptions will
-                     * eventually lead to exit the system and thus can bring the whole system down,
-                     * which is not intended.
-                     */
-                    sLogger.error("Failed to receive image share invitation!", e);
-                    tryToSendErrorResponse(invite, Response.DECLINE);
                 }
             }
         });
@@ -771,7 +756,7 @@ public class RichcallService extends ImsService {
                     }
                     ContactId contact = ContactUtil.createContactIdFromValidatedData(number);
                     mContactManager.setContactDisplayName(contact,
-                            SipUtils.getDisplayNameFromUri(invite.getFrom()));
+                            SipUtils.getDisplayNameFromInvite(invite));
 
                     /* Test if call is established */
                     if (!isCallConnectedWith(contact)) {
@@ -858,18 +843,7 @@ public class RichcallService extends ImsService {
                     }
                     tryToSendErrorResponse(invite, Response.BUSY_HERE);
 
-                } catch (PayloadException e) {
-                    sLogger.error("Failed to receive video share invitation!", e);
-                    tryToSendErrorResponse(invite, Response.DECLINE);
-
-                } catch (RuntimeException e) {
-                    /*
-                     * Normally we are not allowed to catch runtime exceptions as these are genuine
-                     * bugs which should be handled/fixed within the code. However the cases when we
-                     * are executing operations on a thread unhandling such exceptions will
-                     * eventually lead to exit the system and thus can bring the whole system down,
-                     * which is not intended.
-                     */
+                } catch (PayloadException | RuntimeException e) {
                     sLogger.error("Failed to receive video share invitation!", e);
                     tryToSendErrorResponse(invite, Response.DECLINE);
                 }
@@ -932,7 +906,7 @@ public class RichcallService extends ImsService {
                     }
                     ContactId contact = ContactUtil.createContactIdFromValidatedData(number);
                     mContactManager.setContactDisplayName(contact,
-                            SipUtils.getDisplayNameFromUri(invite.getFrom()));
+                            SipUtils.getDisplayNameFromInvite(invite));
 
                     /* Test if call is established */
                     if (!isCallConnectedWith(contact)) {
@@ -1014,18 +988,7 @@ public class RichcallService extends ImsService {
                     }
                     tryToSendErrorResponse(invite, Response.BUSY_HERE);
 
-                } catch (PayloadException e) {
-                    sLogger.error("Failed to receive geoloc share invitation!", e);
-                    tryToSendErrorResponse(invite, Response.DECLINE);
-
-                } catch (RuntimeException e) {
-                    /*
-                     * Normally we are not allowed to catch runtime exceptions as these are genuine
-                     * bugs which should be handled/fixed within the code. However the cases when we
-                     * are executing operations on a thread unhandling such exceptions will
-                     * eventually lead to exit the system and thus can bring the whole system down,
-                     * which is not intended.
-                     */
+                } catch (PayloadException | RuntimeException e) {
                     sLogger.error("Failed to receive geoloc share invitation!", e);
                     tryToSendErrorResponse(invite, Response.DECLINE);
                 }
