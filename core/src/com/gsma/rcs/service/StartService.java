@@ -35,9 +35,9 @@ import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provider.settings.RcsSettingsData.ConfigurationMode;
 import com.gsma.rcs.provider.settings.RcsSettingsData.TermsAndConditionsResponse;
-import com.gsma.rcs.service.Permissions.PermissionsManager;
 import com.gsma.rcs.provisioning.ProvisioningInfo.Version;
 import com.gsma.rcs.provisioning.https.HttpsProvisioningService;
+import com.gsma.rcs.service.permissions.PermissionsManager;
 import com.gsma.rcs.utils.IntentUtils;
 import com.gsma.rcs.utils.TimerUtils;
 import com.gsma.rcs.utils.logger.Logger;
@@ -267,25 +267,12 @@ public class StartService extends Service {
                 } catch (IOException e) {
                     logIOException(intent.getAction(), e);
 
-                } catch (RcsAccountException e) {
+                } catch (RcsAccountException | RuntimeException e) {
                     /**
                      * This is a non revocable use-case as the RCS account itself was not created,
                      * So we log this as error and stop the service itself.
                      */
-                    sLogger.error(new StringBuilder("Failed to start the service for intent: ")
-                            .append(intent).toString(), e);
-                    stopSelf();
-
-                } catch (RuntimeException e) {
-                    /*
-                     * Normally we are not allowed to catch runtime exceptions as these are genuine
-                     * bugs which should be handled/fixed within the code. However the cases when we
-                     * are executing operations on a thread unhandling such exceptions will
-                     * eventually lead to exit the system and thus can bring the whole system down,
-                     * which is not intended.
-                     */
-                    sLogger.error(new StringBuilder("Failed to start the service for intent: ")
-                            .append(intent).toString(), e);
+                    sLogger.error("Failed to start the service for intent: " + intent, e);
                     stopSelf();
                 }
             }
@@ -317,6 +304,7 @@ public class StartService extends Service {
                     public void run() {
                         try {
                             connectionEvent(action);
+
                         } catch (RuntimeException e) {
                             /*
                              * Normally we are not allowed to catch runtime exceptions as these are
@@ -325,9 +313,8 @@ public class StartService extends Service {
                              * such exceptions will eventually lead to exit the system and thus can
                              * bring the whole system down, which is not intended.
                              */
-                            sLogger.error(new StringBuilder(
-                                    "Unable to handle connection event for intent action : ")
-                                    .append(intent.getAction()).toString(), e);
+                            sLogger.error("Unable to handle connection event for intent action : "
+                                    + intent.getAction(), e);
                         }
                     }
                 });
@@ -391,10 +378,8 @@ public class StartService extends Service {
         boolean logActivated = sLogger.isActivated();
         if (logActivated) {
             /* Use StringBuilder instead of concat since argument may be null */
-            sLogger.info(new StringBuilder("Last user account is ").append(mLastUserAccount)
-                    .toString());
-            sLogger.info(new StringBuilder("Current user account is ").append(mCurrentUserAccount)
-                    .toString());
+            sLogger.info("Last user account is " + mLastUserAccount);
+            sLogger.info("Current user account is " + mCurrentUserAccount);
         }
 
         /* Check the current SIM */
@@ -475,8 +460,7 @@ public class StartService extends Service {
              * one.
              */
             if (logActivated) {
-                sLogger.debug(new StringBuilder("Deleting the old RCS account for ").append(
-                        mLastUserAccount).toString());
+                sLogger.debug("Deleting the old RCS account for " + mLastUserAccount);
             }
             mContactManager.deleteRCSEntries();
             mAccountUtility.removeRcsAccount(null);
@@ -498,8 +482,7 @@ public class StartService extends Service {
         ConfigurationMode mode = mRcsSettings.getConfigurationMode();
         boolean logActivated = sLogger.isActivated();
         if (logActivated) {
-            sLogger.debug(new StringBuilder("Launch RCS service: HTTPS=").append(mode)
-                    .append(", boot=").append(boot).append(", user=").append(user).toString());
+            sLogger.debug("Launch RCS service: HTTPS=" + mode + ", boot=" + boot + ", user=" + user);
         }
         if (ConfigurationMode.AUTO != mode) {
             mAccountUtility.createRcsAccount(mRcsAccountUsername, true);
@@ -562,15 +545,8 @@ public class StartService extends Service {
      * @return true if the active account was changed
      */
     private boolean hasChangedAccount() {
-        if (mLastUserAccount == null) {
-            return true;
-
-        } else if (mCurrentUserAccount == null) {
-            return false;
-
-        } else {
-            return (!mCurrentUserAccount.equalsIgnoreCase(mLastUserAccount));
-        }
+        return mLastUserAccount == null || mCurrentUserAccount != null
+                && (!mCurrentUserAccount.equalsIgnoreCase(mLastUserAccount));
     }
 
     /**
@@ -601,14 +577,13 @@ public class StartService extends Service {
     /**
      * Launch the RCS start service
      *
-     * @param context
+     * @param context the context
      * @param boot start RCS service upon boot
      * @param user start RCS service upon user action
      */
     static void LaunchRcsStartService(Context context, boolean boot, boolean user) {
         if (sLogger.isActivated())
-            sLogger.debug(new StringBuilder("Launch RCS service (boot=").append(boot)
-                    .append(") (user=").append(user).append(")").toString());
+            sLogger.debug("Launch RCS service (boot=" + boot + ") (user=" + user + ")");
         Intent intent = new Intent(context, StartService.class);
         intent.putExtra(INTENT_KEY_BOOT, boot);
         intent.putExtra(INTENT_KEY_USER, user);
@@ -708,11 +683,10 @@ public class StartService extends Service {
 
     private void logIOException(String action, IOException e) {
         if (action == null) {
-            sLogger.debug(new StringBuilder("Failed to start the service, Message=").append(
-                    e.getMessage()).toString());
+            sLogger.debug("Failed to start the service, Message=" + e.getMessage());
         } else {
-            sLogger.warn(new StringBuilder("Failed to start the service for action: ")
-                    .append(action).append(", Message=").append(e.getMessage()).toString());
+            sLogger.warn("Failed to start the service for action: " + action + ", Message="
+                    + e.getMessage());
         }
     }
 

@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2014 Sony Mobile Communications Inc.
+ * Copyright (C) 2010-2016 Orange.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -55,6 +56,7 @@ public class GeolocSharingEventBroadcaster implements IGeolocSharingEventBroadca
         mGeolocSharingListeners.unregister(listener);
     }
 
+    @Override
     public void broadcastStateChanged(ContactId contact, String sharingId, State state,
             ReasonCode reasonCode) {
         final int N = mGeolocSharingListeners.beginBroadcast();
@@ -73,6 +75,7 @@ public class GeolocSharingEventBroadcaster implements IGeolocSharingEventBroadca
         mGeolocSharingListeners.finishBroadcast();
     }
 
+    @Override
     public void broadcastProgressUpdate(ContactId contact, String sharingId, long currentSize,
             long totalSize) {
         final int N = mGeolocSharingListeners.beginBroadcast();
@@ -89,6 +92,7 @@ public class GeolocSharingEventBroadcaster implements IGeolocSharingEventBroadca
         mGeolocSharingListeners.finishBroadcast();
     }
 
+    @Override
     public void broadcastInvitation(String sharingId) {
         Intent invitation = new Intent(GeolocSharingIntent.ACTION_NEW_INVITATION);
         invitation.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
@@ -97,6 +101,7 @@ public class GeolocSharingEventBroadcaster implements IGeolocSharingEventBroadca
         AndroidFactory.getApplicationContext().sendBroadcast(invitation);
     }
 
+    @Override
     public void broadcastDeleted(ContactId contact, Set<String> sharingIds) {
         List<String> ids = new ArrayList<>(sharingIds);
         final int N = mGeolocSharingListeners.beginBroadcast();

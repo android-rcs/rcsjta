@@ -833,7 +833,9 @@ public class ChatUtils {
                     }
                 } else {
                     /* Include remote contact if format if correct */
-                    participants.put(remote, status);
+                    if (!remote.equals(ImsModule.getImsUserProfile().getUsername())) {
+                        participants.put(remote, status);
+                    }
                 }
             }
         }

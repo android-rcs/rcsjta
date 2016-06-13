@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2015 Sony Mobile Communications Inc.
- *
+ * Copyright (C) 2010-2016 Orange.
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -59,6 +60,18 @@ public abstract class DeleteTask<T> implements Runnable {
 
         private final ContactId mContact;
 
+        /**
+         * Delete a specific item or all
+         *
+         * @param contentResolver the content resolver
+         * @param contentUri the content URI
+         * @param columnPrimaryKey the primary key column
+         * @param columnGroupBy the column to group (either the contact or chat ID)
+         * @param selection the selection scope executed in the database. If null, all are eligible
+         *            for delete or one exactly (in that case selectionArgs must have one value,
+         *            unique id of the item).
+         * @param selectionArgs the selection arguments of the scope
+         */
         public GroupedByContactId(LocalContentResolver contentResolver, Uri contentUri,
                 String columnPrimaryKey, String columnGroupBy, String selection,
                 String... selectionArgs) {
@@ -307,8 +320,14 @@ public abstract class DeleteTask<T> implements Runnable {
 
         } finally {
             if (deletedIds != null) {
-                for (T groupId : deletedIds.keySet()) {
-                    onCompleted(groupId, deletedIds.get(groupId));
+                for (Map.Entry<T, Set<String>> entry : deletedIds.entrySet()) {
+                    T groupId = entry.getKey();
+                    Set<String> delIds = entry.getValue();
+                    if (sLogger.isActivated()) {
+                        sLogger.debug("onCompleted groupId=" + groupId + " IDs size="
+                                + delIds.size());
+                    }
+                    onCompleted(groupId, delIds);
                 }
             }
         }

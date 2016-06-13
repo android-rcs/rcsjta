@@ -24,6 +24,7 @@ package com.gsma.rcs.core.access;
 
 import com.gsma.rcs.core.ims.security.cert.KeyStoreManager;
 import com.gsma.rcs.platform.AndroidFactory;
+import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
 
 import android.content.Context;
@@ -47,13 +48,12 @@ public class WifiNetworkAccess extends NetworkAccess {
     /**
      * Constructor
      */
-    public WifiNetworkAccess() {
-        super();
+    public WifiNetworkAccess(RcsSettings rcsSettings) {
+        super(rcsSettings);
         mWifiManager = (WifiManager) AndroidFactory.getApplicationContext().getSystemService(
                 Context.WIFI_SERVICE);
         if (sLogger.isActivated()) {
-            sLogger.info(new StringBuilder("Wi-Fi access has been created (interface ")
-                    .append(getType()).append(")").toString());
+            sLogger.info("Wi-Fi access has been created (interface " + getType() + ")");
         }
     }
 
@@ -69,9 +69,16 @@ public class WifiNetworkAccess extends NetworkAccess {
             sLogger.info("Network access connected (" + ipAddress + ")");
         }
         mIpAddress = ipAddress;
+        if (mRcsSettings.isSecureMsrpOverWifi()) {
+            try {
+                KeyStoreManager.updateClientCertificate(ipAddress);
 
-        // Changed by Deutsche Telekom
-        KeyStoreManager.updateClientCertificate(ipAddress);
+            } catch (CertificateException | IOException e) {
+                if (sLogger.isActivated()) {
+                    sLogger.error(e.getMessage());
+                }
+            }
+        }
     }
 
     /**

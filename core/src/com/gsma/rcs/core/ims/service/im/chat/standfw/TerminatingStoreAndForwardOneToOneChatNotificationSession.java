@@ -84,15 +84,10 @@ public class TerminatingStoreAndForwardOneToOneChatNotificationSession extends O
         super(imService, contact, PhoneUtils.formatContactIdToUri(contact), null, rcsSettings,
                 messagingLog, timestamp, contactManager);
 
-        // Create the MSRP manager
         int localMsrpPort = NetworkRessourceManager.generateLocalMsrpPort(rcsSettings);
-        String localIpAddress = getImsService().getImsModule().getCurrentNetworkInterface()
+        String localIpAddress = imService.getImsModule().getCurrentNetworkInterface()
                 .getNetworkAccess().getIpAddress();
-        mMsrpMgr = new MsrpManager(localIpAddress, localMsrpPort, rcsSettings);
-        if (imService.getImsModule().isConnectedToWifiAccess()) {
-            mMsrpMgr.setSecured(rcsSettings.isSecureMsrpOverWifi());
-        }
-        // Create dialog path
+        mMsrpMgr = new MsrpManager(localIpAddress, localMsrpPort, imService, rcsSettings);
         createTerminatingDialogPath(invite);
     }
 

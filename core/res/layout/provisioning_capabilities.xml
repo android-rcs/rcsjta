@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:background="@color/material_blue_grey_800"
+            android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <android.support.v7.widget.AppCompatCheckBox
+            android:id="@+id/image_sharing"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:enabled="true"
+            android:text="@string/Image_sharing"
+            android:textStyle="bold"/>
+
+        <android.support.v7.widget.AppCompatCheckBox
+            android:id="@+id/video_sharing"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:enabled="true"
+            android:text="@string/Video_sharing"
+            android:textStyle="bold"/>
+
+        <android.support.v7.widget.AppCompatCheckBox
+            android:id="@+id/file_transfer_msrp"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:enabled="true"
+            android:text="@string/File_transfer_MSRP"
+            android:textStyle="bold"/>
+
+        <android.support.v7.widget.AppCompatCheckBox
+            android:id="@+id/file_transfer_http"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:enabled="true"
+            android:text="@string/File_transfer_HTTP"
+            android:textStyle="bold"/>
+
+        <android.support.v7.widget.AppCompatCheckBox
+            android:id="@+id/im"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/IM_session"
+            android:textStyle="bold"/>
+
+        <android.support.v7.widget.AppCompatCheckBox
+            android:id="@+id/im_group"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/IM_Group_session"
+            android:textStyle="bold"/>
+
+        <android.support.v7.widget.AppCompatCheckBox
+            android:id="@+id/ipvoicecall"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:enabled="true"
+            android:text="@string/IP_Voice_call"
+            android:textStyle="bold"/>
+
+        <android.support.v7.widget.AppCompatCheckBox
+            android:id="@+id/ipvideocall"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:enabled="true"
+            android:text="@string/IP_Video_call"
+            android:textStyle="bold"/>
+
+        <android.support.v7.widget.AppCompatCheckBox
+            android:id="@+id/cs_video"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:enabled="true"
+            android:text="@string/CS_video"
+            android:textStyle="bold"/>
+
+        <android.support.v7.widget.AppCompatCheckBox
+            android:id="@+id/presence_discovery"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:enabled="true"
+            android:text="@string/Presence_discovery"
+            android:textStyle="bold"/>
+
+        <android.support.v7.widget.AppCompatCheckBox
+            android:id="@+id/social_presence"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:enabled="true"
+            android:text="@string/Social_presence"
+            android:textStyle="bold"/>
+
+        <android.support.v7.widget.AppCompatCheckBox
+            android:id="@+id/geolocation_push"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:enabled="true"
+            android:text="@string/Geolocation_push"
+            android:textStyle="bold"/>
+
+        <android.support.v7.widget.AppCompatCheckBox
+            android:id="@+id/file_transfer_thumbnail"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:enabled="true"
+            android:text="@string/File_transfer_thumbnail"
+            android:textStyle="bold"/>
+
+        <android.support.v7.widget.AppCompatCheckBox
+            android:id="@+id/file_transfer_sf"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:enabled="true"
+            android:text="@string/File_transfer_Store_Forward"
+            android:textStyle="bold"/>
+
+        <android.support.v7.widget.AppCompatCheckBox
+            android:id="@+id/group_chat_sf"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:enabled="true"
+            android:text="@string/Group_chat_Store_Forward"
+            android:textStyle="bold"/>
+
+        <android.support.v7.widget.AppCompatCheckBox
+            android:id="@+id/sip_automata"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:enabled="true"
+            android:text="@string/SIP_automata"
+            android:textStyle="bold"/>
+
+        <android.support.v7.widget.AppCompatCheckBox
+            android:id="@+id/call_composer"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:enabled="true"
+            android:text="@string/call_composer"
+            android:textStyle="bold"/>
+
+        <android.support.v7.widget.AppCompatCheckBox
+            android:id="@+id/shared_map"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:enabled="true"
+            android:text="@string/shared_map"
+            android:textStyle="bold"/>
+
+        <android.support.v7.widget.AppCompatCheckBox
+            android:id="@+id/shared_sketch"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:enabled="true"
+            android:text="@string/shared_sketch"
+            android:textStyle="bold"/>
+
+        <android.support.v7.widget.AppCompatCheckBox
+            android:id="@+id/post_call"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:enabled="true"
+            android:text="@string/post_call"
+            android:textStyle="bold"/>
+
+    </LinearLayout>
+</ScrollView>

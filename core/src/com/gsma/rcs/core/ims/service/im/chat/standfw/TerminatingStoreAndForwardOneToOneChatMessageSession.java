@@ -202,6 +202,13 @@ public class TerminatingStoreAndForwardOneToOneChatMessageSession extends OneToO
                         }
                         break;
 
+                    case INVITATION_DELETED:
+                        if (logActivated) {
+                            sLogger.debug("Session has been deleted");
+                        }
+                        removeSession();
+                        return;
+
                     default:
                         throw new IllegalArgumentException(
                                 "Unknown invitation answer in run; answer=" + answer);

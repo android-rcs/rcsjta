@@ -242,13 +242,7 @@ public class ContactProvider extends ContentProvider {
     }
 
     private String[] getSelectionArgsWithContact(String[] selectionArgs, String contact) {
-        String[] contactSelectionArg = new String[] {
-            contact
-        };
-        if (selectionArgs == null) {
-            return contactSelectionArg;
-        }
-        return DatabaseUtils.appendSelectionArgs(contactSelectionArg, selectionArgs);
+        return DatabaseUtils.appendIdWithSelectionArgs(contact, selectionArgs);
     }
 
     private String getSelectionWithAggregationDataId(String selection) {
@@ -260,13 +254,7 @@ public class ContactProvider extends ContentProvider {
 
     private String[] getSelectionArgsWithAggregationId(String[] selectionArgs,
             String aggregationDataId) {
-        String[] idSelectionArg = new String[] {
-            aggregationDataId
-        };
-        if (selectionArgs == null) {
-            return idSelectionArg;
-        }
-        return DatabaseUtils.appendSelectionArgs(idSelectionArg, selectionArgs);
+        return DatabaseUtils.appendIdWithSelectionArgs(aggregationDataId, selectionArgs);
     }
 
     private String[] restrictProjectionToExternallyDefinedColumns(String[] projection)

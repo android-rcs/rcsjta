@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2014 Sony Mobile Communications Inc.
+ * Copyright (C) 2010-2016 Orange.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -20,13 +21,17 @@ import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.sharing.video.VideoSharing.ReasonCode;
 import com.gsma.services.rcs.sharing.video.VideoSharing.State;
 
+import java.util.Set;
+
 /**
  * Interface to perform broadcast events on VideoSharingListeners
  */
 public interface IVideoSharingEventBroadcaster {
 
-    public void broadcastStateChanged(ContactId contact, String sharingId, State state,
+    void broadcastStateChanged(ContactId contact, String sharingId, State state,
             ReasonCode reasonCode);
 
-    public void broadcastInvitation(String sharingId);
+    void broadcastInvitation(String sharingId);
+
+    void broadcastDeleted(ContactId contact, Set<String> sharingIds);
 }

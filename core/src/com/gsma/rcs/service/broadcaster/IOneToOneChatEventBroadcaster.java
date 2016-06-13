@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2014 Sony Mobile Communications Inc.
+ * Copyright (C) 2010-2016 Orange.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -20,15 +21,20 @@ import com.gsma.services.rcs.chat.ChatLog.Message.Content.ReasonCode;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content.Status;
 import com.gsma.services.rcs.contact.ContactId;
 
+import java.util.Set;
+
 /**
  * Interface to perform broadcast events on ChatListeners
  */
 public interface IOneToOneChatEventBroadcaster {
 
-    public void broadcastMessageStatusChanged(ContactId contact, String mimeType, String msgId,
+    void broadcastMessageStatusChanged(ContactId contact, String mimeType, String msgId,
             Status status, ReasonCode reasonCode);
 
-    public void broadcastComposingEvent(ContactId contact, boolean status);
+    void broadcastComposingEvent(ContactId contact, boolean status);
 
-    public void broadcastMessageReceived(String mimeType, String msgId);
+    void broadcastMessageReceived(String mimeType, String msgId);
+
+    void broadcastMessagesDeleted(ContactId contact, Set<String> msgIds);
+
 }

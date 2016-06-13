@@ -17,7 +17,7 @@
  *
  ******************************************************************************/
 
-package com.gsma.rcs.service.Permissions;
+package com.gsma.rcs.service.permissions;
 
 import android.content.Context;
 import android.content.Intent;

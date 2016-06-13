@@ -19,7 +19,7 @@
         android:gravity="top"
         android:lines="1"
         android:padding="5dip"
-        android:phoneNumber="true"
+        android:inputType="phone"
         android:scrollbars="vertical"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 

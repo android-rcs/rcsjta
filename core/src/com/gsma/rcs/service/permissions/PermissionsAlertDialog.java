@@ -17,7 +17,7 @@
  *
  ******************************************************************************/
 
-package com.gsma.rcs.service.Permissions;
+package com.gsma.rcs.service.permissions;
 
 import com.gsma.rcs.R;
 import com.gsma.rcs.utils.logger.Logger;
