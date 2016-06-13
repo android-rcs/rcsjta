@@ -30,9 +30,9 @@ import com.gsma.services.rcs.upload.FileUploadInfo;
  */
 public interface IFileUploadEventBroadcaster {
 
-    public void broadcastStateChanged(String uploadId, State state);
+    void broadcastStateChanged(String uploadId, State state);
 
-    public void broadcastProgressUpdate(String uploadId, long currentSize, long totalSize);
+    void broadcastProgressUpdate(String uploadId, long currentSize, long totalSize);
 
-    public void broadcastUploaded(String uploadId, FileUploadInfo info);
+    void broadcastUploaded(String uploadId, FileUploadInfo info);
 }

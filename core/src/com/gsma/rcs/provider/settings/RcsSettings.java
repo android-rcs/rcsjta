@@ -61,7 +61,7 @@ import java.util.Set;
  * RCS settings
  *
  * @author jexa7410
- * @author yplo6403
+ * @author Philippe LEMORDANT
  */
 public class RcsSettings {
 
@@ -344,9 +344,6 @@ public class RcsSettings {
      * @return the number of rows updated
      */
     private int writeParameter(String key, String value) {
-        if (value == null) {
-            return 0;
-        }
         ContentValues values = new ContentValues();
         values.put(RcsSettingsData.KEY_VALUE, value);
         String[] whereArgs = new String[] {

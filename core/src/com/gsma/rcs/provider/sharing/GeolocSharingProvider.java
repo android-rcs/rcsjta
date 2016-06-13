@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2010-2016 Orange.
  * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
@@ -137,13 +138,7 @@ public class GeolocSharingProvider extends ContentProvider {
     }
 
     private String[] getSelectionArgsWithSharingId(String[] selectionArgs, String sharingId) {
-        String[] sharingSelectionArg = new String[] {
-            sharingId
-        };
-        if (selectionArgs == null) {
-            return sharingSelectionArg;
-        }
-        return DatabaseUtils.appendSelectionArgs(sharingSelectionArg, selectionArgs);
+        return DatabaseUtils.appendIdWithSelectionArgs(sharingId, selectionArgs);
     }
 
     @Override

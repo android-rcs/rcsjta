@@ -113,8 +113,9 @@ public class RcsSettingsProvider extends ContentProvider {
             db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE + '(' + RcsSettingsData.KEY_KEY
                     + " TEXT NOT NULL PRIMARY KEY," + RcsSettingsData.KEY_VALUE + " TEXT)");
             /* Insert default values for parameters */
-            for (Map.Entry<String, Object> entry : RcsSettingsData.sSettingsKeyDefaultValue.entrySet()) {
-                addParameter(db, entry.getKey(),  entry.getValue());
+            for (Map.Entry<String, Object> entry : RcsSettingsData.sSettingsKeyDefaultValue
+                    .entrySet()) {
+                addParameter(db, entry.getKey(), entry.getValue());
             }
         }
 
@@ -154,8 +155,8 @@ public class RcsSettingsProvider extends ContentProvider {
 
             /* Put the old values back when possible */
             for (ContentValues values : valuesList) {
-                String[] selectionArgs = new String[]{
-                        values.getAsString(RcsSettingsData.KEY_KEY)
+                String[] selectionArgs = new String[] {
+                    values.getAsString(RcsSettingsData.KEY_KEY)
                 };
                 db.update(TABLE, values, SELECTION_WITH_KEY_ONLY, selectionArgs);
             }
@@ -172,13 +173,7 @@ public class RcsSettingsProvider extends ContentProvider {
     }
 
     private String[] getSelectionArgsWithKey(String[] selectionArgs, String key) {
-        String[] keySelectionArg = new String[]{
-                key
-        };
-        if (selectionArgs == null) {
-            return keySelectionArg;
-        }
-        return DatabaseUtils.appendSelectionArgs(keySelectionArg, selectionArgs);
+        return DatabaseUtils.appendIdWithSelectionArgs(key, selectionArgs);
     }
 
     @Override
@@ -203,7 +198,7 @@ public class RcsSettingsProvider extends ContentProvider {
 
     @Override
     public Cursor query(@NonNull Uri uri, String[] projection, String selection,
-                        String[] selectionArgs, String sort) {
+            String[] selectionArgs, String sort) {
         Cursor cursor = null;
         try {
             switch (sUriMatcher.match(uri)) {
@@ -228,7 +223,8 @@ public class RcsSettingsProvider extends ContentProvider {
         /*
          * TODO: Do not catch, close cursor, and then throw same exception. Callers should handle
          * exception.
-         */ catch (RuntimeException e) {
+         */
+        catch (RuntimeException e) {
             if (cursor != null) {
                 cursor.close();
             }
@@ -238,7 +234,7 @@ public class RcsSettingsProvider extends ContentProvider {
 
     @Override
     public int update(@NonNull Uri uri, ContentValues values, String selection,
-                      String[] selectionArgs) {
+            String[] selectionArgs) {
         switch (sUriMatcher.match(uri)) {
             case UriType.SETTINGS_WITH_KEY:
                 String key = uri.getLastPathSegment();

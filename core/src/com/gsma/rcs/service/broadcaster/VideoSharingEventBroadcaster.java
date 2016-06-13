@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2014 Sony Mobile Communications Inc.
+ * Copyright (C) 2010-2016 Orange.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -55,6 +56,7 @@ public class VideoSharingEventBroadcaster implements IVideoSharingEventBroadcast
         mVideoSharingListeners.unregister(listener);
     }
 
+    @Override
     public void broadcastStateChanged(ContactId contact, String sharingId, State state,
             ReasonCode reasonCode) {
         int rcsState = state.toInt();
@@ -73,6 +75,7 @@ public class VideoSharingEventBroadcaster implements IVideoSharingEventBroadcast
         mVideoSharingListeners.finishBroadcast();
     }
 
+    @Override
     public void broadcastInvitation(String sharingId) {
         Intent newInvitation = new Intent(VideoSharingIntent.ACTION_NEW_INVITATION);
         newInvitation.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
@@ -81,6 +84,7 @@ public class VideoSharingEventBroadcaster implements IVideoSharingEventBroadcast
         AndroidFactory.getApplicationContext().sendBroadcast(newInvitation);
     }
 
+    @Override
     public void broadcastDeleted(ContactId contact, Set<String> sharingIds) {
         List<String> ids = new ArrayList<>(sharingIds);
         final int N = mVideoSharingListeners.beginBroadcast();

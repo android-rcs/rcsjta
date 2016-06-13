@@ -47,6 +47,7 @@ public class RcsServiceRegistrationEventBroadcaster implements
         mServiceRegistrationListeners.unregister(listener);
     }
 
+    @Override
     public void broadcastServiceRegistered() {
         final int N = mServiceRegistrationListeners.beginBroadcast();
         for (int i = 0; i < N; i++) {
@@ -61,6 +62,7 @@ public class RcsServiceRegistrationEventBroadcaster implements
         mServiceRegistrationListeners.finishBroadcast();
     }
 
+    @Override
     public void broadcastServiceUnRegistered(RcsServiceRegistration.ReasonCode reason) {
         final int N = mServiceRegistrationListeners.beginBroadcast();
         for (int i = 0; i < N; i++) {

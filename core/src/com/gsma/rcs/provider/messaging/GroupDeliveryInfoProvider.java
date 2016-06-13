@@ -117,13 +117,7 @@ public class GroupDeliveryInfoProvider extends ContentProvider {
     }
 
     private String[] getSelectionArgsWithAppendedId(String[] selectionArgs, String appendedId) {
-        String[] appendedIdSelectionArg = new String[] {
-            appendedId
-        };
-        if (selectionArgs == null) {
-            return appendedIdSelectionArg;
-        }
-        return DatabaseUtils.appendSelectionArgs(appendedIdSelectionArg, selectionArgs);
+        return DatabaseUtils.appendIdWithSelectionArgs(appendedId, selectionArgs);
     }
 
     @Override

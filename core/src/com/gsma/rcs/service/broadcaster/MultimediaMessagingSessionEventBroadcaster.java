@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2014 Sony Mobile Communications Inc.
+ * Copyright (C) 2010-2016 Orange.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -52,6 +53,7 @@ public class MultimediaMessagingSessionEventBroadcaster implements
         mMultimediaMessagingListeners.unregister(listener);
     }
 
+    @Override
     public void broadcastMessageReceived(ContactId contact, String sessionId, byte[] message, String contentType) {
         final int N = mMultimediaMessagingListeners.beginBroadcast();
         for (int i = 0; i < N; i++) {
@@ -75,6 +77,7 @@ public class MultimediaMessagingSessionEventBroadcaster implements
         mMultimediaMessagingListeners.finishBroadcast();
     }
 
+    @Override
     public void broadcastStateChanged(ContactId contact, String sessionId, State state,
             ReasonCode reasonCode) {
         int rcsState = state.toInt();
@@ -93,6 +96,7 @@ public class MultimediaMessagingSessionEventBroadcaster implements
         mMultimediaMessagingListeners.finishBroadcast();
     }
 
+    @Override
     public void broadcastInvitation(String sessionId, Intent msrpSessionInvite) {
         msrpSessionInvite.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
         IntentUtils.tryToSetReceiverForegroundFlag(msrpSessionInvite);
@@ -101,6 +105,7 @@ public class MultimediaMessagingSessionEventBroadcaster implements
         AndroidFactory.getApplicationContext().sendBroadcast(msrpSessionInvite);
     }
 
+    @Override
     public void broadcastMessagesFlushed(ContactId contact, String sessionId) {
         final int N = mMultimediaMessagingListeners.beginBroadcast();
         for (int i = 0; i < N; i++) {

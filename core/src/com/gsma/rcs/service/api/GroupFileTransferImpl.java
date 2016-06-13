@@ -78,8 +78,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 
     private final ContactManager mContactManager;
 
-    private final static Logger sLogger = Logger.getLogger(GroupFileTransferImpl.class
-            .getSimpleName());
+    private final static Logger sLogger = Logger.getLogger(GroupFileTransferImpl.class.getName());
 
     /**
      * Constructor

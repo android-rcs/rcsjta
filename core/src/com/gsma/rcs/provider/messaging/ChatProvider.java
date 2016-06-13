@@ -248,13 +248,7 @@ public class ChatProvider extends ContentProvider {
     }
 
     private String[] getSelectionArgsWithChatId(String[] selectionArgs, String chatId) {
-        String[] chatSelectionArg = new String[] {
-            chatId
-        };
-        if (selectionArgs == null) {
-            return chatSelectionArg;
-        }
-        return DatabaseUtils.appendSelectionArgs(chatSelectionArg, selectionArgs);
+        return DatabaseUtils.appendIdWithSelectionArgs(chatId, selectionArgs);
     }
 
     private String getSelectionWithMessageId(String selection) {
@@ -265,13 +259,7 @@ public class ChatProvider extends ContentProvider {
     }
 
     private String[] getSelectionArgsWithMessageId(String[] selectionArgs, String messageId) {
-        String[] messageSelectionArg = new String[] {
-            messageId
-        };
-        if (selectionArgs == null) {
-            return messageSelectionArg;
-        }
-        return DatabaseUtils.appendSelectionArgs(messageSelectionArg, selectionArgs);
+        return DatabaseUtils.appendIdWithSelectionArgs(messageId, selectionArgs);
     }
 
     private String[] restrictGroupChatProjectionToExternallyDefinedColumns(String[] projection)

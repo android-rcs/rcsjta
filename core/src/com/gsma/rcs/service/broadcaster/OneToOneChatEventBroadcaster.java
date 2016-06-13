@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2014 Sony Mobile Communications Inc.
- *
+ * Copyright (C) 2010-2016 Orange.
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -55,6 +56,7 @@ public class OneToOneChatEventBroadcaster implements IOneToOneChatEventBroadcast
         mOneToOneChatListeners.unregister(listener);
     }
 
+    @Override
     public void broadcastMessageStatusChanged(ContactId contact, String mimeType, String msgId,
             Status status, ReasonCode reasonCode) {
         final int N = mOneToOneChatListeners.beginBroadcast();
@@ -73,6 +75,7 @@ public class OneToOneChatEventBroadcaster implements IOneToOneChatEventBroadcast
         mOneToOneChatListeners.finishBroadcast();
     }
 
+    @Override
     public void broadcastComposingEvent(ContactId contact, boolean status) {
         final int N = mOneToOneChatListeners.beginBroadcast();
         for (int i = 0; i < N; i++) {
@@ -87,6 +90,7 @@ public class OneToOneChatEventBroadcaster implements IOneToOneChatEventBroadcast
         mOneToOneChatListeners.finishBroadcast();
     }
 
+    @Override
     public void broadcastMessageReceived(String mimeType, String msgId) {
         Intent newOneToOneMessage = new Intent(
                 OneToOneChatIntent.ACTION_NEW_ONE_TO_ONE_CHAT_MESSAGE);
@@ -97,6 +101,7 @@ public class OneToOneChatEventBroadcaster implements IOneToOneChatEventBroadcast
         AndroidFactory.getApplicationContext().sendBroadcast(newOneToOneMessage);
     }
 
+    @Override
     public void broadcastMessagesDeleted(ContactId contact, Set<String> msgIds) {
         List<String> ids = new ArrayList<>(msgIds);
         final int N = mOneToOneChatListeners.beginBroadcast();
