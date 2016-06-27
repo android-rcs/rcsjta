@@ -224,7 +224,7 @@ public class ChatMessagePersistedStorageAccessor {
         /*
          * No need to read from provider unless incoming and not already marked as read.
          */
-        if (Direction.INCOMING == mDirection && !Boolean.TRUE.equals(mRead)) {
+        if (Direction.INCOMING == getDirection() && !Boolean.TRUE.equals(mRead)) {
             cacheData();
         }
         return mRead;
