@@ -314,7 +314,7 @@ public class FileTransferPersistedStorageAccessor {
         /*
          * No need to read from provider unless incoming and not already marked as read.
          */
-        if (Direction.INCOMING == mDirection && !Boolean.TRUE.equals(mRead)) {
+        if (Direction.INCOMING == getDirection() && !Boolean.TRUE.equals(mRead)) {
             cacheData();
         }
         return mRead;
@@ -365,7 +365,7 @@ public class FileTransferPersistedStorageAccessor {
      */
     public long getFileExpiration() {
         /* No need to read from provider unless outgoing and expiration is unknown. */
-        if (Direction.OUTGOING == mDirection
+        if (Direction.OUTGOING == getDirection()
                 && FileTransferData.UNKNOWN_EXPIRATION == mFileExpiration) {
             cacheData();
         }
@@ -379,7 +379,7 @@ public class FileTransferPersistedStorageAccessor {
      */
     public long getFileIconExpiration() {
         /* No need to read from provider unless outgoing and expiration is unknown. */
-        if (Direction.OUTGOING == mDirection
+        if (Direction.OUTGOING == getDirection()
                 && FileTransferData.UNKNOWN_EXPIRATION == mFileIconExpiration) {
             cacheData();
         }
