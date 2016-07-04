@@ -1,21 +1,21 @@
 /*******************************************************************************
  * Software Name : RCS IMS Stack
- * <p/>
+ *
  * Copyright (C) 2010-2016 Orange.
  * Copyright (C) 2014 Sony Mobile Communications Inc.
- * <p/>
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * <p/>
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * <p/>
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * <p/>
+ *
  * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
@@ -48,7 +48,7 @@ import java.io.InputStream;
 /**
  * File utilities
  *
- * @author YPLO6403
+ * @author Philippe LEMORDANT
  */
 public class FileUtils {
 
@@ -178,22 +178,23 @@ public class FileUtils {
         Cursor cursor = null;
         try {
             cursor = ctx.getContentResolver().query(file, null, null, null, null);
-            if (ContentResolver.SCHEME_CONTENT.equals(scheme)) {
-                if (cursor != null && cursor.moveToFirst()) {
-                    /*
-                     * Warning: OpenableColumns.DISPLAY_NAME does not have to be a filename (eg. for
-                     * audio files)
-                     */
-                    return cursor.getString(cursor
-                            .getColumnIndexOrThrow(OpenableColumns.DISPLAY_NAME));
-                }
-                throw new IllegalArgumentException("Error in retrieving file name from the URI");
+            switch (scheme) {
+                case ContentResolver.SCHEME_CONTENT:
+                    if (cursor != null && cursor.moveToFirst()) {
+                        /*
+                         * Warning: OpenableColumns.DISPLAY_NAME does not have to be a filename (eg.
+                         * for audio files)
+                         */
+                        return cursor.getString(cursor
+                                .getColumnIndexOrThrow(OpenableColumns.DISPLAY_NAME));
+                    }
+                    throw new IllegalArgumentException("Error in retrieving file name from the URI");
 
-            } else if (ContentResolver.SCHEME_FILE.equals(scheme)) {
-                return file.getLastPathSegment();
+                case ContentResolver.SCHEME_FILE:
+                    return file.getLastPathSegment();
 
-            } else {
-                throw new IllegalArgumentException("Unsupported URI scheme '" + scheme + "'!");
+                default:
+                    throw new IllegalArgumentException("Unsupported URI scheme '" + scheme + "'!");
             }
         } finally {
             CursorUtil.close(cursor);
@@ -212,18 +213,19 @@ public class FileUtils {
         Cursor cursor = null;
         try {
             cursor = ctx.getContentResolver().query(file, null, null, null, null);
-            if (ContentResolver.SCHEME_CONTENT.equals(scheme)) {
-                if (cursor != null && cursor.moveToFirst()) {
-                    return Long.valueOf(cursor.getString(cursor
-                            .getColumnIndexOrThrow(OpenableColumns.SIZE)));
-                }
-                throw new IllegalArgumentException("Error in retrieving file size form the URI");
+            switch (scheme) {
+                case ContentResolver.SCHEME_CONTENT:
+                    if (cursor != null && cursor.moveToFirst()) {
+                        return Long.valueOf(cursor.getString(cursor
+                                .getColumnIndexOrThrow(OpenableColumns.SIZE)));
+                    }
+                    throw new IllegalArgumentException("Error in retrieving file size form the URI");
 
-            } else if (ContentResolver.SCHEME_FILE.equals(scheme)) {
-                return (new File(file.getPath())).length();
+                case ContentResolver.SCHEME_FILE:
+                    return (new File(file.getPath())).length();
 
-            } else {
-                throw new IllegalArgumentException("Unsupported URI scheme '" + scheme + "'!");
+                default:
+                    throw new IllegalArgumentException("Unsupported URI scheme '" + scheme + "'!");
             }
         } finally {
             CursorUtil.close(cursor);
@@ -233,52 +235,54 @@ public class FileUtils {
     /**
      * Test if the stack can read data from this Uri.
      *
-     * @param file the file Uri
-     * @return True is the stack can read data from this Uri.
+     * @param ctx The context
+     * @param file The file URI
+     * @return True if URI is readable
      */
     public static boolean isReadFromUriPossible(Context ctx, Uri file) {
         String scheme = file.getScheme();
-        if (ContentResolver.SCHEME_CONTENT.equals(scheme)) {
-            InputStream stream = null;
-            try {
-                if (PackageManager.PERMISSION_GRANTED == ctx.checkUriPermission(file,
-                        Process.myPid(), Process.myUid(), Intent.FLAG_GRANT_READ_URI_PERMISSION)) {
+        switch (scheme) {
+            case ContentResolver.SCHEME_CONTENT:
+                InputStream stream = null;
+                try {
+                    if (PackageManager.PERMISSION_GRANTED == ctx
+                            .checkUriPermission(file, Process.myPid(), Process.myUid(),
+                                    Intent.FLAG_GRANT_READ_URI_PERMISSION)) {
+                        return true;
+                    }
+                    stream = ctx.getContentResolver().openInputStream(file);
+                    stream.read();
                     return true;
+
+                } catch (SecurityException e) {
+                    sLogger.error("Failed to read from uri :" + file, e);
+                    return false;
+
+                } catch (IOException e) {
+                    if (sLogger.isActivated()) {
+                        sLogger.debug("Failed to read from uri :" + file + ", Message="
+                                + e.getMessage());
+                    }
+                    return false;
+
+                } finally {
+                    CloseableUtils.tryToClose(stream);
                 }
-                stream = ctx.getContentResolver().openInputStream(file);
-                stream.read();
-                return true;
-
-            } catch (SecurityException e) {
-                sLogger.error("Failed to read from uri :" + file, e);
-                return false;
-
-            } catch (IOException e) {
-                if (sLogger.isActivated()) {
-                    sLogger.debug("Failed to read from uri :" + file + ", Message="
-                            + e.getMessage());
+            case ContentResolver.SCHEME_FILE:
+                String path = file.getPath();
+                if (path == null) {
+                    sLogger.error("Failed to read from uri :".concat(file.toString()));
+                    return false;
                 }
-                return false;
+                try {
+                    return new File(path).canRead();
 
-            } finally {
-                CloseableUtils.tryToClose(stream);
-            }
-        } else if (ContentResolver.SCHEME_FILE.equals(scheme)) {
-            String path = file.getPath();
-            if (path == null) {
-                sLogger.error("Failed to read from uri :".concat(file.toString()));
-                return false;
-            }
-            try {
-                return new File(path).canRead();
-
-            } catch (SecurityException e) {
-                sLogger.error("Failed to read from uri :" + file, e);
-                return false;
-            }
-
-        } else {
-            throw new IllegalArgumentException("Unsupported URI scheme '" + scheme + "'!");
+                } catch (SecurityException e) {
+                    sLogger.error("Failed to read from uri :" + file, e);
+                    return false;
+                }
+            default:
+                throw new IllegalArgumentException("Unsupported URI scheme '" + scheme + "'!");
         }
     }
 
@@ -299,11 +303,9 @@ public class FileUtils {
                     .getContentResolver().openOutputStream(destination);
             byte buffer[] = new byte[1024];
             int length;
-
             while ((length = sourceStream.read(buffer)) > 0) {
                 destStream.write(buffer, 0, length);
             }
-
         } finally {
             CloseableUtils.tryToClose(sourceStream);
             CloseableUtils.tryToClose(destStream);
@@ -326,6 +328,7 @@ public class FileUtils {
 
     /**
      * Gets the duration from file Uri
+     * 
      * @param ctx the context
      * @param file the file Uri
      * @return the duration in ms or -1 if it cannot be retrieved
@@ -353,7 +356,7 @@ public class FileUtils {
      *
      * @param file The file Uri to copy
      * @param rcsSettings The RcsSettings accessor
-     * @return Uri of copied file
+     * @return Uri of copy or created file
      * @throws IOException
      */
     public static Uri createCopyOfSentFile(Uri file, RcsSettings rcsSettings) throws IOException {
