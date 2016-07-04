@@ -54,7 +54,7 @@ public class FtHttpResumeUpload extends FtHttpResume {
     public FtHttpResumeUpload(MmContent file, Uri fileIcon, String tId, ContactId contact,
             String chatId, String fileTransferId, boolean isGroup, long timestamp,
             long timestampSent) {
-        super(Direction.OUTGOING, file.getUri(), file.getEncoding(), file.getName(),
+        super(Direction.OUTGOING, file.getUri(), file.getName(), file.getEncoding(),
                 file.getSize(), fileIcon, contact, chatId, fileTransferId, isGroup, timestamp,
                 timestampSent);
         mTId = tId;

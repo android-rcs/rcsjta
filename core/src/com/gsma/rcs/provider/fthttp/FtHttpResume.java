@@ -108,13 +108,12 @@ public abstract class FtHttpResume {
      * @param timestamp the {@code timestamp} value
      * @param timestampSent the {@code timestampSent} value
      */
-    public FtHttpResume(Direction direction, Uri file, String fileName, String mimeType, long size, Uri fileIcon,
-            ContactId contact, String chatId, String fileTransferId, boolean groupTransfer,
-            long timestamp, long timestampSent) {
+    public FtHttpResume(Direction direction, Uri file, String fileName, String mimeType, long size,
+            Uri fileIcon, ContactId contact, String chatId, String fileTransferId,
+            boolean groupTransfer, long timestamp, long timestampSent) {
         if (size <= 0 || file == null || fileName == null)
-            throw new IllegalArgumentException("size invalid arguments (size=" +
-                    size + ") (file=" + file + ") (fileName=" +
-                    fileName + ")");
+            throw new IllegalArgumentException("size invalid arguments (size=" + size + ") (file="
+                    + file + ") (fileName=" + fileName + ")");
         mDirection = direction;
         mFile = file;
         mFileName = fileName;
@@ -220,10 +219,11 @@ public abstract class FtHttpResume {
 
     /**
      * Gets the file mime type
+     * 
      * @return the file mime type
      */
     public String getMimeType() {
-      return mMimeType;
+        return mMimeType;
     }
 
     @Override

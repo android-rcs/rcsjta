@@ -34,7 +34,6 @@ import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSession;
 import com.gsma.rcs.platform.file.FileFactory;
 import com.gsma.rcs.provider.settings.RcsSettings;
-import com.gsma.rcs.utils.FileUtils;
 import com.gsma.rcs.utils.MimeManager;
 
 import android.net.Uri;
@@ -291,7 +290,7 @@ public class ContentManager {
     /**
      * Generate Uri for saving the content that has to be transferred
      *
-     * @param fileName The file name
+     * @param fileName the file name
      * @param mime the MIME type
      * @param rcsSettings the RCS settings accessor
      * @return Uri
