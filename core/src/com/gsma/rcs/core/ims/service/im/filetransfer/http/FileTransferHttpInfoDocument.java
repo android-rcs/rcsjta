@@ -254,8 +254,7 @@ public class FileTransferHttpInfoDocument {
      */
     public MmContent getLocalMmContent() {
         Uri file = ContentManager.generateUriForReceivedContent(mFileName, mMimeType, mRcsSettings);
-        MmContent content = ContentManager.createMmContent(file, mMimeType, mSize,
-                mFileName);
+        MmContent content = ContentManager.createMmContent(file, mMimeType, mSize, mFileName);
         if (FileSharingSession.FILE_DISPOSITION_RENDER.equals(mFileDispo)) {
             content.setPlayable(true);
         }

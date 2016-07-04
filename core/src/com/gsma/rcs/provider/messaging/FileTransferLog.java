@@ -230,12 +230,8 @@ public class FileTransferLog implements IFileTransferLog {
         if (thumbnail != null) {
             values.put(FileTransferData.KEY_FILEICON, thumbnail.getUri().toString());
             values.put(FileTransferData.KEY_FILEICON_MIME_TYPE, thumbnail.getEncoding());
-            values.put(FileTransferData.KEY_FILEICON_EXPIRATION,
-                    FileTransferData.UNKNOWN_EXPIRATION);
-        } else {
-            values.put(FileTransferData.KEY_FILEICON_EXPIRATION,
-                    FileTransferData.UNKNOWN_EXPIRATION);
         }
+        values.put(FileTransferData.KEY_FILEICON_EXPIRATION, FileTransferData.UNKNOWN_EXPIRATION);
         values.put(FileTransferData.KEY_FILE_EXPIRATION, FileTransferData.UNKNOWN_EXPIRATION);
         if (content.isPlayable()) {
             values.put(FileTransferData.KEY_DISPOSITION, FileTransfer.Disposition.RENDER.toInt());
