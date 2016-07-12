@@ -22,6 +22,7 @@ import com.gsma.rcs.api.connection.ConnectionManager.RcsServiceName;
 import com.gsma.rcs.api.connection.utils.ExceptionUtil;
 import com.gsma.rcs.api.connection.utils.RcsActivity;
 import com.gsma.rcs.ri.R;
+import com.gsma.rcs.ri.messaging.filetransfer.AudioMessageRecordActivity;
 import com.gsma.rcs.ri.utils.FileUtils;
 import com.gsma.rcs.ri.utils.LogUtils;
 import com.gsma.rcs.ri.utils.RcsSessionUtil;
@@ -58,6 +59,7 @@ public abstract class SendFile extends RcsActivity implements ISendFile {
 
     private final static int RC_SELECT_IMAGE = 0;
     private final static int RC_SELECT_AUDIO = 1;
+    private final static int RC_RECORD_AUDIO = 2;
 
     /**
      * UI handler
@@ -148,6 +150,17 @@ public abstract class SendFile extends RcsActivity implements ISendFile {
                     mCheckAudio.setEnabled(audioFile);
                     mCheckAudio.setChecked(audioFile);
                 }
+                break;
+
+            case RC_RECORD_AUDIO:
+                displayFileInfo(data);
+                if (LogUtils.isActive) {
+                    Log.d(LOGTAG, "Created audio file:" + mFile);
+                }
+                mInviteBtn.setEnabled(true);
+                mCheckAudio.setEnabled(true);
+                mCheckThumNail.setEnabled(false);
+                mCheckThumNail.setChecked(false);
                 break;
         }
     }
@@ -247,13 +260,24 @@ public abstract class SendFile extends RcsActivity implements ISendFile {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = new MenuInflater(getApplicationContext());
-        inflater.inflate(R.menu.menu_ft, menu);
+        inflater.inflate(R.menu.menu_initiate_ft, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem item = menu.findItem(R.id.menu_record_audio);
+        item.setVisible(mFileTransfer == null);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.menu_record_audio:
+                startActivityForResult(new Intent(this, AudioMessageRecordActivity.class),
+                        RC_RECORD_AUDIO);
+                break;
             case R.id.menu_close_session:
                 quitSession();
                 break;

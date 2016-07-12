@@ -55,8 +55,7 @@ public class IsComposingManager {
 
     private final ChatSession mSession;
 
-    private static final Logger sLogger = Logger
-            .getLogger(IsComposingManager.class.getSimpleName());
+    private static final Logger sLogger = Logger.getLogger(IsComposingManager.class.getName());
 
     /**
      * Constructor
@@ -100,7 +99,6 @@ public class IsComposingManager {
         } catch (ParserConfigurationException | SAXException | ParseFailureException e) {
             throw new PayloadException("Can't parse is-composing event for session ID : "
                     + mSession.getSessionID(), e);
-
         }
     }
 

@@ -88,8 +88,8 @@ public class ServerApiUtils {
      * @throws ServerApiPermissionDeniedException
      * @throws ServerApiServiceNotRegisteredException
      */
-    public static void testImsExtension(String ext)
-            throws ServerApiPermissionDeniedException, ServerApiServiceNotRegisteredException {
+    public static void testImsExtension(String ext) throws ServerApiPermissionDeniedException,
+            ServerApiServiceNotRegisteredException {
         if (!isImsConnected()) {
             throw new ServerApiServiceNotRegisteredException("Core is not connected to IMS");
         }

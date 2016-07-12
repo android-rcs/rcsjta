@@ -48,9 +48,7 @@
     <string name="label_invalid_contacts">Invalid list of participants</string>
     <string name="error_api_permission_denied">RCS API permission denied</string>
     <string name="label_todo">Feature not yet implemented</string>
-	<string name="error_not_registered">Not registered to IMS</string>
-    <string name="label_attach">Attachment</string>
-    <string name="label_render">Render</string>
+    <string name="error_not_registered">Not registered to IMS</string>
     <string name="text_dummy">dummy text</string>
     <string name="timestamp_dummy">2016/01/02 03:00:00</string>
     <string name="contact_dummy">+33123456789</string>
@@ -348,10 +346,18 @@
     <string name="menu_listen_content">Listen to</string>
 
     <!-- HistoryLog  menu -->
+    <string name="label_log_id">Id:</string>
     <string name="label_log_chat_id">Chat Id:</string>
     <string name="label_log_contact">Contact:</string>
     <string name="label_log_content">Content:</string>
     <string name="label_log_date">Date:</string>
+    <string name="label_log_date_sent">Sent:</string>
+    <string name="label_log_date_delivered">Delivered:</string>
+    <string name="label_log_date_displayed">Displayed:</string>
+    <string name="label_log_date_file_expiration">Expiration:</string>
+    <string name="label_log_date_icon_expiration">Icon expiration:</string>
+    <string name="label_log_read_status">Read:</string>
+    <string name="label_log_expired_delivery">Expired delivery:</string>
     <string name="label_log_dir">Direction:</string>
     <string name="label_log_duration">Duration:</string>
     <string name="label_log_encoding">Encoding:</string>
@@ -359,10 +365,12 @@
     <string name="label_log_filename">Filename:</string>
     <string name="label_log_height">Height :</string>
     <string name="label_log_mime">Mime type:</string>
+    <string name="label_log_icon_mime">Icon mime type:</string>
     <string name="label_log_reason">Reason:</string>
     <string name="label_log_state">State:</string>
     <string name="label_log_transferred">Transferred:</string>
-    <string name="label_log_uri">Uri:</string>
+    <string name="label_log_file_uri">File uri:</string>
+    <string name="label_log_icon_uri">Icon uri:</string>
     <string name="label_log_width">Width :</string>
     <string name="title_sharing_log_item">History Log detail</string>
     <string name="menu_log_sharing">Sharing log</string>
@@ -372,6 +380,8 @@
     <string name="label_sharing_log_contact_spinner_default_value">No contact filter</string>
     <string name="value_log_duration">Duration: %1$s</string>
     <string name="title_sharing_log_dialog_filter_logs">Filter</string>
+
+    <string name="label_log_disposition">Disposition:</string>
 
     <string name="title_history_log_messaging">Messaging Log</string>
     <string name="title_sharing_log">Sharing Log</string>
@@ -385,6 +395,9 @@
     <string name="label_stop_record">Stop audio record</string>
     <string name="label_audio_record">Recorded file:</string>
     <string name="max_audio_record_reached">Maximum duration is reached!</string>
+
+    <string name="error_conversation_delete">Delete conversation failed</string>
+    <string name="cannot_read_log">Cannot read RCS history log</string>
 
     <!-- States -->
 

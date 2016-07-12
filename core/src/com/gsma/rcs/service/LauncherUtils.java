@@ -89,7 +89,7 @@ public class LauncherUtils {
     public static void launchRcsService(Context context, boolean boot, boolean user,
             RcsSettings rcsSettings) {
         /* Set the logger properties */
-        Logger.activationFlag = rcsSettings.isTraceActivated();
+        Logger.sActivationFlag = rcsSettings.isTraceActivated();
         Logger.traceLevel = rcsSettings.getTraceLevel();
         if (rcsSettings.isServiceActivated()) {
             StartService.LaunchRcsStartService(context, boot, user);

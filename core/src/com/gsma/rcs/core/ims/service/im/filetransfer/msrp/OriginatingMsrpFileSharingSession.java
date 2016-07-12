@@ -293,7 +293,7 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
                 sLogger.info("Data transferred");
             }
             long timestamp = System.currentTimeMillis();
-            fileTransfered();
+            setFileTransferred();
             closeMediaSession();
             closeSession(TerminationReason.TERMINATION_BY_USER);
             removeSession();

@@ -299,7 +299,7 @@ public class RcsCoreService extends Service implements CoreListener {
             mMmSessionApi = new MultimediaSessionServiceImpl(sipService, mRcsSettings);
             mUploadApi = new FileUploadServiceImpl(imService, mRcsSettings);
 
-            Logger.activationFlag = mRcsSettings.isTraceActivated();
+            Logger.sActivationFlag = mRcsSettings.isTraceActivated();
             Logger.traceLevel = mRcsSettings.getTraceLevel();
 
             if (logActivated) {
@@ -418,7 +418,14 @@ public class RcsCoreService extends Service implements CoreListener {
             mHistoryApi.close();
             mHistoryApi = null;
         }
-
+        if (mMmSessionApi != null) {
+            mMmSessionApi.close();
+            mMmSessionApi = null;
+        }
+        if (mUploadApi != null) {
+            mUploadApi.close();
+            mUploadApi = null;
+        }
         // Terminate the core in background
         Core.terminateCore();
 

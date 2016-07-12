@@ -24,6 +24,7 @@ import com.gsma.rcs.api.connection.utils.RcsActivity;
 import com.gsma.rcs.ri.R;
 import com.gsma.rcs.ri.messaging.adapter.TalkListArrayAdapter;
 import com.gsma.rcs.ri.messaging.adapter.TalkListArrayItem;
+import com.gsma.rcs.ri.messaging.chat.ChatPendingIntentManager;
 import com.gsma.rcs.ri.messaging.filetransfer.multi.SendMultiFile;
 import com.gsma.rcs.ri.utils.LogUtils;
 import com.gsma.services.rcs.RcsServiceException;
@@ -196,6 +197,10 @@ public class TalkList extends RcsActivity {
         try {
             switch (item.getItemId()) {
                 case R.id.menu_delete_message:
+                    if (!isServiceConnected(RcsServiceName.CHAT, RcsServiceName.FILE_TRANSFER)) {
+                        showMessage(R.string.error_conversation_delete);
+                        return true;
+                    }
                     if (LogUtils.isActive) {
                         Log.d(LOGTAG, "Delete conversation for chatId=".concat(chatId));
                     }
@@ -227,15 +232,12 @@ public class TalkList extends RcsActivity {
     private void initialize() {
         mCtx = this;
         mMessageLogs = new ArrayList<>();
-
         mChatService = getChatApi();
         mFileTransferService = getFileTransferApi();
-
         ListView listView = (ListView) findViewById(android.R.id.list);
         TextView emptyView = (TextView) findViewById(android.R.id.empty);
         listView.setEmptyView(emptyView);
         registerForContextMenu(listView);
-
         mAdapter = new TalkListArrayAdapter(this, mMessageLogs);
         listView.setAdapter(mAdapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -257,7 +259,6 @@ public class TalkList extends RcsActivity {
                 }
             }
         });
-
         mOneToOneFileTransferListener = new OneToOneFileTransferListener() {
             @Override
             public void onStateChanged(ContactId contact, String transferId,
@@ -320,7 +321,6 @@ public class TalkList extends RcsActivity {
                 updateView();
             }
         };
-
         mGroupChatListener = new GroupChatListener() {
             @Override
             public void onStateChanged(String chatId, GroupChat.State state,
@@ -358,19 +358,35 @@ public class TalkList extends RcsActivity {
 
             @Override
             public void onMessagesDeleted(final String chatId, Set<String> msgIds) {
+                if (LogUtils.isActive) {
+                    Log.d(LOGTAG, "onMessagesDeleted msgIds=" + msgIds);
+                }
+                updateView();
             }
         };
         mUpdateTalkListListener = new TalkListUpdate.TaskCompleted() {
             @Override
-            public void onTaskComplete(Collection<TalkListArrayItem> result) {
-                if (!sActivityVisible) {
+            public void onTaskComplete(Collection<TalkListArrayItem> talks) {
+                if (talks == null) {
+                    TalkList.this.showMessageThenExit(R.string.cannot_read_log);
                     return;
                 }
                 mMessageLogs.clear();
-                mMessageLogs.addAll(result);
+                mMessageLogs.addAll(talks);
                 /* Sort by descending timestamp */
                 Collections.sort(mMessageLogs);
                 mAdapter.notifyDataSetChanged();
+                ChatPendingIntentManager talkPendingIntentManager = ChatPendingIntentManager
+                        .getChatPendingIntentManager(mCtx);
+                for (TalkListArrayItem talk : talks) {
+                    if (talk.getUnreadCount() == 0) {
+                        /*
+                         * TODO check that if invitation is pending, there is always at least one
+                         * unread message (assertion may be false)
+                         */
+                        talkPendingIntentManager.clearNotification(talk.getChatId());
+                    }
+                }
             }
         };
     }

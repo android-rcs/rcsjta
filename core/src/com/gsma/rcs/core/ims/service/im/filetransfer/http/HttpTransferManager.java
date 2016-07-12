@@ -59,7 +59,7 @@ public abstract class HttpTransferManager {
     /**
      * HTTP transfer event listener
      */
-    private HttpTransferEventListener mListener;
+    private final HttpTransferEventListener mListener;
 
     /**
      * Cancellation flag
@@ -80,7 +80,7 @@ public abstract class HttpTransferManager {
      * Constructor
      * 
      * @param listener HTTP event listener
-     * @param rcsSettings
+     * @param rcsSettings the RCS settings accessor
      */
     public HttpTransferManager(HttpTransferEventListener listener, RcsSettings rcsSettings) {
         this(listener, rcsSettings.getFtHttpServer(), rcsSettings);
@@ -91,7 +91,7 @@ public abstract class HttpTransferManager {
      * 
      * @param listener HTTP event listener
      * @param address HTTP server address
-     * @param rcsSettings
+     * @param rcsSettings the RCS settings accessor
      */
     public HttpTransferManager(HttpTransferEventListener listener, Uri address,
             RcsSettings rcsSettings) {
@@ -221,8 +221,7 @@ public abstract class HttpTransferManager {
             return cnx;
 
         } catch (IOException e) {
-            throw new NetworkException(new StringBuilder(
-                    "Failed to open http connection with url : ").append(url).toString(), e);
+            throw new NetworkException("Failed to open http connection with url : " + url, e);
         }
     }
 

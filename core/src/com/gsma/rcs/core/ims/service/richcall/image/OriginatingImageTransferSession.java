@@ -106,7 +106,7 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
                     .getContentResolver().openInputStream(file);
             byte[] data = new byte[size];
             if (size != fileInputStream.read(data, 0, size)) {
-                throw new IOException("Unable to retrive data from " + file);
+                throw new IOException("Unable to retrieve data from " + file);
             }
             return data;
         } finally {

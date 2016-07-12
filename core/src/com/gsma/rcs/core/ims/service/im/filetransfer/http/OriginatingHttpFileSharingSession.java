@@ -158,7 +158,7 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
         new Thread(new Runnable() {
             public void run() {
                 try {
-                    fileTransferPaused();
+                    setFileTransferPaused();
                     interruptSession();
                     mUploadManager.pauseTransferByUser();
 
@@ -180,7 +180,7 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
         new Thread(new Runnable() {
             public void run() {
                 try {
-                    fileTransferResumed();
+                    setFileTransferResumed();
                     FtHttpResumeUpload upload = mMessagingLog
                             .retrieveFtHttpResumeUpload(mUploadManager.getTId());
                     if (upload != null) {
@@ -194,7 +194,6 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
                         }
                         processHttpUploadResponse(null);
                     }
-
                 } catch (NetworkException e) {
                     handleError(new FileSharingError(FileSharingError.MEDIA_UPLOAD_FAILED, e));
 

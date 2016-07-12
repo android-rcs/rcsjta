@@ -39,6 +39,8 @@ import android.widget.Spinner;
 import android.widget.TableRow;
 import android.widget.TextView;
 
+import java.util.Locale;
+
 /**
  * Display/update the chat service configuration
  * 
@@ -173,14 +175,15 @@ public class FileTransferServiceConfigActivity extends RcsActivity {
     }
 
     private void displayFileTransferServiceConfig() throws RcsServiceException {
+        Locale local = Locale.getDefault();
         TextView textView = (TextView) findViewById(R.id.ft_WarnSize);
-        textView.setText(Long.valueOf(mConfig.getWarnSize()).toString());
+        textView.setText(String.format(local, "%d", mConfig.getWarnSize()));
 
         textView = (TextView) findViewById(R.id.ft_MaxSize);
-        textView.setText(Long.valueOf(mConfig.getMaxSize()).toString());
+        textView.setText(String.format(local, "%d", mConfig.getMaxSize()));
 
         textView = (TextView) findViewById(R.id.MaxAudioDuration);
-        textView.setText(Long.valueOf(mConfig.getMaxAudioMessageDuration()).toString());
+        textView.setText(String.format(local, "%d", mConfig.getMaxAudioMessageDuration()));
 
         if (mConfig.isAutoAcceptModeChangeable()) {
             TableRow tableRow = (TableRow) findViewById(R.id.isAutoAccept);
@@ -202,7 +205,7 @@ public class FileTransferServiceConfigActivity extends RcsActivity {
         }
 
         textView = (TextView) findViewById(R.id.MaxFileTransfers);
-        textView.setText(Integer.valueOf(mConfig.getMaxFileTransfers()).toString());
+        textView.setText(String.format(local, "%d", mConfig.getMaxFileTransfers()));
 
         CheckBox checkBox = (CheckBox) findViewById(R.id.GroupFileTransferSupported); // TODO
         checkBox.setChecked(true);

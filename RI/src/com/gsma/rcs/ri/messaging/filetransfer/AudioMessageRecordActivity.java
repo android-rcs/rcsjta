@@ -26,6 +26,8 @@ import com.gsma.rcs.ri.utils.LogUtils;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.filetransfer.FileTransferServiceConfiguration;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
@@ -38,6 +40,7 @@ import android.widget.TextView;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Locale;
 
 /**
  * @author Philippe LEMORDANT
@@ -100,7 +103,10 @@ public class AudioMessageRecordActivity extends RcsActivity {
                 MediaScannerConnection.scanFile(mThisActivity, new String[] {
                     mFile.getPath()
                 }, null, null);
-                InitiateFileTransfer.onAudioMessageSelected(mThisActivity, mFile);
+                Intent in = new Intent();
+                in.setData(mFile);
+                setResult(Activity.RESULT_OK, in);
+                mThisActivity.finish();
             }
         }
         return super.onKeyDown(keyCode, event);
@@ -109,7 +115,7 @@ public class AudioMessageRecordActivity extends RcsActivity {
     private void displayAudioFileInfo() {
         mTextUri.setText(FileUtils.getFileName(mThisActivity, mFile));
         long duration = AudioMediaPlayer.getDuration(mThisActivity, mFile) / 1000L;
-        mTextDuration.setText(Long.valueOf(duration).toString());
+        mTextDuration.setText(String.format(Locale.getDefault(), "%d", duration));
         long size = FileUtils.getFileSize(mThisActivity, mFile);
         mTextSize.setText(FileUtils.humanReadableByteCount(size, true));
         if (LogUtils.isActive) {

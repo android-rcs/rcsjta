@@ -113,12 +113,12 @@ public class NetworkUtils {
                 /* ~ 1-23 Mbps */
             case TelephonyManager.NETWORK_TYPE_HSUPA:
                 /* Intentional fall back */
-                /* TelephonyManager.NETWORK_TYPE_HSPAP (available on API level 13) ~10-20 Mbps */
-            case 15:
+                /* ~10-20 Mbps */
+            case TelephonyManager.NETWORK_TYPE_HSPAP:
                 return NETWORK_ACCESS_3GPLUS;
 
-                /* TelephonyManager.NETWORK_TYPE_LTE (available on API level 11) ~10+ Mbps */
-            case 13:
+                /* ~10+ Mbps */
+            case TelephonyManager.NETWORK_TYPE_LTE:
                 return NETWORK_ACCESS_4G;
             default:
                 return NETWORK_ACCESS_UNKNOWN;

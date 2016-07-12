@@ -127,7 +127,7 @@
         <TextView
             android:layout_marginRight="10dp"
             android:layout_marginEnd="10dp"
-            android:text="@string/label_log_uri" />
+            android:text="@string/label_log_file_uri" />
 
         <TextView
             android:id="@+id/history_log_item_uri"

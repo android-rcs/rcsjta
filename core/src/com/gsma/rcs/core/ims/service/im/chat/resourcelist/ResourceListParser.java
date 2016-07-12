@@ -22,9 +22,8 @@
 
 package com.gsma.rcs.core.ims.service.im.chat.resourcelist;
 
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
+import com.gsma.rcs.core.ParseFailureException;
+import com.gsma.rcs.utils.logger.Logger;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
@@ -33,8 +32,9 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import java.io.IOException;
 
-import com.gsma.rcs.core.ParseFailureException;
-import com.gsma.rcs.utils.logger.Logger;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 
 /**
  * Resource list parser
@@ -95,28 +95,29 @@ public class ResourceListParser extends DefaultHandler {
         return mList;
     }
 
+    @Override
     public void startDocument() {
-        if (sLogger.isActivated()) {
-            sLogger.debug("Start document");
-        }
         mAccumulator = new StringBuffer();
     }
 
+    @Override
     public void characters(char buffer[], int start, int length) {
         mAccumulator.append(buffer, start, length);
     }
 
+    @Override
     public void startElement(String namespaceURL, String localName, String qname, Attributes attr) {
         mAccumulator.setLength(0);
-
         if ("resource-lists".equals(localName)) {
             mList = new ResourceListDocument();
+
         } else if ("entry".equals(localName)) {
             String uri = attr.getValue("uri").trim();
             mList.addEntry(uri);
         }
     }
 
+    @Override
     public void endElement(String namespaceURL, String localName, String qname) {
         if ("resource-lists".equals(localName)) {
             if (sLogger.isActivated()) {
@@ -125,9 +126,4 @@ public class ResourceListParser extends DefaultHandler {
         }
     }
 
-    public void endDocument() {
-        if (sLogger.isActivated()) {
-            sLogger.debug("End document");
-        }
-    }
 }

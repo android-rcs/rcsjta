@@ -75,36 +75,25 @@ public abstract class SendMultiFile extends RcsActivity implements ISendMultiFil
     private final static String EXTRA_CHAT_ID = "chat_id";
 
     protected String mChatId;
-
     /**
      * UI Handler
      */
     protected final Handler mHandler = new Handler();
-
     /**
      * The list of file transfer IDs
      */
     protected List<String> mTransferIds;
-
     /**
      * The list of files to transfer
      */
     protected List<FileTransferProperties> mFiles;
-
     /**
      * A flag to only add listener once and to remove only if previously added
      */
     protected boolean mFileTransferListenerAdded = false;
-
     protected Set<FileTransfer> mFileTransfers;
-
     private ProgressDialog mProgressDialog;
-
-    /**
-     * List view file transfer adapter
-     */
     protected FileTransferAdapter mFileTransferAdapter;
-
     protected FileTransferService mFileTransferService;
     private boolean mInvited;
 
@@ -120,18 +109,14 @@ public abstract class SendMultiFile extends RcsActivity implements ISendMultiFil
             finish();
             return;
         }
-
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.filetransfer_send_multi_file);
-
         ListView listView = (ListView) findViewById(android.R.id.list);
         mFileTransferAdapter = new FileTransferAdapter(this,
                 R.layout.filetransfer_send_multi_file_item,
                 mFiles.toArray(new FileTransferProperties[mFiles.size()]));
         listView.setAdapter(mFileTransferAdapter);
-
         mFileTransfers = new HashSet<>();
-
         /* Set start button */
         Button startButton = (Button) findViewById(R.id.ft_start_btn);
         startButton.setVisibility(View.GONE);
@@ -141,7 +126,6 @@ public abstract class SendMultiFile extends RcsActivity implements ISendMultiFil
                 initiateTransfer();
             }
         });
-
         /* Register to API connection manager */
         if (!isServiceConnected(RcsServiceName.CHAT, RcsServiceName.FILE_TRANSFER,
                 RcsServiceName.CONTACT)) {
@@ -173,7 +157,6 @@ public abstract class SendMultiFile extends RcsActivity implements ISendMultiFil
     private boolean parseIntent(Intent intent) {
         mChatId = intent.getStringExtra(EXTRA_CHAT_ID);
         String action = intent.getAction();
-
         // Here we get data from the event.
         if (Intent.ACTION_SEND.equals(action)) {
             mFiles = new ArrayList<>();

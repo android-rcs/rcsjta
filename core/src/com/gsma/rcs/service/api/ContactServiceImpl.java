@@ -80,7 +80,6 @@ public class ContactServiceImpl extends IContactService.Stub {
         if (logger.isActivated()) {
             logger.info("Contacts service API is loaded");
         }
-
         mContactManager = contactManager;
         mRcsSettings = rcsSettings;
     }
@@ -109,9 +108,6 @@ public class ContactServiceImpl extends IContactService.Stub {
      * @param listener Service registration listener
      */
     public void addEventListener(IRcsServiceRegistrationListener listener) {
-        if (logger.isActivated()) {
-            logger.info("Add a service listener");
-        }
         synchronized (mLock) {
             mRcsServiceRegistrationEventBroadcaster.addEventListener(listener);
         }
@@ -123,9 +119,6 @@ public class ContactServiceImpl extends IContactService.Stub {
      * @param listener Service registration listener
      */
     public void removeEventListener(IRcsServiceRegistrationListener listener) {
-        if (logger.isActivated()) {
-            logger.info("Remove a service listener");
-        }
         synchronized (mLock) {
             mRcsServiceRegistrationEventBroadcaster.removeEventListener(listener);
         }
@@ -163,9 +156,6 @@ public class ContactServiceImpl extends IContactService.Stub {
     public RcsContact getRcsContact(ContactId contact) throws RemoteException {
         if (contact == null) {
             throw new ServerApiIllegalArgumentException("contact must not be null!");
-        }
-        if (logger.isActivated()) {
-            logger.info("Get RCS contact " + contact);
         }
         try {
             // Read capabilities in the local database

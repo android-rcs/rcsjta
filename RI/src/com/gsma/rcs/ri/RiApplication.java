@@ -23,7 +23,6 @@ import com.gsma.rcs.api.connection.ConnectionManager.RcsServiceName;
 import com.gsma.rcs.ri.utils.LogUtils;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsServiceControl;
-import com.gsma.services.rcs.filetransfer.FileTransfer.Disposition;
 
 import android.app.Application;
 import android.content.Context;
@@ -50,7 +49,7 @@ public class RiApplication extends Application {
     /**
      * Delay (ms) before starting connection manager.
      */
-    /* package private */static final long DELAY_FOR_STARTING_CNX_MANAGER = 2000;
+    /* package private */static final long DELAY_FOR_STARTING_CNX_MANAGER = 1000;
 
     private static Context mContext;
 
@@ -146,8 +145,6 @@ public class RiApplication extends Application {
 
     private static Map<Direction, String> sDirectionToString;
 
-    private static Map<Disposition, String> sDispositionToString;
-
     private static RcsServiceControl mRcsServiceControl;
 
     private static final String LOGTAG = LogUtils.getTag(RiApplication.class.getSimpleName());
@@ -160,16 +157,6 @@ public class RiApplication extends Application {
      */
     public static String getDirection(Direction direction) {
         return sDirectionToString.get(direction);
-    }
-
-    /**
-     * Gets disposition
-     *
-     * @param disposition Disposition
-     * @return String
-     */
-    public static String getDisposition(Disposition disposition) {
-        return sDispositionToString.get(disposition);
     }
 
     /* package private */static boolean sCnxManagerStarted = false;
@@ -205,10 +192,6 @@ public class RiApplication extends Application {
         sDirectionToString.put(Direction.OUTGOING, resources.getString(R.string.label_outgoing));
         sDirectionToString.put(Direction.IRRELEVANT,
                 resources.getString(R.string.label_direction_unknown));
-
-        sDispositionToString = new HashMap<>();
-        sDispositionToString.put(Disposition.ATTACH, resources.getString(R.string.label_attach));
-        sDispositionToString.put(Disposition.RENDER, resources.getString(R.string.label_render));
 
         mRcsServiceControl = RcsServiceControl.getInstance(mContext);
 

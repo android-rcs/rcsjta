@@ -64,7 +64,6 @@ public class GroupChatTerminalExceptionTask implements Runnable {
             int providerIdIdx = cursor.getColumnIndexOrThrow(HistoryLogData.KEY_PROVIDER_ID);
             int idIdx = cursor.getColumnIndexOrThrow(HistoryLogData.KEY_ID);
             int mimeTypeIdx = cursor.getColumnIndexOrThrow(HistoryLogData.KEY_MIME_TYPE);
-
             while (cursor.moveToNext()) {
                 int providerId = cursor.getInt(providerIdIdx);
                 String id = cursor.getString(idIdx);
@@ -83,7 +82,6 @@ public class GroupChatTerminalExceptionTask implements Runnable {
                                 + providerId + "'!");
                 }
             }
-
         } catch (RuntimeException e) {
             /*
              * Normally we are not allowed to catch runtime exceptions as these are genuine bugs
@@ -92,7 +90,7 @@ public class GroupChatTerminalExceptionTask implements Runnable {
              * exit the system and thus can bring the whole system down, which is not intended.
              */
             sLogger.error(
-                    "Exception occured while trying to mark queued group chat messages and group file transfers as failed with chatId "
+                    "Exception occurred while trying to mark queued group chat messages and group file transfers as failed with chatId "
                             + mChatId, e);
         } finally {
             if (cursor != null) {

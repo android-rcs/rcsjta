@@ -1,4 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?><!--
+<?xml version="1.0" encoding="utf-8"?>
+<!--
   ~ /*******************************************************************************
   ~  * Software Name : RCS IMS Stack
   ~  *
@@ -22,14 +23,14 @@
 
     <item
         android:id="@+id/menu_send_geoloc"
-        android:title="@string/menu_send_geoloc" />
+        android:title="@string/menu_send_geoloc"/>
 
     <item
         android:id="@+id/menu_send_rcs_file"
-        android:title="@string/menu_send_file" />
+        android:title="@string/menu_send_file"/>
 
     <item
         android:id="@+id/menu_delete_talk"
-        android:title="@string/menu_delete_talk" />
+        android:title="@string/menu_delete_talk"/>
 
 </menu>

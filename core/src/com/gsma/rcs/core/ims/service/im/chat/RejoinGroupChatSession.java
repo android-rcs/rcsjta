@@ -49,8 +49,7 @@ import javax2.sip.header.SubjectHeader;
  */
 public class RejoinGroupChatSession extends GroupChatSession {
 
-    private final static Logger sLogger = Logger.getLogger(RejoinGroupChatSession.class
-            .getSimpleName());
+    private final static Logger sLogger = Logger.getLogger(RejoinGroupChatSession.class.getName());
 
     /**
      * Constructor
@@ -60,7 +59,7 @@ public class RejoinGroupChatSession extends GroupChatSession {
      * @param rcsSettings Rcs settings
      * @param messagingLog Messaging log
      * @param timestamp Local timestamp for the session
-     * @param contactManager
+     * @param contactManager the contact manager
      */
     public RejoinGroupChatSession(InstantMessagingService imService, GroupChatInfo groupChatInfo,
             RcsSettings rcsSettings, MessagingLog messagingLog, long timestamp,
@@ -112,26 +111,8 @@ public class RejoinGroupChatSession extends GroupChatSession {
 
             sendInvite(invite);
 
-        } catch (InvalidArgumentException e) {
-            handleError(new ChatError(ChatError.SESSION_REJOIN_FAILED, e));
-
-        } catch (ParseException e) {
-            handleError(new ChatError(ChatError.SESSION_REJOIN_FAILED, e));
-
-        } catch (FileAccessException e) {
-            handleError(new ChatError(ChatError.SESSION_REJOIN_FAILED, e));
-
-        } catch (PayloadException e) {
-            handleError(new ChatError(ChatError.SESSION_REJOIN_FAILED, e));
-
-        } catch (NetworkException e) {
-            handleError(new ChatError(ChatError.SESSION_REJOIN_FAILED, e));
-
-        } catch (RuntimeException e) {
-            /*
-             * Intentionally catch runtime exceptions as else it will abruptly end the thread and
-             * eventually bring the whole system down, which is not intended.
-             */
+        } catch (InvalidArgumentException | ParseException | FileAccessException | PayloadException
+                | NetworkException | RuntimeException e) {
             handleError(new ChatError(ChatError.SESSION_REJOIN_FAILED, e));
         }
     }

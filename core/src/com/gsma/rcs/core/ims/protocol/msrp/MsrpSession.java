@@ -93,15 +93,10 @@ public class MsrpSession {
 
         @Override
         public String toString() {
-            StringBuffer sb = new StringBuffer();
-            sb.append("[MsrpTransactionInfo - ");
-            sb.append("transactionId = ").append(mTransactionId).append(", ");
-            sb.append("msrpMsgId = ").append(mMsrpMsgId).append(", ");
-            sb.append("cpimMsgId = ").append(mCpimMsgId).append(", ");
-            sb.append("typeMsrpChunk = ").append(mTypeMsrpChunk).append(", ");
-            sb.append("timestamp = ").append(mTimestamp);
-            sb.append("]");
-            return sb.toString();
+            return "[MsrpTransactionInfo - " + "transactionId = " + mTransactionId + ", "
+                    + "msrpMsgId = " + mMsrpMsgId + ", " + "cpimMsgId = " + mCpimMsgId + ", "
+                    + "typeMsrpChunk = " + mTypeMsrpChunk + ", " + "timestamp = " + mTimestamp
+                    + "]";
         }
     }
 
@@ -486,8 +481,7 @@ public class MsrpSession {
                 mMsrpEventListener.msrpDataTransferred(msgId);
             }
         } catch (IOException e) {
-            throw new NetworkException(new StringBuilder("Send chunk failed for msgId : ").append(
-                    msgId).toString(), e);
+            throw new NetworkException("Send chunk failed for msgId : " + msgId, e);
 
         } finally {
             CloseableUtils.tryToClose(inputStream);
@@ -806,9 +800,8 @@ public class MsrpSession {
             ContactManagerException {
         mIsEstablished = true;
         if (sLogger.isActivated()) {
-            sLogger.debug(new StringBuilder("SEND request received (flag=").append(flag)
-                    .append(", transaction=").append(txId).append(", totalSize=").append(totalSize)
-                    .append(")").toString());
+            sLogger.debug("SEND request received (flag=" + flag + ", transaction=" + txId
+                    + ", totalSize=" + totalSize + ")");
         }
 
         String msgId = headers.get(MsrpConstants.HEADER_MESSAGE_ID);

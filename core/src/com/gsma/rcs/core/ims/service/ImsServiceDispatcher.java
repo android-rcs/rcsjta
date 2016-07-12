@@ -76,7 +76,7 @@ public class ImsServiceDispatcher extends Thread {
      * Constructor
      * 
      * @param imsModule IMS module
-     * @param rcsSettings
+     * @param rcsSettings the RCS settings
      */
     public ImsServiceDispatcher(ImsModule imsModule, RcsSettings rcsSettings) {
         super("SipDispatcher");
@@ -113,29 +113,20 @@ public class ImsServiceDispatcher extends Thread {
         if (sLogger.isActivated()) {
             sLogger.info("Start background processing");
         }
-        SipRequest request = null;
+        SipRequest request;
         while ((request = (SipRequest) mBuffer.getObject()) != null) {
             try {
                 dispatch(request, System.currentTimeMillis());
-            } catch (PayloadException e) {
-                sLogger.error(new StringBuilder("Failed to dispatch received SIP request! CallId=")
-                        .append(request.getCallId()).toString(), e);
+
+            } catch (PayloadException | RuntimeException e) {
+                sLogger.error(
+                        "Failed to dispatch received SIP request! CallId=" + request.getCallId(), e);
                 handleImsDispatchError(request);
+
             } catch (NetworkException e) {
                 if (sLogger.isActivated()) {
                     sLogger.debug(e.getMessage());
                 }
-                handleImsDispatchError(request);
-            } catch (RuntimeException e) {
-                /*
-                 * Normally we are not allowed to catch runtime exceptions as these are genuine bugs
-                 * which should be handled/fixed within the code. However the cases when we are
-                 * executing operations on a thread unhandling such exceptions will eventually lead
-                 * to exit the system and thus can bring the whole system down, which is not
-                 * intended.
-                 */
-                sLogger.error(new StringBuilder("Failed to dispatch received SIP request! CallId=")
-                        .append(request.getCallId()).toString(), e);
                 handleImsDispatchError(request);
             }
         }
@@ -162,10 +153,10 @@ public class ImsServiceDispatcher extends Thread {
         String localIpAddress = mImsModule.getCurrentNetworkInterface().getNetworkAccess()
                 .getIpAddress();
         ImsNetworkInterface imsNetIntf = mImsModule.getCurrentNetworkInterface();
-        boolean isMatchingRegistered = false;
         SipURI requestURI;
         try {
             requestURI = SipUtils.ADDR_FACTORY.createSipURI(request.getRequestURI());
+
         } catch (ParseException e) {
             if (logActivated) {
                 sLogger.error("Unable to parse request URI " + request.getRequestURI(), e);
@@ -173,10 +164,8 @@ public class ImsServiceDispatcher extends Thread {
             sendFinalResponse(request, Response.BAD_REQUEST);
             return;
         }
-
         /* First check if the request URI matches with the local interface address */
-        isMatchingRegistered = localIpAddress.equals(requestURI.getHost());
-
+        boolean isMatchingRegistered = localIpAddress.equals(requestURI.getHost());
         /* If no matching, perhaps we are behind a NAT */
         if ((!isMatchingRegistered) && imsNetIntf.isBehindNat()) {
             /*
@@ -185,15 +174,11 @@ public class ImsServiceDispatcher extends Thread {
              */
             String natPublicIpAddress = imsNetIntf.getNatPublicAddress();
             int natPublicUdpPort = imsNetIntf.getNatPublicPort();
-            if ((natPublicUdpPort != -1) && (natPublicIpAddress != null)) {
-                isMatchingRegistered = natPublicIpAddress.equals(requestURI.getHost())
-                        && (natPublicUdpPort == requestURI.getPort());
-            } else {
-                /* NAT traversal and unknown public address/port */
-                isMatchingRegistered = false;
-            }
+            isMatchingRegistered = (natPublicUdpPort != -1) && (natPublicIpAddress != null)
+                    && natPublicIpAddress.equals(requestURI.getHost())
+                    && (natPublicUdpPort == requestURI.getPort());
+            /* NAT traversal and unknown public address/port */
         }
-
         if (!isMatchingRegistered) {
             if (logActivated) {
                 sLogger.debug("Request-URI address and port do not match with registered contact: reject the request");
@@ -201,7 +186,6 @@ public class ImsServiceDispatcher extends Thread {
             sendFinalResponse(request, Response.NOT_FOUND);
             return;
         }
-
         /*
          * Check SIP instance ID: RCS client supporting the multidevice procedure shall respond to
          * the invite with a 486 BUSY HERE if the identifier value of the "+sip.instance" tag
@@ -216,7 +200,6 @@ public class ImsServiceDispatcher extends Thread {
             sendFinalResponse(request, Response.BUSY_HERE);
             return;
         }
-
         /*
          * Check public GRUU : RCS client supporting the multidevice procedure shall respond to the
          * invite with a 486 BUSY HERE if the identifier value of the "pub-gruu" tag included in the
@@ -231,7 +214,6 @@ public class ImsServiceDispatcher extends Thread {
             sendFinalResponse(request, Response.BUSY_HERE);
             return;
         }
-
         /* Update remote SIP instance ID in the dialog path of the session */
         ImsServiceSession session = getImsServiceSession(request.getCallId());
         if (session != null) {
@@ -241,7 +223,6 @@ public class ImsServiceDispatcher extends Thread {
                 session.getDialogPath().setRemoteSipInstance(remoteInstanceId);
             }
         }
-
         if (request.getMethod().equals(Request.OPTIONS)) {
             mImsModule.getCapabilityService().onCapabilityRequestReceived(request);
 
@@ -252,7 +233,6 @@ public class ImsServiceDispatcher extends Thread {
                 return;
             }
             send100Trying(request);
-
             String sdp = request.getSdpContent();
             if (sdp == null) {
                 /* No SDP found: reject the invitation with a 606 Not Acceptable */
@@ -263,7 +243,6 @@ public class ImsServiceDispatcher extends Thread {
                 return;
             }
             sdp = sdp.toLowerCase();
-
             /* New incoming session invitation */
             if (isTagPresent(sdp, "msrp")
                     && SipUtils.isFeatureTagPresent(request, FeatureTags.FEATURE_3GPP_VIDEO_SHARE)
@@ -281,7 +260,6 @@ public class ImsServiceDispatcher extends Thread {
                     }
                     sendFinalResponse(request, Response.DECLINE);
                 }
-
             } else if (isTagPresent(sdp, "msrp")
                     && SipUtils.isFeatureTagPresent(request, FeatureTags.FEATURE_OMA_IM)
                     && isTagPresent(sdp, "file-selector")) {
@@ -297,7 +275,6 @@ public class ImsServiceDispatcher extends Thread {
                     }
                     sendFinalResponse(request, Response.DECLINE);
                 }
-
             } else if (isTagPresent(sdp, "msrp")
                     && SipUtils.isFeatureTagPresent(request, FeatureTags.FEATURE_OMA_IM)) {
                 if (!mRcsSettings.isImSessionSupported()) {
@@ -368,7 +345,6 @@ public class ImsServiceDispatcher extends Thread {
                                 request, timestamp);
                     }
                 }
-
             } else if (isTagPresent(sdp, "rtp")
                     && SipUtils.isFeatureTagPresent(request, FeatureTags.FEATURE_3GPP_VIDEO_SHARE)) {
                 if (mRcsSettings.isVideoSharingSupported()) {
@@ -383,7 +359,6 @@ public class ImsServiceDispatcher extends Thread {
                     }
                     sendFinalResponse(request, Response.DECLINE);
                 }
-
             } else if (isTagPresent(sdp, "msrp")
                     && SipUtils.isFeatureTagPresent(request, FeatureTags.FEATURE_3GPP_VIDEO_SHARE)
                     && SipUtils.isFeatureTagPresent(request,
@@ -400,7 +375,6 @@ public class ImsServiceDispatcher extends Thread {
                     }
                     sendFinalResponse(request, Response.DECLINE);
                 }
-
             } else if (SipUtils
                     .isFeatureTagPresent(request, FeatureTags.FEATURE_RCSE_IP_VOICE_CALL)
                     && SipUtils
@@ -453,7 +427,6 @@ public class ImsServiceDispatcher extends Thread {
                     sendFinalResponse(request, Response.FORBIDDEN, "Unsupported Extension");
                 }
             }
-
         } else if (request.getMethod().equals(Request.MESSAGE)) {
             if (ChatUtils.isImdnService(request)) {
                 mImsModule.getInstantMessagingService().onMessageDeliveryStatusReceived(request);
@@ -470,7 +443,6 @@ public class ImsServiceDispatcher extends Thread {
                     sendFinalResponse(request, Response.FORBIDDEN);
                 }
             }
-
         } else if (request.getMethod().equals(Request.NOTIFY)) {
             dispatchNotify(request, timestamp);
 
@@ -498,7 +470,6 @@ public class ImsServiceDispatcher extends Thread {
             if (session != null) {
                 session.receiveUpdate(request);
             }
-
         } else {
             /* Unknown request: : reject the request with a 403 Forbidden */
             if (logActivated) {
@@ -518,10 +489,8 @@ public class ImsServiceDispatcher extends Thread {
      */
     private void dispatchNotify(SipRequest notify, long timestamp) throws PayloadException,
             NetworkException {
-
         mImsModule.getSipManager().sendSipResponse(
                 SipMessageFactory.createResponse(notify, Response.OK));
-
         EventHeader eventHeader = (EventHeader) notify.getHeader(EventHeader.NAME);
         if (eventHeader == null) {
             if (sLogger.isActivated()) {
@@ -529,7 +498,6 @@ public class ImsServiceDispatcher extends Thread {
             }
             return;
         }
-
         /* Dispatch the notification to the corresponding service */
         if (eventHeader.getEventType().equalsIgnoreCase("presence.winfo")) {
             if (mRcsSettings.isSocialPresenceSupported()
@@ -537,14 +505,12 @@ public class ImsServiceDispatcher extends Thread {
                 mImsModule.getPresenceService().getWatcherInfoSubscriber()
                         .receiveNotification(notify);
             }
-
         } else if (eventHeader.getEventType().equalsIgnoreCase("presence")) {
-            if (notify.getTo().indexOf("anonymous") != -1) {
+            if (notify.getTo().contains("anonymous")) {
                 mImsModule.getCapabilityService().onNotificationReceived(notify);
             } else {
                 mImsModule.getPresenceService().getPresenceSubscriber().receiveNotification(notify);
             }
-
         } else if (eventHeader.getEventType().equalsIgnoreCase("conference")) {
             mImsModule.getInstantMessagingService().onConferenceNotificationReceived(notify,
                     timestamp);
@@ -564,10 +530,7 @@ public class ImsServiceDispatcher extends Thread {
      * @return Boolean
      */
     private boolean isTagPresent(String message, String tag) {
-        if ((message != null) && (tag != null) && (message.toLowerCase().indexOf(tag) != -1)) {
-            return true;
-        }
-        return false;
+        return (message != null) && (tag != null) && (message.toLowerCase().contains(tag));
     }
 
     /**
@@ -637,7 +600,7 @@ public class ImsServiceDispatcher extends Thread {
     /**
      * Handle ims dispatch error
      * 
-     * @param request
+     * @param request the SIP request
      */
     private void handleImsDispatchError(SipRequest request) {
         final PresenceService service = mImsModule.getPresenceService();

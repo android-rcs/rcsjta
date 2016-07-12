@@ -88,31 +88,16 @@ public class ResumeUploadFileSharingSession extends OriginatingHttpFileSharingSe
             if (mUploadManager.isCancelled() || mUploadManager.isPaused()) {
                 return;
             }
-            sLogger.error(
-                    new StringBuilder("Failed to resume a file transfer session for sessionId : ")
-                            .append(getSessionID()).append(" with fileTransferId : ")
-                            .append(getFileTransferId()).toString(), e);
+            sLogger.error("Failed to resume a file transfer session for sessionId : "
+                    + getSessionID() + " with fileTransferId : " + getFileTransferId(), e);
             handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
 
-        } catch (PayloadException e) {
-            sLogger.error(
-                    new StringBuilder("Failed to resume a file transfer session for sessionId : ")
-                            .append(getSessionID()).append(" with fileTransferId : ")
-                            .append(getFileTransferId()).toString(), e);
+        } catch (PayloadException | RuntimeException e) {
+            sLogger.error("Failed to resume a file transfer session for sessionId : "
+                    + getSessionID() + " with fileTransferId : " + getFileTransferId(), e);
             handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
 
         } catch (NetworkException e) {
-            handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
-
-        } catch (RuntimeException e) {
-            /*
-             * Intentionally catch runtime exceptions as else it will abruptly end the thread and
-             * eventually bring the whole system down, which is not intended.
-             */
-            sLogger.error(
-                    new StringBuilder("Failed to resume a file transfer session for sessionId : ")
-                            .append(getSessionID()).append(" with fileTransferId : ")
-                            .append(getFileTransferId()).toString(), e);
             handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
         }
     }

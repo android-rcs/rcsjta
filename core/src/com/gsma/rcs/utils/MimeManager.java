@@ -234,7 +234,8 @@ public class MimeManager {
      * @return Boolean
      */
     public static boolean isVCardType(String mime) {
-        return mime.toLowerCase().equalsIgnoreCase("text/vcard");
+        mime = mime.toLowerCase();
+        return "text/vcard".equals(mime) || "text/x-vcard".equals(mime);
     }
 
     /**
@@ -244,6 +245,6 @@ public class MimeManager {
      * @return Boolean
      */
     public static boolean isGeolocType(String mime) {
-        return mime.toLowerCase().equalsIgnoreCase("application/vnd.gsma.rcspushlocation+xml");
+        return mime.toLowerCase().equals("application/vnd.gsma.rcspushlocation+xml");
     }
 }

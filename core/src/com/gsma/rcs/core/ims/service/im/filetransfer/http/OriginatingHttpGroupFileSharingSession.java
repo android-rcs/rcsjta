@@ -154,7 +154,7 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
         new Thread(new Runnable() {
             public void run() {
                 try {
-                    fileTransferPaused();
+                    setFileTransferPaused();
                     interruptSession();
                     mUploadManager.pauseTransferByUser();
 
@@ -176,7 +176,7 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
         new Thread(new Runnable() {
             public void run() {
                 try {
-                    fileTransferResumed();
+                    setFileTransferResumed();
                     FtHttpResumeUpload upload = mMessagingLog
                             .retrieveFtHttpResumeUpload(mUploadManager.getTId());
                     if (upload != null) {

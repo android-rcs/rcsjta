@@ -77,7 +77,7 @@ public class SendGroupFile extends SendFile {
     public boolean transferFile(Uri file, FileTransfer.Disposition disposition, boolean fileIcon) {
         try {
             if (LogUtils.isActive) {
-                Log.d(LOGTAG, "initiateTransfer filename=" + mFilename + " size=" + mFilesize
+                Log.d(LOGTAG, "transferFile filename=" + mFilename + " size=" + mFilesize
                         + " chatId=" + mChatId);
             }
             /* Only take persistable permission for content Uris */
@@ -85,8 +85,12 @@ public class SendGroupFile extends SendFile {
             /* Initiate transfer */
             mFileTransfer = mFileTransferService.transferFileToGroupChat(mChatId, file,
                     disposition, fileIcon);
-            mTransferId = mFileTransfer.getTransferId();
-            return true;
+            if (mFileTransfer != null) {
+                mTransferId = mFileTransfer.getTransferId();
+                return true;
+            }
+            Log.e(LOGTAG, "Cannot transfer file: not found");
+            return false;
 
         } catch (RcsServiceException e) {
             showExceptionThenExit(e);

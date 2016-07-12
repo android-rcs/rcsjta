@@ -91,14 +91,7 @@ public class ResumeUploadGroupFileSharingSession extends OriginatingHttpGroupFil
             }
             handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
 
-        } catch (PayloadException | NetworkException e) {
-            handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
-
-        } catch (RuntimeException e) {
-            /*
-             * Intentionally catch runtime exceptions as else it will abruptly end the thread and
-             * eventually bring the whole system down, which is not intended.
-             */
+        } catch (PayloadException | NetworkException | RuntimeException e) {
             handleError(new FileSharingError(FileSharingError.SESSION_INITIATION_FAILED, e));
         }
     }

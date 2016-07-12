@@ -87,40 +87,27 @@ import java.util.Set;
  * @author Philippe LEMORDANT
  */
 public class ReceiveFileTransfer extends RcsActivity {
+
+    private static final String LOGTAG = LogUtils.getTag(ReceiveFileTransfer.class.getSimpleName());
+    private static final String VCARD_MIME_TYPE = "text/x-vcard";
+    private static final String BUNDLE_FTDAO_ID = "ftdao";
+
     /**
      * UI mHandler
      */
     private final Handler mHandler = new Handler();
-
     private FileTransfer mFileTransfer;
-
     private FileTransferDAO mFtDao;
-
     private boolean mGroupFileTransfer = false;
-
     private String mTransferId;
-
     private Button mPauseBtn;
-
     private Button mResumeBtn;
-
     private OnClickListener mDeclineBtnListener;
-
     private OnClickListener mAcceptBtnListener;
-
     private OneToOneFileTransferListener mFileTransferListener;
-
     private GroupFileTransferListener mGroupFtListener;
-
     private FileTransferService mFileTransferService;
-
     private ProgressBar mProgressBar;
-
-    private static final String LOGTAG = LogUtils.getTag(ReceiveFileTransfer.class.getSimpleName());
-
-    private static final String VCARD_MIME_TYPE = "text/x-vcard";
-
-    private static final String BUNDLE_FTDAO_ID = "ftdao";
     private TextView mStatusView;
     private TextView mSizeTextView;
     private TextView mFilenameTextView;

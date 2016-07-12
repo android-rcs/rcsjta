@@ -1713,15 +1713,6 @@ public class RcsSettings {
     }
 
     /**
-     * Set secondary provisioning address
-     *
-     * @param address the secondary provisioning address
-     */
-    public void setSecondaryProvisioningAddress(String address) {
-        writeString(RcsSettingsData.SECONDARY_PROVISIONING_ADDRESS, address);
-    }
-
-    /**
      * Is secondary provisioning address only used
      *
      * @return Boolean

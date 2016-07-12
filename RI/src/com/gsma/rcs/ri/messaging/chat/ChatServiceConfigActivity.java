@@ -33,6 +33,8 @@ import android.view.View.OnClickListener;
 import android.widget.CheckBox;
 import android.widget.TextView;
 
+import java.util.Locale;
+
 /**
  * Display/update the chat service configuration
  * 
@@ -100,26 +102,27 @@ public class ChatServiceConfigActivity extends RcsActivity {
     }
 
     private void displayChatServiceConfig() throws RcsServiceException {
+        Locale local = Locale.getDefault();
         CheckBox checkBox = (CheckBox) findViewById(R.id.WarnSF);
         checkBox.setChecked(mConfig.isChatWarnSF());
 
         TextView textView = (TextView) findViewById(R.id.IsComposingTimeout);
-        textView.setText(Long.valueOf(mConfig.getIsComposingTimeout()).toString());
+        textView.setText(String.format(local, "%d", mConfig.getIsComposingTimeout()));
 
         textView = (TextView) findViewById(R.id.MinGroupChatParticipants);
-        textView.setText(Integer.valueOf(mConfig.getGroupChatMinParticipants()).toString());
+        textView.setText(String.format(local, "%d", mConfig.getGroupChatMinParticipants()));
 
         textView = (TextView) findViewById(R.id.MaxGroupChatParticipants);
-        textView.setText(Integer.valueOf(mConfig.getGroupChatMaxParticipants()).toString());
+        textView.setText(String.format(local, "%d", mConfig.getGroupChatMaxParticipants()));
 
         textView = (TextView) findViewById(R.id.MaxMsgLengthGroupChat);
-        textView.setText(Integer.valueOf(mConfig.getGroupChatMessageMaxLength()).toString());
+        textView.setText(String.format(local, "%d", mConfig.getGroupChatMessageMaxLength()));
 
         textView = (TextView) findViewById(R.id.GroupChatSubjectMaxLength);
-        textView.setText(Integer.valueOf(mConfig.getGroupChatSubjectMaxLength()).toString());
+        textView.setText(String.format(local, "%d", mConfig.getGroupChatSubjectMaxLength()));
 
         textView = (TextView) findViewById(R.id.MaxMsgLengthOneToOneChat);
-        textView.setText(Integer.valueOf(mConfig.getOneToOneChatMessageMaxLength()).toString());
+        textView.setText(String.format(local, "%d", mConfig.getOneToOneChatMessageMaxLength()));
 
         checkBox = (CheckBox) findViewById(R.id.SmsFallback);
         checkBox.setChecked(mConfig.isSmsFallback());
@@ -127,10 +130,10 @@ public class ChatServiceConfigActivity extends RcsActivity {
         mRespondToDisplayReports.setChecked(mConfig.isRespondToDisplayReportsEnabled());
 
         textView = (TextView) findViewById(R.id.MaxGeolocLabelLength);
-        textView.setText(Integer.valueOf(mConfig.getGeolocLabelMaxLength()).toString());
+        textView.setText(String.format(local, "%d", mConfig.getGeolocLabelMaxLength()));
 
         textView = (TextView) findViewById(R.id.GeolocExpireTime);
-        textView.setText(Long.valueOf(mConfig.getGeolocExpirationTime()).toString());
+        textView.setText(String.format(local, "%d", mConfig.getGeolocExpirationTime()));
 
         checkBox = (CheckBox) findViewById(R.id.GroupChatSupported);
         checkBox.setChecked(mConfig.isGroupChatSupported());

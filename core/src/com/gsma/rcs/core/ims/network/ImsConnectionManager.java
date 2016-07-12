@@ -530,9 +530,6 @@ public class ImsConnectionManager implements Runnable {
             Random random = new Random();
             int nbFailures = 0;
             while (mImsPollingThreadId == Thread.currentThread().getId()) {
-                if (sLogger.isActivated()) {
-                    sLogger.debug("Polling: check IMS connection");
-                }
                 // Connection management
                 try {
                     // Test IMS registration
@@ -580,9 +577,6 @@ public class ImsConnectionManager implements Runnable {
                                 mImsModule.startImsServices();
                                 mImsServicesStarted = true;
                             } else {
-                                if (sLogger.isActivated()) {
-                                    sLogger.debug("Already registered to IMS: check IMS services");
-                                }
                                 mImsModule.checkImsServices();
                             }
                         } else {

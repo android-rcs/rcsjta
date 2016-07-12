@@ -42,12 +42,12 @@ import android.widget.Spinner;
  */
 public class LoggerProvisioning extends Fragment implements IProvisioningFragment {
 
-    private static final Logger sLogger = Logger.getLogger(LoggerProvisioning.class
-            .getName());
+    private static final Logger sLogger = Logger.getLogger(LoggerProvisioning.class.getName());
 
     private static final String[] TRACE_LEVEL = {
             "DEBUG", "INFO", "WARN", "ERROR", "FATAL"
     };
+
     private static RcsSettings sRcsSettings;
     private View mRootView;
     private ProvisioningHelper mHelper;
