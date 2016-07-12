@@ -22,6 +22,7 @@
 
 package com.gsma.rcs.im.chat;
 
+import com.gsma.rcs.RcsSettingsMock;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.messaging.MessageData;
 import com.gsma.rcs.provider.messaging.MessagingLog;
@@ -61,7 +62,7 @@ public class MessageLogTest extends AndroidTestCase {
         Context context = getContext();
         mContentResolver = context.getContentResolver();
         mLocalContentResolver = new LocalContentResolver(mContentResolver);
-        RcsSettings rcsSettings = RcsSettings.getInstance(mLocalContentResolver);
+        RcsSettings rcsSettings = RcsSettingsMock.getMockSettings(context);
         mMessagingLog = MessagingLog.getInstance(mLocalContentResolver, rcsSettings);
         ContactUtil contactUtils = ContactUtil.getInstance(new ContactUtilMockContext(mContext));
         mContact1 = contactUtils.formatContact("+339000000");
@@ -73,6 +74,7 @@ public class MessageLogTest extends AndroidTestCase {
     protected void tearDown() throws Exception {
         super.tearDown();
         mMessagingLog.deleteAllEntries();
+        RcsSettingsMock.restoreSettings();
     }
 
     public void testAddGroupChatEvent() {

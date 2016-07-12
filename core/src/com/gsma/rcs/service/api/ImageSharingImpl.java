@@ -120,9 +120,8 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
                         ReasonCode.REJECTED_MAX_SIZE);
             default:
                 throw new IllegalArgumentException(
-                        new StringBuilder(
-                                "Unknown reason in ImageSharingImpl.toStateAndReasonCode; contentSharingError=")
-                                .append(contentSharingError).append("!").toString());
+                        "Unknown reason in ImageSharingImpl.toStateAndReasonCode; contentSharingError="
+                                + contentSharingError + "!");
         }
     }
 
@@ -446,9 +445,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
                      * eventually lead to exit the system and thus can bring the whole system down,
                      * which is not intended.
                      */
-                    sLogger.error(
-                            new StringBuilder("Failed to accept invitation with sharing ID: ")
-                                    .append(mSharingId).toString(), e);
+                    sLogger.error("Failed to accept invitation with sharing ID: " + mSharingId, e);
                 }
             }
         });
@@ -483,9 +480,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
                      * eventually lead to exit the system and thus can bring the whole system down,
                      * which is not intended.
                      */
-                    sLogger.error(
-                            new StringBuilder("Failed to reject invitation with sharing ID: ")
-                                    .append(mSharingId).toString(), e);
+                    sLogger.error("Failed to reject invitation with sharing ID: " + mSharingId, e);
                 }
             }
         });
@@ -521,23 +516,8 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
                     if (sLogger.isActivated()) {
                         sLogger.debug(e.getMessage());
                     }
-
-                } catch (PayloadException e) {
-                    sLogger.error(
-                            new StringBuilder("Failed to terminate session with sharing ID: ")
-                                    .append(mSharingId).toString(), e);
-
-                } catch (RuntimeException e) {
-                    /*
-                     * Normally we are not allowed to catch runtime exceptions as these are genuine
-                     * bugs which should be handled/fixed within the code. However the cases when we
-                     * are executing operations on a thread unhandling such exceptions will
-                     * eventually lead to exit the system and thus can bring the whole system down,
-                     * which is not intended.
-                     */
-                    sLogger.error(
-                            new StringBuilder("Failed to terminate session with sharing ID: ")
-                                    .append(mSharingId).toString(), e);
+                } catch (PayloadException | RuntimeException e) {
+                    sLogger.error("Failed to terminate session with sharing ID: " + mSharingId, e);
                 }
             }
         });
@@ -558,8 +538,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
     @Override
     public void onSessionAborted(ContactId contact, TerminationReason reason) {
         if (sLogger.isActivated()) {
-            sLogger.info(new StringBuilder("Session aborted (terminationReason ").append(reason)
-                    .append(")").toString());
+            sLogger.info("Session aborted (terminationReason " + reason + ")");
         }
         synchronized (mLock) {
             mImageSharingService.removeImageSharing(mSharingId);
@@ -586,9 +565,8 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
                     break;
                 default:
                     throw new IllegalArgumentException(
-                            new StringBuilder(
-                                    "Unknown reason in ImageSharingImpl.handleSessionAborted; terminationReason=")
-                                    .append(reason).append("!").toString());
+                            "Unknown reason in ImageSharingImpl.handleSessionAborted; terminationReason="
+                                    + reason + "!");
             }
         }
     }
@@ -655,8 +633,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
                 handleSessionRejected(ReasonCode.REJECTED_BY_REMOTE, contact);
                 break;
             default:
-                throw new IllegalArgumentException(new StringBuilder(
-                        "Unknown reason RejectedReason=").append(reason).append("!").toString());
+                throw new IllegalArgumentException("Unknown reason RejectedReason=" + reason + "!");
         }
     }
 

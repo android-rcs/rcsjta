@@ -23,8 +23,10 @@
 package com.gsma.rcs.core.ims.service.im.filetransfer.http;
 
 import com.gsma.rcs.core.ParseFailureException;
+import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSession;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.DateUtils;
+import com.gsma.services.rcs.filetransfer.FileTransfer;
 
 import android.net.Uri;
 
@@ -126,7 +128,14 @@ public class FileTransferXmlParser {
                                 mThumbnailProcessed = true;
                                 String typeDispo = xpp.getAttributeValue(null, "file-disposition");
                                 if (typeDispo != null) {
-                                    mFtInfo.setFileDisposition(typeDispo);
+                                    switch (typeDispo) {
+                                        case FileSharingSession.FILE_DISPOSITION_ATTACH:
+                                            mFtInfo.setFileDisposition(FileTransfer.Disposition.ATTACH);
+                                            break;
+                                        case FileSharingSession.FILE_DISPOSITION_RENDER:
+                                            mFtInfo.setFileDisposition(FileTransfer.Disposition.RENDER);
+                                            break;
+                                    }
                                 }
                             }
                         } else if ("data".equalsIgnoreCase(tagName)) {

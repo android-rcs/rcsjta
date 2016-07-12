@@ -70,7 +70,7 @@ public class ConferenceInfoParser extends DefaultHandler {
 
     private StringBuffer mAccumulator;
 
-    private ConferenceInfoDocument mConference = null;
+    private ConferenceInfoDocument mConference;
 
     private String mEntity;
 
@@ -84,10 +84,7 @@ public class ConferenceInfoParser extends DefaultHandler {
 
     private String mFailureReason;
 
-    /**
-     * The logger
-     */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private static final Logger sLogger = Logger.getLogger(ConferenceInfoParser.class.getName());
 
     private final InputSource mInputSource;
 
@@ -103,7 +100,7 @@ public class ConferenceInfoParser extends DefaultHandler {
     /**
      * Parse the Conference info input
      * 
-     * @retunrn ConferenceInfoParser
+     * @return ConferenceInfoParser
      * @throws ParserConfigurationException
      * @throws SAXException
      * @throws ParseFailureException
@@ -125,24 +122,24 @@ public class ConferenceInfoParser extends DefaultHandler {
         return mConference;
     }
 
+    @Override
     public void startDocument() {
-        if (logger.isActivated()) {
-            logger.debug("Start document");
-        }
         mAccumulator = new StringBuffer();
     }
 
+    @Override
     public void characters(char buffer[], int start, int length) {
         mAccumulator.append(buffer, start, length);
     }
 
+    @Override
     public void startElement(String namespaceURL, String localName, String qname, Attributes attr) {
         mAccumulator.setLength(0);
-
         if (localName.equals("conference-info")) {
             String entity = attr.getValue("entity").trim();
             String state = attr.getValue("state").trim();
             mConference = new ConferenceInfoDocument(entity, state);
+
         } else if (localName.equals("user")) {
             mEntity = attr.getValue("entity").trim();
             String yourown = attr.getValue("yourown");
@@ -157,39 +154,44 @@ public class ConferenceInfoParser extends DefaultHandler {
         }
     }
 
+    @Override
     public void endElement(String namespaceURL, String localName, String qname) {
-        if (localName.equals("user")) {
-            if (mConference != null) {
-                User user = new User(mEntity, mMe, mStatus, mDisplayName, mDisconnectionMethod,
-                        mFailureReason);
-                mConference.addUser(user);
-            }
-        } else if (localName.equals("display-text")) {
-            mDisplayName = mAccumulator.toString().trim();
-        } else if (localName.equals("status")) {
-            mStatus = mAccumulator.toString().trim();
-        } else if (localName.equals("maximum-user-count")) {
-            if (mConference != null) {
-                mConference.setMaxUserCount(Integer.parseInt(mAccumulator.toString().trim()));
-            }
-        } else if (localName.equals("user-count")) {
-            if (mConference != null) {
-                mConference.setUserCount(Integer.parseInt(mAccumulator.toString().trim()));
-            }
-        } else if (localName.equals("conference-info")) {
-            if (logger.isActivated()) {
-                logger.debug("Conference-Info document complete");
-            }
-        } else if (localName.equals("disconnection-method")) {
-            mDisconnectionMethod = mAccumulator.toString().trim();
-        } else if (localName.equals("reason")) {
-            mFailureReason = mAccumulator.toString().trim();
+        switch (localName) {
+            case "user":
+                if (mConference != null) {
+                    User user = new User(mEntity, mMe, mStatus, mDisplayName, mDisconnectionMethod,
+                            mFailureReason);
+                    mConference.addUser(user);
+                }
+                break;
+            case "display-text":
+                mDisplayName = mAccumulator.toString().trim();
+                break;
+            case "status":
+                mStatus = mAccumulator.toString().trim();
+                break;
+            case "maximum-user-count":
+                if (mConference != null) {
+                    mConference.setMaxUserCount(Integer.parseInt(mAccumulator.toString().trim()));
+                }
+                break;
+            case "user-count":
+                if (mConference != null) {
+                    mConference.setUserCount(Integer.parseInt(mAccumulator.toString().trim()));
+                }
+                break;
+            case "conference-info":
+                if (sLogger.isActivated()) {
+                    sLogger.debug("Conference-Info document complete");
+                }
+                break;
+            case "disconnection-method":
+                mDisconnectionMethod = mAccumulator.toString().trim();
+                break;
+            case "reason":
+                mFailureReason = mAccumulator.toString().trim();
+                break;
         }
     }
 
-    public void endDocument() {
-        if (logger.isActivated()) {
-            logger.debug("End document");
-        }
-    }
 }

@@ -226,7 +226,6 @@ public class OneToOneChatDequeueTask extends DequeueTask {
                     setOneToOneChatEntryAsFailedDequeue(providerId, contact, id, mimeType);
                 }
             }
-
         } catch (RuntimeException e) {
             /*
              * Normally all the terminal and non-terminal cases should be handled above so if we

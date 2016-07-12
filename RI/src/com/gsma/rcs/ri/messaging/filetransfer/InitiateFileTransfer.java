@@ -39,7 +39,6 @@ import com.gsma.services.rcs.filetransfer.FileTransferLog;
 import com.gsma.services.rcs.filetransfer.FileTransferService;
 import com.gsma.services.rcs.filetransfer.OneToOneFileTransferListener;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -80,40 +79,27 @@ public class InitiateFileTransfer extends RcsActivity {
     private final static int RC_RECORD_AUDIO = 3;
 
     private static final String BUNDLE_FTDAO_ID = "ftdao";
-    private static final String RESULT_RECORD_AUDIO = "result_audio_record";
+
+    private static final String LOGTAG = LogUtils.getTag(InitiateFileTransfer.class.getName());
 
     /**
      * UI handler
      */
     private final Handler mHandler = new Handler();
-
     private String mFilename;
-
     private Uri mFile;
-
     private long mFilesize = -1;
-
     private FileTransfer mFileTransfer;
-
-    private static final String LOGTAG = LogUtils.getTag(InitiateFileTransfer.class.getName());
-
     private String mFileTransferId;
-
     /**
      * Spinner for contact selection
      */
     private Spinner mSpinner;
-
     private Button mResumeBtn;
-
     private Button mPauseBtn;
-
     private Button mInviteBtn;
-
     private Button mSelectBtn;
-
     private OneToOneFileTransferListener mFileTransferListener;
-
     private FileTransferService mFileTransferService;
     private TextView mUriTextView;
     private TextView mSizeTextView;
@@ -180,7 +166,6 @@ public class InitiateFileTransfer extends RcsActivity {
                     Log.d(LOGTAG, "onCreate");
                 }
             }
-
         } catch (RcsServiceException e) {
             showExceptionThenExit(e);
         }
@@ -206,7 +191,6 @@ public class InitiateFileTransfer extends RcsActivity {
         /* Get thumbnail option */
         boolean tryToSendFileicon = mIconCheckBox.isChecked();
         String mimeType = getContentResolver().getType(mFile);
-
         if (tryToSendFileicon && mimeType != null && !mimeType.startsWith("image")) {
             tryToSendFileicon = false;
         }
@@ -218,7 +202,12 @@ public class InitiateFileTransfer extends RcsActivity {
             /* Initiate transfer */
             mFileTransfer = mFileTransferService.transferFile(remote, mFile, dispo,
                     tryToSendFileicon);
-            mFileTransferId = mFileTransfer.getTransferId();
+            if (mFileTransfer != null) {
+                mFileTransferId = mFileTransfer.getTransferId();
+            } else {
+                Log.e(LOGTAG, "Cannot initiate transfer: ID not found");
+                return;
+            }
             /* Disable UI */
             mSpinner.setEnabled(false);
             /* Hide buttons */
@@ -302,8 +291,7 @@ public class InitiateFileTransfer extends RcsActivity {
                 break;
 
             case RC_RECORD_AUDIO:
-                Bundle res = data.getExtras();
-                mFile = res.getParcelable(RESULT_RECORD_AUDIO);
+                mFile = data.getData();
                 if (LogUtils.isActive) {
                     Log.d(LOGTAG, "Created audio file:" + mFile);
                 }
@@ -645,10 +633,4 @@ public class InitiateFileTransfer extends RcsActivity {
         return resume;
     }
 
-    public static void onAudioMessageSelected(Activity activity, Uri file) {
-        Intent in = new Intent();
-        in.putExtra(RESULT_RECORD_AUDIO, file);
-        activity.setResult(Activity.RESULT_OK, in);
-        activity.finish();
-    }
 }

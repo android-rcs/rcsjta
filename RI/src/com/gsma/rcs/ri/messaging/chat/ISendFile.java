@@ -25,7 +25,7 @@ import com.gsma.services.rcs.filetransfer.FileTransferService;
 import android.net.Uri;
 
 /**
- * @author YPLO6403
+ * @author Philippe LEMORDANT
  */
 public interface ISendFile {
 
@@ -42,7 +42,6 @@ public interface ISendFile {
      * @param fileIcon File icon option. If true, the stack tries to attach fileicon.
      * @return True if file transfer is successful
      */
-
     boolean transferFile(Uri file, FileTransfer.Disposition disposition, boolean fileIcon);
 
     /**

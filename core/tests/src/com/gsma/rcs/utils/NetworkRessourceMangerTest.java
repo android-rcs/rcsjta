@@ -18,8 +18,8 @@
 
 package com.gsma.rcs.utils;
 
+import com.gsma.rcs.RcsSettingsMock;
 import com.gsma.rcs.platform.network.NetworkFactory;
-import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.settings.RcsSettings;
 
 import android.test.AndroidTestCase;
@@ -35,10 +35,15 @@ public class NetworkRessourceMangerTest extends AndroidTestCase {
 
     protected void setUp() throws Exception {
         super.setUp();
-        LocalContentResolver localContentResolver = new LocalContentResolver(getContext());
-        mRcsSettings = RcsSettings.getInstance(localContentResolver);
+        mRcsSettings = RcsSettingsMock.getMockSettings(getContext());
         NetworkFactory.loadFactory("com.gsma.rcs.platform.network.AndroidNetworkFactory",
                 mRcsSettings);
+    }
+
+    @Override
+    protected void tearDown() throws Exception {
+        super.tearDown();
+        RcsSettingsMock.restoreSettings();
     }
 
     public void testPortSelection() {

@@ -81,8 +81,7 @@ public class HttpDownloadManager extends HttpTransferManager {
 
     private int mRetryCount = 0;
 
-    private static final Logger sLogger = Logger.getLogger(HttpDownloadManager.class
-            .getSimpleName());
+    private static final Logger sLogger = Logger.getLogger(HttpDownloadManager.class.getName());
 
     /**
      * Constructor
@@ -90,7 +89,7 @@ public class HttpDownloadManager extends HttpTransferManager {
      * @param content File content to download
      * @param listener HTTP transfer event listener
      * @param httpServerAddress Server address from where file is downloaded
-     * @param rcsSettings
+     * @param rcsSettings the RCS settings accessor
      */
     public HttpDownloadManager(MmContent content, HttpTransferEventListener listener,
             Uri httpServerAddress, RcsSettings rcsSettings) {
@@ -127,13 +126,11 @@ public class HttpDownloadManager extends HttpTransferManager {
     /**
      * Download file
      * 
-     * @throws FileNotFoundException
      * @throws IOException
      * @throws FileNotDownloadedException
      * @throws NetworkException
      */
-    public void downloadFile() throws FileNotFoundException, IOException,
-            FileNotDownloadedException, NetworkException {
+    public void downloadFile() throws IOException, FileNotDownloadedException, NetworkException {
         if (sLogger.isActivated()) {
             sLogger.debug("Download file " + getHttpServerAddr());
         }
@@ -144,10 +141,10 @@ public class HttpDownloadManager extends HttpTransferManager {
         if (isHttpTraceEnabled()) {
             System.out.println(">>> Send HTTP request:\nGET " + getHttpServerAddr());
         }
-
         try {
             writeHttpContentToFile(new URL(getHttpServerAddr().toString()),
                     new HashMap<String, String>());
+
         } catch (SSLHandshakeException e) {
             /*
              * If there are issues during handshake between UE and server then we should not proceed
@@ -155,6 +152,7 @@ public class HttpDownloadManager extends HttpTransferManager {
              * possible case would be a certificate mismatch
              */
             throw e;
+
         } catch (IOException e) {
             /*
              * Either the stream is currently not open or there has been a connection time out, In
@@ -164,6 +162,7 @@ public class HttpDownloadManager extends HttpTransferManager {
                 pauseTransferBySystem();
             }
             throw e;
+
         } catch (FileNotDownloadedException e) {
             /* Execute request with retry procedure */
             /*
@@ -224,7 +223,6 @@ public class HttpDownloadManager extends HttpTransferManager {
                 getListener().onHttpTransferProgress(receivedBytes, mContent.getSize());
                 mFileDownloadStream.write(buffer, 0, num);
             }
-
             /*
              * Check if the file is already paused, If it is then its still a partial download and
              * hence we should not delete the file.
@@ -233,7 +231,6 @@ public class HttpDownloadManager extends HttpTransferManager {
                 throw new FileNotDownloadedException(
                         "Download file paused, the file is not complete!");
             }
-
             /*
              * Check if we are able to download the file properly by comparing the file content
              * size, also make sure that the download is not cancelled
@@ -275,9 +272,10 @@ public class HttpDownloadManager extends HttpTransferManager {
             baos = getThumbnail(new URL(iconUri.toString()));
             /* Save data to file on disk */
             fileIcon.writeData2File(baos.toByteArray());
+
         } catch (MalformedURLException e) {
-            throw new IllegalArgumentException(new StringBuilder(
-                    "Failed to download thumbnail for uri : ").append(iconUri).toString(), e);
+            throw new IllegalArgumentException("Failed to download thumbnail for uri : " + iconUri,
+                    e);
 
         } finally {
             CloseableUtils.tryToClose(baos);
@@ -319,8 +317,8 @@ public class HttpDownloadManager extends HttpTransferManager {
                 }
                 return bOutputStream;
             }
-            throw new NetworkException(new StringBuilder("Invalid statuscode '").append(statusCode)
-                    .append("' received from server!").toString());
+            throw new NetworkException("Invalid statuscode '" + statusCode
+                    + "' received from server!");
 
         } catch (IOException e) {
             throw new NetworkException("Failed to get thumbnail!", e);
@@ -336,13 +334,11 @@ public class HttpDownloadManager extends HttpTransferManager {
     /**
      * Resume FToHTTP download
      * 
-     * @throws FileNotFoundException
      * @throws IOException
      * @throws FileNotDownloadedException
      * @throws NetworkException
      */
-    public void resumeDownload() throws FileNotFoundException, IOException,
-            FileNotDownloadedException, NetworkException {
+    public void resumeDownload() throws IOException, FileNotDownloadedException, NetworkException {
         if (mFileDownloadStream == null) {
             mFileDownloadStream = openStreamForFile(mFile);
         }
@@ -351,18 +347,17 @@ public class HttpDownloadManager extends HttpTransferManager {
         if (sLogger.isActivated()) {
             sLogger.debug("Resume Download file " + serverAddress + " from byte " + mFile.length());
         }
-
         /* Send GET request */
         long downloadedLength = mFile.length();
         long completeSize = mContent.getSize();
-        Map<String, String> properties = new HashMap<String, String>();
+        Map<String, String> properties = new HashMap<>();
         properties.put("Range", "bytes=" + downloadedLength + "-" + completeSize);
         if (isHttpTraceEnabled()) {
             System.out.println(">>> Send HTTP request:\n GET " + serverAddress);
         }
-
         try {
             writeHttpContentToFile(new URL(serverAddress.toString()), properties);
+
         } catch (SSLHandshakeException e) {
             /*
              * If there are issues during handshake between UE and server then we should not proceed
@@ -370,6 +365,7 @@ public class HttpDownloadManager extends HttpTransferManager {
              * possible case would be a certificate mismatch
              */
             throw e;
+
         } catch (IOException e) {
             /*
              * Either the stream is currently not open or there has been a connection time out, In
@@ -379,6 +375,7 @@ public class HttpDownloadManager extends HttpTransferManager {
                 pauseTransferBySystem();
             }
             throw e;
+
         } catch (FileNotDownloadedException e) {
             /* Execute request with retry procedure */
             /*
@@ -395,12 +392,4 @@ public class HttpDownloadManager extends HttpTransferManager {
         }
     }
 
-    /**
-     * checks if the stream is already available for usage
-     * 
-     * @return True if Stream is NOT NULL
-     */
-    /* package private */boolean isFileStreamAllocated() {
-        return mFileDownloadStream != null;
-    }
 }

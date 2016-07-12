@@ -50,6 +50,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -130,7 +131,7 @@ public class HttpUploadManager extends HttpTransferManager {
      * @param fileIcon content of the file icon
      * @param listener HTTP transfer event listener
      * @param tId TID of the upload
-     * @param rcsSettings
+     * @param rcsSettings the RCS settings accessor
      */
     public HttpUploadManager(MmContent content, MmContent fileIcon,
             HttpUploadTransferEventListener listener, String tId, RcsSettings rcsSettings) {
@@ -214,7 +215,6 @@ public class HttpUploadManager extends HttpTransferManager {
                     }
                     throw new IOException("Unable to upload file URI " + mContent.getUri() + "!");
             }
-
             if (isCancelled()) {
                 if (sLogger.isActivated()) {
                     sLogger.debug("File transfer cancelled by user");
@@ -223,6 +223,7 @@ public class HttpUploadManager extends HttpTransferManager {
             }
             /* Send a second POST request */
             return sendMultipartPost(url);
+
         } finally {
             if (urlConnection != null) {
                 urlConnection.disconnect();
@@ -241,7 +242,7 @@ public class HttpUploadManager extends HttpTransferManager {
         boolean httpTraceEnabled = isHttpTraceEnabled();
         DataOutputStream outputStream = null;
         HttpURLConnection connection = null;
-        Map<String, String> headers = new HashMap<String, String>();
+        Map<String, String> headers = new HashMap<>();
         headers.put("Connection", "Keep-Alive");
         headers.put("Content-Type", "multipart/form-data; boundary=" + BOUNDARY_TAG);
         try {
@@ -250,10 +251,8 @@ public class HttpUploadManager extends HttpTransferManager {
             connection.setReadTimeout(HTTP_READ_TIMEOUT);
             connection.setChunkedStreamingMode(CHUNK_MAX_SIZE);
             connection.setRequestMethod("POST");
-
             /* Construct the Body */
             String body = generateTidMultipart();
-
             /* Update authentication agent */
             if (mAuth != null) {
                 String authValue = mAuth.generateAuthorizationHeaderValue("POST", url.getPath(),
@@ -271,26 +270,21 @@ public class HttpUploadManager extends HttpTransferManager {
                 trace.append("\n").append(body);
                 System.out.println(trace);
             }
-
             /* Create the DataOutputStream and start writing its body */
             outputStream = new DataOutputStream(connection.getOutputStream());
             outputStream.writeBytes(body);
-
             /* Add file icon */
             if (mFileIcon != null && mFileIcon.getSize() > 0) {
                 writeThumbnailMultipart(outputStream);
             }
             HttpTransferEventListener listeners = getListener();
-
             /* Save Transfer ID into provider: from this point, resuming is possible. */
             ((HttpUploadTransferEventListener) listeners).uploadStarted();
-
             /*
              * Upload resume can only be managed by HTTP Content Server if a transaction id (TID)
              * has been defined during initial upload.
              */
             listeners.onHttpTransferStarted();
-
             try {
                 /* Add File */
                 writeFileMultipart(outputStream, mContent.getUri());
@@ -302,7 +296,6 @@ public class HttpUploadManager extends HttpTransferManager {
                  * request
                  */
                 outputStream.writeBytes(TWO_HYPENS + BOUNDARY_TAG + TWO_HYPENS);
-
                 /* Check response status code */
                 int responseCode = connection.getResponseCode();
                 String message = connection.getResponseMessage();
@@ -354,7 +347,6 @@ public class HttpUploadManager extends HttpTransferManager {
                     }
                     return null;
                 }
-
             } catch (IOException e) {
                 /*
                  * When there is a connection problem causing transfer terminated, state should be
@@ -404,11 +396,10 @@ public class HttpUploadManager extends HttpTransferManager {
             if (size != fileInputStream.read(fileIconData, 0, bufferSize)) {
                 throw new IOException("Unable to read fileIcon from '" + fileIcon + "'!");
             }
-            outputStream.writeBytes(new StringBuilder(TWO_HYPENS).append(BOUNDARY_TAG)
-                    .append(LINE_END).toString());
-            outputStream.writeBytes(new StringBuilder(
-                    "Content-Disposition: form-data; name=\"Thumbnail\"; filename=\"thumb_")
-                    .append(mContent.getName()).append("\"").append(LINE_END).toString());
+            outputStream.writeBytes(TWO_HYPENS + BOUNDARY_TAG + LINE_END);
+            outputStream
+                    .writeBytes("Content-Disposition: form-data; name=\"Thumbnail\"; filename=\"thumb_"
+                            + mContent.getName() + "\"" + LINE_END);
             outputStream.writeBytes("Content-Type: image/jpeg".concat(LINE_END));
             outputStream.writeBytes("Content-Length: ".concat(Long.toString(size)));
             outputStream.writeBytes(LINE_END.concat(LINE_END));
@@ -425,11 +416,10 @@ public class HttpUploadManager extends HttpTransferManager {
      * @return tid TID header
      */
     private String generateTidMultipart() {
-        return new StringBuilder(TWO_HYPENS).append(BOUNDARY_TAG).append(LINE_END)
-                .append("Content-Disposition: form-data; name=\"tid\"").append(LINE_END)
-                .append("Content-Type: text/plain").append(LINE_END).append("Content-Length: ")
-                .append(mTId.length()).append(LINE_END).append(LINE_END).append(mTId)
-                .append(LINE_END).toString();
+        return TWO_HYPENS + BOUNDARY_TAG + LINE_END
+                + "Content-Disposition: form-data; name=\"tid\"" + LINE_END
+                + "Content-Type: text/plain" + LINE_END + "Content-Length: " + mTId.length()
+                + LINE_END + LINE_END + mTId + LINE_END;
     }
 
     /**
@@ -443,16 +433,13 @@ public class HttpUploadManager extends HttpTransferManager {
         // Check file path
         String filename = mContent.getName();
         long fileSize = mContent.getSize();
-
         // Build and write headers
-        StringBuilder filePartHeader = new StringBuilder(TWO_HYPENS).append(BOUNDARY_TAG)
-                .append(LINE_END)
-                .append("Content-Disposition: form-data; name=\"File\"; filename=\"")
-                .append(URLEncoder.encode(filename, UTF8_STR)).append("\"").append(LINE_END)
-                .append("Content-Type: ").append(mContent.getEncoding()).append(LINE_END)
-                .append("Content-Length: ").append(fileSize).append(LINE_END).append(LINE_END);
-        outputStream.writeBytes(filePartHeader.toString());
-
+        String filePartHeader = TWO_HYPENS + BOUNDARY_TAG + LINE_END
+                + "Content-Disposition: form-data; name=\"File\"; filename=\""
+                + URLEncoder.encode(filename, UTF8_STR) + "\"" + LINE_END + "Content-Type: "
+                + mContent.getEncoding() + LINE_END + "Content-Length: " + fileSize + LINE_END
+                + LINE_END;
+        outputStream.writeBytes(filePartHeader);
         // Write file content
         InputStream fileInputStream = null;
         try {
@@ -491,8 +478,7 @@ public class HttpUploadManager extends HttpTransferManager {
     private static byte[] convertStreamToString(InputStream is) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(is));
         StringBuilder sb = new StringBuilder();
-
-        String line = null;
+        String line;
         try {
             while ((line = reader.readLine()) != null) {
                 sb.append(line);
@@ -519,22 +505,19 @@ public class HttpUploadManager extends HttpTransferManager {
         /* Try to get upload info */
         byte[] resp = sendGetInfo(UPLOAD_INFO_REQUEST, false);
         resumeTransfer();
-
         if (resp == null) {
             if (sLogger.isActivated()) {
                 sLogger.debug("Unexpected Server response, will restart upload from beginning");
             }
             return uploadFile();
         }
-
         try {
             if (isHttpTraceEnabled()) {
-                String trace = "Get Upload Info response:\n".concat(resp.toString());
+                String trace = "Get Upload Info response:\n".concat(Arrays.toString(resp));
                 System.out.println(trace);
             }
             FileTransferHttpResumeInfo ftResumeInfo = ChatUtils
                     .parseFileTransferHttpResumeInfo(resp);
-
             if (ftResumeInfo == null) {
                 sLogger.error("Cannot parse resume info! restart upload");
                 return uploadFile();
@@ -550,10 +533,7 @@ public class HttpUploadManager extends HttpTransferManager {
             }
             return null;
 
-        } catch (ParserConfigurationException e) {
-            throw new PayloadException("Unable to parse file transfer resume info!", e);
-
-        } catch (SAXException e) {
+        } catch (ParserConfigurationException | SAXException e) {
             throw new PayloadException("Unable to parse file transfer resume info!", e);
         }
     }
@@ -575,7 +555,7 @@ public class HttpUploadManager extends HttpTransferManager {
                     + " to " + endByte);
         }
         URL url = new URL(resumeInfo.getUri().toString());
-        Map<String, String> properties = new HashMap<String, String>();
+        Map<String, String> properties = new HashMap<>();
         properties.put("Connection", "Keep-Alive");
         properties.put("Content-Type", mContent.getEncoding());
         properties.put("Content-Length", String.valueOf(totalSize - (endByte + 1)));
@@ -598,10 +578,8 @@ public class HttpUploadManager extends HttpTransferManager {
             connection.setDoOutput(true);
             connection.setReadTimeout(HTTP_READ_TIMEOUT);
             connection.setRequestMethod("PUT");
-
             String body = "";
             // Update authentication agent from response
-
             if (httpTraceEnabled) {
                 StringBuilder trace = new StringBuilder(">>> Send HTTP request:\nPUT ").append(url);
                 Map<String, List<String>> headers = connection.getRequestProperties();
@@ -612,11 +590,9 @@ public class HttpUploadManager extends HttpTransferManager {
                 trace.append("\n").append(body);
                 System.out.println(trace);
             }
-
             // Create the DataOutputStream and start writing its body
             outputStream = new DataOutputStream(connection.getOutputStream());
             outputStream.writeBytes(body);
-
             // Add File
             writeRemainingFileData(outputStream, mContent.getUri(), endByte);
             if (!isCancelled()) {
@@ -628,7 +604,7 @@ public class HttpUploadManager extends HttpTransferManager {
                 }
                 byte[] result = null;
                 boolean success = false;
-                boolean retry = false;
+                boolean retry = false; // TODO PLM check why no retry ?
                 switch (responseCode) {
                     case HttpURLConnection.HTTP_OK:
                         success = true;
@@ -686,7 +662,7 @@ public class HttpUploadManager extends HttpTransferManager {
      * 
      * @param outputStream the output stream
      * @param file the Uri of file to be uploaded
-     * @param endingByte the offset in bytes
+     * @param offset the offset in bytes
      * @throws IOException
      */
     private void writeRemainingFileData(DataOutputStream outputStream, Uri file, int offset)
@@ -716,7 +692,6 @@ public class HttpUploadManager extends HttpTransferManager {
                 bufferSize = Math.min(bytesAvailable, CHUNK_MAX_SIZE);
                 buffer = new byte[bufferSize];
                 bytesRead = fileInputStream.read(buffer, 0, bufferSize);
-
             }
         } finally {
             CloseableUtils.tryToClose(fileInputStream);
@@ -743,8 +718,7 @@ public class HttpUploadManager extends HttpTransferManager {
         Uri uri = new Uri.Builder().scheme(protocol).encodedAuthority(host).encodedPath(path)
                 .encodedQuery(query).build();
         url = new URL(uri.toString());
-
-        Map<String, String> properties = new HashMap<String, String>();
+        Map<String, String> properties = new HashMap<>();
         if (authRequired && mAuth != null) {
             String authValue = mAuth.generateAuthorizationHeaderValue("GET", url.getPath(), "");
             properties.put("Authorization", authValue);

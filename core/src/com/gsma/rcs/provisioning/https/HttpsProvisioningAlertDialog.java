@@ -15,7 +15,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
+ *
  * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
@@ -48,7 +48,7 @@ public class HttpsProvisioningAlertDialog extends Activity {
 
     private CountDownTimer mCountDownTimer;
     private LinearLayout mErrorLayout;
-    private LinearLayout mOkNomalLayout;
+    private LinearLayout mOkNormalLayout;
     private TextView mMsisdn;
     private Boolean normalCase = true;
 
@@ -66,7 +66,7 @@ public class HttpsProvisioningAlertDialog extends Activity {
 
         mErrorLayout = (LinearLayout) findViewById(R.id.error_layout);
 
-        mOkNomalLayout = (LinearLayout) findViewById(R.id.normal_layout);
+        mOkNormalLayout = (LinearLayout) findViewById(R.id.normal_layout);
         mMsisdn = (TextView) findViewById(R.id.msisdn);
 
         Button okButton = (Button) findViewById(R.id.ok_button);
@@ -112,13 +112,13 @@ public class HttpsProvisioningAlertDialog extends Activity {
     private void showErrorCase() {
         normalCase = false;
         mErrorLayout.setVisibility(View.VISIBLE);
-        mOkNomalLayout.setVisibility(View.GONE);
+        mOkNormalLayout.setVisibility(View.GONE);
     }
 
     private void showNormalCase() {
         normalCase = true;
         mErrorLayout.setVisibility(View.GONE);
-        mOkNomalLayout.setVisibility(View.VISIBLE);
+        mOkNormalLayout.setVisibility(View.VISIBLE);
     }
 
     @Override

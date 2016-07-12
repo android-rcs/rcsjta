@@ -25,6 +25,7 @@ package com.gsma.rcs.im.chat;
 import static com.gsma.rcs.utils.PhoneUtils.SIP_URI_HEADER;
 import static com.gsma.rcs.utils.PhoneUtils.initialize;
 
+import com.gsma.rcs.RcsSettingsMock;
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.protocol.PayloadException;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
@@ -78,7 +79,7 @@ public class ChatMessageTest extends AndroidTestCase {
         Context context = getContext();
         mContentResolver = context.getContentResolver();
         mLocalContentResolver = new LocalContentResolver(mContentResolver);
-        RcsSettings rcsSettings = RcsSettings.getInstance(mLocalContentResolver);
+        RcsSettings rcsSettings = RcsSettingsMock.getMockSettings(context);
         initialize(rcsSettings);
         mMessagingLog = MessagingLog.getInstance(mLocalContentResolver, rcsSettings);
         ContactUtil contactUtils = ContactUtil.getInstance(new ContactUtilMockContext(context));
@@ -89,6 +90,12 @@ public class ChatMessageTest extends AndroidTestCase {
         mTimestamp = mRandom.nextLong();
         mTimestampSent = mRandom.nextLong();
         mText = Long.toString(mRandom.nextLong());
+    }
+
+    @Override
+    protected void tearDown() throws Exception {
+        super.tearDown();
+        RcsSettingsMock.restoreSettings();
     }
 
     public void testTextMessage() throws PayloadException, IOException, SQLDataException {
@@ -226,7 +233,7 @@ public class ChatMessageTest extends AndroidTestCase {
     }
 
     public void testClearChatMessageDeliveryExpiration() throws PayloadException {
-        ArrayList<String> msgIds = new ArrayList<>();
+        List<String> msgIds = new ArrayList<>();
         for (int i = 0; i < 4; i++) {
             msgIds.add(Long.toString(mRandom.nextLong()));
         }

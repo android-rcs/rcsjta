@@ -101,8 +101,11 @@ public class Core {
      * @param listener Listener
      * @param rcsSettings RcsSettings instance
      * @param contentResolver The content resolver
+     * @param localContentResolver The local content resolver
      * @param contactManager The contact manager
      * @param messagingLog The messaging log accessor
+     * @param historyLog The history log accessor
+     * @param richCallHistory The richcall log accessor
      * @return Core instance
      * @throws IOException
      * @throws KeyStoreException
@@ -145,10 +148,13 @@ public class Core {
      * 
      * @param ctx The application context
      * @param listener Listener
-     * @param rcsSettings The RCS settings accessor
      * @param contentResolver The content resolver
+     * @param localContentResolver The local content resolver
+     * @param rcsSettings The RCS settings accessor
      * @param contactManager The contact manager
      * @param messagingLog The messaging log accessor
+     * @param historyLog The history log accessor
+     * @param richCallHistory The richcall log accessor
      */
     private Core(Context ctx, CoreListener listener, ContentResolver contentResolver,
             LocalContentResolver localContentResolver, RcsSettings rcsSettings,
@@ -163,13 +169,11 @@ public class Core {
             sLogger.info("My device UUID is ".concat(String.valueOf(DeviceUtils.getDeviceUUID(ctx))));
         }
         PhoneUtils.initialize(rcsSettings);
-
         mAddressBookManager = new AddressBookManager(contentResolver, contactManager);
         mLocaleManager = new LocaleManager(ctx, this, rcsSettings, contactManager);
 
         mImsModule = new ImsModule(this, ctx, localContentResolver, rcsSettings, contactManager,
                 messagingLog, historyLog, richCallHistory, mAddressBookManager);
-
         if (logActivated) {
             sLogger.info("Terminal core is created with success");
         }

@@ -35,7 +35,6 @@ import com.gsma.rcs.provider.fthttp.FtHttpResumeUpload;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provider.settings.RcsSettingsData.FileTransferProtocol;
-import com.gsma.rcs.service.api.ServerApiPersistentStorageException;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 
@@ -47,19 +46,16 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * File Transfer HTTP resume manager
  */
 public class FtHttpResumeManager implements Runnable {
-    private InstantMessagingService mImsService;
 
+    private static final Logger sLogger = Logger.getLogger(FtHttpResumeManager.class.getName());
+
+    private InstantMessagingService mImsService;
     /**
      * List of pending sessions to resume
      */
     private LinkedList<FtHttpResume> mListOfFtHttpResume;
-
-    private final Logger mLogger = Logger.getLogger(getClass().getSimpleName());
-
     private final RcsSettings mRcsSettings;
-
     private final MessagingLog mMessagingLog;
-
     private final ContactManager mContactManager;
 
     /**
@@ -88,21 +84,12 @@ public class FtHttpResumeManager implements Runnable {
                 mListOfFtHttpResume = new LinkedList<>(transfersToResume);
                 processNext();
             }
-
-        } catch (ServerApiPersistentStorageException e) {
-            /*
-             * No state change in case we havn't able to find any resumable file transfer sessions ,
-             * as may be they are not any such ones. In case there has been a error while trying to
-             * fetch such sessions then we will retry later to fetch them.
-             */
-            mLogger.error("Error retrieving resumable sessions!", e);
-
         } catch (RuntimeException e) {
             /*
              * Intentionally catch runtime exceptions as else it will abruptly end the thread and
              * eventually bring the whole system down, which is not intended.
              */
-            mLogger.error("Error retrieving resumable sessions!", e);
+            sLogger.error("Error retrieving resumable sessions!", e);
         }
     }
 
@@ -117,14 +104,14 @@ public class FtHttpResumeManager implements Runnable {
          * FT HTTP session being resumed
          */
         FtHttpResume ftHttpResume = mListOfFtHttpResume.poll();
-        if (mLogger.isActivated()) {
-            mLogger.debug("Resume FT HTTP ".concat(ftHttpResume.toString()));
+        if (sLogger.isActivated()) {
+            sLogger.debug("Resume FT HTTP ".concat(ftHttpResume.toString()));
         }
         switch (ftHttpResume.getDirection()) {
             case INCOMING:
                 FtHttpResumeDownload downloadInfo = (FtHttpResumeDownload) ftHttpResume;
-                MmContent downloadContent = ContentManager.createMmContent(
-                        ftHttpResume.getFile(), ftHttpResume.getMimeType(), ftHttpResume.getSize(),
+                MmContent downloadContent = ContentManager.createMmContent(ftHttpResume.getFile(),
+                        ftHttpResume.getMimeType(), downloadInfo.getSize(),
                         downloadInfo.getFileName());
                 final DownloadFromResumeFileSharingSession resumeDownload = new DownloadFromResumeFileSharingSession(
                         mImsService, downloadContent, downloadInfo, mRcsSettings, mMessagingLog,
@@ -137,9 +124,8 @@ public class FtHttpResumeManager implements Runnable {
 
             case OUTGOING:
                 FtHttpResumeUpload uploadInfo = (FtHttpResumeUpload) ftHttpResume;
-                MmContent uploadContent = ContentManager.createMmContent(
-                        uploadInfo.getFile(), uploadInfo.getMimeType(), uploadInfo.getSize(),
-                        uploadInfo.getFileName());
+                MmContent uploadContent = ContentManager.createMmContent(uploadInfo.getFile(),
+                        uploadInfo.getMimeType(), uploadInfo.getSize(), uploadInfo.getFileName());
                 if (!ftHttpResume.isGroupTransfer()) {
                     final ResumeUploadFileSharingSession resumeUpload = new ResumeUploadFileSharingSession(
                             mImsService, uploadContent, uploadInfo, mRcsSettings, mMessagingLog,
@@ -160,7 +146,6 @@ public class FtHttpResumeManager implements Runnable {
             default:
                 break;
         }
-
     }
 
     /**

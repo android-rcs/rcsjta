@@ -77,14 +77,18 @@ public class SendSingleFile extends SendFile {
     public boolean transferFile(Uri file, FileTransfer.Disposition dispo, boolean fileicon) {
         try {
             if (LogUtils.isActive) {
-                Log.d(LOGTAG, "initiateTransfer mFilename=" + mFilename + " size=" + mFilesize);
+                Log.d(LOGTAG, "transferFile filename=" + mFilename + " size=" + mFilesize);
             }
             /* Only take persistable permission for content Uris */
             takePersistableContentUriPermission(this, file);
             /* Initiate transfer */
             mFileTransfer = mFileTransferService.transferFile(mContact, file, dispo, fileicon);
-            mTransferId = mFileTransfer.getTransferId();
-            return true;
+            if (mFileTransfer != null) {
+                mTransferId = mFileTransfer.getTransferId();
+                return true;
+            }
+            Log.e(LOGTAG, "Cannot transfer file: not found");
+            return false;
 
         } catch (RcsServiceException e) {
             showExceptionThenExit(e);

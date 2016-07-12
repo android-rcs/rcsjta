@@ -47,16 +47,25 @@ public class ChatMessageLogView extends RcsActivity {
     private TextView mTxtViewMime;
     private TextView mTxtViewReason;
     private TextView mTxtViewState;
+    private TextView mTxtViewDateSent;
+    private TextView mTxtViewDateDelivered;
+    private TextView mTxtViewDateDisplayed;
+    private TextView mTxtViewRead;
+    private TextView mTxtViewExpiredDelivery;
+
+    private static DateFormat sDateFormat;
+    private TextView mTxtViewId;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.one2one_chat_log_item);
+        setContentView(R.layout.chat_message_log_item);
         mMessageId = getIntent().getStringExtra(EXTRA_MESSAGE_ID);
         initialize();
     }
 
     private void initialize() {
+        mTxtViewId = (TextView) findViewById(R.id.history_log_item_id);
         mTxtViewChatId = (TextView) findViewById(R.id.history_log_item_chat_id);
         mTxtViewContact = (TextView) findViewById(R.id.history_log_item_contact);
         mTxtViewState = (TextView) findViewById(R.id.history_log_item_state);
@@ -65,6 +74,21 @@ public class ChatMessageLogView extends RcsActivity {
         mTxtViewDate = (TextView) findViewById(R.id.history_log_item_date);
         mTxtViewMime = (TextView) findViewById(R.id.history_log_item_mime);
         mTxtViewContent = (TextView) findViewById(R.id.history_log_item_content);
+        mTxtViewDateSent = (TextView) findViewById(R.id.history_log_item_date_sent);
+        mTxtViewDateDelivered = (TextView) findViewById(R.id.history_log_item_date_delivered);
+        mTxtViewDateDisplayed = (TextView) findViewById(R.id.history_log_item_date_displayed);
+        mTxtViewRead = (TextView) findViewById(R.id.history_log_item_read_status);
+        mTxtViewExpiredDelivery = (TextView) findViewById(R.id.history_log_item_expired_delivery);
+    }
+
+    private String getDateFromDb(long timestamp) {
+        if (0 == timestamp) {
+            return "";
+        }
+        if (sDateFormat == null) {
+            sDateFormat = DateFormat.getInstance();
+        }
+        return sDateFormat.format(new Date(timestamp));
     }
 
     @Override
@@ -75,6 +99,7 @@ public class ChatMessageLogView extends RcsActivity {
             showMessageThenExit(R.string.error_item_not_found);
             return;
         }
+        mTxtViewId.setText(mMessageId);
         mTxtViewChatId.setText(dao.getChatId());
         ContactId contact = dao.getContact();
         if (contact != null) {
@@ -93,7 +118,12 @@ public class ChatMessageLogView extends RcsActivity {
             mTxtViewContent.setText(dao.getContent());
         }
         mTxtViewDir.setText(RiApplication.getDirection(dao.getDirection()));
-        mTxtViewDate.setText(DateFormat.getInstance().format(new Date(dao.getTimestamp())));
+        mTxtViewDate.setText(getDateFromDb(dao.getTimestamp()));
+        mTxtViewDateSent.setText(getDateFromDb(dao.getTimestampSent()));
+        mTxtViewDateDelivered.setText(getDateFromDb(dao.getTimestampDelivered()));
+        mTxtViewDateDisplayed.setText(getDateFromDb(dao.getTimestampDisplayed()));
+        mTxtViewRead.setText(dao.getReadStatus().toString());
+        mTxtViewExpiredDelivery.setText(Boolean.toString(dao.isExpiredDelivery()));
         mTxtViewMime.setText(mime);
     }
 

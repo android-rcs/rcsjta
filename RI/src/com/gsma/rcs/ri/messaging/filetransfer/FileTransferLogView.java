@@ -50,6 +50,18 @@ public class FileTransferLogView extends RcsActivity {
     private TextView mTxtViewState;
     private TextView mTxtViewTransferred;
     private TextView mTxtViewUri;
+    private TextView mTxtViewDateSent;
+    private TextView mTxtViewDateDelivered;
+    private TextView mTxtViewDateDisplayed;
+    private TextView mTxtViewRead;
+    private TextView mTxtViewExpiredDelivery;
+    private static DateFormat sDateFormat;
+    private TextView mTxtViewFileExpiration;
+    private TextView mTxtViewIconExpiration;
+    private TextView mTxtViewIconUri;
+    private TextView mTxtViewIconMime;
+    private TextView mTxtViewId;
+    private TextView mTxtViewDisposition;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -60,6 +72,7 @@ public class FileTransferLogView extends RcsActivity {
     }
 
     private void initialize() {
+        mTxtViewId = (TextView) findViewById(R.id.history_log_item_id);
         mTxtViewChatId = (TextView) findViewById(R.id.history_log_item_chat_id);
         mTxtViewContact = (TextView) findViewById(R.id.history_log_item_contact);
         mTxtViewState = (TextView) findViewById(R.id.history_log_item_state);
@@ -71,6 +84,26 @@ public class FileTransferLogView extends RcsActivity {
         mTxtViewFileSize = (TextView) findViewById(R.id.history_log_item_size);
         mTxtViewUri = (TextView) findViewById(R.id.history_log_item_uri);
         mTxtViewTransferred = (TextView) findViewById(R.id.history_log_item_transferred);
+        mTxtViewDateSent = (TextView) findViewById(R.id.history_log_item_date_sent);
+        mTxtViewDateDelivered = (TextView) findViewById(R.id.history_log_item_date_delivered);
+        mTxtViewDateDisplayed = (TextView) findViewById(R.id.history_log_item_date_displayed);
+        mTxtViewRead = (TextView) findViewById(R.id.history_log_item_read_status);
+        mTxtViewExpiredDelivery = (TextView) findViewById(R.id.history_log_item_expired_delivery);
+        mTxtViewFileExpiration = (TextView) findViewById(R.id.history_log_item_date_file_expiration);
+        mTxtViewIconExpiration = (TextView) findViewById(R.id.history_log_item_date_icon_expiration);
+        mTxtViewIconUri = (TextView) findViewById(R.id.history_log_item_icon);
+        mTxtViewIconMime = (TextView) findViewById(R.id.history_log_item_icon_mime);
+        mTxtViewDisposition = (TextView) findViewById(R.id.history_log_item_disposition);
+    }
+
+    private String getDateFromDb(long timestamp) {
+        if (0 == timestamp) {
+            return "";
+        }
+        if (sDateFormat == null) {
+            sDateFormat = DateFormat.getInstance();
+        }
+        return sDateFormat.format(new Date(timestamp));
     }
 
     @Override
@@ -81,6 +114,7 @@ public class FileTransferLogView extends RcsActivity {
             showMessageThenExit(R.string.error_item_not_found);
             return;
         }
+        mTxtViewId.setText(mFileTransferId);
         mTxtViewChatId.setText(dao.getChatId());
         ContactId contact = dao.getContact();
         if (contact != null) {
@@ -91,12 +125,23 @@ public class FileTransferLogView extends RcsActivity {
         mTxtViewState.setText(RiApplication.sFileTransferStates[dao.getState().toInt()]);
         mTxtViewReason.setText(RiApplication.sFileTransferReasonCodes[dao.getReasonCode().toInt()]);
         mTxtViewDir.setText(RiApplication.getDirection(dao.getDirection()));
-        mTxtViewDate.setText(DateFormat.getInstance().format(new Date(dao.getTimestamp())));
+        mTxtViewDate.setText(getDateFromDb(dao.getTimestamp()));
+        mTxtViewDateSent.setText(getDateFromDb(dao.getTimestampSent()));
+        mTxtViewDateDelivered.setText(getDateFromDb(dao.getTimestampDelivered()));
+        mTxtViewDateDisplayed.setText(getDateFromDb(dao.getTimestampDisplayed()));
+        mTxtViewRead.setText(dao.getReadStatus().toString());
+        mTxtViewExpiredDelivery.setText(Boolean.toString(dao.isExpiredDelivery()));
         mTxtViewMime.setText(dao.getMimeType());
         mTxtViewFilename.setText(dao.getFilename());
         mTxtViewFileSize.setText(String.valueOf(dao.getSize()));
         mTxtViewUri.setText(dao.getFile().toString());
         mTxtViewTransferred.setText(String.valueOf(dao.getSizeTransferred()));
+        mTxtViewFileExpiration.setText(getDateFromDb(dao.getFileExpiration()));
+        mTxtViewIconExpiration.setText(getDateFromDb(dao.getFileIconExpiration()));
+        mTxtViewIconUri.setText(dao.getThumbnail() == null ? "" : dao.getThumbnail().toString());
+        mTxtViewIconMime
+                .setText(dao.getIconMimeType() == null ? "" : dao.getThumbnail().toString());
+        mTxtViewDisposition.setText(dao.getDisposition().toString());
     }
 
     /**

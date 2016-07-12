@@ -42,34 +42,21 @@ import android.net.Uri;
 public class ChatMessageDAO {
 
     private final String mMsgId;
-
     private final ContactId mContact;
-
     private final String mChatId;
-
     private final Message.Content.Status mStatus;
-
     private final Message.GroupChatEvent.Status mChatEvent;
-
     private final Message.Content.ReasonCode mReasonCode;
-
     private final ReadStatus mReadStatus;
-
     private final Direction mDirection;
-
     private final String mMimeType;
-
     private final String mContent;
-
     private final long mTimestamp;
-
     private final long mTimestampSent;
-
     private final long mTimestampDelivered;
-
     private final long mTimestampDisplayed;
-
     private static ContentResolver sContentResolver;
+    private final boolean mExpiredDelivery;
 
     public Message.Content.Status getStatus() {
         return mStatus;
@@ -77,10 +64,6 @@ public class ChatMessageDAO {
 
     public Message.GroupChatEvent.Status getChatEvent() {
         return mChatEvent;
-    }
-
-    public String getMsgId() {
-        return mMsgId;
     }
 
     public ReadStatus getReadStatus() {
@@ -127,6 +110,10 @@ public class ChatMessageDAO {
         return mReasonCode;
     }
 
+    public boolean isExpiredDelivery() {
+        return mExpiredDelivery;
+    }
+
     @Override
     public String toString() {
         return "ChatMessageDAO [msgId=" + mMsgId + ", contact=" + mContact + ", chatId=" + mChatId
@@ -134,10 +121,11 @@ public class ChatMessageDAO {
                 + "']";
     }
 
-    public ChatMessageDAO(String msgId, ContactId contact, String chatId, Status status,
+    private ChatMessageDAO(String msgId, ContactId contact, String chatId, Status status,
             GroupChatEvent.Status chatEvent, ReasonCode reasonCode, ReadStatus readStatus,
             Direction direction, String mimeType, String content, long timestamp,
-            long timestampSent, long timestampDelivered, long timestampDisplayed) {
+            long timestampSent, long timestampDelivered, long timestampDisplayed,
+            boolean expiredDelivery) {
         mMsgId = msgId;
         mContact = contact;
         mChatId = chatId;
@@ -152,6 +140,7 @@ public class ChatMessageDAO {
         mTimestampSent = timestampSent;
         mTimestampDelivered = timestampDelivered;
         mTimestampDisplayed = timestampDisplayed;
+        mExpiredDelivery = expiredDelivery;
     }
 
     /**
@@ -212,9 +201,11 @@ public class ChatMessageDAO {
                     .getColumnIndexOrThrow(ChatLog.Message.TIMESTAMP_DELIVERED));
             long timestampDisplayed = cursor.getLong(cursor
                     .getColumnIndexOrThrow(ChatLog.Message.TIMESTAMP_DISPLAYED));
+            boolean expiredDelivery = cursor.getInt(cursor
+                    .getColumnIndexOrThrow(Message.EXPIRED_DELIVERY)) == 1;
             return new ChatMessageDAO(msgId, contactId, chatId, contentStatus, chatEvent,
                     reasonCode, readStatus, dir, mimeType, content, timestamp, timestampSent,
-                    timestampDelivered, timestampDisplayed);
+                    timestampDelivered, timestampDisplayed, expiredDelivery);
         } finally {
             if (cursor != null) {
                 cursor.close();

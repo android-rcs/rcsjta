@@ -22,6 +22,7 @@
 
 package com.gsma.rcs.im.filetransfer;
 
+import com.gsma.rcs.RcsSettingsMock;
 import com.gsma.rcs.core.content.FileContent;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.provider.CursorUtil;
@@ -86,7 +87,7 @@ public class FileTransferLogTest extends AndroidTestCase {
         Context context = getContext();
         mContentResolver = context.getContentResolver();
         mLocalContentResolver = new LocalContentResolver(mContentResolver);
-        RcsSettings rcsSettings = RcsSettings.getInstance(mLocalContentResolver);
+        RcsSettings rcsSettings = RcsSettingsMock.getMockSettings(context);
         mMessagingLog = MessagingLog.getInstance(mLocalContentResolver, rcsSettings);
         ContactUtil contactUtils = ContactUtil.getInstance(new ContactUtilMockContext(mContext));
         mContact = contactUtils.formatContact("+339000000");
@@ -100,6 +101,7 @@ public class FileTransferLogTest extends AndroidTestCase {
     protected void tearDown() throws Exception {
         super.tearDown();
         mMessagingLog.deleteAllEntries();
+        RcsSettingsMock.restoreSettings();
     }
 
     public void testAddFileTransfer() {

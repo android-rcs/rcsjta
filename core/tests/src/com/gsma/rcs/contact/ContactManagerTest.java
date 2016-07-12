@@ -22,6 +22,7 @@
 
 package com.gsma.rcs.contact;
 
+import com.gsma.rcs.RcsSettingsMock;
 import com.gsma.rcs.core.FileAccessException;
 import com.gsma.rcs.core.ims.service.ContactInfo;
 import com.gsma.rcs.core.ims.service.ContactInfo.BlockingState;
@@ -60,7 +61,7 @@ public class ContactManagerTest extends AndroidTestCase {
         Context context = getContext();
         ContentResolver contentResolver = context.getContentResolver();
         LocalContentResolver localContentResolver = new LocalContentResolver(contentResolver);
-        mRcsSettings = RcsSettings.getInstance(localContentResolver);
+        mRcsSettings = RcsSettingsMock.getMockSettings(context);
         mContactManager = ContactManager.getInstance(context, contentResolver,
                 localContentResolver, mRcsSettings);
         ContactUtil contactUtils = ContactUtil.getInstance(new ContactUtilMockContext(context));
@@ -70,6 +71,7 @@ public class ContactManagerTest extends AndroidTestCase {
 
     protected void tearDown() throws Exception {
         mContactManager.cleanRCSEntries();
+        RcsSettingsMock.restoreSettings();
         super.tearDown();
     }
 

@@ -30,6 +30,8 @@ import android.content.Intent;
 public class DeviceBoot extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        context.startService(new Intent(context, RcsServiceNotifManager.class));
+        if (Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction())) {
+            context.startService(new Intent(context, RcsServiceNotifManager.class));
+        }
     }
 }

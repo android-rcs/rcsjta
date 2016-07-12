@@ -160,7 +160,7 @@ public class SipDialogPath {
      * @param localParty Local party
      * @param remoteParty Remote party
      * @param route Route path
-     * @param rcsSettings
+     * @param rcsSettings the RCS settings accessor
      */
     public SipDialogPath(SipInterface stack, String callId, long cseq, String target,
             String localParty, String remoteParty, Vector<String> route, RcsSettings rcsSettings) {
@@ -187,7 +187,7 @@ public class SipDialogPath {
      * Constructor<br>
      * Perform a deep copy of the dialogPath
      * 
-     * @param dialogPath
+     * @param dialogPath the dialog path
      */
     public SipDialogPath(SipDialogPath dialogPath) {
         mStack = dialogPath.getSipStack();

@@ -288,7 +288,7 @@ public class TalkCursorAdapter extends CursorAdapter {
                     ImageBitmapLoader loader = new ImageBitmapLoader(mContext, memoryCache,
                             MAX_IMAGE_WIDTH, MAX_IMAGE_HEIGHT, new BitmapLoader.SetViewCallback() {
                                 @Override
-                                public void loadView(BitmapLoader.BitmapCacheInfo cacheInfo) {
+                                public void loadView(BitmapCacheInfo cacheInfo) {
                                     imageView.setImageBitmap(cacheInfo.getBitmap());
                                     imageView.setLayoutParams(mImageParams);
                                 }
@@ -310,6 +310,7 @@ public class TalkCursorAdapter extends CursorAdapter {
                 });
             }
         } else if (Utils.isAudioType(mimeType)) {
+            imageView.setImageResource(R.drawable.headphone);
             imageView.setOnClickListener(new View.OnClickListener() {
 
                 @Override
@@ -350,7 +351,6 @@ public class TalkCursorAdapter extends CursorAdapter {
             final String id = cursor.getString(cursor.getColumnIndexOrThrow(HistoryLog.ID));
             if (Utils.isImageType(mimeType)) {
                 final String filePath = FileUtils.getPath(mContext, file);
-                Bitmap imageBitmap = null;
                 if (filePath != null) {
                     LruCache<String, BitmapCacheInfo> memoryCache = bitmapCache.getMemoryCache();
                     BitmapCacheInfo bitmapCacheInfo = memoryCache.get(filePath);
@@ -359,16 +359,14 @@ public class TalkCursorAdapter extends CursorAdapter {
                                 MAX_IMAGE_WIDTH, MAX_IMAGE_HEIGHT,
                                 new BitmapLoader.SetViewCallback() {
                                     @Override
-                                    public void loadView(BitmapLoader.BitmapCacheInfo cacheInfo) {
+                                    public void loadView(BitmapCacheInfo cacheInfo) {
                                         imageView.setImageBitmap(cacheInfo.getBitmap());
                                         imageView.setLayoutParams(mImageParams);
                                     }
                                 });
                         loader.execute(filePath);
                     } else {
-                        imageBitmap = bitmapCacheInfo.getBitmap();
-                    }
-                    if (imageBitmap != null) {
+                        Bitmap imageBitmap = bitmapCacheInfo.getBitmap();
                         imageView.setImageBitmap(imageBitmap);
                         imageView.setLayoutParams(mImageParams);
                     }
@@ -382,6 +380,7 @@ public class TalkCursorAdapter extends CursorAdapter {
                     });
                 }
             } else if (Utils.isAudioType(mimeType)) {
+                imageView.setImageResource(R.drawable.headphone);
                 imageView.setOnClickListener(new View.OnClickListener() {
 
                     @Override
@@ -524,4 +523,5 @@ public class TalkCursorAdapter extends CursorAdapter {
         }
         return buf;
     }
+
 }

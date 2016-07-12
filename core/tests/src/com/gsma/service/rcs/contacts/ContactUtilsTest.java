@@ -156,7 +156,4 @@ public class ContactUtilsTest extends AndroidTestCase {
         assertEquals(ContactUtilMockContext.COUNTRY_AREA_CODE, mContactUtils.getMyCountryAreaCode());
     }
 
-    public void testGetMyCountryCode() throws RcsPermissionDeniedException {
-        assertEquals(ContactUtilMockContext.COUNTRY_CODE, mContactUtils.getMyCountryCode());
-    }
 }
