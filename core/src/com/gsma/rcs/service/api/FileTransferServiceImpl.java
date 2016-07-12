@@ -8,7 +8,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -525,7 +525,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         if (!mImService.isFileTransferSessionAvailable()
                 || mImService.isMaxConcurrentOutgoingFileTransfersReached()) {
             if (sLogger.isActivated()) {
-                sLogger.debug("The max number of file transfer sessions is achieved: re-queue the file transfer with fileTransferId "
+                sLogger.debug("The max number of file transfer sessions is achieved: re-queue the file transfer with Id "
                         .concat(fileTransferId));
             }
             setOneToOneFileTransferStateAndTimestamp(fileTransferId, contact, State.QUEUED,
@@ -538,7 +538,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         FileTransferProtocol ftProtocol = getFileTransferProtocolForOneToOneFileTransfer(contact);
         if (ftProtocol == null) {
             throw new ServerApiGenericException(
-                    "No valid file transfer protocol could be determined for resending file with fileTransferId '"
+                    "No valid file transfer protocol could be determined for resending file with Id '"
                             + fileTransferId + "'!");
         }
 
@@ -1064,7 +1064,6 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
     public void receiveOneToOneFileDeliveryStatus(ImdnDocument imdn, ContactId contact) {
         ImdnDocument.DeliveryStatus status = imdn.getStatus();
         long timestamp = imdn.getDateTime();
-
         /* Note: File transfer ID always corresponds to message ID in the imdn pay-load */
         String fileTransferId = imdn.getMsgId();
         switch (status) {

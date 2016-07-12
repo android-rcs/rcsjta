@@ -25,7 +25,6 @@ package com.gsma.rcs.provider.messaging;
 import com.gsma.rcs.core.FileAccessException;
 import com.gsma.rcs.core.content.ContentManager;
 import com.gsma.rcs.core.content.MmContent;
-import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpThumbnail;
 import com.gsma.rcs.platform.AndroidFactory;
@@ -62,7 +61,6 @@ import java.util.Set;
  * Class to interface the 'filetransfer' table
  */
 public class FileTransferLog implements IFileTransferLog {
-
     private static final String SELECTION_FILE_BY_T_ID = FileTransferData.KEY_UPLOAD_TID + "=?";
 
     private static final String SELECTION_BY_PAUSED_BY_SYSTEM = FileTransferData.KEY_STATE + "="
@@ -707,6 +705,9 @@ public class FileTransferLog implements IFileTransferLog {
 
     @Override
     public boolean isGroupFileTransfer(String fileTransferId) {
+        /*
+         * Warning: return true if record does not exist.
+         */
         Cursor cursor = null;
         try {
             Uri contentUri = Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId);
@@ -717,6 +718,7 @@ public class FileTransferLog implements IFileTransferLog {
              * For a one-to-one file transfer, value of chatID is equal to the value of contact
              */
             return !cursor.moveToNext();
+
         } finally {
             CursorUtil.close(cursor);
         }
@@ -941,18 +943,14 @@ public class FileTransferLog implements IFileTransferLog {
                 .getColumnIndexOrThrow(FileTransferData.KEY_FILEICON_SIZE));
         String fileIconMimeType = cursor.getString(cursor
                 .getColumnIndexOrThrow(FileTransferData.KEY_FILEICON_MIME_TYPE));
-        Disposition disposition = Disposition.valueOf(cursor.getInt(cursor
-                .getColumnIndexOrThrow(FileTransferData.KEY_DISPOSITION)));
         FileTransferHttpThumbnail fileIconData = fileIcon != null ? new FileTransferHttpThumbnail(
                 mRcsSettings, Uri.parse(fileIcon), fileIconMimeType, fileIconSize,
                 fileIconExpiration) : null;
         FileTransferHttpInfoDocument infoDoc = new FileTransferHttpInfoDocument(mRcsSettings,
                 Uri.parse(file), fileName, size, mimeType, fileExpiration, fileIconData);
-        if (FileTransfer.Disposition.RENDER == disposition) {
-            infoDoc.setFileDisposition(FileSharingSession.FILE_DISPOSITION_RENDER);
-        } else {
-            infoDoc.setFileDisposition(FileSharingSession.FILE_DISPOSITION_ATTACH);
-        }
+        Disposition disposition = Disposition.valueOf(cursor.getInt(cursor
+                .getColumnIndexOrThrow(FileTransferData.KEY_DISPOSITION)));
+        infoDoc.setFileDisposition(disposition);
         if (MimeManager.isAudioType(mimeType)) {
             file = cursor.getString(cursor.getColumnIndexOrThrow(FileTransferData.KEY_FILE));
             long duration = FileUtils.getDurationFromFile(AndroidFactory.getApplicationContext(),

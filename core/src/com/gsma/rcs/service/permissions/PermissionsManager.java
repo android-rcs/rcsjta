@@ -30,7 +30,6 @@ public class PermissionsManager {
     /**
      * Need for asking permissions
      */
-
     private static volatile PermissionsManager sInstance;
     private boolean mHasPermissions = false;
 
@@ -79,7 +78,7 @@ public class PermissionsManager {
 
     /**
      * Callback of the Permissions
-     * 
+     *
      * @param hasPermissions boolean, true if all permissions are granted, false if not
      */
     public void responseReceived(boolean hasPermissions) {

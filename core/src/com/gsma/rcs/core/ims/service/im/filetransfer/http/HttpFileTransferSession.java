@@ -142,8 +142,8 @@ public abstract class HttpFileTransferSession extends FileSharingSession impleme
             return;
         }
         if (sLogger.isActivated()) {
-            sLogger.info(new StringBuilder("Transfer error: ").append(error.getErrorCode())
-                    .append(", reason=").append(error.getMessage()).toString());
+            sLogger.info("Transfer error: " + error.getErrorCode() + ", reason="
+                    + error.getMessage());
         }
         removeSession();
         ContactId contact = getRemoteContact();
@@ -179,7 +179,7 @@ public abstract class HttpFileTransferSession extends FileSharingSession impleme
      * file.
      */
     public void handleFileTransferred() {
-        fileTransfered();
+        setFileTransferred();
         removeSession();
 
         ContactId contact = getRemoteContact();

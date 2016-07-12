@@ -5,6 +5,7 @@
 
 package com.gsma.service.rcs.history;
 
+import com.gsma.rcs.RcsSettingsMock;
 import com.gsma.rcs.core.content.FileContent;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.content.VideoContent;
@@ -18,7 +19,6 @@ import com.gsma.rcs.provider.messaging.FileTransferData;
 import com.gsma.rcs.provider.messaging.FileTransferProvider;
 import com.gsma.rcs.provider.messaging.MessageData;
 import com.gsma.rcs.provider.messaging.MessagingLog;
-import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provider.settings.RcsSettingsProvider;
 import com.gsma.rcs.provider.sharing.GeolocSharingData;
 import com.gsma.rcs.provider.sharing.ImageSharingData;
@@ -57,6 +57,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.RemoteException;
 import android.provider.BaseColumns;
+import android.support.annotation.NonNull;
 import android.test.AndroidTestCase;
 import android.test.IsolatedContext;
 import android.test.mock.MockContentResolver;
@@ -176,8 +177,8 @@ public class HistoryLogTest extends AndroidTestCase {
         }
 
         @Override
-        public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
-                String sortOrder) {
+        public Cursor query(@NonNull Uri uri, String[] projection, String selection,
+                String[] selectionArgs, String sortOrder) {
             Log.i("HISTORY", "query external");
 
             SQLiteDatabase db = getContext().openOrCreateDatabase(EXTERNAL_DATABASE_NAME,
@@ -189,22 +190,23 @@ public class HistoryLogTest extends AndroidTestCase {
         }
 
         @Override
-        public String getType(Uri uri) {
+        public String getType(@NonNull Uri uri) {
             return "vnd.android.cursor.item/test";
         }
 
         @Override
-        public Uri insert(Uri uri, ContentValues values) {
+        public Uri insert(@NonNull Uri uri, ContentValues values) {
             return null;
         }
 
         @Override
-        public int delete(Uri uri, String selection, String[] selectionArgs) {
+        public int delete(@NonNull Uri uri, String selection, String[] selectionArgs) {
             return 0;
         }
 
         @Override
-        public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+        public int update(@NonNull Uri uri, ContentValues values, String selection,
+                String[] selectionArgs) {
             return 0;
         }
     }
@@ -262,7 +264,7 @@ public class HistoryLogTest extends AndroidTestCase {
             sLocalContentResolver = new LocalContentResolver(mockResolver);
         }
         mMessagingLog = MessagingLog.getInstance(sLocalContentResolver,
-                RcsSettings.getInstance(sLocalContentResolver));
+                RcsSettingsMock.getMockSettings(iContext));
         RichCallHistory.getInstance(sLocalContentResolver);
         mRichCallHistory = RichCallHistory.getInstance();
         mContactUtil = ContactUtil.getInstance(new ContactUtilMockContext(
@@ -314,6 +316,7 @@ public class HistoryLogTest extends AndroidTestCase {
 
     protected void tearDown() throws Exception {
         super.tearDown();
+        RcsSettingsMock.restoreSettings();
     }
 
     private ContactId getRemoteContact() throws RcsPermissionDeniedException {

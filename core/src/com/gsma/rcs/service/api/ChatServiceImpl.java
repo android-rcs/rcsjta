@@ -160,8 +160,8 @@ public class ChatServiceImpl extends IChatService.Stub {
      * @param chatId the chat ID
      * @throws NetworkException
      */
-    public void sendGroupChatDisplayedDeliveryReport(final String msgId, final ContactId contact,
-            final long timestamp, String chatId) throws NetworkException {
+    public void sendGroupChatDisplayedDeliveryReport(String msgId, ContactId contact,
+            long timestamp, String chatId) throws NetworkException {
         final GroupChatSession session = mImService.getGroupChatSession(chatId);
         if (session == null || !session.isMediaEstablished()) {
             if (sLogger.isActivated()) {
@@ -186,7 +186,6 @@ public class ChatServiceImpl extends IChatService.Stub {
         // Clear list of sessions
         mOneToOneChatCache.clear();
         mGroupChatCache.clear();
-
         if (sLogger.isActivated()) {
             sLogger.info("Chat service API is closed");
         }
@@ -288,10 +287,9 @@ public class ChatServiceImpl extends IChatService.Stub {
         String msgId = imdn.getMsgId();
         String notificationType = imdn.getNotificationType();
         long timestamp = imdn.getDateTime();
-
         if (sLogger.isActivated()) {
-            sLogger.info("Receive message delivery status for message " + msgId + ", status "
-                    + status + "notificationType=" + notificationType);
+            sLogger.info("Receive IMDN for message " + msgId + ", status=" + status + ", Type="
+                    + notificationType);
         }
         String mimeType = mMessagingLog.getMessageMimeType(msgId);
         if (ImdnDocument.DeliveryStatus.ERROR == status
@@ -305,7 +303,6 @@ public class ChatServiceImpl extends IChatService.Stub {
                             msgId, Status.FAILED, reasonCode);
                 }
             }
-
         } else if (ImdnDocument.DeliveryStatus.DELIVERED == status) {
             mImService.getDeliveryExpirationManager().cancelDeliveryTimeoutAlarm(msgId);
             synchronized (mLock) {
@@ -314,7 +311,6 @@ public class ChatServiceImpl extends IChatService.Stub {
                             msgId, Status.DELIVERED, ReasonCode.UNSPECIFIED);
                 }
             }
-
         } else if (ImdnDocument.DeliveryStatus.DISPLAYED == status) {
             mImService.getDeliveryExpirationManager().cancelDeliveryTimeoutAlarm(msgId);
             synchronized (mLock) {
@@ -865,7 +861,6 @@ public class ChatServiceImpl extends IChatService.Stub {
                 }
                 return;
             }
-
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
                 sLogger.error(ExceptionUtil.getFullStackTrace(e));

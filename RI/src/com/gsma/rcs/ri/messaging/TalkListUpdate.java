@@ -18,8 +18,10 @@
 
 package com.gsma.rcs.ri.messaging;
 
+import com.gsma.rcs.api.connection.utils.ExceptionUtil;
 import com.gsma.rcs.ri.messaging.adapter.TalkListArrayItem;
 import com.gsma.rcs.ri.utils.ContactUtil;
+import com.gsma.rcs.ri.utils.LogUtils;
 import com.gsma.services.rcs.RcsService;
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.contact.ContactId;
@@ -33,6 +35,7 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.util.Log;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -64,6 +67,7 @@ public class TalkListUpdate extends AsyncTask<Void, Void, Collection<TalkListArr
 
     private final TaskCompleted mTaskCompleted;
     private final Context mCtx;
+    private static final String LOGTAG = LogUtils.getTag(TalkListUpdate.class.getSimpleName());
 
     public TalkListUpdate(Context ctx, TaskCompleted taskCompleted) {
         mCtx = ctx;
@@ -72,12 +76,18 @@ public class TalkListUpdate extends AsyncTask<Void, Void, Collection<TalkListArr
 
     @Override
     protected Collection<TalkListArrayItem> doInBackground(Void... params) {
-        /*
-         * The MMS sending is performed in background because the API returns a message instance
-         * only once it is persisted and to persist MMS, the core stack computes the file icon for
-         * image attached files.
-         */
-        return queryHistoryLogAndRefreshView();
+        try {
+            /*
+             * The MMS sending is performed in background because the API returns a message instance
+             * only once it is persisted and to persist MMS, the core stack computes the file icon
+             * for image attached files.
+             */
+            return queryHistoryLogAndRefreshView();
+
+        } catch (RuntimeException e) {
+            Log.e(LOGTAG, ExceptionUtil.getFullStackTrace(e));
+            return null;
+        }
     }
 
     @Override
@@ -130,10 +140,7 @@ public class TalkListUpdate extends AsyncTask<Void, Void, Collection<TalkListArr
         uriBuilder.appendProvider(ChatLog.Message.HISTORYLOG_MEMBER_ID);
         uriBuilder.appendProvider(FileTransferLog.HISTORYLOG_MEMBER_ID);
         Uri mUriHistoryProvider = uriBuilder.build();
-        /*
-        
-         */
-        Map<String, TalkListArrayItem> threads = new HashMap<>();
+        Map<String, TalkListArrayItem> dataMap = new HashMap<>();
         Cursor cursor = null;
         try {
             cursor = mCtx.getContentResolver().query(mUriHistoryProvider, PROJECTION, null, null,
@@ -163,7 +170,7 @@ public class TalkListUpdate extends AsyncTask<Void, Void, Collection<TalkListArr
                         .getInt(columnDirection));
                 RcsService.ReadStatus readStatus = RcsService.ReadStatus.valueOf(cursor
                         .getInt(columnReadStatus));
-                TalkListArrayItem item = threads.get(chatId);
+                TalkListArrayItem item = dataMap.get(chatId);
                 int providerId = cursor.getInt(columnProviderId);
                 int status = cursor.getInt(columnStatus);
                 boolean unread = isUnread(providerId, dir, readStatus, status);
@@ -182,7 +189,6 @@ public class TalkListUpdate extends AsyncTask<Void, Void, Collection<TalkListArr
                     }
                     unreadCount += item.getUnreadCount();
                 }
-
                 String content;
                 if (FileTransferLog.HISTORYLOG_MEMBER_ID != providerId) {
                     /* There is not body text message for RCS file transfer */
@@ -191,7 +197,6 @@ public class TalkListUpdate extends AsyncTask<Void, Void, Collection<TalkListArr
                     content = cursor.getString(columnFilename);
                 }
                 String mimeType = cursor.getString(columnMimeType);
-
                 if (ChatLog.GroupChat.HISTORYLOG_MEMBER_ID == providerId) {
                     if (item != null) {
                         item.setSubject(content);
@@ -209,14 +214,14 @@ public class TalkListUpdate extends AsyncTask<Void, Void, Collection<TalkListArr
                     item = new TalkListArrayItem(chatId, contact, timestamp, dir, content,
                             mimeType, unreadCount);
                 }
-                threads.put(chatId, item);
+                dataMap.put(chatId, item);
             }
         } finally {
             if (cursor != null) {
                 cursor.close();
             }
         }
-        return threads.values();
+        return dataMap.values();
     }
 
 }

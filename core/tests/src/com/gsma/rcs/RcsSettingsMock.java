@@ -16,36 +16,35 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.gsma.service.rcs.contacts;
+package com.gsma.rcs;
 
-import com.gsma.rcs.RcsSettingsMock;
 import com.gsma.rcs.platform.AndroidFactory;
+import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.ContactUtil;
+import com.gsma.rcs.utils.PhoneUtils;
+import com.gsma.services.rcs.RcsPermissionDeniedException;
+import com.gsma.services.rcs.contact.ContactId;
 
 import android.content.Context;
-import android.test.AndroidTestCase;
 
-public class ContactUtilTest extends AndroidTestCase {
+public class RcsSettingsMock {
 
-    protected void setUp() throws Exception {
-        super.setUp();
-        Context context = getContext();
-        RcsSettings settings = RcsSettingsMock.getMockSettings(context);
-        AndroidFactory.setApplicationContext(context, settings);
+    private static ContactId mOriContact;
+    private static RcsSettings sSettings;
+
+    public static RcsSettings getMockSettings(Context context) throws RcsPermissionDeniedException {
+        sSettings = RcsSettings.getInstance(new LocalContentResolver(context));
+        AndroidFactory.setApplicationContext(context, sSettings);
+        mOriContact = sSettings.getUserProfileImsUserName();
+        sSettings.setUserProfileImsUserName(ContactUtil
+                .createContactIdFromTrustedData("+33601020304"));
+        PhoneUtils.initialize(sSettings);
+        return sSettings;
     }
 
-    @Override
-    public void tearDown() throws Exception {
-        super.tearDown();
-        RcsSettingsMock.restoreSettings();
-    }
-
-    public void testGetValidPhoneNumberFromUri() {
-        String telUri = "<tel:+33640519308?Accept-Contact=%2Bsip.instance%3D%22%3Curn%3Agsma%3Aimei%3A35824005-944763-1%3E%22>";
-        ContactUtil.PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(telUri);
-        assertNotNull(number);
-        assertEquals("+33640519308", number.getNumber());
+    public static void restoreSettings() {
+        sSettings.setUserProfileImsUserName(mOriContact);
     }
 
 }

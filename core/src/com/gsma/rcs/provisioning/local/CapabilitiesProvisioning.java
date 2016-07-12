@@ -32,8 +32,6 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.Spinner;
 
 /**
  * Logger provisioning fragment
@@ -42,8 +40,8 @@ import android.widget.Spinner;
  */
 public class CapabilitiesProvisioning extends Fragment implements IProvisioningFragment {
 
-    private static final Logger sLogger = Logger.getLogger(CapabilitiesProvisioning.class
-            .getName());
+    private static final Logger sLogger = Logger
+            .getLogger(CapabilitiesProvisioning.class.getName());
 
     private static RcsSettings sRcsSettings;
     private View mRootView;

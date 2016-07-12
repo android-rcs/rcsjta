@@ -122,24 +122,6 @@ public abstract class MmContent {
     }
 
     /**
-     * Returns the content size in Kbytes
-     * 
-     * @return Size in Kbytes
-     */
-    public long getKbSize() {
-        return mSize / 1024;
-    }
-
-    /**
-     * Returns the content size in Mbytes
-     * 
-     * @return Size in Mbytes
-     */
-    public long getMbSize() {
-        return mSize / (1024 * 1024);
-    }
-
-    /**
      * Returns the encoding type
      * 
      * @return Encoding type
@@ -182,7 +164,7 @@ public abstract class MmContent {
     /**
      * Set the name
      * 
-     * @param fileName
+     * @param fileName the file name
      */
     public void setName(String fileName) {
         mFileName = fileName;
@@ -252,21 +234,15 @@ public abstract class MmContent {
      * @throws IOException
      */
     public void deleteFile() throws IOException {
-        if (mOut != null) {
-            try {
-                mOut.close();
-                mOut = null;
-            } finally {
-                Uri fileToDelete = getUri();
-                if (ContentResolver.SCHEME_FILE.equals(fileToDelete.getScheme())) {
-                    File file = new File(fileToDelete.getPath());
-                    if (!file.delete()) {
-                        throw new IOException("Unable to delete file: " + file.getAbsolutePath());
-                    }
-                } else {
-                    throw new IOException("Not possible to delete file: " + fileToDelete);
-                }
+        CloseableUtils.tryToClose(mOut);
+        Uri fileToDelete = getUri();
+        if (ContentResolver.SCHEME_FILE.equals(fileToDelete.getScheme())) {
+            File file = new File(fileToDelete.getPath());
+            if (!file.delete()) {
+                throw new IOException("Unable to delete file: " + file.getAbsolutePath());
             }
+        } else {
+            throw new IOException("Not possible to delete file: " + fileToDelete);
         }
     }
 }

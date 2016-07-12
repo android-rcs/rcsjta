@@ -142,9 +142,7 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession {
                     ((GroupChatSessionListener) listener).onSessionInvited(contact, subject,
                             participants, timestamp);
                 }
-
                 send180Ringing(dialogPath.getInvite(), dialogPath.getLocalTag());
-
                 InvitationStatus answer = waitInvitationAnswer();
                 switch (answer) {
                     case INVITATION_REJECTED_DECLINE:
@@ -222,10 +220,7 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession {
             String remotePath = attr1.getValue();
             String remoteHost = SdpUtils.extractRemoteHost(parser.sessionDescription, mediaDesc);
             int remotePort = mediaDesc.mPort;
-
-            /* Changed by Deutsche Telekom */
             String fingerprint = SdpUtils.extractFingerprint(parser, mediaDesc);
-
             /* Extract the "setup" parameter */
             String remoteSetup = "passive";
             MediaAttribute attr2 = mediaDesc.getMediaAttribute("setup");
@@ -252,10 +247,8 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession {
             String sdp = SdpUtils.buildGroupChatSDP(ipAddress, localMsrpPort, getMsrpMgr()
                     .getLocalSocketProtocol(), getAcceptTypes(), getWrappedTypes(), localSetup,
                     getMsrpMgr().getLocalMsrpPath(), SdpUtils.DIRECTION_SENDRECV);
-
             /* Set the local SDP part in the dialog path */
             dialogPath.setLocalContent(sdp);
-
             /* Test if the session should be interrupted */
             if (isInterrupted()) {
                 if (logActivated) {
@@ -269,7 +262,6 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession {
             }
             SipResponse resp = SipMessageFactory.create200OkInviteResponse(dialogPath,
                     getFeatureTags(), getAcceptContactTags(), sdp);
-
             dialogPath.setSigEstablished();
             SipTransactionContext ctx = getImsService().getImsModule().getSipManager()
                     .sendSipMessage(resp);
@@ -288,7 +280,6 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession {
             }
             /* wait a response */
             getImsService().getImsModule().getSipManager().waitResponse(ctx);
-
             /* Test if the session should be interrupted */
             if (isInterrupted()) {
                 if (logActivated) {
@@ -302,7 +293,6 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession {
                     sLogger.info("ACK request received");
                 }
                 dialogPath.setSessionEstablished();
-
                 /* Create the MSRP client session */
                 if (localSetup.equals("active")) {
                     /* Active mode: client should connect */
@@ -313,13 +303,10 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession {
                     getMsrpMgr().openMsrpSession();
                     sendEmptyDataChunk();
                 }
-
                 for (ImsSessionListener listener : listeners) {
                     listener.onSessionStarted(contact);
                 }
-
                 getConferenceEventSubscriber().subscribe();
-
                 SessionTimerManager sessionTimerManager = getSessionTimerManager();
                 if (sessionTimerManager.isSessionTimerActivated(resp)) {
                     sessionTimerManager.start(SessionTimerManager.UAS_ROLE,

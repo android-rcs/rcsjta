@@ -122,11 +122,6 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
      * @param sharingId String
      */
     private void addImageSharing(ImageSharingImpl imageSharing, String sharingId) {
-        if (sLogger.isActivated()) {
-            sLogger.debug("Add an image sharing in the list (size=" + mImageSharingCache.size()
-                    + ")");
-        }
-
         mImageSharingCache.put(sharingId, imageSharing);
     }
 
@@ -136,11 +131,6 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
      * @param sharingId Sharing ID
      */
     public void removeImageSharing(String sharingId) {
-        if (sLogger.isActivated()) {
-            sLogger.debug("Remove an image sharing from the list (size="
-                    + mImageSharingCache.size() + ")");
-        }
-
         mImageSharingCache.remove(sharingId);
     }
 
@@ -168,9 +158,6 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
      * @param listener Service registration listener
      */
     public void addEventListener(IRcsServiceRegistrationListener listener) {
-        if (sLogger.isActivated()) {
-            sLogger.info("Add a service listener");
-        }
         synchronized (mLock) {
             mRcsServiceRegistrationEventBroadcaster.addEventListener(listener);
         }
@@ -182,9 +169,6 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
      * @param listener Service registration listener
      */
     public void removeEventListener(IRcsServiceRegistrationListener listener) {
-        if (sLogger.isActivated()) {
-            sLogger.info("Remove a service listener");
-        }
         synchronized (mLock) {
             mRcsServiceRegistrationEventBroadcaster.removeEventListener(listener);
         }
@@ -211,7 +195,6 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
      * @param reasonCode for unregistration
      */
     public void notifyUnRegistration(RcsServiceRegistration.ReasonCode reasonCode) {
-        // Notify listeners
         synchronized (mLock) {
             mRcsServiceRegistrationEventBroadcaster.broadcastServiceUnRegistered(reasonCode);
         }
@@ -398,9 +381,6 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
         if (listener == null) {
             throw new ServerApiIllegalArgumentException("listener must not be null!");
         }
-        if (sLogger.isActivated()) {
-            sLogger.info("Add an Image sharing event listener");
-        }
         try {
             synchronized (mLock) {
                 mBroadcaster.addEventListener(listener);
@@ -426,9 +406,6 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
     public void removeEventListener2(IImageSharingListener listener) throws RemoteException {
         if (listener == null) {
             throw new ServerApiIllegalArgumentException("listener must not be null!");
-        }
-        if (sLogger.isActivated()) {
-            sLogger.info("Remove an Image sharing event listener");
         }
         try {
             synchronized (mLock) {

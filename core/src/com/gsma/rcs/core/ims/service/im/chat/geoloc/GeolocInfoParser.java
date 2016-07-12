@@ -22,21 +22,21 @@
 
 package com.gsma.rcs.core.ims.service.im.chat.geoloc;
 
-import java.io.IOException;
-import java.util.StringTokenizer;
-
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
+import com.gsma.rcs.core.ParseFailureException;
+import com.gsma.rcs.utils.DateUtils;
+import com.gsma.rcs.utils.logger.Logger;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import com.gsma.rcs.core.ParseFailureException;
-import com.gsma.rcs.utils.DateUtils;
-import com.gsma.rcs.utils.logger.Logger;
+import java.io.IOException;
+import java.util.StringTokenizer;
+
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 
 /**
  * Geolocation info parser
@@ -45,7 +45,7 @@ import com.gsma.rcs.utils.logger.Logger;
  */
 public class GeolocInfoParser extends DefaultHandler {
 
-        /*
+    /*
      * Geoloc-Info SAMPLE: <?xml version="1.0" encoding="UTF-8"?> <rcsenvelope
      * xmlns="urn:gsma:params:xml:ns:rcs:rcs:geolocation"
      * xmlns:rpid="urn:ietf:params:xml:ns:pidf:rpid"
@@ -116,6 +116,7 @@ public class GeolocInfoParser extends DefaultHandler {
         if ("rcsenvelope".equals(localName)) {
             String entity = attr.getValue("entity").trim();
             mGeoloc = new GeolocInfoDocument(entity);
+
         } else if ("rcspushlocation".equals(localName)) {
             if (sLogger.isActivated()) {
                 sLogger.debug("rcspushlocation");
@@ -151,6 +152,5 @@ public class GeolocInfoParser extends DefaultHandler {
             }
         }
     }
-
 
 }

@@ -67,7 +67,7 @@ import javax.xml.parsers.ParserConfigurationException;
 /**
  * Utility class to manage File Transfer
  * 
- * @author YPLO6403
+ * @author Philippe LEMORDANT
  */
 public class FileTransferUtils {
 
@@ -115,16 +115,13 @@ public class FileTransferUtils {
             }
             int width = bitmap.getWidth();
             int height = bitmap.getHeight();
-
             long size = FileUtils.getFileSize(AndroidFactory.getApplicationContext(), file);
             // Resize the bitmap
             float scale = 0.05f;
             Matrix matrix = new Matrix();
             matrix.postScale(scale, scale);
-
             // Recreate the new bitmap
             Bitmap resizedBitmap = Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, true);
-
             // Compress the file to be under the limit
             int quality = 90;
             long maxSize = rcsSettings.getMaxFileIconSize();
@@ -224,7 +221,6 @@ public class FileTransferUtils {
                 result.closeFile();
             }
         }
-
     }
 
     /**
@@ -268,7 +264,7 @@ public class FileTransferUtils {
 
     /**
      * Create a content object from URI
-     * 
+     *
      * @param uri Uri of file
      * @param mimeType the mime type
      * @param disposition File disposition
@@ -319,7 +315,7 @@ public class FileTransferUtils {
 
     /**
      * Create HTTP file transfer xml descriptor
-     * 
+     *
      * @param fileTransferData File transfer information
      * @return a string representing the HTTP file transfer xml descriptor
      */
@@ -335,7 +331,8 @@ public class FileTransferUtils {
         String fileInfo = createHttpFileInfoXml(FILE_INFO, fileTransferData.getUri(),
                 fileTransferData.getFilename(), fileTransferData.getMimeType(),
                 fileTransferData.getSize(), fileTransferData.getExpiration(),
-                fileTransferData.getFileDisposition(), fileTransferData.getPlayingLength());
+                FileSharingSession.DispositionToString(fileTransferData.getFileDisposition()),
+                fileTransferData.getPlayingLength());
         info.append(fileInfo);
         info.append("</file>");
         return info.toString();

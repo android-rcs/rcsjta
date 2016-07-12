@@ -24,9 +24,10 @@ package com.gsma.rcs.core.ims.service.im.filetransfer.http;
 
 import com.gsma.rcs.core.content.ContentManager;
 import com.gsma.rcs.core.content.MmContent;
-import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSession;
 import com.gsma.rcs.provider.messaging.FileTransferData;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.services.rcs.filetransfer.FileTransfer;
+import com.gsma.services.rcs.filetransfer.FileTransfer.Disposition;
 
 import android.net.Uri;
 
@@ -41,46 +42,14 @@ public class FileTransferHttpInfoDocument {
      */
     public static final String MIME_TYPE = "application/vnd.gsma.rcs-ft-http+xml";
 
-    /**
-     * File size
-     */
     private int mSize = 0;
-
-    /**
-     * File mime type
-     */
     private String mMimeType;
-
-    /**
-     * URI of the file
-     */
     private Uri mFile;
-
-    /**
-     * Expiration of the file
-     */
     private long mExpiration = FileTransferData.UNKNOWN_EXPIRATION;
-
-    /**
-     * File thumbnail
-     */
     private FileTransferHttpThumbnail mFileIcon;
-
-    /**
-     * Filename
-     */
     private String mFileName;
-
-    /**
-     * File disposition
-     */
-    private String mFileDispo = FileSharingSession.FILE_DISPOSITION_ATTACH;
-
-    /**
-     * Playing length
-     */
+    private Disposition mFileDisposition = FileTransfer.Disposition.ATTACH;
     private int mPlayingLength = -1;
-
     private final RcsSettings mRcsSettings;
 
     /**
@@ -214,10 +183,10 @@ public class FileTransferHttpInfoDocument {
     /**
      * Sets the file disposition
      *
-     * @param fileDispo File disposition
+     * @param disposition File disposition
      */
-    public void setFileDisposition(String fileDispo) {
-        mFileDispo = fileDispo;
+    public void setFileDisposition(Disposition disposition) {
+        mFileDisposition = disposition;
     }
 
     /**
@@ -225,8 +194,8 @@ public class FileTransferHttpInfoDocument {
      *
      * @return File disposition
      */
-    public String getFileDisposition() {
-        return mFileDispo;
+    public Disposition getFileDisposition() {
+        return mFileDisposition;
     }
 
     /**
@@ -250,12 +219,12 @@ public class FileTransferHttpInfoDocument {
     /**
      * Gets local MmContent
      * 
-     * @return local MmCOntent
+     * @return local MmContent
      */
     public MmContent getLocalMmContent() {
         Uri file = ContentManager.generateUriForReceivedContent(mFileName, mMimeType, mRcsSettings);
         MmContent content = ContentManager.createMmContent(file, mMimeType, mSize, mFileName);
-        if (FileSharingSession.FILE_DISPOSITION_RENDER.equals(mFileDispo)) {
+        if (Disposition.RENDER == mFileDisposition) {
             content.setPlayable(true);
         }
         return content;

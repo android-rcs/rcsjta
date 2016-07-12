@@ -153,7 +153,6 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession {
                         }
                         sendErrorResponse(dialogPath.getInvite(), dialogPath.getLocalTag(), answer);
                         removeSession();
-
                         for (ImsSessionListener listener : listeners) {
                             listener.onSessionRejected(remote,
                                     TerminationReason.TERMINATION_BY_USER);
@@ -164,12 +163,9 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession {
                         if (logActivated) {
                             sLogger.debug("Session has been rejected on timeout");
                         }
-
                         /* Ringing period timeout */
                         send486Busy(dialogPath.getInvite(), dialogPath.getLocalTag());
-
                         removeSession();
-
                         for (ImsSessionListener listener : listeners) {
                             listener.onSessionRejected(remote,
                                     TerminationReason.TERMINATION_BY_TIMEOUT);
@@ -227,9 +223,7 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession {
             String remotePath = attr1.getValue();
             String remoteHost = SdpUtils.extractRemoteHost(parser.sessionDescription, mediaDesc);
             int remotePort = mediaDesc.mPort;
-
             String fingerprint = SdpUtils.extractFingerprint(parser, mediaDesc);
-
             /* Extract the "setup" parameter */
             String remoteSetup = "passive";
             MediaAttribute attr2 = mediaDesc.getMediaAttribute("setup");
@@ -303,7 +297,6 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession {
                     sLogger.info("ACK request received");
                 }
                 dialogPath.setSessionEstablished();
-
                 /* Create the MSRP client session */
                 if (localSetup.equals("active")) {
                     /* Active mode: client should connect */
@@ -323,12 +316,10 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession {
                             dialogPath.getSessionExpireTime());
                 }
                 getActivityManager().start();
-
             } else {
                 if (logActivated) {
                     sLogger.debug("No ACK received for INVITE");
                 }
-
                 /* No response received: timeout */
                 handleError(new ChatError(ChatError.SEND_RESPONSE_FAILED));
             }

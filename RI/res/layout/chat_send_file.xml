@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent">
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent">
 
     <TableLayout
         android:layout_width="fill_parent"
@@ -14,7 +14,7 @@
             <CheckBox
                 android:id="@+id/ft_thumb"
                 android:enabled="true"
-                android:text="@string/label_ft_thumb" />
+                android:text="@string/label_ft_thumb"/>
         </TableRow>
 
         <TableRow android:layout_margin="2dip">
@@ -22,13 +22,13 @@
             <TextView
                 android:layout_marginLeft="5dip"
                 android:layout_marginStart="5dip"
-                android:text="@string/label_file" />
+                android:text="@string/label_file"/>
 
             <TextView
                 android:id="@+id/uri"
                 android:singleLine="true"
                 android:text="@string/text_dummy"
-                android:textStyle="bold" />
+                android:textStyle="bold"/>
         </TableRow>
 
         <TableRow android:layout_margin="2dip">
@@ -36,13 +36,13 @@
             <TextView
                 android:layout_marginLeft="5dip"
                 android:layout_marginStart="5dip"
-                android:text="@string/label_size" />
+                android:text="@string/label_size"/>
 
             <TextView
                 android:id="@+id/size"
                 android:singleLine="true"
                 android:text="@string/number_dummy"
-                android:textStyle="bold" />
+                android:textStyle="bold"/>
         </TableRow>
 
         <TableRow android:layout_margin="2dip">
@@ -50,13 +50,13 @@
             <TextView
                 android:layout_marginLeft="5dip"
                 android:layout_marginStart="5dip"
-                android:text="@string/label_progress_status" />
+                android:text="@string/label_progress_status"/>
 
             <TextView
                 android:id="@+id/progress_status"
                 android:singleLine="true"
                 android:text="@string/text_dummy"
-                android:textStyle="bold" />
+                android:textStyle="bold"/>
         </TableRow>
 
         <TableRow android:layout_margin="2dip">
@@ -64,35 +64,35 @@
             <TextView
                 android:layout_marginLeft="5dip"
                 android:layout_marginStart="5dip"
-                android:text="@string/label_progress_bar" />
+                android:text="@string/label_progress_bar"/>
 
             <ProgressBar
                 android:id="@+id/progress_bar"
                 style="@android:style/Widget.ProgressBar.Horizontal"
                 android:layout_marginEnd="5dip"
-                android:layout_marginRight="5dip" />
+                android:layout_marginRight="5dip"/>
         </TableRow>
 
         <CheckBox
             android:id="@+id/send_audio_msg"
             android:enabled="true"
-            android:text="@string/label_send_audio_msg" />
+            android:text="@string/label_send_audio_msg"/>
 
         <Button
             android:id="@+id/select_btn"
-            android:text="@string/label_select_file" />
+            android:text="@string/label_select_file"/>
 
         <Button
             android:id="@+id/invite_btn"
-            android:text="@string/label_initiate_sharing" />
+            android:text="@string/label_initiate_sharing"/>
 
         <Button
             android:id="@+id/pause_btn"
-            android:text="@string/label_pause_transfer" />
+            android:text="@string/label_pause_transfer"/>
 
         <Button
             android:id="@+id/resume_btn"
-            android:text="@string/label_resume_transfer" />
+            android:text="@string/label_resume_transfer"/>
     </TableLayout>
 
 </ScrollView>

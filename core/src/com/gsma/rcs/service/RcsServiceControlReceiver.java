@@ -70,7 +70,7 @@ public class RcsServiceControlReceiver extends BroadcastReceiver {
     private static boolean sAccurateLog = false;
 
     private interface IRcsCompatibility {
-        public boolean isCompatible(String serviceName, String codename, int version, int increment);
+        boolean isCompatible(String serviceName, String codename, int version, int increment);
     }
 
     private static IRcsCompatibility sRcsCompatibility = new IRcsCompatibility() {

@@ -21,12 +21,12 @@ package com.gsma.rcs.core.ims.service.im.filetransfer.http;
 /**
  * Class HTTP Upload Transfer Event Listener
  * 
- * @author YPLO6403
+ * @author Philippe LEMORDANT
  */
 public interface HttpUploadTransferEventListener extends HttpTransferEventListener {
     /**
-     * notify the start of the HTTP Upload transfer (once the thumbnail transfer iis done) <br>
-     * The upload resume is only possible once thumbnail is transferred
+     * Notifies the start of the HTTP Upload transfer (once the thumbnail transfer is done) <br>
+     * The upload resume is only possible once thumbnail is transferred.
      */
-    public void uploadStarted();
+    void uploadStarted();
 }

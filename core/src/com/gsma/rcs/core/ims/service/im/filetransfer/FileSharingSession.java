@@ -8,7 +8,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -35,6 +35,7 @@ import com.gsma.rcs.utils.StorageUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.chat.GroupChat.ParticipantStatus;
 import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.filetransfer.FileTransfer;
 
 import android.net.Uri;
 
@@ -43,7 +44,7 @@ import java.util.Map;
 
 /**
  * Abstract file sharing session
- * 
+ *
  * @author jexa7410
  */
 public abstract class FileSharingSession extends ImsServiceSession {
@@ -72,33 +73,32 @@ public abstract class FileSharingSession extends ImsServiceSession {
 
     private boolean mFileTransferPaused = false;
 
-    private final String mFiletransferId;
+    private final String mFileTransferId;
 
     protected final ImdnManager mImdnManager;
 
-    private static final Logger sLogger = Logger
-            .getLogger(FileSharingSession.class.getSimpleName());
+    private static final Logger sLogger = Logger.getLogger(FileSharingSession.class.getName());
 
     /**
      * Constructor
      *
-     * @param imService      InstantMessagingService
-     * @param content        Content to be shared
-     * @param contact        Remote contactId
-     * @param remoteContact  the remote contact URI
-     * @param fileIcon       File icon
-     * @param filetransferId File transfer identifier
-     * @param rcsSettings    RCS settings accessor
-     * @param timestamp      Local timestamp for the session
+     * @param imService InstantMessagingService
+     * @param content Content to be shared
+     * @param contact Remote contactId
+     * @param remoteContact the remote contact URI
+     * @param fileIcon File icon
+     * @param fileTransferId File transfer identifier
+     * @param rcsSettings RCS settings accessor
+     * @param timestamp Local timestamp for the session
      * @param contactManager Contact manager accessor
      */
     public FileSharingSession(InstantMessagingService imService, MmContent content,
-                              ContactId contact, Uri remoteContact, MmContent fileIcon, String filetransferId,
-                              RcsSettings rcsSettings, long timestamp, ContactManager contactManager) {
+            ContactId contact, Uri remoteContact, MmContent fileIcon, String fileTransferId,
+            RcsSettings rcsSettings, long timestamp, ContactManager contactManager) {
         super(imService, contact, remoteContact, rcsSettings, timestamp, contactManager);
         mContent = content;
         mFileIcon = fileIcon;
-        mFiletransferId = filetransferId;
+        mFileTransferId = fileTransferId;
         mImdnManager = imService.getImdnManager();
         mParticipants = new HashMap<>();
     }
@@ -161,15 +161,14 @@ public abstract class FileSharingSession extends ImsServiceSession {
      * @return filetransferId String
      */
     public String getFileTransferId() {
-        return mFiletransferId;
+        return mFileTransferId;
     }
 
     /**
-     * File has been transferred
+     * Set file as being transferred
      */
-    public void fileTransfered() {
+    public void setFileTransferred() {
         mFileTransferred = true;
-
     }
 
     /**
@@ -184,14 +183,14 @@ public abstract class FileSharingSession extends ImsServiceSession {
     /**
      * File has been paused
      */
-    public void fileTransferPaused() {
+    public void setFileTransferPaused() {
         mFileTransferPaused = true;
     }
 
     /**
      * File is resuming
      */
-    public void fileTransferResumed() {
+    public void setFileTransferResumed() {
         mFileTransferPaused = false;
     }
 
@@ -216,15 +215,15 @@ public abstract class FileSharingSession extends ImsServiceSession {
     /**
      * Check if file capacity is acceptable
      *
-     * @param fileSize    File size in bytes
+     * @param fileSize File size in bytes
      * @param rcsSettings RCS settings accessor
      * @return Error or null if file capacity is acceptable
      */
     public static FileSharingError isFileCapacityAcceptable(long fileSize, RcsSettings rcsSettings) {
         long maxFileSharingSize = rcsSettings.getMaxFileTransferSize();
         boolean fileIsToBig = (maxFileSharingSize > 0) && fileSize > maxFileSharingSize;
-        boolean storageIsTooSmall = (StorageUtils.getExternalStorageFreeSpace() > 0) && fileSize > StorageUtils
-                .getExternalStorageFreeSpace();
+        boolean storageIsTooSmall = (StorageUtils.getExternalStorageFreeSpace() > 0)
+                && fileSize > StorageUtils.getExternalStorageFreeSpace();
         if (fileIsToBig) {
             if (sLogger.isActivated()) {
                 sLogger.warn("File is too big, reject the file transfer");
@@ -282,15 +281,21 @@ public abstract class FileSharingSession extends ImsServiceSession {
     /**
      * Returns the file-disposition
      *
-     * @return String
+     * @return string for payload insertion.
      */
     public String getFileDisposition() {
-        String disposition;
-        if (getContent().isPlayable()) {
-            disposition = FileSharingSession.FILE_DISPOSITION_RENDER;
-        } else {
-            disposition = FileSharingSession.FILE_DISPOSITION_ATTACH;
-        }
-        return disposition;
+        return getContent().isPlayable() ? FileSharingSession.FILE_DISPOSITION_RENDER
+                : FileSharingSession.FILE_DISPOSITION_ATTACH;
+    }
+
+    /**
+     * Convert Disposition to string for payload insertion.
+     *
+     * @param disposition the disposition
+     * @return the string for payload insertion.
+     */
+    /* package private */static String DispositionToString(FileTransfer.Disposition disposition) {
+        return FileTransfer.Disposition.ATTACH == disposition ? FILE_DISPOSITION_ATTACH
+                : FILE_DISPOSITION_RENDER;
     }
 }

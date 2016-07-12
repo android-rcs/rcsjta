@@ -22,17 +22,16 @@ package com.gsma.rcs.im.filetransfer;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
+import com.gsma.rcs.RcsSettingsMock;
 import com.gsma.rcs.core.ParseFailureException;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpThumbnail;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.FileTransferXmlParser;
-import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
+import com.gsma.services.rcs.filetransfer.FileTransfer;
 
-import android.content.ContentResolver;
-import android.content.Context;
 import android.net.Uri;
 import android.test.AndroidTestCase;
 
@@ -85,10 +84,13 @@ public class FileTransferXmlParserTest extends AndroidTestCase {
 
     protected void setUp() throws Exception {
         super.setUp();
-        Context context = getContext();
-        ContentResolver contentResolver = context.getContentResolver();
-        LocalContentResolver localContentResolver = new LocalContentResolver(contentResolver);
-        mRcsSettings = RcsSettings.getInstance(localContentResolver);
+        mRcsSettings = RcsSettingsMock.getMockSettings(getContext());
+    }
+
+    @Override
+    protected void tearDown() throws Exception {
+        super.tearDown();
+        RcsSettingsMock.restoreSettings();
     }
 
     public void testFileTransferXmlParserAudioMessage() throws ParseFailureException, SAXException,
@@ -101,7 +103,7 @@ public class FileTransferXmlParserTest extends AndroidTestCase {
         assertEquals(1234567890, info.getSize());
         assertEquals("audio.mp4", info.getFilename());
         assertEquals("audio/mp4", info.getMimeType());
-        assertEquals("render", info.getFileDisposition());
+        assertEquals(FileTransfer.Disposition.RENDER, info.getFileDisposition());
         assertEquals(1461945743000L, info.getExpiration());
         assertNull(info.getFileThumbnail());
         assertEquals(1000, info.getPlayingLength());
@@ -118,7 +120,7 @@ public class FileTransferXmlParserTest extends AndroidTestCase {
         assertEquals(1234567890, info.getSize());
         assertEquals("image.jpg", info.getFilename());
         assertEquals("image/jpeg", info.getMimeType());
-        assertEquals("attach", info.getFileDisposition());
+        assertEquals(FileTransfer.Disposition.ATTACH, info.getFileDisposition());
         assertEquals(1461945743000L, info.getExpiration());
         assertNull(info.getFileThumbnail());
         assertEquals(-1, info.getPlayingLength());
@@ -135,7 +137,7 @@ public class FileTransferXmlParserTest extends AndroidTestCase {
         assertEquals(1234567890, info.getSize());
         assertEquals("image.jpg", info.getFilename());
         assertEquals("image/jpeg", info.getMimeType());
-        assertEquals("attach", info.getFileDisposition());
+        assertEquals(FileTransfer.Disposition.ATTACH, info.getFileDisposition());
         assertEquals(1461945743000L, info.getExpiration());
         FileTransferHttpThumbnail icon = info.getFileThumbnail();
         assertNotNull(icon);

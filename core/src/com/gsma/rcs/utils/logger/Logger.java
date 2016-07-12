@@ -65,7 +65,7 @@ public class Logger {
     /**
      * Trace flag
      */
-    public static boolean activationFlag = TRACE_ON;
+    public static boolean sActivationFlag = TRACE_ON;
 
     /**
      * Trace level
@@ -75,14 +75,14 @@ public class Logger {
     /**
      * List of appenders
      */
-    private static Appender[] appenders = new Appender[] {
+    private static Appender[] sAppenders = new Appender[] {
         new AndroidAppender()
     };
 
     /**
      * Classname
      */
-    private String classname;
+    private String mClassname;
 
     /**
      * Constructor
@@ -92,9 +92,9 @@ public class Logger {
     private Logger(String classname) {
         int index = classname.lastIndexOf('.');
         if (index != -1) {
-            this.classname = classname.substring(index + 1);
+            mClassname = classname.substring(index + 1);
         } else {
-            this.classname = classname;
+            mClassname = classname;
         }
     }
 
@@ -104,7 +104,7 @@ public class Logger {
      * @return boolean
      */
     public boolean isActivated() {
-        return (activationFlag == TRACE_ON);
+        return (sActivationFlag == TRACE_ON);
     }
 
     /**
@@ -193,20 +193,15 @@ public class Logger {
      * @param level Trace level
      */
     private void printTrace(String trace, int level) {
-        if ((appenders != null) && (level >= traceLevel)) {
-            for (int i = 0; i < appenders.length; i++) {
-                appenders[i].printTrace(classname, level, trace);
+        if (sAppenders != null && level >= traceLevel) {
+            /*
+             * String having '\' characters are not printed out in locat console !
+             */
+            trace = trace.replace("\r", "");
+            for (Appender appender : sAppenders) {
+                appender.printTrace(mClassname, level, trace);
             }
         }
-    }
-
-    /**
-     * Set the list of appenders
-     * 
-     * @param appenders List of appenders
-     */
-    public static void setAppenders(Appender[] appenders) {
-        Logger.appenders = appenders;
     }
 
     /**
@@ -219,12 +214,4 @@ public class Logger {
         return new Logger(classname);
     }
 
-    /**
-     * Get the current appenders
-     * 
-     * @return Array of appender
-     */
-    public static synchronized Appender[] getAppenders() {
-        return appenders;
-    }
 }

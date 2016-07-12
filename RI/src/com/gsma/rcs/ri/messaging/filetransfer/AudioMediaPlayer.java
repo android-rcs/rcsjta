@@ -28,7 +28,9 @@ import android.util.Log;
 import java.io.IOException;
 
 /**
- * Created by Sandrine Lacharme on 12/01/2016.
+ * AudioMediaPlayer class can be used to control playback of audio files and streams.
+ *
+ * @author Sandrine Lacharme on 12/01/2016.
  */
 public class AudioMediaPlayer extends MediaPlayer {
 
@@ -70,7 +72,6 @@ public class AudioMediaPlayer extends MediaPlayer {
                 mListener.onCompletion();
             }
         });
-
     }
 
     /**

@@ -1,18 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
-    android:padding="5dip"
-    android:stretchColumns="1">
+             android:layout_width="fill_parent"
+             android:layout_height="wrap_content"
+             android:padding="5dip"
+             android:stretchColumns="1">
 
     <TableRow android:padding="2dip">
 
         <TextView
             android:layout_marginLeft="5dip"
             android:layout_marginRight="5dip"
-            android:text="@string/label_ft_WarnSize" />
+            android:text="@string/label_ft_WarnSize"/>
 
-        <TextView android:id="@+id/ft_WarnSize" />
+        <TextView
+            android:id="@+id/ft_WarnSize"
+            android:text="@string/number_dummy"/>
     </TableRow>
 
     <TableRow android:padding="2dip">
@@ -20,9 +22,35 @@
         <TextView
             android:layout_marginLeft="5dip"
             android:layout_marginRight="5dip"
-            android:text="@string/label_ft_MaxSize" />
+            android:text="@string/label_ft_MaxSize"/>
 
-        <TextView android:id="@+id/ft_MaxSize" />
+        <TextView
+            android:id="@+id/ft_MaxSize"
+            android:text="@string/number_dummy"/>
+    </TableRow>
+
+    <TableRow android:padding="2dip">
+
+        <TextView
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:text="@string/label_MaxFileTransfers"/>
+
+        <TextView
+            android:id="@+id/MaxFileTransfers"
+            android:text="@string/number_dummy"/>
+    </TableRow>
+
+    <TableRow android:padding="2dip">
+
+        <TextView
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:text="@string/label_max_audio_duration"/>
+
+        <TextView
+            android:id="@+id/MaxAudioDuration"
+            android:text="@string/number_dummy"/>
     </TableRow>
 
     <TableRow
@@ -32,9 +60,9 @@
         <TextView
             android:layout_marginLeft="5dip"
             android:layout_marginRight="5dip"
-            android:text="@string/label_ft_isAutoAccept" />
+            android:text="@string/label_ft_isAutoAccept"/>
 
-        <CheckBox android:id="@+id/ft_isAutoAccept" />
+        <CheckBox android:id="@+id/ft_isAutoAccept"/>
     </TableRow>
 
     <TableRow
@@ -44,9 +72,9 @@
         <TextView
             android:layout_marginLeft="5dip"
             android:layout_marginRight="5dip"
-            android:text="@string/label_ft_isAutoAcceptInRoaming" />
+            android:text="@string/label_ft_isAutoAcceptInRoaming"/>
 
-        <CheckBox android:id="@+id/ft_isAutoAcceptInRoaming" />
+        <CheckBox android:id="@+id/ft_isAutoAcceptInRoaming"/>
     </TableRow>
 
     <TableRow android:padding="2dip">
@@ -54,32 +82,12 @@
         <TextView
             android:layout_marginLeft="5dip"
             android:layout_marginRight="5dip"
-            android:text="@string/label_MaxFileTransfers" />
-
-        <TextView android:id="@+id/MaxFileTransfers" />
-    </TableRow>
-
-    <TableRow android:padding="2dip">
-
-        <TextView
-            android:layout_marginLeft="5dip"
-            android:layout_marginRight="5dip"
-            android:text="@string/label_ft_ImageResizeOption" />
-
-        <Spinner android:id="@+id/ft_ImageResizeOption" />
-    </TableRow>
-
-    <TableRow android:padding="2dip">
-
-        <TextView
-            android:layout_marginLeft="5dip"
-            android:layout_marginRight="5dip"
-            android:text="@string/label_GroupFileTransferSupported" />
+            android:text="@string/label_GroupFileTransferSupported"/>
 
         <CheckBox
             android:id="@+id/GroupFileTransferSupported"
             android:clickable="false"
-            android:enabled="false" />
+            android:enabled="false"/>
     </TableRow>
 
     <TableRow android:padding="2dip">
@@ -87,8 +95,9 @@
         <TextView
             android:layout_marginLeft="5dip"
             android:layout_marginRight="5dip"
-            android:text="@string/label_max_audio_duration" />
+            android:text="@string/label_ft_ImageResizeOption"/>
 
-        <TextView android:id="@+id/MaxAudioDuration" />
+        <Spinner android:id="@+id/ft_ImageResizeOption"/>
     </TableRow>
+
 </TableLayout>

@@ -22,6 +22,7 @@
 
 package com.gsma.rcs.richcall;
 
+import com.gsma.rcs.RcsSettingsMock;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.rtp.codec.video.h264.H264Config;
 import com.gsma.rcs.core.ims.protocol.rtp.codec.video.h264.profiles.H264Profile1_2;
@@ -30,8 +31,6 @@ import com.gsma.rcs.core.ims.protocol.sdp.MediaDescription;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpParser;
 import com.gsma.rcs.core.ims.service.richcall.video.VideoCodecManager;
 import com.gsma.rcs.core.ims.service.richcall.video.VideoSdpBuilder;
-import com.gsma.rcs.provider.LocalContentResolver;
-import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.services.rcs.sharing.video.VideoCodec;
 
 import android.test.AndroidTestCase;
@@ -44,9 +43,7 @@ public class VideoSdpTest extends AndroidTestCase {
 
     protected void setUp() throws Exception {
         super.setUp();
-        LocalContentResolver localContentResolver = new LocalContentResolver(getContext());
-        RcsSettings.getInstance(localContentResolver);
-
+        RcsSettingsMock.getMockSettings(getContext());
         // Create list of codecs
         mCodecs = new VideoCodec[4];
         int payload_count = 95;
@@ -66,9 +63,13 @@ public class VideoSdpTest extends AndroidTestCase {
                 15, 396, H264Config.CIF_WIDTH, H264Config.CIF_HEIGHT,
                 H264Config.CODEC_PARAM_PROFILEID + "=" + H264Profile1_2.BASELINE_PROFILE_ID + ";"
                         + H264Config.CODEC_PARAM_PACKETIZATIONMODE + "=1");
-
     }
 
+    @Override
+    protected void tearDown() throws Exception {
+        super.tearDown();
+        RcsSettingsMock.restoreSettings();
+    }
 
     public void testCreateSdp() {
         // Create SDP
