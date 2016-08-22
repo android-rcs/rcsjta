@@ -24,6 +24,7 @@ package com.gsma.rcs.core;
 
 import com.gsma.rcs.platform.AndroidFactory;
 import com.gsma.rcs.utils.logger.Logger;
+import com.gsma.services.rcs.RcsServiceControl;
 
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -85,7 +86,9 @@ public class TerminalInfo {
     public static String getProductVersion(Context ctx) {
         if (sProductVersion == null) {
             try {
-                sProductVersion = ctx.getPackageManager().getPackageInfo(ctx.getPackageName(), 0).versionName;
+                sProductVersion = ctx.getPackageManager().getPackageInfo(
+                        RcsServiceControl.RCS_STACK_PACKAGENAME, 0).versionName;
+
             } catch (NameNotFoundException e) {
                 if (sLogger.isActivated()) {
                     sLogger.error("Version Name not defined in Manifest", e);
@@ -102,8 +105,7 @@ public class TerminalInfo {
      * @return product information
      */
     public static String getProductInfo() {
-        return new StringBuilder(productName).append(FORWARD_SLASH).append(sProductVersion)
-                .toString();
+        return productName + FORWARD_SLASH + sProductVersion;
     }
 
     /**
@@ -113,13 +115,12 @@ public class TerminalInfo {
      * In case versionName is not found under AndroidManifest it will default to UNKNOWN.
      * </p>
      * 
-     * @param ctx
+     * @param ctx the context
      * @return Client version
      */
     public static String getClientVersion(Context ctx) {
         if (sClientVersion == null) {
-            sClientVersion = new StringBuilder(CLIENT_VERSION_PREFIX)
-                    .append(getProductVersion(ctx)).toString();
+            sClientVersion = CLIENT_VERSION_PREFIX + getProductVersion(ctx);
         }
         return sClientVersion;
     }
@@ -167,10 +168,8 @@ public class TerminalInfo {
      */
     public static String getBuildInfo() {
         if (sBuildInfo == null) {
-            final String buildVersion = new StringBuilder(getTerminalModel()).append(HYPHEN)
-                    .append(getTerminalSoftwareVersion()).toString();
-            sBuildInfo = new StringBuilder(getTerminalVendor()).append(FORWARD_SLASH)
-                    .append(buildVersion).toString();
+            final String buildVersion = getTerminalModel() + HYPHEN + getTerminalSoftwareVersion();
+            sBuildInfo = getTerminalVendor() + FORWARD_SLASH + buildVersion;
         }
         return sBuildInfo;
     }
@@ -182,8 +181,8 @@ public class TerminalInfo {
      */
     public static String getClientInfo() {
         if (sClientInfo == null) {
-            sClientInfo = new StringBuilder(getClientVendor()).append(FORWARD_SLASH)
-                    .append(getClientVersion(AndroidFactory.getApplicationContext())).toString();
+            sClientInfo = getClientVendor() + FORWARD_SLASH
+                    + getClientVersion(AndroidFactory.getApplicationContext());
         }
         return sClientInfo;
     }

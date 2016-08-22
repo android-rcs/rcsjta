@@ -152,5 +152,9 @@
     <string name="Allow_extensions">Allow extensions</string>
     <string name="load">Load</string>
     <string name="save">Save</string>
+    <string name="info">Info</string>
+    <string name="label_about_title">RCS stack</string>
+    <string name="label_about">About RCS service</string>
+    <string name="label_about_app_version">App release %s</string>
     <string name="Directory_path_to_store_audios">Directory path to store audios</string>
 </resources>
