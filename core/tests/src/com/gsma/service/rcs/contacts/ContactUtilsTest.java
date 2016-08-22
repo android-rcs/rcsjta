@@ -19,6 +19,7 @@
 package com.gsma.service.rcs.contacts;
 
 import com.gsma.rcs.utils.ContactUtilMockContext;
+import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsPermissionDeniedException;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.contact.ContactUtil;
@@ -28,6 +29,8 @@ import android.text.TextUtils;
 
 public class ContactUtilsTest extends AndroidTestCase {
 
+    private static final Logger sLogger = Logger.getLogger(ContactUtilsTest.class.getName());
+
     private ContactUtil mContactUtils;
     private String mNextCountryAreaCode;
 
@@ -36,6 +39,10 @@ public class ContactUtilsTest extends AndroidTestCase {
         mContactUtils = ContactUtil.getInstance(new ContactUtilMockContext(getContext()));
         mNextCountryAreaCode = String.valueOf(Integer
                 .valueOf(ContactUtilMockContext.COUNTRY_AREA_CODE) + 1);
+        if (sLogger.isActivated()) {
+            sLogger.debug("Country Code='" + mContactUtils.getMyCountryCode()
+                    + "' Country Area Code='" + mContactUtils.getMyCountryAreaCode() + "'");
+        }
     }
 
     public void testIsValidContactNull() {
@@ -153,7 +160,9 @@ public class ContactUtilsTest extends AndroidTestCase {
     }
 
     public void testGetMyCountryAreaCode() throws RcsPermissionDeniedException {
-        assertEquals(ContactUtilMockContext.COUNTRY_AREA_CODE, mContactUtils.getMyCountryAreaCode());
+        assertEquals("Country Code='" + mContactUtils.getMyCountryCode() + "' Country Area Code='"
+                + mContactUtils.getMyCountryAreaCode() + "'",
+                ContactUtilMockContext.COUNTRY_AREA_CODE, mContactUtils.getMyCountryAreaCode());
     }
 
 }
