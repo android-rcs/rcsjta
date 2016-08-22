@@ -20,10 +20,11 @@ package com.orangelabs.rcs.ri;
 
 import com.gsma.services.rcs.RcsService.Build;
 
-import com.orangelabs.rcs.ri.utils.Utils;
-
 import android.app.Activity;
+import android.content.Context;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.widget.TextView;
 
@@ -43,12 +44,29 @@ public class AboutRI extends Activity {
         setContentView(R.layout.app_about);
 
         // Display release number
-        String appRelease = Utils.getApplicationVersion(this);
+        String appRelease = getApplicationVersion(this);
         TextView releaseView = (TextView) findViewById(R.id.release);
         releaseView.setText(getString(R.string.label_about_release, appRelease));
 
         TextView apiView = (TextView) findViewById(R.id.api);
         apiView.setText(getString(R.string.label_about_api, getBuildNumber()));
+    }
+
+    /**
+     * Returns the application version from manifest file
+     *
+     * @param ctx Context
+     * @return Application version or null if not found
+     */
+    public static String getApplicationVersion(Context ctx) {
+        String version = null;
+        try {
+            PackageInfo info = ctx.getPackageManager().getPackageInfo(ctx.getPackageName(), 0);
+            version = info.versionName + "." + info.versionCode;
+
+        } catch (PackageManager.NameNotFoundException ignored) {
+        }
+        return version;
     }
 
     /**

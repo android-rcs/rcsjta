@@ -63,7 +63,7 @@
 
     <!-- About menu -->
     <string name="label_about_title">Reference Implementation</string>
-    <string name="label_about_release">Release: %s</string>
+    <string name="label_about_release">App release: %s</string>
     <string name="label_about_api">API release: %s</string>
 
     <!-- Quick contact badge -->

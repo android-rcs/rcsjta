@@ -24,8 +24,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.Uri;
 import android.widget.Toast;
 
@@ -41,8 +39,6 @@ public class Utils {
 
     private static final Random sPendingIntentIdGenerator = new Random();
 
-    private static final String LOGTAG = LogUtils.getTag(Utils.class.getSimpleName());
-
     /**
      * Gets a unique ID for pending intent
      * 
@@ -50,22 +46,6 @@ public class Utils {
      */
     public static int getUniqueIdForPendingIntent() {
         return sPendingIntentIdGenerator.nextInt();
-    }
-
-    /**
-     * Returns the application version from manifest file
-     * 
-     * @param ctx Context
-     * @return Application version or null if not found
-     */
-    public static String getApplicationVersion(Context ctx) {
-        String version = null;
-        try {
-            PackageInfo info = ctx.getPackageManager().getPackageInfo(ctx.getPackageName(), 0);
-            version = info.versionName;
-        } catch (NameNotFoundException ignored) {
-        }
-        return version;
     }
 
     /**

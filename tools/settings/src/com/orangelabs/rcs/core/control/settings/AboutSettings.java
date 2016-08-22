@@ -45,20 +45,21 @@ public class AboutSettings extends Activity {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.app_about);
 
-        String versionName, versionCode;
+        String versionStack, versionApi;
         try {
             PackageInfo infos = getPackageManager().getPackageInfo(
                     RcsServiceControl.RCS_STACK_PACKAGENAME, 0);
-            versionName = infos.versionName;
-            versionCode = getBuildNumber();
+            versionStack = infos.versionName + "." + infos.versionCode;
+            versionApi = getBuildNumber();
+
         } catch (NameNotFoundException e) {
-            versionName = getString(R.string.label_api_unavailable);
-            versionCode = getString(R.string.label_api_unavailable);
+            versionStack = getString(R.string.label_api_unavailable);
+            versionApi = getString(R.string.label_api_unavailable);
         }
         TextView releaseView = (TextView) findViewById(R.id.release);
-        releaseView.setText(getString(R.string.label_about_release, versionName));
+        releaseView.setText(getString(R.string.label_about_release, versionStack));
         TextView apiView = (TextView) findViewById(R.id.api);
-        apiView.setText(getString(R.string.label_about_api, versionCode));
+        apiView.setText(getString(R.string.label_about_api, versionApi));
     }
 
     /**
