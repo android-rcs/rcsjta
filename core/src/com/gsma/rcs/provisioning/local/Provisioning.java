@@ -33,6 +33,7 @@ import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.CommonServiceConfiguration;
 import com.gsma.services.rcs.RcsService;
+import com.gsma.services.rcs.RcsServiceControl;
 import com.gsma.services.rcs.contact.ContactId;
 
 import android.Manifest;
@@ -41,6 +42,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.Uri;
@@ -53,13 +55,13 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.xml.sax.SAXException;
@@ -176,9 +178,71 @@ public class Provisioning extends AppCompatActivity {
                 loadXmlFile();
                 return true;
 
+            case R.id.about:
+                displayInfo();
+                return true;
+
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    /**
+     * Returns the application version from manifest file
+     *
+     * @return Application version or null if not found
+     */
+    private String getAppVersion() {
+        String version = "";
+        try {
+            PackageInfo info = getPackageManager().getPackageInfo(
+                    RcsServiceControl.RCS_STACK_PACKAGENAME, 0);
+            version = info.versionName + "." + info.versionCode;
+
+        } catch (PackageManager.NameNotFoundException ignored) {
+        }
+        return version;
+    }
+
+    /**
+     * Returns the GSMA version
+     *
+     * @return String
+     */
+    private String getGsmaVersion() {
+        StringBuilder version = new StringBuilder("API ");
+        version.append(RcsService.Build.API_CODENAME);
+        version.append(" ");
+        switch (RcsService.Build.API_VERSION) {
+            case RcsService.Build.VERSION_CODES.BASE:
+                version.append("Albatros 2.0.");
+                break;
+            case RcsService.Build.VERSION_CODES.BLACKBIRD:
+                version.append("Blackbird 1.5.");
+                break;
+            case RcsService.Build.VERSION_CODES.CPR:
+                version.append("Crane PR 1.6.");
+                break;
+            default:
+                version.append("Unknown 0.0");
+        }
+        version.append(RcsService.Build.API_INCREMENTAL);
+        return version.toString();
+    }
+
+    private void displayInfo() {
+        View view = View.inflate(mActivity, R.layout.rcs_provisioning_about, null);
+        // Display application release
+        TextView releaseView = (TextView) view.findViewById(R.id.app_version);
+        releaseView.setText(getString(R.string.label_about_app_version, getAppVersion()));
+        // Display GSMA version
+        TextView gsmaView = (TextView) view.findViewById(R.id.gsma_version);
+        gsmaView.setText(getGsmaVersion());
+        AlertDialog.Builder builder = new AlertDialog.Builder(this).setTitle(R.string.label_about)
+                .setView(view).setPositiveButton(R.string.label_ok, null);
+        AlertDialog dialog = builder.create();
+        dialog.setCanceledOnTouchOutside(false);
+        dialog.show();
     }
 
     @Override
@@ -211,8 +275,7 @@ public class Provisioning extends AppCompatActivity {
         }
         try {
             String[] xmlFiles = getProvisioningFiles();
-            LayoutInflater factory = LayoutInflater.from(this);
-            final View view = factory.inflate(R.layout.rcs_provisioning_generate_profile, null);
+            View view = View.inflate(mActivity, R.layout.rcs_provisioning_generate_profile, null);
             final EditText textEdit = (EditText) view.findViewById(R.id.msisdn);
             ContactId me = mRcsSettings.getUserProfileImsUserName();
             textEdit.setText(me == null ? "" : me.toString());

@@ -28,8 +28,9 @@ import android.os.Bundle;
 import android.text.format.DateUtils;
 import android.widget.TextView;
 
-import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 /**
  * A class to view the persisted information for video sharing <br>
@@ -47,6 +48,7 @@ public class VideoSharingLogView extends RcsActivity {
     private TextView mTxtViewReason;
     private TextView mTxtViewState;
     private TextView mTxtViewWidth;
+    private SimpleDateFormat sDateFormat;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -68,6 +70,16 @@ public class VideoSharingLogView extends RcsActivity {
         mTxtViewEncoding = (TextView) findViewById(R.id.history_log_item_encoding);
     }
 
+    private String getDateFromDb(long timestamp) {
+        if (0 == timestamp) {
+            return "";
+        }
+        if (sDateFormat == null) {
+            sDateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.getDefault());
+        }
+        return sDateFormat.format(new Date(timestamp));
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -80,7 +92,7 @@ public class VideoSharingLogView extends RcsActivity {
         mTxtViewState.setText(RiApplication.sVideoSharingStates[dao.getState().toInt()]);
         mTxtViewReason.setText(RiApplication.sVideoReasonCodes[dao.getReasonCode().toInt()]);
         mTxtViewDir.setText(RiApplication.getDirection(dao.getDirection()));
-        mTxtViewDate.setText(DateFormat.getInstance().format(new Date(dao.getTimestamp())));
+        mTxtViewDate.setText(getDateFromDb(dao.getTimestamp()));
         mTxtViewDuration.setText(DateUtils.formatElapsedTime(dao.getDuration() / 1000));
         mTxtViewHeight.setText(String.valueOf(dao.getHeight()));
         mTxtViewWidth.setText(String.valueOf(dao.getWidth()));
