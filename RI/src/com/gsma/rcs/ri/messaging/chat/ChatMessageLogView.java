@@ -30,7 +30,9 @@ import android.os.Bundle;
 import android.widget.TextView;
 
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 /**
  * A class to view the persisted information for chat message<br>
@@ -86,7 +88,7 @@ public class ChatMessageLogView extends RcsActivity {
             return "";
         }
         if (sDateFormat == null) {
-            sDateFormat = DateFormat.getInstance();
+            sDateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.getDefault());
         }
         return sDateFormat.format(new Date(timestamp));
     }

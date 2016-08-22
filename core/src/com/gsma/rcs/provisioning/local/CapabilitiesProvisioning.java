@@ -44,7 +44,6 @@ public class CapabilitiesProvisioning extends Fragment implements IProvisioningF
             .getLogger(CapabilitiesProvisioning.class.getName());
 
     private static RcsSettings sRcsSettings;
-    private View mRootView;
     private ProvisioningHelper mHelper;
 
     public static CapabilitiesProvisioning newInstance(RcsSettings rcsSettings) {
@@ -63,10 +62,10 @@ public class CapabilitiesProvisioning extends Fragment implements IProvisioningF
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        mRootView = inflater.inflate(R.layout.provisioning_capabilities, container, false);
-        mHelper = new ProvisioningHelper(mRootView, sRcsSettings);
+        View rootView = inflater.inflate(R.layout.provisioning_capabilities, container, false);
+        mHelper = new ProvisioningHelper(rootView, sRcsSettings);
         displayRcsSettings();
-        return mRootView;
+        return rootView;
     }
 
     @Override

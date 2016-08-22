@@ -1,271 +1,277 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             android:layout_width="fill_parent"
-             android:layout_height="wrap_content"
-             android:layout_margin="5dp">
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fillViewport="true">
+
+    <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                 android:layout_width="fill_parent"
+                 android:layout_height="wrap_content"
+                 android:layout_margin="5dp">
+
+        <TableRow android:layout_margin="2dp">
+
+            <TextView
+                android:layout_marginEnd="10dp"
+                android:layout_marginRight="10dp"
+                android:text="@string/label_log_id"/>
+
+            <TextView
+                android:id="@+id/history_log_item_id"
+                android:text="@string/text_dummy"/>
+        </TableRow>
+
+        <TableRow android:layout_margin="2dp">
+
+            <TextView
+                android:layout_marginEnd="10dp"
+                android:layout_marginRight="10dp"
+                android:text="@string/label_log_chat_id"/>
+
+            <TextView
+                android:id="@+id/history_log_item_chat_id"
+                android:text="@string/text_dummy"/>
+        </TableRow>
+
+        <TableRow android:layout_margin="2dp">
+
+            <TextView
+                android:layout_marginEnd="10dp"
+                android:layout_marginRight="10dp"
+                android:text="@string/label_log_contact"/>
+
+            <TextView
+                android:id="@+id/history_log_item_contact"
+                android:text="@string/contact_dummy"/>
+        </TableRow>
+
+        <TableRow android:layout_margin="2dp">
+
+            <TextView
+                android:layout_marginEnd="10dp"
+                android:layout_marginRight="10dp"
+                android:text="@string/label_log_state"/>
+
+            <TextView
+                android:id="@+id/history_log_item_state"
+                android:text="@string/text_dummy"/>
+        </TableRow>
+
+        <TableRow android:layout_margin="2dp">
+
+            <TextView
+                android:layout_marginEnd="10dp"
+                android:layout_marginRight="10dp"
+                android:text="@string/label_log_reason"/>
+
+            <TextView
+                android:id="@+id/history_log_item_reason"
+                android:text="@string/text_dummy"/>
+        </TableRow>
+
+        <TableRow android:layout_margin="2dp">
+
+            <TextView
+                android:layout_marginEnd="10dp"
+                android:layout_marginRight="10dp"
+                android:text="@string/label_log_dir"/>
+
+            <TextView
+                android:id="@+id/history_log_item_direction"
+                android:text="@string/direction_dummy"/>
+        </TableRow>
+
+        <TableRow android:layout_margin="2dp">
+
+            <TextView
+                android:layout_marginEnd="10dp"
+                android:layout_marginRight="10dp"
+                android:text="@string/label_log_disposition"/>
+
+            <TextView
+                android:id="@+id/history_log_item_disposition"
+                android:text="@string/text_dummy"/>
+        </TableRow>
+
+        <TableRow android:layout_margin="2dp">
+
+            <TextView
+                android:layout_marginEnd="10dp"
+                android:layout_marginRight="10dp"
+                android:text="@string/label_log_date"/>
+
+            <TextView
+                android:id="@+id/history_log_item_date"
+                android:text="@string/timestamp_dummy"/>
+        </TableRow>
 
-    <TableRow android:layout_margin="2dp">
-
-        <TextView
-            android:layout_marginEnd="10dp"
-            android:layout_marginRight="10dp"
-            android:text="@string/label_log_id"/>
-
-        <TextView
-            android:id="@+id/history_log_item_id"
-            android:text="@string/text_dummy"/>
-    </TableRow>
+        <TableRow android:layout_margin="2dp">
 
-    <TableRow android:layout_margin="2dp">
-
-        <TextView
-            android:layout_marginEnd="10dp"
-            android:layout_marginRight="10dp"
-            android:text="@string/label_log_chat_id"/>
-
-        <TextView
-            android:id="@+id/history_log_item_chat_id"
-            android:text="@string/text_dummy"/>
-    </TableRow>
+            <TextView
+                android:layout_marginEnd="10dp"
+                android:layout_marginRight="10dp"
+                android:text="@string/label_log_date_sent"/>
 
-    <TableRow android:layout_margin="2dp">
-
-        <TextView
-            android:layout_marginEnd="10dp"
-            android:layout_marginRight="10dp"
-            android:text="@string/label_log_contact"/>
-
-        <TextView
-            android:id="@+id/history_log_item_contact"
-            android:text="@string/contact_dummy"/>
-    </TableRow>
+            <TextView
+                android:id="@+id/history_log_item_date_sent"
+                android:text="@string/timestamp_dummy"/>
+        </TableRow>
 
-    <TableRow android:layout_margin="2dp">
-
-        <TextView
-            android:layout_marginEnd="10dp"
-            android:layout_marginRight="10dp"
-            android:text="@string/label_log_state"/>
-
-        <TextView
-            android:id="@+id/history_log_item_state"
-            android:text="@string/text_dummy"/>
-    </TableRow>
+        <TableRow android:layout_margin="2dp">
 
-    <TableRow android:layout_margin="2dp">
-
-        <TextView
-            android:layout_marginEnd="10dp"
-            android:layout_marginRight="10dp"
-            android:text="@string/label_log_reason"/>
-
-        <TextView
-            android:id="@+id/history_log_item_reason"
-            android:text="@string/text_dummy"/>
-    </TableRow>
+            <TextView
+                android:layout_marginEnd="10dp"
+                android:layout_marginRight="10dp"
+                android:text="@string/label_log_date_delivered"/>
 
-    <TableRow android:layout_margin="2dp">
-
-        <TextView
-            android:layout_marginEnd="10dp"
-            android:layout_marginRight="10dp"
-            android:text="@string/label_log_dir"/>
-
-        <TextView
-            android:id="@+id/history_log_item_direction"
-            android:text="@string/direction_dummy"/>
-    </TableRow>
+            <TextView
+                android:id="@+id/history_log_item_date_delivered"
+                android:text="@string/timestamp_dummy"/>
+        </TableRow>
 
-    <TableRow android:layout_margin="2dp">
-
-        <TextView
-            android:layout_marginEnd="10dp"
-            android:layout_marginRight="10dp"
-            android:text="@string/label_log_disposition"/>
-
-        <TextView
-            android:id="@+id/history_log_item_disposition"
-            android:text="@string/text_dummy"/>
-    </TableRow>
+        <TableRow android:layout_margin="2dp">
 
-    <TableRow android:layout_margin="2dp">
-
-        <TextView
-            android:layout_marginEnd="10dp"
-            android:layout_marginRight="10dp"
-            android:text="@string/label_log_date"/>
-
-        <TextView
-            android:id="@+id/history_log_item_date"
-            android:text="@string/timestamp_dummy"/>
-    </TableRow>
+            <TextView
+                android:layout_marginEnd="10dp"
+                android:layout_marginRight="10dp"
+                android:text="@string/label_log_date_displayed"/>
 
-    <TableRow android:layout_margin="2dp">
+            <TextView
+                android:id="@+id/history_log_item_date_displayed"
+                android:text="@string/timestamp_dummy"/>
+        </TableRow>
 
-        <TextView
-            android:layout_marginEnd="10dp"
-            android:layout_marginRight="10dp"
-            android:text="@string/label_log_date_sent"/>
+        <TableRow android:layout_margin="2dp">
 
-        <TextView
-            android:id="@+id/history_log_item_date_sent"
-            android:text="@string/timestamp_dummy"/>
-    </TableRow>
+            <TextView
+                android:layout_marginEnd="10dp"
+                android:layout_marginRight="10dp"
+                android:text="@string/label_log_read_status"/>
 
-    <TableRow android:layout_margin="2dp">
+            <TextView
+                android:id="@+id/history_log_item_read_status"
+                android:text="@string/text_dummy"/>
+        </TableRow>
 
-        <TextView
-            android:layout_marginEnd="10dp"
-            android:layout_marginRight="10dp"
-            android:text="@string/label_log_date_delivered"/>
+        <TableRow android:layout_margin="2dp">
 
-        <TextView
-            android:id="@+id/history_log_item_date_delivered"
-            android:text="@string/timestamp_dummy"/>
-    </TableRow>
+            <TextView
+                android:layout_marginEnd="10dp"
+                android:layout_marginRight="10dp"
+                android:text="@string/label_log_expired_delivery"/>
 
-    <TableRow android:layout_margin="2dp">
+            <TextView
+                android:id="@+id/history_log_item_expired_delivery"
+                android:text="@string/text_dummy"/>
+        </TableRow>
 
-        <TextView
-            android:layout_marginEnd="10dp"
-            android:layout_marginRight="10dp"
-            android:text="@string/label_log_date_displayed"/>
+        <TableRow android:layout_margin="2dp">
 
-        <TextView
-            android:id="@+id/history_log_item_date_displayed"
-            android:text="@string/timestamp_dummy"/>
-    </TableRow>
+            <TextView
+                android:layout_marginEnd="10dp"
+                android:layout_marginRight="10dp"
+                android:text="@string/label_log_filename"/>
 
-    <TableRow android:layout_margin="2dp">
+            <TextView
+                android:id="@+id/history_log_item_filename"
+                android:text="@string/text_dummy"/>
+        </TableRow>
 
-        <TextView
-            android:layout_marginEnd="10dp"
-            android:layout_marginRight="10dp"
-            android:text="@string/label_log_read_status"/>
+        <TableRow android:layout_margin="2dp">
 
-        <TextView
-            android:id="@+id/history_log_item_read_status"
-            android:text="@string/text_dummy"/>
-    </TableRow>
+            <TextView
+                android:layout_marginEnd="10dp"
+                android:layout_marginRight="10dp"
+                android:text="@string/label_log_file_size"/>
 
-    <TableRow android:layout_margin="2dp">
+            <TextView
+                android:id="@+id/history_log_item_size"
+                android:text="@string/number_dummy"/>
+        </TableRow>
 
-        <TextView
-            android:layout_marginEnd="10dp"
-            android:layout_marginRight="10dp"
-            android:text="@string/label_log_expired_delivery"/>
+        <TableRow android:layout_margin="2dp">
 
-        <TextView
-            android:id="@+id/history_log_item_expired_delivery"
-            android:text="@string/text_dummy"/>
-    </TableRow>
+            <TextView
+                android:layout_marginEnd="10dp"
+                android:layout_marginRight="10dp"
+                android:text="@string/label_log_transferred"/>
 
-    <TableRow android:layout_margin="2dp">
+            <TextView
+                android:id="@+id/history_log_item_transferred"
+                android:text="@string/number_dummy"/>
+        </TableRow>
 
-        <TextView
-            android:layout_marginEnd="10dp"
-            android:layout_marginRight="10dp"
-            android:text="@string/label_log_filename"/>
+        <TableRow android:layout_margin="2dp">
 
-        <TextView
-            android:id="@+id/history_log_item_filename"
-            android:text="@string/text_dummy"/>
-    </TableRow>
+            <TextView
+                android:layout_marginEnd="10dp"
+                android:layout_marginRight="10dp"
+                android:text="@string/label_log_mime"/>
 
-    <TableRow android:layout_margin="2dp">
+            <TextView
+                android:id="@+id/history_log_item_mime"
+                android:text="@string/text_dummy"/>
+        </TableRow>
 
-        <TextView
-            android:layout_marginEnd="10dp"
-            android:layout_marginRight="10dp"
-            android:text="@string/label_log_file_size"/>
+        <TableRow android:layout_margin="2dp">
 
-        <TextView
-            android:id="@+id/history_log_item_size"
-            android:text="@string/number_dummy"/>
-    </TableRow>
+            <TextView
+                android:layout_marginEnd="10dp"
+                android:layout_marginRight="10dp"
+                android:text="@string/label_log_date_file_expiration"/>
 
-    <TableRow android:layout_margin="2dp">
+            <TextView
+                android:id="@+id/history_log_item_date_file_expiration"
+                android:text="@string/timestamp_dummy"/>
+        </TableRow>
 
-        <TextView
-            android:layout_marginEnd="10dp"
-            android:layout_marginRight="10dp"
-            android:text="@string/label_log_transferred"/>
+        <TableRow android:layout_margin="2dp">
 
-        <TextView
-            android:id="@+id/history_log_item_transferred"
-            android:text="@string/number_dummy"/>
-    </TableRow>
+            <TextView
+                android:layout_marginEnd="10dp"
+                android:layout_marginRight="10dp"
+                android:text="@string/label_log_file_uri"/>
 
-    <TableRow android:layout_margin="2dp">
+            <TextView
+                android:id="@+id/history_log_item_uri"
+                android:text="@string/text_dummy"/>
+        </TableRow>
 
-        <TextView
-            android:layout_marginEnd="10dp"
-            android:layout_marginRight="10dp"
-            android:text="@string/label_log_mime"/>
+        <TableRow android:layout_margin="2dp">
 
-        <TextView
-            android:id="@+id/history_log_item_mime"
-            android:text="@string/text_dummy"/>
-    </TableRow>
+            <TextView
+                android:layout_marginEnd="10dp"
+                android:layout_marginRight="10dp"
+                android:text="@string/label_log_icon_mime"/>
 
-    <TableRow android:layout_margin="2dp">
+            <TextView
+                android:id="@+id/history_log_item_icon_mime"
+                android:text="@string/text_dummy"/>
+        </TableRow>
 
-        <TextView
-            android:layout_marginEnd="10dp"
-            android:layout_marginRight="10dp"
-            android:text="@string/label_log_date_file_expiration"/>
+        <TableRow android:layout_margin="2dp">
 
-        <TextView
-            android:id="@+id/history_log_item_date_file_expiration"
-            android:text="@string/timestamp_dummy"/>
-    </TableRow>
+            <TextView
+                android:layout_marginEnd="10dp"
+                android:layout_marginRight="10dp"
+                android:text="@string/label_log_date_icon_expiration"/>
 
-    <TableRow android:layout_margin="2dp">
+            <TextView
+                android:id="@+id/history_log_item_date_icon_expiration"
+                android:text="@string/timestamp_dummy"/>
+        </TableRow>
 
-        <TextView
-            android:layout_marginEnd="10dp"
-            android:layout_marginRight="10dp"
-            android:text="@string/label_log_file_uri"/>
+        <TableRow android:layout_margin="2dp">
 
-        <TextView
-            android:id="@+id/history_log_item_uri"
-            android:text="@string/text_dummy"/>
-    </TableRow>
+            <TextView
+                android:layout_marginEnd="10dp"
+                android:layout_marginRight="10dp"
+                android:text="@string/label_log_icon_uri"/>
 
-    <TableRow android:layout_margin="2dp">
+            <TextView
+                android:id="@+id/history_log_item_icon"
+                android:text="@string/text_dummy"/>
+        </TableRow>
 
-        <TextView
-            android:layout_marginEnd="10dp"
-            android:layout_marginRight="10dp"
-            android:text="@string/label_log_icon_mime"/>
-
-        <TextView
-            android:id="@+id/history_log_item_icon_mime"
-            android:text="@string/text_dummy"/>
-    </TableRow>
-
-    <TableRow android:layout_margin="2dp">
-
-        <TextView
-            android:layout_marginEnd="10dp"
-            android:layout_marginRight="10dp"
-            android:text="@string/label_log_date_icon_expiration"/>
-
-        <TextView
-            android:id="@+id/history_log_item_date_icon_expiration"
-            android:text="@string/timestamp_dummy"/>
-    </TableRow>
-
-    <TableRow android:layout_margin="2dp">
-
-        <TextView
-            android:layout_marginEnd="10dp"
-            android:layout_marginRight="10dp"
-            android:text="@string/label_log_icon_uri"/>
-
-        <TextView
-            android:id="@+id/history_log_item_icon"
-            android:text="@string/text_dummy"/>
-    </TableRow>
-
-</TableLayout>
+    </TableLayout>
+</ScrollView>
