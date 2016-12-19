@@ -35,15 +35,8 @@ android {
         versionCode 2
         versionName "2.0"
         archivesBaseName = "RCS_Core"
-        jackOptions {
-            enabled true
-        }
     }
 
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
 }
 
 dependencies {
