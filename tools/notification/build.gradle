@@ -37,7 +37,7 @@ android {
 
 dependencies {
     compile project(':api')
-    compile 'com.android.support:support-v4:21.0.0'
+    compile 'com.android.support:support-v4:25.0.1'
 }
 
 //Below install dependecy was added to always install RCS service before
