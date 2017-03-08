@@ -481,7 +481,7 @@ public class HttpUploadManager extends HttpTransferManager {
         String line;
         try {
             while ((line = reader.readLine()) != null) {
-                sb.append(line);
+                sb.append(line).append('\n');
             }
             return sb.toString().getBytes(UTF8);
 
