@@ -1,6 +1,8 @@
 apply plugin: 'com.android.library'
 
 android {
+    namespace "gov2.nist"
+
     compileSdkVersion rootProject.compileSdkVersion
     buildToolsVersion rootProject.buildToolsVersion
 
@@ -10,7 +12,6 @@ android {
             manifest.srcFile 'AndroidManifestLibrary.xml'
             java.srcDirs = ['src']
             resources.srcDirs = ['src']
-            aidl.srcDirs = ['src']
             renderscript.srcDirs = ['src']
             res.srcDirs = ['res']
             assets.srcDirs = ['assets']
@@ -21,5 +22,5 @@ android {
     lintOptions {
         abortOnError false
     }
-	
+
 }

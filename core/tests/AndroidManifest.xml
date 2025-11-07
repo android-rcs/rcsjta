@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <!-- package name must be unique so suffix with "tests" so package loader doesn't ignore us -->
-<manifest package="com.gsma.rcs.tests"
-          xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!--
       We add an application tag here just so that we can indicate that

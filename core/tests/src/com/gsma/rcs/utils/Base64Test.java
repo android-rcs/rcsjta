@@ -24,15 +24,15 @@ public class Base64Test extends AndroidTestCase {
 
     public final void testBase64() {
         String ss = "2 + 2 = quatre, non 5?";
-        assertEquals(Base64.encodeBase64ToString(ss.getBytes()), "MiArIDIgPSBxdWF0cmUsIG5vbiA1Pw==");
-        assertEquals(new String(Base64.encodeBase64(ss.getBytes())),
-                "MiArIDIgPSBxdWF0cmUsIG5vbiA1Pw==");
-        assertEquals(Base64.encodeBase64ToString(Base64
-                .decodeBase64(("MiArIDIgPSBxdWF0cmUsIG5vbiA1Pw==").getBytes())),
-                "MiArIDIgPSBxdWF0cmUsIG5vbiA1Pw==");
+        assertEquals("MiArIDIgPSBxdWF0cmUsIG5vbiA1Pw==", Base64.encodeBase64ToString(ss.getBytes()));
+        assertEquals("MiArIDIgPSBxdWF0cmUsIG5vbiA1Pw==",
+                new String(Base64.encodeBase64(ss.getBytes())));
+        assertEquals("MiArIDIgPSBxdWF0cmUsIG5vbiA1Pw==",
+                Base64.encodeBase64ToString(Base64
+                        .decodeBase64(("MiArIDIgPSBxdWF0cmUsIG5vbiA1Pw==").getBytes())));
         assertEquals(
-                new String(Base64.decodeBase64(("MiArIDIgPSBxdWF0cmUsIG5vbiA1Pw==").getBytes())),
-                ss);
+                ss,
+                new String(Base64.decodeBase64(("MiArIDIgPSBxdWF0cmUsIG5vbiA1Pw==").getBytes())));
     }
 
 }

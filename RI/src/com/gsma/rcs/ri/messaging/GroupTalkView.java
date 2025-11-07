@@ -643,46 +643,40 @@ public class GroupTalkView extends RcsFragmentActivity implements
             Log.d(LOGTAG, "onContextItemSelected Id=".concat(id));
         }
         try {
-            switch (item.getItemId()) {
-                case R.id.menu_view_group_delivery:
-                    GroupDeliveryInfoList.startActivity(this, id);
+            int itemId = item.getItemId();
+            if (itemId == R.id.menu_view_group_delivery) {
+                GroupDeliveryInfoList.startActivity(this, id);
+                return true;
+            } else if (itemId == R.id.menu_delete_message) {
+                if (Message.HISTORYLOG_MEMBER_ID == providerId) {
+                    mChatService.deleteMessage(id);
+                } else {
+                    mFileTransferService.deleteFileTransfer(id);
+                }
+                return true;
+            } else if (itemId == R.id.menu_view_detail) {
+                if (Message.HISTORYLOG_MEMBER_ID == providerId) {
+                    ChatMessageLogView.startActivity(this, id);
+                } else {
+                    FileTransferLogView.startActivity(this, id);
+                }
+                return true;
+            } else if (itemId == R.id.menu_display_content) {
+                if (FileTransferLog.HISTORYLOG_MEMBER_ID == providerId) {
+                    String file = cursor.getString(cursor
+                            .getColumnIndexOrThrow(HistoryLog.CONTENT));
+                    Utils.showPicture(this, Uri.parse(file));
+                    markFileTransferAsRead(cursor, id);
                     return true;
-
-                case R.id.menu_delete_message:
-                    if (ChatLog.Message.HISTORYLOG_MEMBER_ID == providerId) {
-                        mChatService.deleteMessage(id);
-                    } else {
-                        mFileTransferService.deleteFileTransfer(id);
-                    }
+                }
+            } else if (itemId == R.id.menu_listen_content) {
+                if (FileTransferLog.HISTORYLOG_MEMBER_ID == providerId) {
+                    String file = cursor.getString(cursor
+                            .getColumnIndexOrThrow(HistoryLog.CONTENT));
+                    Utils.playAudio(this, Uri.parse(file));
+                    markFileTransferAsRead(cursor, id);
                     return true;
-
-                case R.id.menu_view_detail:
-                    if (ChatLog.Message.HISTORYLOG_MEMBER_ID == providerId) {
-                        ChatMessageLogView.startActivity(this, id);
-                    } else {
-                        FileTransferLogView.startActivity(this, id);
-                    }
-                    return true;
-
-                case R.id.menu_display_content:
-                    if (FileTransferLog.HISTORYLOG_MEMBER_ID == providerId) {
-                        String file = cursor.getString(cursor
-                                .getColumnIndexOrThrow(HistoryLog.CONTENT));
-                        Utils.showPicture(this, Uri.parse(file));
-                        markFileTransferAsRead(cursor, id);
-                        return true;
-                    }
-                    break;
-
-                case R.id.menu_listen_content:
-                    if (FileTransferLog.HISTORYLOG_MEMBER_ID == providerId) {
-                        String file = cursor.getString(cursor
-                                .getColumnIndexOrThrow(HistoryLog.CONTENT));
-                        Utils.playAudio(this, Uri.parse(file));
-                        markFileTransferAsRead(cursor, id);
-                        return true;
-                    }
-                    break;
+                }
             }
             return super.onContextItemSelected(item);
         } catch (RcsServiceException e) {
@@ -954,59 +948,45 @@ public class GroupTalkView extends RcsFragmentActivity implements
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         try {
-            switch (item.getItemId()) {
-                case R.id.menu_insert_smiley:
-                    AlertDialog alert = Smileys.showSmileyDialog(this, mComposeText,
-                            getResources(), getString(R.string.menu_insert_smiley));
-                    registerDialog(alert);
-                    break;
-
-                case R.id.menu_participants:
-                    alert = Utils.showList(this, getString(R.string.menu_participants),
-                            getSetOfParticipants(mGroupChat.getParticipants()));
-                    registerDialog(alert);
-                    break;
-
-                case R.id.menu_add_participant:
-                    addParticipants();
-                    break;
-
-                case R.id.menu_quicktext:
-                    addQuickText();
-                    break;
-
-                case R.id.menu_send_file:
-                    SendGroupFile.startActivity(this, mChatId);
-                    break;
-
-                case R.id.menu_send_geoloc:
-                    getGeoLoc();
-                    break;
-
-                case R.id.menu_showus_map:
-                    DisplayGeoloc.showContactsOnMap(this, mGroupChat.getParticipants().keySet());
-                    break;
-
-                case R.id.menu_close_session:
-                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                    builder.setTitle(R.string.title_chat_exit);
-                    builder.setPositiveButton(R.string.label_ok,
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int which) {
-                                    if (mGroupChat != null) {
-                                        try {
-                                            mGroupChat.leave();
-                                        } catch (RcsServiceException e) {
-                                            showExceptionThenExit(e);
-                                        }
+            int itemId = item.getItemId();
+            if (itemId == R.id.menu_insert_smiley) {
+                AlertDialog alert = Smileys.showSmileyDialog(this, mComposeText,
+                        getResources(), getString(R.string.menu_insert_smiley));
+                registerDialog(alert);
+            } else if (itemId == R.id.menu_participants) {
+                AlertDialog alert;
+                alert = Utils.showList(this, getString(R.string.menu_participants),
+                        getSetOfParticipants(mGroupChat.getParticipants()));
+                registerDialog(alert);
+            } else if (itemId == R.id.menu_add_participant) {
+                addParticipants();
+            } else if (itemId == R.id.menu_quicktext) {
+                addQuickText();
+            } else if (itemId == R.id.menu_send_file) {
+                SendGroupFile.startActivity(this, mChatId);
+            } else if (itemId == R.id.menu_send_geoloc) {
+                getGeoLoc();
+            } else if (itemId == R.id.menu_showus_map) {
+                DisplayGeoloc.showContactsOnMap(this, mGroupChat.getParticipants().keySet());
+            } else if (itemId == R.id.menu_close_session) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle(R.string.title_chat_exit);
+                builder.setPositiveButton(R.string.label_ok,
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                if (mGroupChat != null) {
+                                    try {
+                                        mGroupChat.leave();
+                                    } catch (RcsServiceException e) {
+                                        showExceptionThenExit(e);
                                     }
-                                    GroupTalkView.this.finish();
                                 }
-                            });
-                    builder.setNegativeButton(R.string.label_cancel, null);
-                    builder.setCancelable(true);
-                    registerDialog(builder.show());
-                    break;
+                                GroupTalkView.this.finish();
+                            }
+                        });
+                builder.setNegativeButton(R.string.label_cancel, null);
+                builder.setCancelable(true);
+                registerDialog(builder.show());
             }
 
         } catch (RcsServiceException e) {

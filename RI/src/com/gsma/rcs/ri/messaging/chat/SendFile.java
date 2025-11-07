@@ -273,14 +273,12 @@ public abstract class SendFile extends RcsActivity implements ISendFile {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.menu_record_audio:
-                startActivityForResult(new Intent(this, AudioMessageRecordActivity.class),
-                        RC_RECORD_AUDIO);
-                break;
-            case R.id.menu_close_session:
-                quitSession();
-                break;
+        int itemId = item.getItemId();
+        if (itemId == R.id.menu_record_audio) {
+            startActivityForResult(new Intent(this, AudioMessageRecordActivity.class),
+                    RC_RECORD_AUDIO);
+        } else if (itemId == R.id.menu_close_session) {
+            quitSession();
         }
         return true;
     }

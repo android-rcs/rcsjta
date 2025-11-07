@@ -520,10 +520,8 @@ public class OutgoingVideoSharing extends RcsActivity implements VideoPlayerList
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.menu_close_session:
-                quitSession();
-                break;
+        if (item.getItemId() == R.id.menu_close_session) {
+            quitSession();
         }
         return true;
     }

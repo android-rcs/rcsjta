@@ -1,6 +1,7 @@
 apply plugin: 'com.android.application'
 
 android {
+    namespace 'com.gsma.rcs'
 
     //Required to support the old folder structure
     sourceSets {
@@ -8,7 +9,6 @@ android {
             manifest.srcFile 'AndroidManifest.xml'
             java.srcDirs = ['src']
             resources.srcDirs = ['src']
-            aidl.srcDirs = ['src']
             renderscript.srcDirs = ['src']
             res.srcDirs = ['res']
             assets.srcDirs = ['assets']
@@ -40,10 +40,10 @@ android {
 }
 
 dependencies {
-    compile project(':bouncycastle')
-    compile project(':nist_sip')
-    compile project(':api')
-    compile 'dnsjava:dnsjava:2.1.7'
-    compile 'com.android.support:support-v4:25.0.1'
-    compile 'com.android.support:appcompat-v7:25.0.1'
+    implementation project(':bouncycastle')
+    implementation project(':nist_sip')
+    implementation project(':api')
+    implementation 'dnsjava:dnsjava:2.1.7'
+    implementation 'com.android.support:support-v4:25.0.1'
+    implementation 'com.android.support:appcompat-v7:25.0.1'
 }

@@ -152,21 +152,19 @@ public class TalkList extends RcsActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         try {
-            switch (item.getItemId()) {
-                case R.id.menu_clear_log:
-                    /* Delete all messages */
-                    if (!isServiceConnected(RcsServiceName.CHAT, RcsServiceName.FILE_TRANSFER)) {
-                        showMessage(R.string.label_service_not_available);
-                        break;
-                    }
-                    if (LogUtils.isActive) {
-                        Log.d(LOGTAG, "delete conversations");
-                    }
-                    mChatService.deleteOneToOneChats();
-                    mChatService.deleteGroupChats();
-                    mFileTransferService.deleteOneToOneFileTransfers();
-                    mFileTransferService.deleteGroupFileTransfers();
-                    break;
+            if (item.getItemId() == R.id.menu_clear_log) {
+                /* Delete all messages */
+                if (!isServiceConnected(RcsServiceName.CHAT, RcsServiceName.FILE_TRANSFER)) {
+                    showMessage(R.string.label_service_not_available);
+                    return true;
+                }
+                if (LogUtils.isActive) {
+                    Log.d(LOGTAG, "delete conversations");
+                }
+                mChatService.deleteOneToOneChats();
+                mChatService.deleteGroupChats();
+                mFileTransferService.deleteOneToOneFileTransfers();
+                mFileTransferService.deleteGroupFileTransfers();
             }
         } catch (RcsServiceNotAvailableException e) {
             showMessage(R.string.label_service_not_available);
@@ -195,27 +193,24 @@ public class TalkList extends RcsActivity {
             Log.d(LOGTAG, "onContextItemSelected chatId=".concat(chatId));
         }
         try {
-            switch (item.getItemId()) {
-                case R.id.menu_delete_message:
-                    if (!isServiceConnected(RcsServiceName.CHAT, RcsServiceName.FILE_TRANSFER)) {
-                        showMessage(R.string.error_conversation_delete);
-                        return true;
-                    }
-                    if (LogUtils.isActive) {
-                        Log.d(LOGTAG, "Delete conversation for chatId=".concat(chatId));
-                    }
-                    if (message.isGroupChat()) {
-                        mChatService.deleteGroupChat(chatId);
-                        mFileTransferService.deleteGroupFileTransfers(chatId);
-                    } else {
-                        mChatService.deleteOneToOneChat(contact);
-                        mFileTransferService.deleteOneToOneFileTransfers(contact);
-                    }
+            if (item.getItemId() == R.id.menu_delete_message) {
+                if (!isServiceConnected(RcsServiceName.CHAT, RcsServiceName.FILE_TRANSFER)) {
+                    showMessage(R.string.error_conversation_delete);
                     return true;
-
-                default:
-                    return super.onContextItemSelected(item);
+                }
+                if (LogUtils.isActive) {
+                    Log.d(LOGTAG, "Delete conversation for chatId=".concat(chatId));
+                }
+                if (message.isGroupChat()) {
+                    mChatService.deleteGroupChat(chatId);
+                    mFileTransferService.deleteGroupFileTransfers(chatId);
+                } else {
+                    mChatService.deleteOneToOneChat(contact);
+                    mFileTransferService.deleteOneToOneFileTransfers(contact);
+                }
+                return true;
             }
+            return super.onContextItemSelected(item);
         } catch (RcsServiceException e) {
             showExceptionThenExit(e);
             return true;
@@ -262,12 +257,12 @@ public class TalkList extends RcsActivity {
         mOneToOneFileTransferListener = new OneToOneFileTransferListener() {
             @Override
             public void onStateChanged(ContactId contact, String transferId,
-                    FileTransfer.State state, FileTransfer.ReasonCode reasonCode) {
+                                       FileTransfer.State state, FileTransfer.ReasonCode reasonCode) {
             }
 
             @Override
             public void onProgressUpdate(ContactId contact, String transferId, long currentSize,
-                    long totalSize) {
+                                         long totalSize) {
             }
 
             @Override
@@ -281,8 +276,8 @@ public class TalkList extends RcsActivity {
         mOneToOneChatListener = new OneToOneChatListener() {
             @Override
             public void onMessageStatusChanged(ContactId contact, String mimeType, String msgId,
-                    ChatLog.Message.Content.Status status,
-                    ChatLog.Message.Content.ReasonCode reasonCode) {
+                                               ChatLog.Message.Content.Status status,
+                                               ChatLog.Message.Content.ReasonCode reasonCode) {
             }
 
             @Override
@@ -300,17 +295,17 @@ public class TalkList extends RcsActivity {
         mGroupFileTransferListener = new GroupFileTransferListener() {
             @Override
             public void onStateChanged(String chatId, String transferId, FileTransfer.State state,
-                    FileTransfer.ReasonCode reasonCode) {
+                                       FileTransfer.ReasonCode reasonCode) {
             }
 
             @Override
             public void onDeliveryInfoChanged(String chatId, ContactId contact, String transferId,
-                    GroupDeliveryInfo.Status status, GroupDeliveryInfo.ReasonCode reasonCode) {
+                                              GroupDeliveryInfo.Status status, GroupDeliveryInfo.ReasonCode reasonCode) {
             }
 
             @Override
             public void onProgressUpdate(String chatId, String transferId, long currentSize,
-                    long totalSize) {
+                                         long totalSize) {
             }
 
             @Override
@@ -324,7 +319,7 @@ public class TalkList extends RcsActivity {
         mGroupChatListener = new GroupChatListener() {
             @Override
             public void onStateChanged(String chatId, GroupChat.State state,
-                    GroupChat.ReasonCode reasonCode) {
+                                       GroupChat.ReasonCode reasonCode) {
             }
 
             @Override
@@ -333,19 +328,19 @@ public class TalkList extends RcsActivity {
 
             @Override
             public void onMessageStatusChanged(String chatId, String mimeType, String msgId,
-                    ChatLog.Message.Content.Status status,
-                    ChatLog.Message.Content.ReasonCode reasonCode) {
+                                               ChatLog.Message.Content.Status status,
+                                               ChatLog.Message.Content.ReasonCode reasonCode) {
             }
 
             @Override
             public void onMessageGroupDeliveryInfoChanged(String chatId, ContactId contact,
-                    String mimeType, String msgId, GroupDeliveryInfo.Status status,
-                    GroupDeliveryInfo.ReasonCode reasonCode) {
+                                                          String mimeType, String msgId, GroupDeliveryInfo.Status status,
+                                                          GroupDeliveryInfo.ReasonCode reasonCode) {
             }
 
             @Override
             public void onParticipantStatusChanged(String chatId, ContactId contact,
-                    GroupChat.ParticipantStatus status) {
+                                                   GroupChat.ParticipantStatus status) {
             }
 
             @Override
@@ -394,7 +389,7 @@ public class TalkList extends RcsActivity {
     /**
      * Notify new conversation event
      *
-     * @param ctx the context
+     * @param ctx    the context
      * @param action the action intent
      */
     public static void notifyNewConversationEvent(Context ctx, String action) {

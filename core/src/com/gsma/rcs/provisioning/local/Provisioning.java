@@ -159,32 +159,28 @@ public class Provisioning extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.save:
-                if (sLogger.isActivated()) {
-                    sLogger.debug("Save provisioning");
-                }
-                for (IProvisioningFragment fragment : mAdapter.getFragments()) {
-                    fragment.persistRcsSettings();
-                }
-                Toast.makeText(this, getString(R.string.label_reboot_service), Toast.LENGTH_LONG)
-                        .show();
-                return true;
-
-            case R.id.load:
-                if (sLogger.isActivated()) {
-                    sLogger.debug("Load provisioning");
-                }
-                loadXmlFile();
-                return true;
-
-            case R.id.about:
-                displayInfo();
-                return true;
-
-            default:
-                return super.onOptionsItemSelected(item);
+        int itemId = item.getItemId();
+        if (itemId == R.id.save) {
+            if (sLogger.isActivated()) {
+                sLogger.debug("Save provisioning");
+            }
+            for (IProvisioningFragment fragment : mAdapter.getFragments()) {
+                fragment.persistRcsSettings();
+            }
+            Toast.makeText(this, getString(R.string.label_reboot_service), Toast.LENGTH_LONG)
+                    .show();
+            return true;
+        } else if (itemId == R.id.load) {
+            if (sLogger.isActivated()) {
+                sLogger.debug("Load provisioning");
+            }
+            loadXmlFile();
+            return true;
+        } else if (itemId == R.id.about) {
+            displayInfo();
+            return true;
         }
+        return super.onOptionsItemSelected(item);
     }
 
     /**

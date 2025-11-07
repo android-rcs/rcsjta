@@ -628,20 +628,14 @@ public class OneToOneTalkView extends RcsFragmentActivity implements
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         try {
-            switch (item.getItemId()) {
-                case R.id.menu_send_geoloc:
-                    /* Start a new activity to select a geolocation */
-                    startActivityForResult(new Intent(this, EditGeoloc.class), SELECT_GEOLOCATION);
-                    break;
-
-                case R.id.menu_send_rcs_file:
-                    SendSingleFile.startActivity(this, mContact);
-                    break;
-
-                case R.id.menu_delete_talk:
-                    mFileTransferService.deleteOneToOneFileTransfers(mContact);
-                    mChatService.deleteOneToOneChat(mContact);
-                    break;
+            int itemId = item.getItemId();
+            if (itemId == R.id.menu_send_geoloc) {/* Start a new activity to select a geolocation */
+                startActivityForResult(new Intent(this, EditGeoloc.class), SELECT_GEOLOCATION);
+            } else if (itemId == R.id.menu_send_rcs_file) {
+                SendSingleFile.startActivity(this, mContact);
+            } else if (itemId == R.id.menu_delete_talk) {
+                mFileTransferService.deleteOneToOneFileTransfers(mContact);
+                mChatService.deleteOneToOneChat(mContact);
             }
         } catch (RcsServiceException e) {
             showExceptionThenExit(e);
@@ -748,67 +742,58 @@ public class OneToOneTalkView extends RcsFragmentActivity implements
             Log.d(LOGTAG, "onContextItemSelected Id=".concat(id));
         }
         try {
-            switch (item.getItemId()) {
-                case R.id.menu_delete_message:
-                    switch (providerId) {
-                        case ChatLog.Message.HISTORYLOG_MEMBER_ID:
-                            mChatService.deleteMessage(id);
-                            return true;
-                        case FileTransferLog.HISTORYLOG_MEMBER_ID:
-                            mFileTransferService.deleteFileTransfer(id);
-                            return true;
-                    }
-                    break;
+            int itemId = item.getItemId();
+            if (itemId == R.id.menu_delete_message) {
+                switch (providerId) {
+                    case ChatLog.Message.HISTORYLOG_MEMBER_ID:
+                        mChatService.deleteMessage(id);
+                        return true;
+                    case FileTransferLog.HISTORYLOG_MEMBER_ID:
+                        mFileTransferService.deleteFileTransfer(id);
+                        return true;
+                }
+            } else if (itemId == R.id.menu_resend_message) {
+                switch (providerId) {
+                    case ChatLog.Message.HISTORYLOG_MEMBER_ID:
+                        OneToOneChat chat = mChatService.getOneToOneChat(mContact);
+                        if (chat != null) {
+                            chat.resendMessage(id);
+                        }
+                        return true;
 
-                case R.id.menu_resend_message:
-                    switch (providerId) {
-                        case ChatLog.Message.HISTORYLOG_MEMBER_ID:
-                            OneToOneChat chat = mChatService.getOneToOneChat(mContact);
-                            if (chat != null) {
-                                chat.resendMessage(id);
-                            }
-                            return true;
-
-                        case FileTransferLog.HISTORYLOG_MEMBER_ID:
-                            FileTransfer fileTransfer = mFileTransferService.getFileTransfer(id);
-                            if (fileTransfer != null) {
-                                fileTransfer.resendTransfer();
-                            }
-                            return true;
-                    }
-                    break;
-
-                case R.id.menu_display_content:
-                    switch (providerId) {
-                        case FileTransferLog.HISTORYLOG_MEMBER_ID:
-                            String file = cursor.getString(cursor
-                                    .getColumnIndexOrThrow(HistoryLog.CONTENT));
-                            Utils.showPicture(this, Uri.parse(file));
-                            markFileTransferAsRead(cursor, id);
-                            return true;
-                    }
-                    break;
-
-                case R.id.menu_view_detail:
-                    switch (providerId) {
-                        case ChatLog.Message.HISTORYLOG_MEMBER_ID:
-                            ChatMessageLogView.startActivity(this, id);
-                            return true;
-                        case FileTransferLog.HISTORYLOG_MEMBER_ID:
-                            FileTransferLogView.startActivity(this, id);
-                            return true;
-                    }
-                    break;
-
-                case R.id.menu_listen_content:
-                    if (FileTransferLog.HISTORYLOG_MEMBER_ID == providerId) {
+                    case FileTransferLog.HISTORYLOG_MEMBER_ID:
+                        FileTransfer fileTransfer = mFileTransferService.getFileTransfer(id);
+                        if (fileTransfer != null) {
+                            fileTransfer.resendTransfer();
+                        }
+                        return true;
+                }
+            } else if (itemId == R.id.menu_display_content) {
+                switch (providerId) {
+                    case FileTransferLog.HISTORYLOG_MEMBER_ID:
                         String file = cursor.getString(cursor
                                 .getColumnIndexOrThrow(HistoryLog.CONTENT));
-                        Utils.playAudio(this, Uri.parse(file));
+                        Utils.showPicture(this, Uri.parse(file));
                         markFileTransferAsRead(cursor, id);
                         return true;
-                    }
-                    break;
+                }
+            } else if (itemId == R.id.menu_view_detail) {
+                switch (providerId) {
+                    case ChatLog.Message.HISTORYLOG_MEMBER_ID:
+                        ChatMessageLogView.startActivity(this, id);
+                        return true;
+                    case FileTransferLog.HISTORYLOG_MEMBER_ID:
+                        FileTransferLogView.startActivity(this, id);
+                        return true;
+                }
+            } else if (itemId == R.id.menu_listen_content) {
+                if (FileTransferLog.HISTORYLOG_MEMBER_ID == providerId) {
+                    String file = cursor.getString(cursor
+                            .getColumnIndexOrThrow(HistoryLog.CONTENT));
+                    Utils.playAudio(this, Uri.parse(file));
+                    markFileTransferAsRead(cursor, id);
+                    return true;
+                }
             }
             return super.onContextItemSelected(item);
 

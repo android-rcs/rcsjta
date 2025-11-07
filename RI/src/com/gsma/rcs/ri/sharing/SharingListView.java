@@ -475,61 +475,58 @@ public class SharingListView extends RcsFragmentActivity implements
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.menu_filter:
-                Builder builder = new Builder(this);
-                builder.setTitle(R.string.title_sharing_log_dialog_filter_logs);
-                builder.setMultiChoiceItems(
-                        mFilterMenuItems.toArray(new CharSequence[mFilterMenuItems.size()]),
-                        mCheckedProviders, new DialogInterface.OnMultiChoiceClickListener() {
-                            public void onClick(DialogInterface dialog, int which, boolean isChecked) {
-                                mCheckedProviders[which] = isChecked;
-                            }
-                        });
-                builder.setPositiveButton(R.string.label_ok, new OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        mFilterAlertDialog.dismiss();
-                        queryHistoryLogAndRefreshView();
-                    }
-                });
-                builder.setNegativeButton(R.string.label_cancel, new OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        mFilterAlertDialog.dismiss();
-                    }
-                });
-                mFilterAlertDialog = builder.show();
-                registerDialog(mFilterAlertDialog);
-                break;
-
-            case R.id.menu_delete:
-                if (!isServiceConnected(RcsServiceName.IMAGE_SHARING, RcsServiceName.VIDEO_SHARING,
-                        RcsServiceName.GEOLOC_SHARING)) {
-                    showMessage(R.string.label_service_not_available);
-                    break;
+        int itemId = item.getItemId();
+        if (itemId == R.id.menu_filter) {
+            Builder builder = new Builder(this);
+            builder.setTitle(R.string.title_sharing_log_dialog_filter_logs);
+            builder.setMultiChoiceItems(
+                    mFilterMenuItems.toArray(new CharSequence[mFilterMenuItems.size()]),
+                    mCheckedProviders, new DialogInterface.OnMultiChoiceClickListener() {
+                        public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+                            mCheckedProviders[which] = isChecked;
+                        }
+                    });
+            builder.setPositiveButton(R.string.label_ok, new OnClickListener() {
+                public void onClick(DialogInterface dialog, int which) {
+                    mFilterAlertDialog.dismiss();
+                    queryHistoryLogAndRefreshView();
                 }
-                Log.d(LOGTAG, "delete all image sharing sessions");
-                try {
-                    if (!mImageSharingListenerSet) {
-                        mImageSharingService.addEventListener(mImageSharingListener);
-                        mImageSharingListenerSet = true;
-                    }
-                    mImageSharingService.deleteImageSharings();
-                    if (!mVideoSharingListenerSet) {
-                        mVideoSharingService.addEventListener(mVideoSharingListener);
-                        mVideoSharingListenerSet = true;
-                    }
-                    mVideoSharingService.deleteVideoSharings();
-                    if (!mGeolocSharingListenerSet) {
-                        mGeolocSharingService.addEventListener(mGeolocSharingListener);
-                        mGeolocSharingListenerSet = true;
-                    }
-                    mGeolocSharingService.deleteGeolocSharings();
-                } catch (RcsServiceException e) {
-                    showExceptionThenExit(e);
-
+            });
+            builder.setNegativeButton(R.string.label_cancel, new OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    mFilterAlertDialog.dismiss();
                 }
-                break;
+            });
+            mFilterAlertDialog = builder.show();
+            registerDialog(mFilterAlertDialog);
+        } else if (itemId == R.id.menu_delete) {
+            if (!isServiceConnected(RcsServiceName.IMAGE_SHARING, RcsServiceName.VIDEO_SHARING,
+                    RcsServiceName.GEOLOC_SHARING)) {
+                showMessage(R.string.label_service_not_available);
+                return true;
+            }
+            Log.d(LOGTAG, "delete all image sharing sessions");
+            try {
+                if (!mImageSharingListenerSet) {
+                    mImageSharingService.addEventListener(mImageSharingListener);
+                    mImageSharingListenerSet = true;
+                }
+                mImageSharingService.deleteImageSharings();
+                if (!mVideoSharingListenerSet) {
+                    mVideoSharingService.addEventListener(mVideoSharingListener);
+                    mVideoSharingListenerSet = true;
+                }
+                mVideoSharingService.deleteVideoSharings();
+                if (!mGeolocSharingListenerSet) {
+                    mGeolocSharingService.addEventListener(mGeolocSharingListener);
+                    mGeolocSharingListenerSet = true;
+                }
+                mGeolocSharingService.deleteGeolocSharings();
+            } catch (RcsServiceException e) {
+                showExceptionThenExit(e);
+
+            }
         }
         return true;
     }
@@ -570,43 +567,41 @@ public class SharingListView extends RcsFragmentActivity implements
             Log.d(LOGTAG, "onContextItemSelected sharing ID=".concat(sharingId));
         }
         try {
-            switch (item.getItemId()) {
-                case R.id.menu_sharing_delete:
-                    Log.d(LOGTAG, "Delete sharing ID=".concat(sharingId));
-                    switch (providerId) {
-                        case ImageSharingLog.HISTORYLOG_MEMBER_ID:
-                            if (!mImageSharingListenerSet) {
-                                mImageSharingService.addEventListener(mImageSharingListener);
-                                mImageSharingListenerSet = true;
-                            }
-                            mImageSharingService.deleteImageSharing(sharingId);
-                            return true;
+            int itemId = item.getItemId();
+            if (itemId == R.id.menu_sharing_delete) {
+                Log.d(LOGTAG, "Delete sharing ID=".concat(sharingId));
+                switch (providerId) {
+                    case ImageSharingLog.HISTORYLOG_MEMBER_ID:
+                        if (!mImageSharingListenerSet) {
+                            mImageSharingService.addEventListener(mImageSharingListener);
+                            mImageSharingListenerSet = true;
+                        }
+                        mImageSharingService.deleteImageSharing(sharingId);
+                        return true;
 
-                        case VideoSharingLog.HISTORYLOG_MEMBER_ID:
-                            if (!mVideoSharingListenerSet) {
-                                mVideoSharingService.addEventListener(mVideoSharingListener);
-                                mVideoSharingListenerSet = true;
-                            }
-                            mVideoSharingService.deleteVideoSharing(sharingId);
-                            return true;
-                        case GeolocSharingLog.HISTORYLOG_MEMBER_ID:
-                            if (!mGeolocSharingListenerSet) {
-                                mGeolocSharingService.addEventListener(mGeolocSharingListener);
-                                mGeolocSharingListenerSet = true;
-                            }
-                            mGeolocSharingService.deleteGeolocSharing(sharingId);
-                            return true;
-                        default:
-                            return true;
-                    }
-                case R.id.menu_sharing_display:
-                    Utils.showPicture(this, Uri.parse(cursor.getString(cursor
-                            .getColumnIndexOrThrow(HistoryLog.CONTENT))));
-                    return true;
-
-                default:
-                    return super.onContextItemSelected(item);
+                    case VideoSharingLog.HISTORYLOG_MEMBER_ID:
+                        if (!mVideoSharingListenerSet) {
+                            mVideoSharingService.addEventListener(mVideoSharingListener);
+                            mVideoSharingListenerSet = true;
+                        }
+                        mVideoSharingService.deleteVideoSharing(sharingId);
+                        return true;
+                    case GeolocSharingLog.HISTORYLOG_MEMBER_ID:
+                        if (!mGeolocSharingListenerSet) {
+                            mGeolocSharingService.addEventListener(mGeolocSharingListener);
+                            mGeolocSharingListenerSet = true;
+                        }
+                        mGeolocSharingService.deleteGeolocSharing(sharingId);
+                        return true;
+                    default:
+                        return true;
+                }
+            } else if (itemId == R.id.menu_sharing_display) {
+                Utils.showPicture(this, Uri.parse(cursor.getString(cursor
+                        .getColumnIndexOrThrow(HistoryLog.CONTENT))));
+                return true;
             }
+            return super.onContextItemSelected(item);
         } catch (RcsServiceNotAvailableException e) {
             showMessage(R.string.label_service_not_available);
             return true;

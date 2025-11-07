@@ -1,12 +1,19 @@
 apply plugin: 'com.android.library'
 
 android {
+    namespace 'com.gsma.rcs.api.connection'
     compileSdkVersion rootProject.compileSdkVersion
     buildToolsVersion rootProject.buildToolsVersion
 
-	lintOptions {
-		abortOnError false
-	}
+    sourceSets {
+        main {
+            manifest.srcFile 'src/main/AndroidManifest.xml'
+        }
+    }
+
+    lintOptions {
+        abortOnError false
+    }
     buildTypes {
         release {
             minifyEnabled false
@@ -21,6 +28,6 @@ android {
 }
 
 dependencies {
-    compile project(':api')
-	compile 'com.android.support:support-v4:25.0.1'
+    implementation project(':api')
+    implementation 'com.android.support:support-v4:25.0.1'
 }
